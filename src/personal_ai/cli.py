@@ -13,8 +13,9 @@ MODEL = "qwen3.5:9b"
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the personal AI agent.")
     parser.add_argument(
-        "workspace",
+        "--workspace",
         type=Path,
+        required=True,
         help="Directory the agent is allowed to inspect.",
     )
     parser.add_argument(
