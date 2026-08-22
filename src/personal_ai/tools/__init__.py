@@ -1,5 +1,6 @@
 """Tool infrastructure for the personal-ai agent."""
 
+from personal_ai.tools.defaults import create_default_registry
 from personal_ai.tools.registry import (
     DuplicateToolError,
     InvalidToolNameError,
@@ -22,4 +23,5 @@ __all__ = [
     "ToolHandler",
     "ToolRegistry",
     "UnknownToolError",
+    "create_default_registry",
 ]
