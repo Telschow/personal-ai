@@ -68,10 +68,19 @@ def _parse_tool_call(raw_call: Any, position: int) -> ToolCall:
     return ToolCall(id=call_id, name=name, arguments=arguments)
 
 
-@dataclass(frozen=True, slots=True)
-class ChatMessage:
-    role: str
-    content: str
+def _serialize_message(message: ChatMessage) -> dict[str, Any]:
+    serialized: dict[str, Any] = {"role": message.role, "content": message.content}
+    if message.tool_calls:
+        serialized["tool_calls"] = [
+            {
+                "function": {
+                    "name": call.name,
+                    "arguments": call.arguments,
+                }
+            }
+            for call in message.tool_calls
+        ]
+    return serialized
 
 
 @dataclass(frozen=True, slots=True)
@@ -81,6 +90,15 @@ class ToolCall:
     id: str
     name: str
     arguments: dict[str, object]
+
+
+@dataclass(frozen=True, slots=True)
+class ChatMessage:
+    """A single message in an Ollama conversation."""
+
+    role: str
+    content: str
+    tool_calls: tuple[ToolCall, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -109,12 +127,18 @@ class OllamaClient:
             transport=transport,
         )
 
-    def chat(self, messages: Sequence[ChatMessage]) -> ChatResponse:
-        payload = {
+    def chat(
+        self,
+        messages: Sequence[ChatMessage],
+        tools: Sequence[dict[str, object]] | None = None,
+    ) -> ChatResponse:
+        payload: dict[str, object] = {
             "model": self.model,
-            "messages": [{"role": m.role, "content": m.content} for m in messages],
+            "messages": [_serialize_message(m) for m in messages],
             "stream": False,
         }
+        if tools is not None:
+            payload["tools"] = list(tools)
         try:
             response = self._client.post("/api/chat", json=payload)
         except httpx.TransportError as exc:
