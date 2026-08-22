@@ -14,6 +14,7 @@ from personal_ai.ollama_client import (
     OllamaConnectionError,
     OllamaHTTPStatusError,
     OllamaResponseError,
+    ToolCall,
 )
 
 Handler = Callable[[httpx.Request], httpx.Response]
@@ -28,6 +29,21 @@ def chat_payload(content: str = "hello") -> dict[str, Any]:
         "message": {"role": "assistant", "content": content},
         "done": True,
     }
+
+
+def tool_call_payload(**overrides: Any) -> dict[str, Any]:
+    call = {
+        "id": "call_gvumtiaj",
+        "function": {
+            "index": 0,
+            "name": "list_directory",
+            "arguments": {"path": "/tmp"},
+        },
+    }
+    call.update(overrides)
+    payload = chat_payload("")
+    payload["message"]["tool_calls"] = [call]
+    return payload
 
 
 def make_client(
@@ -164,6 +180,97 @@ def test_invalid_json_raises_response_error() -> None:
     ],
 )
 def test_malformed_payloads_raise_response_error(payload: dict[str, Any]) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=payload)
+
+    client, _ = make_client(handler)
+
+    with client, pytest.raises(OllamaResponseError):
+        client.chat(USER_MESSAGE)
+
+
+def test_chat_parses_single_tool_call() -> None:
+    client, _ = make_client(
+        lambda request: httpx.Response(200, json=tool_call_payload())
+    )
+
+    with client:
+        result = client.chat(USER_MESSAGE)
+
+    assert result.content == ""
+    assert result.tool_calls == (
+        ToolCall(
+            id="call_gvumtiaj",
+            name="list_directory",
+            arguments={"path": "/tmp"},
+        ),
+    )
+
+
+def test_chat_parses_multiple_tool_calls() -> None:
+    payload = tool_call_payload()
+    payload["message"]["tool_calls"] = [
+        {
+            "id": "call_one",
+            "function": {"index": 0, "name": "list_directory", "arguments": {}},
+        },
+        {
+            "id": "call_two",
+            "function": {"index": 1, "name": "read_file", "arguments": {}},
+        },
+    ]
+    client, _ = make_client(lambda request: httpx.Response(200, json=payload))
+
+    with client:
+        result = client.chat(USER_MESSAGE)
+
+    assert result.tool_calls == (
+        ToolCall(id="call_one", name="list_directory", arguments={}),
+        ToolCall(id="call_two", name="read_file", arguments={}),
+    )
+
+
+def test_chat_without_tool_calls_returns_empty_tuple() -> None:
+    client, _ = make_client(
+        lambda request: httpx.Response(200, json=chat_payload("plain answer"))
+    )
+
+    with client:
+        result = client.chat(USER_MESSAGE)
+
+    assert result == ChatResponse(content="plain answer", model="test-model", done=True)
+    assert result.tool_calls == ()
+
+
+@pytest.mark.parametrize(
+    "tool_calls",
+    [
+        pytest.param("not-a-list", id="tool_calls-not-a-list"),
+        pytest.param(["not-a-dict"], id="entry-not-an-object"),
+        pytest.param([{"function": {"name": "f", "arguments": {}}}], id="missing-id"),
+        pytest.param(
+            [{"id": 7, "function": {"name": "f", "arguments": {}}}], id="non-string-id"
+        ),
+        pytest.param(
+            [{"id": "", "function": {"name": "f", "arguments": {}}}], id="empty-id"
+        ),
+        pytest.param([{"id": "c"}], id="missing-function"),
+        pytest.param([{"id": "c", "function": {"arguments": {}}}], id="missing-name"),
+        pytest.param(
+            [{"id": "c", "function": {"name": 42, "arguments": {}}}],
+            id="non-string-name",
+        ),
+        pytest.param([{"id": "c", "function": {"name": "f"}}], id="missing-arguments"),
+        pytest.param(
+            [{"id": "c", "function": {"name": "f", "arguments": "{}"}}],
+            id="arguments-not-an-object",
+        ),
+    ],
+)
+def test_malformed_tool_call_raises_response_error(tool_calls: Any) -> None:
+    payload = chat_payload("")
+    payload["message"]["tool_calls"] = tool_calls
+
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json=payload)
 

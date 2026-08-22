@@ -3,7 +3,7 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
 from types import TracebackType
-from typing import Self
+from typing import Any, Self
 
 import httpx
 
@@ -33,6 +33,41 @@ class OllamaResponseError(OllamaError):
     """Raised when Ollama returns a response that cannot be parsed."""
 
 
+def _parse_tool_calls(message: dict[str, Any]) -> tuple[ToolCall, ...]:
+    raw_calls = message.get("tool_calls")
+    if raw_calls is None:
+        return ()
+    if not isinstance(raw_calls, list):
+        msg = f"Ollama returned malformed tool_calls: {raw_calls!r}"
+        raise OllamaResponseError(msg)
+
+    return tuple(
+        _parse_tool_call(raw_call, index) for index, raw_call in enumerate(raw_calls)
+    )
+
+
+def _parse_tool_call(raw_call: Any, position: int) -> ToolCall:
+    function = raw_call.get("function") if isinstance(raw_call, dict) else None
+    call_id = raw_call.get("id") if isinstance(raw_call, dict) else None
+    name = function.get("name") if isinstance(function, dict) else None
+    arguments = function.get("arguments") if isinstance(function, dict) else None
+
+    if (
+        not isinstance(call_id, str)
+        or not call_id
+        or not isinstance(name, str)
+        or not name
+        or not isinstance(arguments, dict)
+    ):
+        msg = (
+            "Ollama returned a malformed tool call "
+            f"at position {position}: {raw_call!r}"
+        )
+        raise OllamaResponseError(msg)
+
+    return ToolCall(id=call_id, name=name, arguments=arguments)
+
+
 @dataclass(frozen=True, slots=True)
 class ChatMessage:
     role: str
@@ -40,10 +75,20 @@ class ChatMessage:
 
 
 @dataclass(frozen=True, slots=True)
+class ToolCall:
+    """A single tool call requested natively by the model."""
+
+    id: str
+    name: str
+    arguments: dict[str, object]
+
+
+@dataclass(frozen=True, slots=True)
 class ChatResponse:
     content: str
     model: str
     done: bool
+    tool_calls: tuple[ToolCall, ...] = ()
 
 
 class OllamaClient:
@@ -101,6 +146,7 @@ class OllamaClient:
             content=content,
             model=str(data.get("model", self.model)),
             done=bool(data.get("done", False)),
+            tool_calls=_parse_tool_calls(message),
         )
 
     def close(self) -> None:
