@@ -27,3 +27,6 @@ cache/
 # Secrets
 secrets/
 credentials/
+
+# Local raw project data
+previous_project_and_raw_data/
