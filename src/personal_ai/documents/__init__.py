@@ -21,6 +21,12 @@ from personal_ai.documents.models import (
     compute_content_hash,
     compute_document_id,
 )
+from personal_ai.documents.structured import (
+    MalformedStructuredOutputError,
+    StructuredExtraction,
+    StructuredExtractor,
+    parse_structured_extraction,
+)
 
 __all__ = [
     "TEXT_HEAVY_MIN_NON_WHITESPACE_CHARACTERS",
@@ -29,6 +35,9 @@ __all__ = [
     "DocumentChunk",
     "DocumentClassification",
     "DocumentKind",
+    "MalformedStructuredOutputError",
+    "StructuredExtraction",
+    "StructuredExtractor",
     "TextExtractionError",
     "TextExtractionResult",
     "classify",
@@ -38,4 +47,5 @@ __all__ = [
     "document_from_source_record",
     "extract_text",
     "measure_text",
+    "parse_structured_extraction",
 ]
