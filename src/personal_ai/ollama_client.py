@@ -109,8 +109,20 @@ class ChatResponse:
     tool_calls: tuple[ToolCall, ...] = ()
 
 
+@dataclass(frozen=True, slots=True)
+class EmbedResponse:
+    """Raw embedding rows echoed by Ollama, one per input.
+
+    Rows are kept as plain component tuples; semantic vector validation
+    belongs to the embedding contract, not to transport parsing.
+    """
+
+    model: str
+    embeddings: tuple[tuple[object, ...], ...]
+
+
 class OllamaClient:
-    """Small synchronous client for Ollama's ``/api/chat`` endpoint."""
+    """Small synchronous client for Ollama's ``/api/chat`` and ``/api/embed``."""
 
     def __init__(
         self,
@@ -149,6 +161,45 @@ class OllamaClient:
             raise OllamaHTTPStatusError(response.status_code, response.text[:500])
 
         return self._parse_chat_response(response)
+
+    def embed(self, text: str) -> EmbedResponse:
+        """Embed one piece of text via Ollama's ``/api/embed`` endpoint."""
+        try:
+            response = self._client.post(
+                "/api/embed", json={"model": self.model, "input": text}
+            )
+        except httpx.TransportError as exc:
+            msg = f"Could not reach Ollama at {self.base_url}: {exc}"
+            raise OllamaConnectionError(msg) from exc
+
+        if response.is_error:
+            raise OllamaHTTPStatusError(response.status_code, response.text[:500])
+
+        return self._parse_embed_response(response)
+
+    def _parse_embed_response(self, response: httpx.Response) -> EmbedResponse:
+        try:
+            data = response.json()
+        except ValueError as exc:
+            msg = f"Ollama returned invalid JSON: {response.text[:200]}"
+            raise OllamaResponseError(msg) from exc
+
+        malformed = (
+            not isinstance(data, dict)
+            or not isinstance(raw_rows := data.get("embeddings"), list)
+            or not all(isinstance(row, list) for row in raw_rows)
+        )
+        if malformed:
+            msg = (
+                "Unexpected embedding response structure from Ollama: "
+                f"{response.text[:200]}"
+            )
+            raise OllamaResponseError(msg)
+
+        return EmbedResponse(
+            model=str(data.get("model", self.model)),
+            embeddings=tuple(tuple(row) for row in raw_rows),
+        )
 
     def _parse_chat_response(self, response: httpx.Response) -> ChatResponse:
         try:

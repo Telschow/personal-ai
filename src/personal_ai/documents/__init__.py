@@ -16,6 +16,12 @@ from personal_ai.documents.classifier import (
     classify_document,
     measure_text,
 )
+from personal_ai.documents.embedding import (
+    Embedding,
+    EmbeddingProvider,
+    MalformedEmbeddingError,
+    parse_embedding,
+)
 from personal_ai.documents.extractor import (
     TextExtractionError,
     TextExtractionResult,
@@ -43,6 +49,9 @@ __all__ = [
     "DocumentChunk",
     "DocumentClassification",
     "DocumentKind",
+    "Embedding",
+    "EmbeddingProvider",
+    "MalformedEmbeddingError",
     "MalformedStructuredOutputError",
     "StructuredExtraction",
     "StructuredExtractor",
@@ -57,5 +66,6 @@ __all__ = [
     "document_from_source_record",
     "extract_text",
     "measure_text",
+    "parse_embedding",
     "parse_structured_extraction",
 ]
