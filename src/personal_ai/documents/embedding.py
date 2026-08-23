@@ -36,7 +36,13 @@ class EmbeddingProvider(Protocol):
     with chunk identities is the persistence layer's responsibility.
     Implementations must reject empty input with ``ValueError`` before any
     network activity.
+
+    Implementations expose the identity of the model whose vectors they
+    return, so callers can decide whether a stored vector was produced by
+    the currently configured model before reusing it.
     """
+
+    model: str
 
     def embed(self, text: str) -> Embedding:
         """Return the embedding of one piece of text."""

@@ -75,6 +75,14 @@ def test_embed_returns_typed_result_with_serving_model() -> None:
     assert result.dimensions == 3
 
 
+def test_embedder_exposes_the_configured_model_identity() -> None:
+    embedder, _requests = make_embedder(
+        lambda request: httpx.Response(200, json=embed_payload())
+    )
+
+    assert embedder.model == "nomic-embed-text"
+
+
 def test_empty_text_is_rejected_before_any_network_call() -> None:
     def failing_handler(request: httpx.Request) -> httpx.Response:
         raise AssertionError("network must not be contacted for empty input")

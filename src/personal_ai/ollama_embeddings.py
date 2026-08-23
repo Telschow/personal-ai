@@ -17,6 +17,11 @@ class OllamaEmbedder:
     def __init__(self, client: OllamaClient) -> None:
         self._client = client
 
+    @property
+    def model(self) -> str:
+        """Model whose vectors this embedder produces."""
+        return self._client.model
+
     def embed(self, text: str) -> Embedding:
         if not text:
             msg = "Cannot embed empty text"

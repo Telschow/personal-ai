@@ -16,13 +16,18 @@ from personal_ai.documents import (
 class FakeEmbeddingProvider:
     """Deterministic in-memory provider satisfying the contract."""
 
-    def __init__(self, vector: tuple[float, ...] = (0.25, -0.5, 1.0)) -> None:
+    def __init__(
+        self,
+        vector: tuple[float, ...] = (0.25, -0.5, 1.0),
+        model: str = "fake-model",
+    ) -> None:
         self._vector = vector
+        self.model = model
         self.calls: list[str] = []
 
     def embed(self, text: str) -> Embedding:
         self.calls.append(text)
-        return Embedding(model="fake-model", vector=self._vector)
+        return Embedding(model=self.model, vector=self._vector)
 
 
 def test_fake_provider_satisfies_the_embedding_protocol() -> None:
@@ -37,6 +42,7 @@ def test_embed_returns_typed_deterministic_result() -> None:
 
     assert isinstance(first, Embedding)
     assert first == second
+    assert first.model == "fake-model"
     assert first.vector == (0.25, -0.5, 1.0)
     assert provider.calls == ["some text", "some text"]
 
