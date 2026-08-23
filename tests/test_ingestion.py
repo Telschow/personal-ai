@@ -20,6 +20,7 @@ from personal_ai.documents import (
     extract_text,
     measure_text,
 )
+from personal_ai.embeddings import EmbeddingBackfiller
 from personal_ai.ingestion import DocumentIngestor
 from personal_ai.sources.models import SourceRecord
 from personal_ai.storage import (
@@ -68,40 +69,23 @@ class FailingStructuredExtractor:
 class FakeEmbeddingProvider:
     """Deterministic vector source recording calls."""
 
-    def __init__(
-        self,
-        model: str = FAKE_EMBED_MODEL,
-        vector: tuple[float, ...] = (0.5, -0.25),
-    ) -> None:
+    def __init__(self, model: str = FAKE_EMBED_MODEL) -> None:
         self.model = model
-        self.vector = vector
         self.calls: list[str] = []
 
     def embed(self, text: str) -> Embedding:
         self.calls.append(text)
-        return Embedding(model=self.model, vector=self.vector)
-
-
-class FlakyEmbeddingProvider:
-    """Embeds deterministically but raises on one chosen call."""
-
-    def __init__(self, fail_on_call: int, model: str = FAKE_EMBED_MODEL) -> None:
-        self.model = model
-        self.fail_on_call = fail_on_call
-        self.calls: list[str] = []
-
-    def embed(self, text: str) -> Embedding:
-        self.calls.append(text)
-        if len(self.calls) == self.fail_on_call:
-            raise RuntimeError("embedding backend unavailable")
-        return Embedding(model=self.model, vector=(0.5,))
+        return Embedding(model=self.model, vector=(0.5, -0.25))
 
 
 class ChunkStoreSpy:
     """Delegates to a real store while recording mutating calls."""
 
-    def __init__(self, inner: ChunkStore) -> None:
+    def __init__(
+        self, inner: ChunkStore, events: list[tuple[str, object]] | None = None
+    ) -> None:
         self._inner = inner
+        self._events = events if events is not None else []
         self.add_many_calls: list[int] = []
         self.delete_calls: list[str] = []
 
@@ -110,18 +94,23 @@ class ChunkStoreSpy:
 
     def add_many(self, chunks: tuple[DocumentChunk, ...]) -> int:
         self.add_many_calls.append(len(chunks))
+        self._events.append(("chunks_add", len(chunks)))
         return self._inner.add_many(chunks)
 
     def delete_for_document(self, document_id: str) -> int:
         self.delete_calls.append(document_id)
+        self._events.append(("chunks_delete", document_id))
         return self._inner.delete_for_document(document_id)
 
 
 class EmbeddingStoreSpy:
     """Delegates to a real store while recording mutating calls."""
 
-    def __init__(self, inner: EmbeddingStore) -> None:
+    def __init__(
+        self, inner: EmbeddingStore, events: list[tuple[str, object]] | None = None
+    ) -> None:
         self._inner = inner
+        self._events = events if events is not None else []
         self.add_calls: list[str] = []
         self.delete_calls: list[str] = []
 
@@ -130,10 +119,12 @@ class EmbeddingStoreSpy:
 
     def add(self, embedding: Embedding, chunk_id: str) -> bool:
         self.add_calls.append(chunk_id)
+        self._events.append(("emb_add", chunk_id))
         return self._inner.add(embedding, chunk_id)
 
     def delete(self, chunk_id: str) -> bool:
         self.delete_calls.append(chunk_id)
+        self._events.append(("emb_delete", chunk_id))
         return self._inner.delete(chunk_id)
 
 
@@ -144,12 +135,10 @@ class IngestionHarness(NamedTuple):
     chunk_store: ChunkStore
     embedding_store: EmbeddingStore
     extractor: FakeStructuredExtractor
-    provider: FakeEmbeddingProvider
 
 
 def make_ingestor(
     extractor: object | None = None,
-    provider: object | None = None,
     *,
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
@@ -160,14 +149,12 @@ def make_ingestor(
     chunk_store = ChunkStore(connection)
     embedding_store = EmbeddingStore(connection)
     fake_extractor = extractor if extractor is not None else FakeStructuredExtractor()
-    fake_provider = provider if provider is not None else FakeEmbeddingProvider()
     ingestor = DocumentIngestor(
         document_store,
         extraction_store,
         fake_extractor,
         chunk_store,
         embedding_store,
-        fake_provider,
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
     )
@@ -178,7 +165,6 @@ def make_ingestor(
         chunk_store,
         embedding_store,
         fake_extractor,
-        fake_provider,
     )
 
 
@@ -219,12 +205,10 @@ def test_reingesting_unchanged_content_is_idempotent() -> None:
     harness = make_ingestor()
 
     first = harness.ingestor.ingest(record)
-    provider_calls_after_first = len(harness.provider.calls)
     second = harness.ingestor.ingest(record)
 
     assert second == first
     assert len(harness.extractor.calls) == 1
-    assert len(harness.provider.calls) == provider_calls_after_first
     assert len(harness.document_store.list_documents()) == 1
     stored = harness.extraction_store.get(first.document_id)
     assert stored == first.structured_extraction
@@ -257,7 +241,6 @@ def test_empty_document_skips_structured_extraction() -> None:
     assert result.kind is DocumentKind.EMPTY
     assert result.structured_extraction is None
     assert harness.extractor.calls == []
-    assert harness.provider.calls == []
     assert harness.embedding_store.get("anything") is None
     assert harness.document_store.get(result.document_id) is not None
     assert harness.extraction_store.get(result.document_id) is None
@@ -272,13 +255,17 @@ def test_mixed_document_skips_structured_extraction() -> None:
     assert result.kind is DocumentKind.MIXED
     assert result.structured_extraction is None
     assert harness.extractor.calls == []
-    assert harness.provider.calls == []
     assert harness.embedding_store.get("anything") is None
     assert harness.extraction_store.get(result.document_id) is None
 
 
-def test_image_heavy_documents_never_reach_the_embedding_provider(monkeypatch) -> None:
-    """Image evidence cannot arise from text measurement yet; force it here."""
+def test_image_heavy_documents_never_touch_the_embedding_store(monkeypatch) -> None:
+    """Image evidence cannot arise from text measurement yet; force it here.
+
+    The ingestor also has no embedding provider dependency at all, so the
+    strongest available proof is that classification away from TEXT_HEAVY
+    leaves the embedding store completely untouched.
+    """
 
     def image_heavy_classification(extraction):
         return DocumentClassification(
@@ -298,7 +285,6 @@ def test_image_heavy_documents_never_reach_the_embedding_provider(monkeypatch) -
     assert result.chunks == ()
     assert result.structured_extraction is None
     assert harness.extractor.calls == []
-    assert harness.provider.calls == []
 
 
 def test_text_extraction_failure_propagates_without_persistence() -> None:
@@ -311,7 +297,6 @@ def test_text_extraction_failure_propagates_without_persistence() -> None:
     assert harness.document_store.list_documents() == []
     document_id = document_from_source_record(record).id
     assert harness.extraction_store.get(document_id) is None
-    assert harness.provider.calls == []
 
 
 def test_structured_failure_propagates_and_leaves_no_extraction_record() -> None:
@@ -325,7 +310,6 @@ def test_structured_failure_propagates_and_leaves_no_extraction_record() -> None
     assert harness.document_store.get(document_id) is not None
     assert harness.extraction_store.get(document_id) is None
     assert harness.chunk_store.list_for_document(document_id) == ()
-    assert harness.provider.calls == []
 
 
 def test_identity_and_metadata_survive_the_pipeline() -> None:
@@ -365,38 +349,33 @@ def test_reingesting_unchanged_content_does_not_duplicate_chunks() -> None:
     assert stored == first.chunks
 
 
-def test_reingestion_does_not_rewrite_identical_embeddings_or_chunks() -> None:
+def test_ingestion_succeeds_without_any_embedding_provider() -> None:
+    """Bulk durability must not depend on model availability.
+
+    The ingestor has no embedding provider dependency at all; the full
+    durable path (document, extraction, chunks) completes while the
+    embedding store records no operations whatsoever.
+    """
     record = make_record(TEXT_HEAVY_TEXT.encode())
     connection = connect_database(":memory:")
-    chunk_spy = ChunkStoreSpy(ChunkStore(connection))
     embedding_spy = EmbeddingStoreSpy(EmbeddingStore(connection))
-    provider = FakeEmbeddingProvider()
+    extractor = FakeStructuredExtractor()
     ingestor = DocumentIngestor(
         DocumentStore(connection),
         ExtractionStore(connection),
-        FakeStructuredExtractor(),
-        chunk_spy,
+        extractor,
+        ChunkStoreSpy(ChunkStore(connection)),
         embedding_spy,
-        provider,
     )
 
-    ingestor.ingest(record)
-    assert provider.calls
-    assert embedding_spy.add_calls
+    result = ingestor.ingest(record)
 
-    embedding_spy.add_calls.clear()
-    embedding_spy.delete_calls.clear()
-    chunk_spy.add_many_calls.clear()
-    chunk_spy.delete_calls.clear()
-    provider_calls_before = len(provider.calls)
-    second = ingestor.ingest(record)
-
-    assert chunk_spy.add_many_calls == []
-    assert chunk_spy.delete_calls == []
+    assert result.kind is DocumentKind.TEXT_HEAVY
+    assert result.structured_extraction is not None
+    assert result.chunks
+    assert len(extractor.calls) == 1
     assert embedding_spy.add_calls == []
     assert embedding_spy.delete_calls == []
-    assert len(provider.calls) == provider_calls_before
-    assert second.chunks
 
 
 def test_missing_chunks_are_repaired_without_rerunning_the_model() -> None:
@@ -414,60 +393,168 @@ def test_missing_chunks_are_repaired_without_rerunning_the_model() -> None:
     assert second.chunks == first.chunks
 
 
-def test_missing_embedding_is_repaired_without_rerunning_extraction() -> None:
+def test_reingestion_does_not_rewrite_identical_embeddings_or_chunks() -> None:
+    record = make_record(TEXT_HEAVY_TEXT.encode())
+    connection = connect_database(":memory:")
+    chunk_spy = ChunkStoreSpy(ChunkStore(connection))
+    embedding_spy = EmbeddingStoreSpy(EmbeddingStore(connection))
+    ingestor = DocumentIngestor(
+        DocumentStore(connection),
+        ExtractionStore(connection),
+        FakeStructuredExtractor(),
+        chunk_spy,
+        embedding_spy,
+    )
+
+    first = ingestor.ingest(record)
+    assert first.chunks
+
+    chunk_spy.add_many_calls.clear()
+    chunk_spy.delete_calls.clear()
+    second = ingestor.ingest(record)
+
+    assert chunk_spy.add_many_calls == []
+    assert chunk_spy.delete_calls == []
+    assert embedding_spy.add_calls == []
+    assert embedding_spy.delete_calls == []
+    assert second.chunks == first.chunks
+
+
+def test_rechunking_prunes_stale_embeddings_immediately() -> None:
     record = make_record(TEXT_HEAVY_TEXT.encode())
     harness = make_ingestor(chunk_size=40, chunk_overlap=5)
 
     first = harness.ingestor.ingest(record)
-    assert len(first.chunks) > 1
-    victim_text = first.chunks[0].text
-    assert harness.embedding_store.delete(first.chunks[0].id) is True
-    calls_before = len(harness.provider.calls)
+    backfiller = EmbeddingBackfiller(
+        harness.chunk_store, harness.embedding_store, FakeEmbeddingProvider()
+    )
+    backfiller.ensure_document(first.document_id)
+    old_ids = {chunk.id for chunk in first.chunks}
 
-    second = harness.ingestor.ingest(record)
-
-    assert len(harness.extractor.calls) == 1
-    assert len(harness.provider.calls) == calls_before + 1
-    assert harness.provider.calls[-1] == victim_text
-    restored = harness.embedding_store.get(second.chunks[0].id)
-    assert restored == Embedding(model=FAKE_EMBED_MODEL, vector=(0.5, -0.25))
-
-
-def test_changed_chunk_configuration_replaces_stale_chunks() -> None:
-    record = make_record(TEXT_HEAVY_TEXT.encode())
-    harness = make_ingestor()
     rechunked = DocumentIngestor(
         harness.document_store,
         harness.extraction_store,
         FakeStructuredExtractor(),
         harness.chunk_store,
         harness.embedding_store,
-        FakeEmbeddingProvider(),
+        chunk_size=80,
+        chunk_overlap=10,
+    ).ingest(record)
+    new_ids = {chunk.id for chunk in rechunked.chunks}
+    removed = old_ids - new_ids
+
+    assert removed
+    # Pruning happened during ingestion itself, with no further backfill.
+    for stale_id in removed:
+        assert harness.embedding_store.get(stale_id) is None
+    for chunk in rechunked.chunks:
+        stored = harness.embedding_store.get(chunk.id)
+        if chunk.id in old_ids:
+            assert stored is not None and stored.model == FAKE_EMBED_MODEL
+        else:
+            assert stored is None
+
+
+def test_stale_embedding_deletion_precedes_chunk_replacement() -> None:
+    record = make_record(TEXT_HEAVY_TEXT.encode())
+    connection = connect_database(":memory:")
+    events: list[tuple[str, object]] = []
+    chunk_spy = ChunkStoreSpy(ChunkStore(connection), events)
+    embedding_spy = EmbeddingStoreSpy(EmbeddingStore(connection), events)
+    stores = (DocumentStore(connection), ExtractionStore(connection))
+
+    DocumentIngestor(
+        *stores,
+        FakeStructuredExtractor(),
+        chunk_spy,
+        embedding_spy,
         chunk_size=40,
         chunk_overlap=5,
+    ).ingest(record)
+    events.clear()
+
+    DocumentIngestor(
+        *stores,
+        FakeStructuredExtractor(),
+        chunk_spy,
+        embedding_spy,
+        chunk_size=80,
+        chunk_overlap=10,
+    ).ingest(record)
+
+    kinds = [kind for kind, _payload in events]
+    assert kinds[0] == "emb_delete"
+    assert "emb_delete" in kinds
+    first_chunk_op = min(
+        index for index, kind in enumerate(kinds) if kind.startswith("chunks_")
     )
+    last_emb_delete = max(
+        index for index, kind in enumerate(kinds) if kind == "emb_delete"
+    )
+    assert last_emb_delete < first_chunk_op
 
+
+def test_interrupted_stale_deletion_state_is_reconciled_by_retry() -> None:
+    """A crash between pruning and replacement leaves a recoverable state.
+
+    Simulated interruption: stale embeddings are already deleted while the
+    old chunk rows are still in place. A plain retry of the same operation
+    must complete the transition without errors or duplicates.
+    """
+    record = make_record(TEXT_HEAVY_TEXT.encode())
+    harness = make_ingestor(chunk_size=40, chunk_overlap=5)
     first = harness.ingestor.ingest(record)
-    second = rechunked.ingest(record)
+    EmbeddingBackfiller(
+        harness.chunk_store, harness.embedding_store, FakeEmbeddingProvider()
+    ).ensure_document(first.document_id)
+    old_ids = {chunk.id for chunk in first.chunks}
 
-    expected = chunk_document(extract_text(record), chunk_size=40, overlap=5)
-    stored = harness.chunk_store.list_for_document(first.document_id)
-    assert len(expected) > 1
-    assert stored == expected
-    assert second.chunks == expected
-    assert {c.id for c in first.chunks}.isdisjoint({c.id for c in expected})
+    expected_new = chunk_document(extract_text(record), chunk_size=80, overlap=10)
+    # Delete embeddings for ids that the new configuration removes; old
+    # chunk rows are intentionally left in place, as an interruption would.
+    for stale_id in old_ids - {chunk.id for chunk in expected_new}:
+        assert harness.embedding_store.delete(stale_id) is True
+
+    second = DocumentIngestor(
+        harness.document_store,
+        harness.extraction_store,
+        FakeStructuredExtractor(),
+        harness.chunk_store,
+        harness.embedding_store,
+        chunk_size=80,
+        chunk_overlap=10,
+    ).ingest(record)
+
+    assert second.chunks == expected_new
+    assert harness.chunk_store.list_for_document(second.document_id) == expected_new
+    final_ids = {chunk.id for chunk in expected_new}
+    for stale_id in old_ids - final_ids:
+        assert harness.embedding_store.get(stale_id) is None
 
 
-def test_chunks_remain_isolated_between_documents() -> None:
-    original_record = make_record(TEXT_HEAVY_TEXT.encode())
-    changed_record = make_record(b"Revised meeting note " * 30)
-    harness = make_ingestor()
+def test_missing_embeddings_never_cause_model_or_extraction_reruns() -> None:
+    record = make_record(TEXT_HEAVY_TEXT.encode())
+    harness = make_ingestor(chunk_size=40, chunk_overlap=5)
+    result = harness.ingestor.ingest(record)
+    assert len(harness.extractor.calls) == 1
 
-    first = harness.ingestor.ingest(original_record)
-    second = harness.ingestor.ingest(changed_record)
+    backfiller = EmbeddingBackfiller(
+        harness.chunk_store, harness.embedding_store, FakeEmbeddingProvider()
+    )
+    assert backfiller.ensure_document(result.document_id) == len(result.chunks)
+    for chunk in result.chunks:
+        assert harness.embedding_store.delete(chunk.id) is True
 
-    assert harness.chunk_store.list_for_document(first.document_id) == first.chunks
-    assert harness.chunk_store.list_for_document(second.document_id) == second.chunks
+    again = harness.ingestor.ingest(record)
+    provider = FakeEmbeddingProvider()
+    repaired = EmbeddingBackfiller(
+        harness.chunk_store, harness.embedding_store, provider
+    ).ensure_document(result.document_id)
+
+    assert again.chunks == result.chunks
+    assert len(harness.extractor.calls) == 1
+    assert repaired == len(result.chunks)
+    assert provider.calls == [chunk.text for chunk in result.chunks]
 
 
 def test_empty_document_produces_no_chunks() -> None:
@@ -501,127 +588,71 @@ def test_structured_failure_persists_no_chunks() -> None:
 
     document_id = document_from_source_record(record).id
     assert harness.chunk_store.list_for_document(document_id) == ()
-    assert harness.provider.calls == []
 
 
-def test_changed_chunk_configuration_creates_fresh_embeddings_for_new_ids() -> None:
+def test_chunks_remain_isolated_between_documents() -> None:
+    original_record = make_record(TEXT_HEAVY_TEXT.encode())
+    changed_record = make_record(b"Revised meeting note " * 30)
+    harness = make_ingestor()
+
+    first = harness.ingestor.ingest(original_record)
+    second = harness.ingestor.ingest(changed_record)
+
+    assert harness.chunk_store.list_for_document(first.document_id) == first.chunks
+    assert harness.chunk_store.list_for_document(second.document_id) == second.chunks
+
+
+def test_changed_chunk_configuration_replaces_stale_chunks() -> None:
     record = make_record(TEXT_HEAVY_TEXT.encode())
-    harness = make_ingestor(chunk_size=40, chunk_overlap=5)
-    fresh_provider = FakeEmbeddingProvider()
+    harness = make_ingestor()
     rechunked = DocumentIngestor(
         harness.document_store,
         harness.extraction_store,
         FakeStructuredExtractor(),
         harness.chunk_store,
         harness.embedding_store,
-        fresh_provider,
-        chunk_size=80,
-        chunk_overlap=10,
-    )
-
-    _first = harness.ingestor.ingest(record)
-    second = rechunked.ingest(record)
-
-    assert fresh_provider.calls == [chunk.text for chunk in second.chunks]
-    for chunk in second.chunks:
-        stored = harness.embedding_store.get(chunk.id)
-        assert stored == Embedding(model=FAKE_EMBED_MODEL, vector=(0.5, -0.25))
-
-
-def test_stale_embeddings_for_removed_chunk_ids_are_cleaned_up() -> None:
-    record = make_record(TEXT_HEAVY_TEXT.encode())
-    harness = make_ingestor(chunk_size=40, chunk_overlap=5)
-    rechunked = DocumentIngestor(
-        harness.document_store,
-        harness.extraction_store,
-        FakeStructuredExtractor(),
-        harness.chunk_store,
-        harness.embedding_store,
-        FakeEmbeddingProvider(),
-        chunk_size=80,
-        chunk_overlap=10,
+        chunk_size=40,
+        chunk_overlap=5,
     )
 
     first = harness.ingestor.ingest(record)
-    old_ids = {chunk.id for chunk in first.chunks}
     second = rechunked.ingest(record)
-    new_ids = {chunk.id for chunk in second.chunks}
-    removed = old_ids - new_ids
 
-    assert removed
-    for stale_id in removed:
-        assert harness.embedding_store.get(stale_id) is None
-    for chunk in second.chunks:
-        assert harness.embedding_store.get(chunk.id) is not None
-
-
-def test_model_change_causes_reembedding_instead_of_reuse() -> None:
-    record = make_record(TEXT_HEAVY_TEXT.encode())
-    harness = make_ingestor(provider=FakeEmbeddingProvider(model="old-model"))
-    replacement = FakeEmbeddingProvider(model="new-model", vector=(0.9, 0.8))
-    reembedded = DocumentIngestor(
-        harness.document_store,
-        harness.extraction_store,
-        harness.extractor,
-        harness.chunk_store,
-        harness.embedding_store,
-        replacement,
-    )
-
-    first = harness.ingestor.ingest(record)
-    second = reembedded.ingest(record)
-
-    assert second.chunks == first.chunks
-    assert len(replacement.calls) == len(second.chunks)
-    for chunk in second.chunks:
-        stored = harness.embedding_store.get(chunk.id)
-        assert stored == Embedding(model="new-model", vector=(0.9, 0.8))
-    assert len(harness.extractor.calls) == 1
-
-
-def test_embedding_failure_mid_document_keeps_repairable_partial_state() -> None:
-    record = make_record(TEXT_HEAVY_TEXT.encode())
-    harness = make_ingestor(chunk_size=40, chunk_overlap=5)
     expected = chunk_document(extract_text(record), chunk_size=40, overlap=5)
-    assert len(expected) >= 3
+    stored = harness.chunk_store.list_for_document(first.document_id)
+    assert len(expected) > 1
+    assert stored == expected
+    assert second.chunks == expected
+    assert {c.id for c in first.chunks}.isdisjoint({c.id for c in expected})
 
-    flaky = FlakyEmbeddingProvider(fail_on_call=2)
-    failing = DocumentIngestor(
-        harness.document_store,
-        harness.extraction_store,
-        harness.extractor,
-        harness.chunk_store,
-        harness.embedding_store,
-        flaky,
-        chunk_size=40,
-        chunk_overlap=5,
+
+def test_repeated_identical_rechunking_performs_zero_writes() -> None:
+    """The transition to a new configuration is a fixed point once done."""
+    connection = connect_database(":memory:")
+    events: list[tuple[str, object]] = []
+    chunk_spy = ChunkStoreSpy(ChunkStore(connection), events)
+    embedding_spy = EmbeddingStoreSpy(EmbeddingStore(connection), events)
+    stores = (DocumentStore(connection), ExtractionStore(connection))
+    rechunked = DocumentIngestor(
+        *stores,
+        FakeStructuredExtractor(),
+        chunk_spy,
+        embedding_spy,
+        chunk_size=80,
+        chunk_overlap=10,
     )
 
-    with pytest.raises(RuntimeError, match="embedding backend unavailable"):
-        failing.ingest(record)
+    first = rechunked.ingest(make_record(TEXT_HEAVY_TEXT.encode()))
+    assert events
+    events.clear()
+    chunk_spy.add_many_calls.clear()
+    chunk_spy.delete_calls.clear()
 
-    assert flaky.calls == [chunk.text for chunk in expected[:2]]
-    assert harness.embedding_store.get(expected[0].id) == Embedding(
-        model=FAKE_EMBED_MODEL, vector=(0.5,)
-    )
-    for chunk in expected[1:]:
-        assert harness.embedding_store.get(chunk.id) is None
-    assert len(harness.extractor.calls) == 1
+    second = rechunked.ingest(make_record(TEXT_HEAVY_TEXT.encode()))
 
-    healthy = DocumentIngestor(
-        harness.document_store,
-        harness.extraction_store,
-        harness.extractor,
-        harness.chunk_store,
-        harness.embedding_store,
-        FakeEmbeddingProvider(),
-        chunk_size=40,
-        chunk_overlap=5,
-    )
-    result = healthy.ingest(record)
-
-    assert result.chunks == expected
-    assert len(harness.extractor.calls) == 1
-    for chunk in expected:
-        stored = harness.embedding_store.get(chunk.id)
-        assert stored is not None and stored.model == FAKE_EMBED_MODEL
+    assert second == first
+    assert events == []
+    assert chunk_spy.add_many_calls == []
+    assert chunk_spy.delete_calls == []
+    assert embedding_spy.add_calls == []
+    assert embedding_spy.delete_calls == []

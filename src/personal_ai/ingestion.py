@@ -9,7 +9,6 @@ from personal_ai.documents.chunker import (
     chunk_document,
 )
 from personal_ai.documents.classifier import DocumentKind, classify_document
-from personal_ai.documents.embedding import EmbeddingProvider
 from personal_ai.documents.extractor import TextExtractionResult, extract_text
 from personal_ai.documents.models import DocumentChunk
 from personal_ai.documents.structured import StructuredExtraction, StructuredExtractor
@@ -29,10 +28,9 @@ class IngestionResult:
     mirrors the chunk set ensured in storage: empty for documents that
     classification did not route through text chunking.
 
-    Text-heavy ingestion additionally ensures one embedding per persisted
-    chunk in the embedding store; that store remains authoritative and its
-    contents are intentionally not mirrored here, keeping the result lean
-    and free of provider internals.
+    Ingestion is durable on its own and never requires an embedding
+    provider. Embeddings are derived data populated separately by
+    :class:`~personal_ai.embeddings.EmbeddingBackfiller`.
     """
 
     document_id: str
@@ -57,9 +55,11 @@ class DocumentIngestor:
     resulting chunk set is aligned with storage: an identical stored set is
     left untouched, while missing or drifted sets (changed chunk
     configuration, partial deletion) are replaced in full, so re-ingestion
-    never duplicates or leaves stale chunks behind. Embeddings for chunks
-    whose stored vector is missing or was produced by another model are
-    regenerated; everything else is left untouched.
+    never duplicates or leaves stale chunks behind. When a replacement
+    removes chunk ids, their embeddings are deleted before the chunks
+    themselves are replaced, so no interruption can strand vectors whose
+    chunks no longer exist. Embedding generation is not part of ingestion;
+    see :class:`~personal_ai.embeddings.EmbeddingBackfiller`.
     """
 
     def __init__(
@@ -69,7 +69,6 @@ class DocumentIngestor:
         structured_extractor: StructuredExtractor,
         chunk_store: ChunkStore,
         embedding_store: EmbeddingStore,
-        embedding_provider: EmbeddingProvider,
         *,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
         chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
@@ -79,7 +78,6 @@ class DocumentIngestor:
         self._structured_extractor = structured_extractor
         self._chunk_store = chunk_store
         self._embedding_store = embedding_store
-        self._embedding_provider = embedding_provider
         self._chunk_size = chunk_size
         self._chunk_overlap = chunk_overlap
 
@@ -101,7 +99,6 @@ class DocumentIngestor:
             structured_extraction = existing
 
             chunks = self._ensure_chunks(document.id, extracted)
-            self._ensure_embeddings(chunks)
 
         return IngestionResult(
             document_id=document.id,
@@ -118,9 +115,12 @@ class DocumentIngestor:
         Chunking is a cheap pure function, so it runs unconditionally and
         the result is compared against stored rows: equal sets leave storage
         untouched, while drifted sets are replaced wholesale via
-        ``delete_for_document`` followed by ``add_many``. Chunk ids removed
-        by the replacement have their embeddings deleted as well, so stale
-        vectors cannot outlive their chunks.
+        ``delete_for_document`` followed by ``add_many``. Embeddings of
+        removed chunk ids are deleted *before* the chunks themselves are
+        replaced: every step is idempotent and re-derivable from the stored
+        chunk set, so an interruption at any point leaves a state that a
+        plain retry fully reconciles — stale vectors can never outlive
+        their chunks indefinitely.
         """
         chunks = chunk_document(
             extracted, chunk_size=self._chunk_size, overlap=self._chunk_overlap
@@ -130,31 +130,9 @@ class DocumentIngestor:
             return chunks
 
         stale_ids = {chunk.id for chunk in stored} - {chunk.id for chunk in chunks}
+        for stale_id in sorted(stale_ids):
+            self._embedding_store.delete(stale_id)
         if stored:
             self._chunk_store.delete_for_document(document_id)
         self._chunk_store.add_many(chunks)
-        for stale_id in sorted(stale_ids):
-            self._embedding_store.delete(stale_id)
         return chunks
-
-    def _ensure_embeddings(self, chunks: tuple[DocumentChunk, ...]) -> None:
-        """Ensure every chunk carries an embedding from the current model.
-
-        A stored embedding is reused only when its recorded model matches
-        the provider's current model identity; anything missing or produced
-        by another model is re-embedded and overwritten under the same
-        chunk id, so a future model change invalidates old vectors instead
-        of silently treating them as equivalent. Chunks are processed in
-        order and each embedding persists immediately, so a provider
-        failure mid-document leaves a partial but consistent state: earlier
-        chunks keep valid embeddings, the failing chunk propagates its
-        error, and later chunks stay absent. A retry re-embeds exactly the
-        remainder without rerunning structured extraction. Provider errors
-        propagate unchanged; nothing here logs or swallows chunk text.
-        """
-        for chunk in chunks:
-            stored = self._embedding_store.get(chunk.id)
-            if stored is not None and stored.model == self._embedding_provider.model:
-                continue
-            embedding = self._embedding_provider.embed(chunk.text)
-            self._embedding_store.add(embedding, chunk.id)
