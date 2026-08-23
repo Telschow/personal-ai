@@ -1,5 +1,8 @@
 """Idempotent population of durable embeddings for persisted chunks."""
 
+from collections.abc import Iterable
+from dataclasses import dataclass
+
 from personal_ai.documents.embedding import EmbeddingProvider
 from personal_ai.storage.chunks import ChunkStore
 from personal_ai.storage.embeddings import EmbeddingStore
@@ -54,3 +57,28 @@ class EmbeddingBackfiller:
             self._embedding_store.add(embedding, chunk.id)
             embedded += 1
         return embedded
+
+
+@dataclass(frozen=True, slots=True)
+class BackfillSummary:
+    """Outcome of running the backfiller over a set of documents."""
+
+    documents: int
+    embeddings_created: int
+
+
+def backfill_documents(
+    backfiller: EmbeddingBackfiller, document_ids: Iterable[str]
+) -> BackfillSummary:
+    """Ensure vectors for many documents in deterministic document-id order.
+
+    Purely an iteration wrapper around :meth:`EmbeddingBackfiller.ensure_document`:
+    identical idempotency, immediate persistence, and fail-fast error
+    propagation are inherited unchanged; duplicates in the input simply
+    reuse their now-current vectors.
+    """
+    ordered = sorted(document_ids)
+    created = 0
+    for document_id in ordered:
+        created += backfiller.ensure_document(document_id)
+    return BackfillSummary(documents=len(ordered), embeddings_created=created)
