@@ -1,5 +1,6 @@
 """SQLite-backed storage for document chunks."""
 
+import datetime as dt
 import json
 import sqlite3
 from collections.abc import Iterable
@@ -69,6 +70,21 @@ ORDER BY rank, document_chunks.chunk_id
 LIMIT ?
 """
 
+_FILTERED_SEARCH_SQL_TEMPLATE = """
+SELECT
+    document_chunks.chunk_id,
+    document_chunks.document_id,
+    document_chunks.chunk_index,
+    document_chunks.text,
+    bm25(document_chunks_fts) AS rank
+FROM document_chunks_fts
+JOIN document_chunks ON document_chunks.chunk_id = document_chunks_fts.chunk_id
+JOIN documents ON documents.id = document_chunks.document_id
+WHERE document_chunks_fts MATCH ?{constraints}
+ORDER BY rank, document_chunks.chunk_id
+LIMIT ?
+"""
+
 
 @dataclass(frozen=True, slots=True)
 class ChunkSearchResult:
@@ -79,6 +95,115 @@ class ChunkSearchResult:
     chunk_index: int | None
     text: str
     rank: float
+
+
+@dataclass(frozen=True, slots=True)
+class DocumentFilter:
+    """Explicit constraints on authoritative document metadata.
+
+    Every field is optional; a filter with no fields set matches every
+    document exactly like no filter at all. ``source_types`` is an explicit
+    inclusion list. Date boundaries are inclusive and compared lexically
+    against the stored ISO-8601 timestamps, so boundaries written in the
+    same format as the documents compare naturally; date-only strings act
+    as inclusive whole-day bounds. Documents whose timestamp is unknown
+    (stored empty) never match a date-bounded window.
+
+    Invalid values fail loudly at construction instead of silently
+    narrowing results: unparsable boundaries, inverted ranges, mixed
+    offset-naive/aware boundary pairs, and empty or blank source types are
+    all rejected.
+    """
+
+    source_types: tuple[str, ...] | None = None
+    created_after: str | None = None
+    created_before: str | None = None
+    modified_after: str | None = None
+    modified_before: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.source_types is not None:
+            source_types = tuple(self.source_types)
+            if not source_types:
+                msg = "source_types must be None or non-empty"
+                raise ValueError(msg)
+            if any(not isinstance(value, str) or not value for value in source_types):
+                msg = "source_types entries must be non-empty strings"
+                raise ValueError(msg)
+            object.__setattr__(self, "source_types", source_types)
+        _validate_boundary("created_after", self.created_after)
+        _validate_boundary("created_before", self.created_before)
+        _validate_boundary("modified_after", self.modified_after)
+        _validate_boundary("modified_before", self.modified_before)
+        _validate_range("created", self.created_after, self.created_before)
+        _validate_range("modified", self.modified_after, self.modified_before)
+
+    @property
+    def is_empty(self) -> bool:
+        """True when no field constrains the search."""
+        return (
+            self.source_types is None
+            and self.created_after is None
+            and self.created_before is None
+            and self.modified_after is None
+            and self.modified_before is None
+        )
+
+
+def _parse_boundary(field: str, value: str) -> dt.datetime:
+    try:
+        return dt.datetime.fromisoformat(value)
+    except ValueError as exc:
+        msg = f"{field} must be an ISO-8601 date or timestamp, got {value!r}"
+        raise ValueError(msg) from exc
+
+
+def _validate_boundary(field: str, value: str | None) -> None:
+    if value is not None:
+        _parse_boundary(field, value)
+
+
+def _validate_range(name: str, after: str | None, before: str | None) -> None:
+    if after is None or before is None:
+        return
+    try:
+        inverted = _parse_boundary(f"{name}_after", after) > _parse_boundary(
+            f"{name}_before", before
+        )
+    except TypeError as exc:
+        msg = f"{name} boundaries mix offset-naive and offset-aware timestamps"
+        raise ValueError(msg) from exc
+    if inverted:
+        msg = f"{name}_after must not be later than {name}_before"
+        raise ValueError(msg)
+
+
+def _document_constraints(
+    filters: DocumentFilter,
+) -> tuple[str, list[object]]:
+    """Translate a non-empty filter into a WHERE fragment plus parameters."""
+    clauses: list[str] = []
+    parameters: list[object] = []
+    if filters.source_types is not None:
+        placeholders = ", ".join("?" * len(filters.source_types))
+        clauses.append(f"documents.source_type IN ({placeholders})")
+        parameters.extend(filters.source_types)
+    for column, after_field, before_field in (
+        ("created_at", "created_after", "created_before"),
+        ("modified_at", "modified_after", "modified_before"),
+    ):
+        after = getattr(filters, after_field)
+        before = getattr(filters, before_field)
+        if after is not None or before is not None:
+            clauses.append(f"documents.{column} <> ''")
+        if after is not None:
+            clauses.append(f"documents.{column} >= ?")
+            parameters.append(after)
+        if before is not None:
+            clauses.append(f"documents.{column} <= ?")
+            parameters.append(before)
+    fragment = f" AND {' AND '.join(clauses)}" if clauses else ""
+    return fragment, parameters
 
 
 def _match_expression(query: str) -> str | None:
@@ -227,7 +352,10 @@ class ChunkStore:
         return cursor.rowcount
 
     def search(
-        self, query: str, limit: int = _SEARCH_DEFAULT_LIMIT
+        self,
+        query: str,
+        limit: int = _SEARCH_DEFAULT_LIMIT,
+        filters: DocumentFilter | None = None,
     ) -> tuple[ChunkSearchResult, ...]:
         """Return keyword-search hits over stored chunks, best-ranked first.
 
@@ -235,6 +363,11 @@ class ChunkStore:
         keeping results deterministic. Queries are treated as literal
         keyword terms, never as FTS5 query syntax. Empty or whitespace-only
         queries return no results.
+
+        ``filters`` optionally constrains hits by authoritative document
+        metadata (see :class:`DocumentFilter`); the limit applies after
+        filtering. Passing None or an empty filter is exactly equivalent to
+        unfiltered search.
         """
         if limit < 0:
             msg = f"Search limit must be non-negative, got {limit}"
@@ -242,7 +375,14 @@ class ChunkStore:
         expression = _match_expression(query)
         if expression is None:
             return ()
-        rows = self._connection.execute(_SEARCH_SQL, (expression, limit)).fetchall()
+        if filters is None or filters.is_empty:
+            rows = self._connection.execute(_SEARCH_SQL, (expression, limit)).fetchall()
+        else:
+            constraints, parameters = _document_constraints(filters)
+            sql = _FILTERED_SEARCH_SQL_TEMPLATE.format(constraints=constraints)
+            rows = self._connection.execute(
+                sql, (expression, *parameters, limit)
+            ).fetchall()
         return tuple(
             ChunkSearchResult(
                 chunk_id=str(row[0]),
