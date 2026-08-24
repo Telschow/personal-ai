@@ -55,6 +55,7 @@ _SELECT_SQL = f"SELECT {', '.join(_COLUMNS)} FROM document_chunks"
 _FTS_INSERT_SQL = "INSERT INTO document_chunks_fts (chunk_id, text) VALUES (?, ?)"
 
 _SEARCH_DEFAULT_LIMIT = 10
+DEFAULT_SEARCH_LIMIT = _SEARCH_DEFAULT_LIMIT
 
 _SEARCH_SQL = """
 SELECT
