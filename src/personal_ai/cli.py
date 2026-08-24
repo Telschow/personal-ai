@@ -4,9 +4,20 @@ import argparse
 from pathlib import Path
 
 from personal_ai.agent import Agent
+from personal_ai.ingestion import DocumentIngestor
 from personal_ai.ollama_client import ChatMessage, OllamaClient
+from personal_ai.ollama_structured import OllamaStructuredExtractor
+from personal_ai.orchestration import ingest_source
 from personal_ai.retrieval import SearchDocumentsRequest, search_documents
-from personal_ai.storage import ChunkStore, connect_database
+from personal_ai.sources.base import SourceError
+from personal_ai.sources.registry import known_source_types, resolve_source_adapter
+from personal_ai.storage import (
+    ChunkStore,
+    DocumentStore,
+    EmbeddingStore,
+    ExtractionStore,
+    connect_database,
+)
 from personal_ai.tools import create_default_registry
 
 MODEL = "qwen3.5:9b"
@@ -23,6 +34,18 @@ def parse_args() -> argparse.Namespace:
         "--database",
         type=Path,
         help="SQLite database holding the ingested knowledge base.",
+    )
+    parser.add_argument(
+        "--ingest",
+        dest="ingest_source_args",
+        nargs=2,
+        metavar=("SOURCE", "PATH"),
+        help=(
+            "Ingest a source directory into the knowledge base instead of "
+            "running the agent; requires --database. Known sources: "
+            + ", ".join(known_source_types())
+            + "."
+        ),
     )
     parser.add_argument(
         "--search",
@@ -46,12 +69,24 @@ def parse_args() -> argparse.Namespace:
     )
 
     args = parser.parse_args()
-    if args.search_query is None and args.workspace is None:
-        parser.error("the following arguments are required: --workspace")
-    if args.search_query is None and args.prompt is None:
-        parser.error("the following arguments are required: prompt")
-    if args.search_query is not None and args.database is None:
-        parser.error("--search requires --database")
+    modes = [
+        flag
+        for flag, value in (
+            ("--search", args.search_query),
+            ("--ingest", args.ingest_source_args),
+        )
+        if value is not None
+    ]
+    if len(modes) > 1:
+        parser.error(f"{modes[0]} and {modes[1]} are mutually exclusive")
+    if not modes:
+        # Agent mode keeps the original required-argument behavior.
+        if args.workspace is None:
+            parser.error("the following arguments are required: --workspace")
+        if args.prompt is None:
+            parser.error("the following arguments are required: prompt")
+    elif args.database is None:
+        parser.error(f"{modes[0]} requires --database")
     return args
 
 
@@ -79,11 +114,53 @@ def run_search(query: str, database: Path, limit: int) -> None:
         print(f"   {hit.text}")
 
 
+def run_ingest(source_type: str, source_path: Path, database: Path) -> None:
+    """Ingest one source directory into the knowledge database."""
+    if not source_path.is_dir():
+        raise SystemExit(f"Source path is not a directory: {source_path}")
+
+    try:
+        adapter = resolve_source_adapter(source_type, source_path)
+    except SourceError as exc:
+        raise SystemExit(str(exc)) from exc
+
+    connection = connect_database(database)
+    try:
+        document_store = DocumentStore(connection)
+        extraction_store = ExtractionStore(connection)
+        chunk_store = ChunkStore(connection)
+        embedding_store = EmbeddingStore(connection)
+
+        with OllamaClient(model=MODEL) as client:
+            ingestor = DocumentIngestor(
+                document_store,
+                extraction_store,
+                OllamaStructuredExtractor(client),
+                chunk_store,
+                embedding_store,
+            )
+            summary = ingest_source(adapter, ingestor)
+    finally:
+        connection.close()
+
+    print(f"source_type: {summary.source_type}")
+    print(f"documents: {summary.documents}")
+    print("kind_counts:")
+    for kind in sorted(summary.kind_counts):
+        print(f"  {kind}: {summary.kind_counts[kind]}")
+    print(f"chunks: {summary.chunk_count}")
+
+
 def main() -> None:
     args = parse_args()
 
     if args.search_query is not None:
         run_search(args.search_query, args.database, args.limit)
+        return
+
+    if args.ingest_source_args is not None:
+        source_type, source_path = args.ingest_source_args
+        run_ingest(source_type, Path(source_path), args.database)
         return
 
     workspace = args.workspace.resolve()
