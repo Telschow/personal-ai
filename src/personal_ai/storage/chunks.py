@@ -3,6 +3,7 @@
 import json
 import sqlite3
 from collections.abc import Iterable
+from dataclasses import dataclass
 from types import TracebackType
 from typing import Self
 
@@ -16,6 +17,16 @@ CREATE TABLE IF NOT EXISTS document_chunks (
     page_number INTEGER,
     text TEXT NOT NULL,
     metadata TEXT NOT NULL
+)
+"""
+
+# Derived, rebuildable full-text index over the authoritative chunks. Only
+# the searchable text and the join key back to ``document_chunks`` live here;
+# every other field of a search result is read from the authoritative table.
+_CHUNKS_FTS_SCHEMA = """
+CREATE VIRTUAL TABLE IF NOT EXISTS document_chunks_fts USING fts5(
+    text,
+    chunk_id UNINDEXED
 )
 """
 
@@ -39,6 +50,49 @@ _INSERT_SQL = (
 )
 
 _SELECT_SQL = f"SELECT {', '.join(_COLUMNS)} FROM document_chunks"
+
+_FTS_INSERT_SQL = "INSERT INTO document_chunks_fts (chunk_id, text) VALUES (?, ?)"
+
+_SEARCH_DEFAULT_LIMIT = 10
+
+_SEARCH_SQL = """
+SELECT
+    document_chunks.chunk_id,
+    document_chunks.document_id,
+    document_chunks.chunk_index,
+    document_chunks.text,
+    bm25(document_chunks_fts) AS rank
+FROM document_chunks_fts
+JOIN document_chunks ON document_chunks.chunk_id = document_chunks_fts.chunk_id
+WHERE document_chunks_fts MATCH ?
+ORDER BY rank, document_chunks.chunk_id
+LIMIT ?
+"""
+
+
+@dataclass(frozen=True, slots=True)
+class ChunkSearchResult:
+    """One keyword-search hit, projected from the authoritative chunk row."""
+
+    chunk_id: str
+    document_id: str
+    chunk_index: int | None
+    text: str
+    rank: float
+
+
+def _match_expression(query: str) -> str | None:
+    """Turn free user text into a safe FTS5 MATCH expression.
+
+    Each whitespace-separated term is quoted as a literal phrase and the
+    terms are AND-ed (FTS5's implicit default), so punctuation, operators,
+    and column filters in personal content can never alter query syntax.
+    Returns None for queries without any terms.
+    """
+    terms = query.split()
+    if not terms:
+        return None
+    return " ".join(f'"{term.replace('"', '""')}"' for term in terms)
 
 
 def _order_index(chunk: DocumentChunk) -> int | None:
@@ -84,24 +138,37 @@ class ChunkStore:
     of :class:`~personal_ai.storage.documents.DocumentStore`. Chunks are
     listed per document in ``chunk_index`` order with chunk id as the
     deterministic tie-break, independent of incidental row order.
+
+    Keyword search runs over a derived SQLite FTS5 index that this store
+    keeps consistent with ``document_chunks`` inside the same transactions
+    as every mutation. The index is rebuildable at any time via
+    :meth:`rebuild_search_index`.
     """
 
     def __init__(self, connection: sqlite3.Connection) -> None:
         self._connection = connection
         self._connection.execute(_CHUNKS_SCHEMA)
         self._connection.execute(_CHUNKS_DOCUMENT_ORDER_INDEX)
+        self._connection.execute(_CHUNKS_FTS_SCHEMA)
         self._connection.commit()
 
     def _insert_or_update(self, chunk: DocumentChunk) -> bool:
         """Insert the chunk, or overwrite it when its id already exists."""
         cursor = self._connection.execute(_INSERT_SQL, _chunk_to_row(chunk))
         if cursor.rowcount == 1:
+            self._connection.execute(_FTS_INSERT_SQL, (chunk.id, chunk.text))
             return True
         assignments = ", ".join(f"{column} = ?" for column in _COLUMNS[1:])
         self._connection.execute(
             f"UPDATE document_chunks SET {assignments} WHERE chunk_id = ?",
             (*_chunk_to_row(chunk)[1:], chunk.id),
         )
+        # Refresh the index entry even when only non-text columns changed,
+        # so no update path can leave stale terms behind.
+        self._connection.execute(
+            "DELETE FROM document_chunks_fts WHERE chunk_id = ?", (chunk.id,)
+        )
+        self._connection.execute(_FTS_INSERT_SQL, (chunk.id, chunk.text))
         return False
 
     def add(self, chunk: DocumentChunk) -> bool:
@@ -145,11 +212,64 @@ class ChunkStore:
 
     def delete_for_document(self, document_id: str) -> int:
         """Remove all chunks of one document; returns the number deleted."""
+        self._connection.execute(
+            """
+            DELETE FROM document_chunks_fts WHERE chunk_id IN (
+                SELECT chunk_id FROM document_chunks WHERE document_id = ?
+            )
+            """,
+            (document_id,),
+        )
         cursor = self._connection.execute(
             "DELETE FROM document_chunks WHERE document_id = ?", (document_id,)
         )
         self._connection.commit()
         return cursor.rowcount
+
+    def search(
+        self, query: str, limit: int = _SEARCH_DEFAULT_LIMIT
+    ) -> tuple[ChunkSearchResult, ...]:
+        """Return keyword-search hits over stored chunks, best-ranked first.
+
+        Ranking uses FTS5's native BM25; equal ranks are ordered by chunk id,
+        keeping results deterministic. Queries are treated as literal
+        keyword terms, never as FTS5 query syntax. Empty or whitespace-only
+        queries return no results.
+        """
+        if limit < 0:
+            msg = f"Search limit must be non-negative, got {limit}"
+            raise ValueError(msg)
+        expression = _match_expression(query)
+        if expression is None:
+            return ()
+        rows = self._connection.execute(_SEARCH_SQL, (expression, limit)).fetchall()
+        return tuple(
+            ChunkSearchResult(
+                chunk_id=str(row[0]),
+                document_id=str(row[1]),
+                chunk_index=row[2] if row[2] is None else int(row[2]),
+                text=str(row[3]),
+                rank=float(row[4]),
+            )
+            for row in rows
+        )
+
+    def rebuild_search_index(self) -> int:
+        """Rebuild the derived full-text index from authoritative chunks.
+
+        Drops and re-populates the entire FTS index from the current rows in
+        ``document_chunks``, returning the number of indexed chunks. This is
+        the recovery path for databases written before the index existed.
+        """
+        self._connection.execute("DELETE FROM document_chunks_fts")
+        rows = self._connection.execute(
+            "SELECT chunk_id, text FROM document_chunks ORDER BY chunk_id"
+        ).fetchall()
+        self._connection.executemany(
+            _FTS_INSERT_SQL, ((str(row[0]), str(row[1])) for row in rows)
+        )
+        self._connection.commit()
+        return len(rows)
 
     def close(self) -> None:
         """Release the underlying database connection."""

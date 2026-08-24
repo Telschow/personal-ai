@@ -3,9 +3,10 @@
 Local-first personal knowledge and agent system.
 
 Text knowledge is ingested through typed source adapters into a durable,
-deterministic document store, chunked deterministically, and optionally
-embedded by a provider-independent embedding backend for future retrieval.
-The model backend is Ollama; no cloud APIs are used.
+deterministic document store, chunked deterministically, and searchable via
+a derived SQLite FTS5 keyword index; optional provider-independent
+embeddings for future semantic retrieval remain a separate step. The model
+backend is Ollama; no cloud APIs are used.
 
 This file is the project's durable checkpoint record. It is written so a
 future session can resume exactly where work stopped without relying on
@@ -13,14 +14,15 @@ chat history.
 
 ## Current status snapshot
 
-As of checkpoint `f3d6537` ("Add batched embedding backfill"), plus a
-second corpus discovery on **2026-08-23** and the ChatGPT adapter slice:
+As of checkpoint `877cb96` ("Ignore raw data archive"), plus the FTS
+retrieval slice and a second corpus discovery on **2026-08-23**:
 
 - **Phase:** knowledge ingestion covers four sources end-to-end (Keep,
-  NotebookLM, Gemini, ChatGPT). The second archive's remaining families
-  (PDFs, XLSX, email) are inventoried but not yet ingested. Retrieval is
-  not started.
-- **Tests:** 512 passing; `ruff check` clean; `ruff format --check` clean.
+  NotebookLM, Gemini, ChatGPT). SQLite FTS5 keyword retrieval over chunks is
+  implemented. The second archive's remaining families (PDFs, XLSX, email)
+  are inventoried but not yet ingested. Semantic/vector retrieval is not
+  started (blocked on embedding infrastructure).
+- **Tests:** 535 passing; `ruff check` clean; `ruff format --check` clean.
 - **First-corpus validation:** 838 knowledge documents / 4,542 chunks from
   Google Keep and NotebookLM exports; fake-provider backfill produced
   4,542 embeddings; re-running ingestion and backfill was fully idempotent.
@@ -49,16 +51,24 @@ second corpus discovery on **2026-08-23** and the ChatGPT adapter slice:
 SourceAdapter -> SourceRecord -> DocumentIngestor -> DocumentStore
                                      |
                                      +-> extraction/classification/chunks
-                                              |
-                             EmbeddingBackfiller (separate step)
-                                              |
-                                       ChunkEmbeddingStore
+                                              |                |
+                                              |          document_chunks_fts
+                                              |          (derived, rebuildable)
+                              EmbeddingBackfiller (separate step)
+                                               |
+                                        ChunkEmbeddingStore
 ```
 
 - Sources produce typed `SourceRecord`s with deterministic identity
   (source type, stable key, content hash).
 - The ingestor persists documents, structured extractions, and chunks
   idempotently; unchanged inputs produce zero new rows.
+- `document_chunks` is the authoritative chunk store. Keyword search runs
+  over a derived SQLite FTS5 index (`document_chunks_fts`) that
+  `ChunkStore` maintains inside the same transactions as every chunk
+  mutation and that can be rebuilt from scratch via
+  `rebuild_search_index()`. Search results are always projected from the
+  authoritative table.
 - Embeddings are derived state: rebuildable at any time from chunks via a
   separate batched backfill (`backfill_documents`). Ingestion never calls
   a model provider.
@@ -101,7 +111,7 @@ Status vocabulary:
 | Gemini conversation adapter | this checkpoint | implemented, corpus-validated | Per-conversation JSON only (`.md` twins and `_`-prefixed aggregates excluded structurally); composed speaker-labeled text; provenance in metadata. Real corpus: 170/170 discovered, zero schema anomalies, 167 TEXT_HEAVY + 3 MIXED; throwaway ingestion: 170 docs / 1,344 chunks, rerun idempotent, embeddings untouched |
 | ChatGPT conversation adapter | this checkpoint | implemented, corpus-validated | Official shard export (`conversations-*.json`) parsed structurally; active-branch linearization over parent-pointer `mapping` trees (no `children` arrays exist in the export); voice transcriptions rendered as text; media pointers and model reasoning excluded but counted; synthetic `<conversation_id>.json` source keys stable across re-sharding. Real corpus: 469/469 discovered, 451 TEXT_HEAVY + 18 MIXED, throwaway ingestion 469 docs / 3,363 chunks / 451 extractions, rerun idempotent, embeddings untouched. See "ChatGPT export schema notes" below |
 | Real embeddings | — | **blocked** | Local Ollama lacks embeddings support (HTTP 501; no model). Requires enabling the server flag/installing an embedding model and setting `PERSONAL_AI_EMBEDDING_MODEL`. No code work blocked on this. |
-| Retrieval (search over chunks/extractions) | — | **not started** | Design deliberately deferred until the chat-export knowledge from discovery 2 is ingested so retrieval is designed once over the full document mix |
+| SQLite FTS5 keyword retrieval | this checkpoint | implemented | Derived `document_chunks_fts` index over authoritative chunks, maintained transactionally by `ChunkStore` (insert/update/delete stay in sync); `search()` returns typed `ChunkSearchResult` with native BM25 ranking and deterministic chunk-id tie-break; free-text queries sanitized into literal quoted terms so punctuation/operators in personal content can never alter query syntax; empty queries return no results; `rebuild_search_index()` re-derives the whole index from `document_chunks` (also populates pre-existing databases). 23 focused tests; semantic/vector retrieval remains pending on embedding infrastructure |
 | Structured-data pipeline | — | **not started** | Maps/Chrome/YouTube/Google Pay exports inventoried but intentionally not ingested; see boundaries below |
 
 ## Corpus inventory and boundaries
@@ -334,25 +344,29 @@ when a use case exists.
 
 ## Next planned phase
 
-Re-ranked after the ChatGPT adapter landed (2026-08-23), by measured value:
+Re-ranked after the FTS retrieval slice landed (2026-08-23), by measured
+value:
 
 1. **Retrieval over all ingested knowledge** — keyword-first (SQLite FTS),
    designed once Keep + NotebookLM + Gemini + ChatGPT are in (done: 1,477
-   documents / 9,249 chunks), so metadata filtering (source_type,
-   timestamps, titles) is shaped by the real document mix. Text-layer PDFs
-   and email can join later without redesign.
+   documents / 9,249 chunks). **Keyword retrieval over chunks is now
+   implemented** (`ChunkStore.search`). Remaining sub-slices: metadata
+   filtering (source_type, timestamps, titles), search over structured
+   extractions, and a CLI/agent surface for queries. Text-layer PDFs and
+   email can join later without redesign.
 2. **Personal-PDF text extraction** — 28 of 41 PDFs have usable text
    layers; includes scanned classification (6 fully scanned stay
    vision-only for now).
 3. **Email ingestion (Gmail mbox)** — largest remaining volume, highest
    sensitivity.
 
-**Chosen next slice: 1 — retrieval design over the ingested corpus.**
+**Chosen next slice: 2 — personal-PDF text extraction**, or the remaining
+retrieval sub-slices above if retrieval value should compound first.
 
-Rationale: every chat-export family is now in storage with measured
-classification and chunk counts, which was the explicit precondition for
-designing retrieval once. PDFs remain a clean follow-on source that can be
-added behind the existing adapter contract afterwards.
+Rationale: keyword retrieval exists but is not yet exposed to any caller;
+either deepening retrieval (filters/extraction search/agent tool) or adding
+the next source is justified from here. PDFs remain a clean follow-on
+source behind the existing adapter contract.
 
 ## Deferred work
 
@@ -364,7 +378,9 @@ added behind the existing adapter contract afterwards.
   `PERSONAL_AI_EMBEDDING_MODEL`)
 - Personal-PDF text extraction (unblocked; includes scanned classification)
 - Spreadsheet record boundary for the 6 personal XLSX files
-- Semantic search and retrieval agent tools after keyword retrieval exists
+- Semantic search (blocked on real embedding infrastructure) and retrieval
+  agent tools; metadata-filtered search and extraction search on top of
+  keyword retrieval
 - Durable memories concept distinct from document chunks (Phase 10);
   candidate import source later: old project's extracted-memory database,
   behind a dedicated deduplicating import boundary
@@ -378,7 +394,7 @@ added behind the existing adapter contract afterwards.
 
 1. Read this file top to bottom; trust the checkpoint table over memory.
 2. Verify baseline: `uv run pytest && uv run ruff check . && uv run ruff
-   format --check src tests` — expect 512 passing, all green.
+   format --check src tests` — expect 535 passing, all green.
 3. Confirm HEAD matches or postdates `f3d6537`; the Gemini and ChatGPT
    adapter slices are uncommitted working-tree state as of 2026-08-23 —
    commit them before starting new work if not yet committed.
