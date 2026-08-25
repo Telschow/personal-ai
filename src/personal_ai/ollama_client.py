@@ -143,6 +143,9 @@ class OllamaClient:
         self,
         messages: Sequence[ChatMessage],
         tools: Sequence[dict[str, object]] | None = None,
+        *,
+        think: bool | None = None,
+        format: dict[str, object] | None = None,
     ) -> ChatResponse:
         payload: dict[str, object] = {
             "model": self.model,
@@ -151,6 +154,10 @@ class OllamaClient:
         }
         if tools is not None:
             payload["tools"] = list(tools)
+        if think is not None:
+            payload["think"] = think
+        if format is not None:
+            payload["format"] = format
         try:
             response = self._client.post("/api/chat", json=payload)
         except httpx.TransportError as exc:

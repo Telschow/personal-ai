@@ -291,3 +291,57 @@ def test_custom_timeout_is_passed_through() -> None:
         timeout=300.0,
     )
     assert client._client.timeout.connect == 300.0
+
+
+def test_think_false_is_forwarded_in_payload() -> None:
+    client, requests = make_client(
+        lambda request: httpx.Response(200, json=chat_payload())
+    )
+
+    with client:
+        client.chat(USER_MESSAGE, think=False)
+
+    body = json.loads(requests[0].content)
+    assert body["think"] is False
+
+
+def test_think_true_is_forwarded_in_payload() -> None:
+    client, requests = make_client(
+        lambda request: httpx.Response(200, json=chat_payload())
+    )
+
+    with client:
+        client.chat(USER_MESSAGE, think=True)
+
+    body = json.loads(requests[0].content)
+    assert body["think"] is True
+
+
+def test_format_is_forwarded_in_payload() -> None:
+    schema = {
+        "type": "object",
+        "properties": {"answer": {"type": "string"}},
+        "required": ["answer"],
+    }
+    client, requests = make_client(
+        lambda request: httpx.Response(200, json=chat_payload())
+    )
+
+    with client:
+        client.chat(USER_MESSAGE, format=schema)
+
+    body = json.loads(requests[0].content)
+    assert body["format"] == schema
+
+
+def test_think_and_format_absent_when_not_provided() -> None:
+    client, requests = make_client(
+        lambda request: httpx.Response(200, json=chat_payload())
+    )
+
+    with client:
+        client.chat(USER_MESSAGE)
+
+    body = json.loads(requests[0].content)
+    assert "think" not in body
+    assert "format" not in body

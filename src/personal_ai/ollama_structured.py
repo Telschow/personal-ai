@@ -24,6 +24,26 @@ Use an empty string or empty arrays when nothing applies.
 Never invent facts that are not present in the document.
 """
 
+EXTRACTION_SCHEMA: dict[str, object] = {
+    "type": "object",
+    "properties": {
+        "summary": {"type": "string"},
+        "people": {"type": "array", "items": {"type": "string"}},
+        "organizations": {"type": "array", "items": {"type": "string"}},
+        "projects": {"type": "array", "items": {"type": "string"}},
+        "goals": {"type": "array", "items": {"type": "string"}},
+        "topics": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": [
+        "summary",
+        "people",
+        "organizations",
+        "projects",
+        "goals",
+        "topics",
+    ],
+}
+
 
 class OllamaStructuredExtractor:
     """Structured extractor over :class:`OllamaClient`.
@@ -42,7 +62,9 @@ class OllamaStructuredExtractor:
             [
                 ChatMessage(role="system", content=STRUCTURED_EXTRACTION_SYSTEM_PROMPT),
                 ChatMessage(role="user", content=extraction.text),
-            ]
+            ],
+            think=False,
+            format=EXTRACTION_SCHEMA,
         )
         return parse_structured_extraction(
             extraction.document_id,

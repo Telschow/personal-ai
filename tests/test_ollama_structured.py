@@ -14,6 +14,7 @@ from personal_ai.documents import (
 )
 from personal_ai.ollama_client import OllamaClient, OllamaConnectionError
 from personal_ai.ollama_structured import (
+    EXTRACTION_SCHEMA,
     STRUCTURED_EXTRACTION_SYSTEM_PROMPT,
     OllamaStructuredExtractor,
 )
@@ -162,3 +163,89 @@ def test_extract_never_touches_the_source_origin() -> None:
         result = extractor.extract(extraction)
 
     assert result.document_id == "doc-9"
+
+
+def test_extract_sends_think_false() -> None:
+    full_payload = {
+        "summary": "ok",
+        "people": [],
+        "organizations": [],
+        "projects": [],
+        "goals": [],
+        "topics": [],
+    }
+    extractor, requests, client = make_extractor(
+        lambda request: json_response(full_payload)
+    )
+
+    with client:
+        extractor.extract(make_extraction())
+
+    body = json.loads(requests[0].content)
+    assert body["think"] is False
+
+
+def test_extract_sends_format_schema() -> None:
+    full_payload = {
+        "summary": "ok",
+        "people": [],
+        "organizations": [],
+        "projects": [],
+        "goals": [],
+        "topics": [],
+    }
+    extractor, requests, client = make_extractor(
+        lambda request: json_response(full_payload)
+    )
+
+    with client:
+        extractor.extract(make_extraction())
+
+    body = json.loads(requests[0].content)
+    assert body["format"] == EXTRACTION_SCHEMA
+
+
+def test_extract_parses_full_structured_response() -> None:
+    payload = {
+        "summary": "Meeting notes about project alpha",
+        "people": ["Alice", "Bob"],
+        "organizations": ["Acme Corp"],
+        "projects": ["Project Alpha"],
+        "goals": ["Launch by Q4"],
+        "topics": ["roadmap", "timeline"],
+    }
+    extractor, _requests, client = make_extractor(
+        lambda request: json_response(payload)
+    )
+
+    with client:
+        result = extractor.extract(make_extraction())
+
+    assert result.summary == "Meeting notes about project alpha"
+    assert result.people == ("Alice", "Bob")
+    assert result.organizations == ("Acme Corp",)
+    assert result.projects == ("Project Alpha",)
+    assert result.goals == ("Launch by Q4",)
+    assert result.topics == ("roadmap", "timeline")
+
+
+def test_extract_empty_arrays_still_parsed() -> None:
+    payload = {
+        "summary": "Short note",
+        "people": [],
+        "organizations": [],
+        "projects": [],
+        "goals": [],
+        "topics": [],
+    }
+    extractor, _requests, client = make_extractor(
+        lambda request: json_response(payload)
+    )
+
+    with client:
+        result = extractor.extract(make_extraction())
+
+    assert result == StructuredExtraction(
+        document_id="doc-1",
+        summary="Short note",
+    )
