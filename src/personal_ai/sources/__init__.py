@@ -7,6 +7,7 @@ from personal_ai.sources.chatgpt import (
 from personal_ai.sources.chatgpt import (
     build_conversation_record as build_chatgpt_conversation_record,
 )
+from personal_ai.sources.email import EmailSourceAdapter, build_message_record
 from personal_ai.sources.filesystem import FilesystemSourceAdapter
 from personal_ai.sources.gemini import GeminiSourceAdapter, build_conversation_record
 from personal_ai.sources.keep import KeepSourceAdapter, build_note_record
@@ -18,6 +19,7 @@ from personal_ai.sources.notebooklm import (
 
 __all__ = [
     "ChatGPTSourceAdapter",
+    "EmailSourceAdapter",
     "FilesystemSourceAdapter",
     "GeminiSourceAdapter",
     "KeepSourceAdapter",
@@ -28,5 +30,6 @@ __all__ = [
     "build_article_record",
     "build_chatgpt_conversation_record",
     "build_conversation_record",
+    "build_message_record",
     "build_note_record",
 ]
