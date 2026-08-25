@@ -128,7 +128,7 @@ class OllamaClient:
         self,
         model: str,
         base_url: str = DEFAULT_BASE_URL,
-        timeout: float = 60.0,
+        timeout: float = 180.0,
         transport: httpx.BaseTransport | None = None,
     ) -> None:
         self.model = model

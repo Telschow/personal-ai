@@ -278,3 +278,16 @@ def test_malformed_tool_call_raises_response_error(tool_calls: Any) -> None:
 
     with client, pytest.raises(OllamaResponseError):
         client.chat(USER_MESSAGE)
+
+
+def test_default_timeout_is_180_seconds() -> None:
+    client, _ = make_client(lambda request: httpx.Response(200, json=chat_payload()))
+    assert client._client.timeout.connect == 180.0
+
+
+def test_custom_timeout_is_passed_through() -> None:
+    client, _ = make_client(
+        lambda request: httpx.Response(200, json=chat_payload()),
+        timeout=300.0,
+    )
+    assert client._client.timeout.connect == 300.0
