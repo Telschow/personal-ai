@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+from dataclasses import dataclass
 from types import TracebackType
 from typing import Self
 
@@ -32,6 +33,25 @@ _COLUMNS = (
 )
 
 _LIST_FIELDS = ("people", "organizations", "projects", "goals", "topics")
+
+# Fields searched by the extraction search, in priority order.
+_SEARCHABLE_LIST_FIELDS = ("people", "organizations", "projects", "goals", "topics")
+
+
+@dataclass(frozen=True, slots=True)
+class ExtractionSearchResult:
+    """A single hit from structured extraction search.
+
+    ``score`` is a deterministic relevance measure in [0, 1].  Higher is
+    better.  ``matched_fields`` records which extraction fields contained
+    the query so callers can display provenance without re-searching.
+    """
+
+    document_id: str
+    summary: str
+    score: float
+    matched_fields: tuple[str, ...]
+
 
 _INSERT_SQL = (
     f"INSERT OR IGNORE INTO structured_extractions ({', '.join(_COLUMNS)}) "
@@ -66,6 +86,54 @@ def _row_to_extraction(row: tuple[object, ...]) -> StructuredExtraction:
         metadata=metadata,
         **collections,
     )
+
+
+def _field_score(field_name: str, values: tuple[str, ...], query_lower: str) -> float:
+    """Return the best match score for a single collection field."""
+    best = 0.0
+    for value in values:
+        vl = value.lower()
+        if vl == query_lower:
+            return 1.0
+        if vl.startswith(query_lower):
+            best = max(best, 0.7)
+        elif query_lower in vl:
+            best = max(best, 0.4)
+    return best
+
+
+def _score_extraction(
+    query: str, extraction: StructuredExtraction
+) -> tuple[float, tuple[str, ...]]:
+    """Compute a relevance score and matched fields for one extraction.
+
+    Returns (score, matched_field_names).  Score is in (0, 1].
+    """
+    query_lower = query.lower().strip()
+    total = 0.0
+    matched: list[str] = []
+
+    # Score summary
+    summary_lower = extraction.summary.lower()
+    if summary_lower == query_lower:
+        total += 1.0
+        matched.append("summary")
+    elif query_lower in summary_lower:
+        total += 0.4
+        matched.append("summary")
+
+    # Score collection fields
+    for field_name in _SEARCHABLE_LIST_FIELDS:
+        values = getattr(extraction, field_name)
+        score = _field_score(field_name, values, query_lower)
+        if score > 0:
+            total += score
+            matched.append(field_name)
+
+    # Normalize: max possible is 1.0 (summary) + 5 * 1.0 (fields) = 6.0
+    max_score = 1.0 + len(_SEARCHABLE_LIST_FIELDS)
+    normalized = total / max_score if total > 0 else 0.0
+    return normalized, tuple(matched)
 
 
 class ExtractionStore:
@@ -104,6 +172,51 @@ class ExtractionStore:
             (document_id,),
         ).fetchone()
         return _row_to_extraction(row) if row is not None else None
+
+    def search(
+        self, query: str, *, limit: int = 10
+    ) -> tuple[ExtractionSearchResult, ...]:
+        """Search structured extractions by case-insensitive substring match.
+
+        Searches across summary and all collection fields (people,
+        organizations, projects, goals, topics).  Results are scored by
+        match quality and number of matched fields, then returned in
+        descending score order.  Ties are broken deterministically by
+        document_id.
+
+        Scoring (per field, in [0, 1]):
+            exact field value match:    1.0
+            starts with query:         0.7
+            contains query:            0.4
+
+        Total score = sum of per-field scores / number of searched fields.
+        This means a document matching in 2 fields scores higher than one
+        matching in 1, and summary matches are weighted equally to field
+        matches.
+        """
+        if not isinstance(query, str) or not query.strip():
+            return ()
+
+        rows = self._connection.execute(
+            f"SELECT {', '.join(_COLUMNS)} FROM structured_extractions"
+        ).fetchall()
+
+        results: list[ExtractionSearchResult] = []
+        for row in rows:
+            extraction = _row_to_extraction(row)
+            score, matched = _score_extraction(query, extraction)
+            if score > 0:
+                results.append(
+                    ExtractionSearchResult(
+                        document_id=extraction.document_id,
+                        summary=extraction.summary,
+                        score=score,
+                        matched_fields=matched,
+                    )
+                )
+
+        results.sort(key=lambda r: (-r.score, r.document_id))
+        return tuple(results[:limit])
 
     def close(self) -> None:
         """Release the underlying database connection."""

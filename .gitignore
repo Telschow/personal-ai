@@ -31,3 +31,7 @@ credentials/
 # Local raw project data
 previous_project_and_raw_data/
 raw_data.zip
+
+# Local/generated data
+knowledge.db
+raw_data_extracted/

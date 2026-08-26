@@ -96,5 +96,24 @@ def classify(
 
 
 def classify_document(extraction: TextExtractionResult) -> DocumentClassification:
-    """Classify straight from a Phase 4 extraction result."""
-    return classify(extraction.document_id, measure_text(extraction.text))
+    """Classify straight from a Phase 4 extraction result.
+
+    For PDFs, uses the page and image counts stored in extraction metadata
+    by the PDF extractor.  For non-PDF documents, falls back to text-only
+    measurement.
+    """
+    characteristics = measure_text(extraction.text)
+
+    page_count = extraction.metadata.get("pdf_page_count")
+    image_count = extraction.metadata.get("pdf_image_count")
+    if page_count is not None:
+        characteristics = DocumentCharacteristics(
+            text_character_count=characteristics.text_character_count,
+            non_whitespace_character_count=characteristics.non_whitespace_character_count,
+            line_count=characteristics.line_count,
+            word_count=characteristics.word_count,
+            page_count=page_count,
+            image_count=image_count if image_count is not None else 0,
+        )
+
+    return classify(extraction.document_id, characteristics)

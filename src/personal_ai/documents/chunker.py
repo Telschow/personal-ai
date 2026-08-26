@@ -37,6 +37,50 @@ def _validated_configuration(chunk_size: int, overlap: int) -> int:
     return chunk_size - overlap
 
 
+def _chunk_text(
+    text: str,
+    document_id: str,
+    start_position: int,
+    page_number: int | None,
+    source_type: str,
+    source_key: str,
+    content_hash: str,
+    *,
+    chunk_size: int,
+    step: int,
+) -> tuple[DocumentChunk, ...]:
+    """Chunk a single text block, returning chunks with shared provenance."""
+    provenance: dict[str, object] = {
+        "source_type": source_type,
+        "source_key": source_key,
+        "content_hash": content_hash,
+    }
+
+    chunks: list[DocumentChunk] = []
+    previous_end = 0
+    for offset, start in enumerate(range(0, len(text), step)):
+        end = min(start + chunk_size, len(text))
+        if end <= previous_end:
+            break
+        chunk_text = text[start:end]
+        position = start_position + offset
+        metadata = {"chunk_index": position, **provenance}
+        if page_number is not None:
+            metadata["page_number"] = page_number
+        chunks.append(
+            DocumentChunk(
+                id=compute_chunk_id(document_id, position, chunk_text),
+                document_id=document_id,
+                text=chunk_text,
+                page_number=page_number,
+                metadata=metadata,
+            )
+        )
+        previous_end = end
+
+    return tuple(chunks)
+
+
 def chunk_document(
     extraction: TextExtractionResult,
     *,
@@ -45,45 +89,59 @@ def chunk_document(
 ) -> tuple[DocumentChunk, ...]:
     """Split extracted document text into deterministic searchable chunks.
 
-    Chunks are verbatim contiguous slices of ``extraction.text``: whitespace
+    Chunks are verbatim contiguous slices of the extracted text: whitespace
     is never collapsed, stripped, or normalized, so no character is lost.
     Empty input yields no chunks; whitespace-only input yields chunks
     containing that whitespace unchanged — filtering belongs to callers,
     which already route unusable text away before chunking.
 
+    When ``extraction.pages`` is provided (PDF extraction), each page is
+    chunked independently and every resulting chunk carries the page's
+    1-based ``page_number``.  This preserves page provenance so that no
+    chunk mixes text from different pages.  ``chunk_index`` remains
+    globally sequential across all pages for stable identity derivation.
+
+    For non-paginated extractions, ``page_number`` stays ``None`` on every
+    chunk, preserving existing behavior unchanged.
+
     Windows advance by ``chunk_size - overlap``, so adjacent chunks share
     exactly ``overlap`` characters and every character appears in at least
-    one chunk. A trailing window fully contained in its predecessor is
-    skipped as redundant. Chunk order follows text order, exposed both by
+    one chunk.  A trailing window fully contained in its predecessor is
+    skipped as redundant.  Chunk order follows text order, exposed both by
     sequence position and the ``chunk_index`` metadata entry.
 
     Each chunk carries ``document_id`` provenance plus ``source_type``,
-    ``source_key``, and ``content_hash`` in metadata. ``page_number``
-    stays ``None`` until page-aware extraction exists.
+    ``source_key``, and ``content_hash`` in metadata.
     """
     step = _validated_configuration(chunk_size, overlap)
 
-    provenance: dict[str, object] = {
-        "source_type": extraction.source_type,
-        "source_key": extraction.source_key,
-        "content_hash": extraction.content_hash,
-    }
-
-    chunks: list[DocumentChunk] = []
-    previous_end = 0
-    for position, start in enumerate(range(0, len(extraction.text), step)):
-        end = min(start + chunk_size, len(extraction.text))
-        if end <= previous_end:
-            break
-        chunk_text = extraction.text[start:end]
-        chunks.append(
-            DocumentChunk(
-                id=compute_chunk_id(extraction.document_id, position, chunk_text),
-                document_id=extraction.document_id,
-                text=chunk_text,
-                metadata={"chunk_index": position, **provenance},
+    if extraction.pages is not None:
+        all_chunks: list[DocumentChunk] = []
+        position = 0
+        for page in extraction.pages:
+            page_chunks = _chunk_text(
+                page.text,
+                extraction.document_id,
+                start_position=position,
+                page_number=page.page_number,
+                source_type=extraction.source_type,
+                source_key=extraction.source_key,
+                content_hash=extraction.content_hash,
+                chunk_size=chunk_size,
+                step=step,
             )
-        )
-        previous_end = end
+            all_chunks.extend(page_chunks)
+            position += len(page_chunks)
+        return tuple(all_chunks)
 
-    return tuple(chunks)
+    return _chunk_text(
+        extraction.text,
+        extraction.document_id,
+        start_position=0,
+        page_number=None,
+        source_type=extraction.source_type,
+        source_key=extraction.source_key,
+        content_hash=extraction.content_hash,
+        chunk_size=chunk_size,
+        step=step,
+    )

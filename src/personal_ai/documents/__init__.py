@@ -23,6 +23,8 @@ from personal_ai.documents.embedding import (
     parse_embedding,
 )
 from personal_ai.documents.extractor import (
+    PageExtraction,
+    PDFExtractionError,
     TextExtractionError,
     TextExtractionResult,
     extract_text,
@@ -53,6 +55,8 @@ __all__ = [
     "EmbeddingProvider",
     "MalformedEmbeddingError",
     "MalformedStructuredOutputError",
+    "PDFExtractionError",
+    "PageExtraction",
     "StructuredExtraction",
     "StructuredExtractor",
     "TextExtractionError",
