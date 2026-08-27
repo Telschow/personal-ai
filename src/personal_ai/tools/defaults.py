@@ -218,10 +218,11 @@ def create_default_registry(
                     "YouTube channels/videos; 'activity_by_bucket' returns "
                     "activity counts grouped by a UTC time bucket (day, week, "
                     "or month). All operations accept optional inclusive "
-                    "ISO-8601 start_time/end_time, source, and event_type "
-                    "filters. Use this to answer questions about what the "
-                    "user searched for, browsed, or watched, or to summarize "
-                    "activity over a time period."
+                    "ISO-8601 start_time/end_time, source, event_type, and a "
+                    "literal 'keyword' substring filter (against title/URL/"
+                    "search query/channel). Use this to answer questions "
+                    "about what the user searched for, browsed, or watched, "
+                    "or to summarize activity over a time period."
                 ),
                 parameters={
                     "type": "object",
@@ -269,6 +270,16 @@ def create_default_registry(
                             "description": (
                                 "Restrict to a source, e.g. 'chrome_history' "
                                 "or 'youtube'."
+                            ),
+                        },
+                        "keyword": {
+                            "type": "string",
+                            "description": (
+                                "Optional literal case-insensitive substring "
+                                "filter applied to each event's title, URL, "
+                                "search query, and channel name (e.g. "
+                                "'career' or 'interview'). It is an exact "
+                                "text filter, not semantic or fuzzy search."
                             ),
                         },
                         "bucket": {

@@ -25,6 +25,36 @@ _BUCKET_FORMATS = {
 # never produced from an unvalidated caller.
 _MAX_RESULTS = 1 << 30
 
+# Columns a literal keyword filter matches against, case-insensitively.
+_KEYWORD_COLUMNS = ("title", "url", "search_query", "channel_name")
+
+
+def _escape_like(value: str) -> str:
+    """Escape LIKE wildcards so user text is matched literally.
+
+    Backslash, ``%`` and ``_`` are escaped for the `ESCAPE '\\'` clause so a
+    keyword containing those characters cannot act as a wildcard. ASCII ``\\``
+    is doubled in Python source to mean a single backslash.
+    """
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def _keyword_fragment(keyword: str) -> tuple[str, list[object]]:
+    """Build a parenthesized LIKE clause (and params) for a literal keyword.
+
+    The keyword matches case-insensitively against ``title``, ``url``,
+    ``search_query`` and ``channel_name`` (ASCII case-insensitivity per
+    SQLite's default LIKE semantics). ``%`` and ``_`` supplied by the caller
+    are escaped so they never act as wildcards; the clause is fully
+    parameterized, so user input can never become SQL syntax.
+    """
+    pattern = f"%{_escape_like(keyword)}%"
+    columns = " OR ".join(f"{col} LIKE ? ESCAPE '\\'" for col in _KEYWORD_COLUMNS)
+    fragment = f"({columns})"
+    params: list[object] = [pattern] * len(_KEYWORD_COLUMNS)
+    return fragment, params
+
+
 _EVENTS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS events (
     id TEXT PRIMARY KEY,
@@ -114,6 +144,7 @@ class EventQuery:
     end_time: str | None = None
     source: str | None = None
     event_type: str | None = None
+    keyword: str | None = None
     limit: int = 100
 
 
@@ -330,6 +361,10 @@ class EventStore:
         if query.event_type is not None:
             clauses.append("event_type = ?")
             params.append(query.event_type)
+        if query.keyword is not None:
+            fragment, kw_params = _keyword_fragment(query.keyword)
+            clauses.append(fragment)
+            params.extend(kw_params)
         where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
         rows = self._connection.execute(
             f"SELECT {', '.join(_COLUMNS)} FROM events{where} "
@@ -346,11 +381,14 @@ class EventStore:
         end_time: str | None = None,
         source: str | None = None,
         event_type: str | None = None,
+        keyword: str | None = None,
     ) -> tuple[str, list[object]]:
         """Build an ``events`` WHERE clause (and params) from standard filters.
 
-        Time bounds are inclusive. Results in ``(where_str, params)`` where
-        ``where_str`` is empty when there are no filters.
+        Time bounds are inclusive. ``keyword`` is matched as a literal
+        case-insensitive substring across title/url/search_query/channel_name.
+        Results in ``(where_str, params)`` where ``where_str`` is empty when
+        there are no filters.
         """
         clauses: list[str] = []
         params: list[object] = []
@@ -366,6 +404,10 @@ class EventStore:
         if event_type is not None:
             clauses.append("event_type = ?")
             params.append(event_type)
+        if keyword is not None:
+            fragment, kw_params = _keyword_fragment(keyword)
+            clauses.append(fragment)
+            params.extend(kw_params)
         where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
         return where, params
 
@@ -377,6 +419,7 @@ class EventStore:
         source: str | None = None,
         event_types: tuple[str, ...] | None = None,
         not_null: str | None = None,
+        keyword: str | None = None,
     ) -> tuple[str, list[object]]:
         """Extend :meth:`_filter_predicate` for grouping queries.
 
@@ -385,7 +428,10 @@ class EventStore:
         params)``.
         """
         where, params = EventStore._filter_predicate(
-            start_time=start_time, end_time=end_time, source=source
+            start_time=start_time,
+            end_time=end_time,
+            source=source,
+            keyword=keyword,
         )
         conditions: list[str] = []
         if not_null is not None:
@@ -406,18 +452,21 @@ class EventStore:
         end_time: str | None = None,
         source: str | None = None,
         event_type: str | None = None,
+        keyword: str | None = None,
     ) -> tuple[ActivityCount, ...]:
         """Return event counts grouped by event_type and source.
 
         Ordered by count descending, then event_type and source ascending for
         deterministic tie-breaking. Optional inclusive time bounds and exact
-        source/event_type filters restrict the rows counted.
+        source/event_type filters restrict the rows counted. ``keyword``
+        restricts the counted rows to those matching a literal substring.
         """
         where, params = self._filter_predicate(
             start_time=start_time,
             end_time=end_time,
             source=source,
             event_type=event_type,
+            keyword=keyword,
         )
         rows = self._connection.execute(
             "SELECT event_type, source, COUNT(*) AS c FROM events"
@@ -437,13 +486,15 @@ class EventStore:
         end_time: str | None = None,
         source: str | None = None,
         event_types: tuple[str, ...] | None = None,
+        keyword: str | None = None,
         limit: int = 10,
     ) -> tuple[CountedQuery, ...]:
         """Return the most frequent distinct ``search_query`` values.
 
         Restricted to rows that carry a search query, optionally limited to a
         set of ``event_types``. Ordered by count descending then query
-        ascending. ``limit`` applies to the number of returned queries.
+        ascending. ``keyword`` restricts the input rows to those matching a
+        literal substring. ``limit`` applies to the number of returned queries.
         """
         where, params = self._group_where(
             start_time=start_time,
@@ -451,6 +502,7 @@ class EventStore:
             source=source,
             event_types=event_types,
             not_null="search_query",
+            keyword=keyword,
         )
         limit = _MAX_RESULTS if limit < 0 else limit
         rows = self._connection.execute(
@@ -467,6 +519,7 @@ class EventStore:
         end_time: str | None = None,
         source: str | None = None,
         event_types: tuple[str, ...] | None = None,
+        keyword: str | None = None,
         limit: int = 10,
     ) -> tuple[ChannelCount, ...]:
         """Return the most frequently watched channels.
@@ -474,7 +527,8 @@ class EventStore:
         Restricted to rows that carry a channel name. ``count`` is the number
         of watches; ``total_duration_seconds`` sums only the durations the
         source actually recorded (``None`` when none exist). Ordered by count
-        descending then channel name ascending.
+        descending then channel name ascending. ``keyword`` restricts the input
+        rows to those matching a literal substring.
         """
         where, params = self._group_where(
             start_time=start_time,
@@ -482,6 +536,7 @@ class EventStore:
             source=source,
             event_types=event_types,
             not_null="channel_name",
+            keyword=keyword,
         )
         limit = _MAX_RESULTS if limit < 0 else limit
         rows = self._connection.execute(
@@ -506,6 +561,7 @@ class EventStore:
         end_time: str | None = None,
         source: str | None = None,
         event_types: tuple[str, ...] | None = None,
+        keyword: str | None = None,
         limit: int = 10,
     ) -> tuple[VideoCount, ...]:
         """Return the most frequently watched videos.
@@ -513,6 +569,8 @@ class EventStore:
         Grouped by the stable ``metadata["video_id"]``; events without a video
         id are excluded. ``title`` and ``url`` are representative values from
         the group. Ordered by count descending then video id ascending.
+        ``keyword`` restricts the input rows to those matching a literal
+        substring.
         """
         where, params = self._group_where(
             start_time=start_time,
@@ -520,6 +578,7 @@ class EventStore:
             source=source,
             event_types=event_types,
             not_null="json_extract(metadata, '$.video_id')",
+            keyword=keyword,
         )
         limit = _MAX_RESULTS if limit < 0 else limit
         rows = self._connection.execute(
@@ -545,6 +604,7 @@ class EventStore:
         end_time: str | None = None,
         source: str | None = None,
         event_type: str | None = None,
+        keyword: str | None = None,
         bucket: str = "month",
         limit: int = 100,
     ) -> tuple[BucketCount, ...]:
@@ -553,6 +613,8 @@ class EventStore:
         ``bucket`` is one of ``day``, ``week``, or ``month``. Bucket labels
         are derived from the canonical UTC event time, so aggregation is
         consistently in UTC. Ordered chronologically by bucket label.
+        ``keyword`` restricts the counted rows to those matching a literal
+        substring.
         """
         fmt = _BUCKET_FORMATS.get(bucket)
         if fmt is None:
@@ -563,6 +625,7 @@ class EventStore:
             end_time=end_time,
             source=source,
             event_type=event_type,
+            keyword=keyword,
         )
         limit = _MAX_RESULTS if limit < 0 else limit
         # strftime(?, ...) appears textually before the WHERE placeholders, so

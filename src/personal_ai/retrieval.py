@@ -274,6 +274,7 @@ class EventQueryRequest:
     end_time: str | None = None
     source: str | None = None
     event_type: str | None = None
+    keyword: str | None = None
     limit: int = 100
 
 
@@ -291,6 +292,7 @@ def query_events(
             end_time=request.end_time,
             source=request.source,
             event_type=request.event_type,
+            keyword=request.keyword,
             limit=request.limit,
         )
     )
@@ -304,6 +306,7 @@ class ActivitySummaryRequest:
     end_time: str | None = None
     source: str | None = None
     event_type: str | None = None
+    keyword: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -314,6 +317,7 @@ class SearchTrendsRequest:
     end_time: str | None = None
     source: str | None = None
     event_type: str | None = None
+    keyword: str | None = None
     limit: int = 10
 
 
@@ -325,6 +329,7 @@ class ChannelTrendsRequest:
     end_time: str | None = None
     source: str | None = None
     event_type: str | None = None
+    keyword: str | None = None
     limit: int = 10
 
 
@@ -336,6 +341,7 @@ class VideoTrendsRequest:
     end_time: str | None = None
     source: str | None = None
     event_type: str | None = None
+    keyword: str | None = None
     limit: int = 10
 
 
@@ -347,6 +353,7 @@ class ActivityBucketsRequest:
     end_time: str | None = None
     source: str | None = None
     event_type: str | None = None
+    keyword: str | None = None
     bucket: str = "month"
     limit: int = 100
 
@@ -371,6 +378,7 @@ def activity_summary(
         end_time=request.end_time,
         source=request.source,
         event_type=request.event_type,
+        keyword=request.keyword,
     )
 
 
@@ -380,12 +388,14 @@ def top_searches(
     """Return the most frequent search queries.
 
     Restricted to search event types by default (or the requested one).
+    ``keyword`` additionally restricts to matching events.
     """
     return event_store.top_search_queries(
         start_time=request.start_time,
         end_time=request.end_time,
         source=request.source,
         event_types=_event_types(request.event_type, DEFAULT_SEARCH_EVENT_TYPES),
+        keyword=request.keyword,
         limit=request.limit,
     )
 
@@ -393,12 +403,16 @@ def top_searches(
 def top_channels(
     event_store: EventStore, request: ChannelTrendsRequest
 ) -> tuple[ChannelCount, ...]:
-    """Return the most frequently watched channels."""
+    """Return the most frequently watched channels.
+
+    ``keyword`` additionally restricts to matching events.
+    """
     return event_store.top_channels(
         start_time=request.start_time,
         end_time=request.end_time,
         source=request.source,
         event_types=_event_types(request.event_type, DEFAULT_VIDEO_EVENT_TYPES),
+        keyword=request.keyword,
         limit=request.limit,
     )
 
@@ -406,12 +420,16 @@ def top_channels(
 def top_videos(
     event_store: EventStore, request: VideoTrendsRequest
 ) -> tuple[VideoCount, ...]:
-    """Return the most frequently watched videos."""
+    """Return the most frequently watched videos.
+
+    ``keyword`` additionally restricts to matching events.
+    """
     return event_store.top_videos(
         start_time=request.start_time,
         end_time=request.end_time,
         source=request.source,
         event_types=_event_types(request.event_type, DEFAULT_VIDEO_EVENT_TYPES),
+        keyword=request.keyword,
         limit=request.limit,
     )
 
@@ -425,6 +443,7 @@ def activity_by_bucket(
         end_time=request.end_time,
         source=request.source,
         event_type=request.event_type,
+        keyword=request.keyword,
         bucket=request.bucket,
         limit=request.limit,
     )

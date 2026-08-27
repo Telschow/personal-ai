@@ -18,6 +18,11 @@ The tool dispatches on a single ``operation`` argument:
 
 Aggregation operations return a concise structured result
 (``{"operation": ..., "results": [...]}``) rather than raw rows.
+
+Every operation accepts an optional ``keyword`` — a literal, case-insensitive
+substring filter applied to each event's title, url, search_query, and
+channel_name. ``%`` and ``_`` in the keyword are matched literally. It is a
+deterministic SQL filter, never semantic or embedding search.
 """
 
 from personal_ai.events.models import (
@@ -46,7 +51,7 @@ from personal_ai.storage.events import EventStore
 _COMMON_ARGUMENT_KEYS = frozenset({"operation"})
 
 _BASE_ARGUMENT_KEYS = _COMMON_ARGUMENT_KEYS | frozenset(
-    {"start_time", "end_time", "event_type", "source", "limit"}
+    {"start_time", "end_time", "event_type", "source", "keyword", "limit"}
 )
 
 _OPERATION_ARGUMENT_KEYS: dict[str, frozenset[str]] = {
@@ -92,6 +97,21 @@ def _parse_limit(arguments: dict[str, object], default: int = 100) -> int:
     if limit < 0:
         raise ValueError("limit must be non-negative")
     return limit
+
+
+def _parse_keyword(arguments: dict[str, object]) -> str | None:
+    """Parse an optional literal keyword substring filter.
+
+    ``keyword`` must be a string when supplied; whitespace-only or empty
+    values are treated as absent (no filtering), matching ``_parse_optional_str``
+    semantics.
+    """
+    keyword = arguments.get("keyword")
+    if keyword is None:
+        return None
+    if not isinstance(keyword, str):
+        raise TypeError("keyword must be a string")
+    return keyword.strip() or None
 
 
 def _validate_event_type(
@@ -162,6 +182,7 @@ class EventQueryTool:
             end_time=_parse_optional_str(arguments, "end_time"),
             source=_parse_optional_str(arguments, "source"),
             event_type=event_type,
+            keyword=_parse_keyword(arguments),
             limit=_parse_limit(arguments),
         )
         events = query_events(self._event_store, request)
@@ -173,6 +194,7 @@ class EventQueryTool:
             end_time=_parse_optional_str(arguments, "end_time"),
             source=_parse_optional_str(arguments, "source"),
             event_type=_validate_event_type(arguments),
+            keyword=_parse_keyword(arguments),
         )
         results = activity_summary(self._event_store, request)
         return {
@@ -194,6 +216,7 @@ class EventQueryTool:
             end_time=_parse_optional_str(arguments, "end_time"),
             source=_parse_optional_str(arguments, "source"),
             event_type=event_type,
+            keyword=_parse_keyword(arguments),
             limit=_parse_limit(arguments, default=10),
         )
         results = top_searches(self._event_store, request)
@@ -209,6 +232,7 @@ class EventQueryTool:
             end_time=_parse_optional_str(arguments, "end_time"),
             source=_parse_optional_str(arguments, "source"),
             event_type=event_type,
+            keyword=_parse_keyword(arguments),
             limit=_parse_limit(arguments, default=10),
         )
         results = top_channels(self._event_store, request)
@@ -231,6 +255,7 @@ class EventQueryTool:
             end_time=_parse_optional_str(arguments, "end_time"),
             source=_parse_optional_str(arguments, "source"),
             event_type=event_type,
+            keyword=_parse_keyword(arguments),
             limit=_parse_limit(arguments, default=10),
         )
         results = top_videos(self._event_store, request)
@@ -258,6 +283,7 @@ class EventQueryTool:
             end_time=_parse_optional_str(arguments, "end_time"),
             source=_parse_optional_str(arguments, "source"),
             event_type=_validate_event_type(arguments),
+            keyword=_parse_keyword(arguments),
             bucket=bucket,
             limit=_parse_limit(arguments, default=100),
         )

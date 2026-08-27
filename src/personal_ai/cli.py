@@ -1,6 +1,7 @@
 """Command-line interface for the personal AI agent."""
 
 import argparse
+import sqlite3
 from pathlib import Path
 
 from personal_ai.agent import Agent
@@ -8,17 +9,23 @@ from personal_ai.ingestion import DocumentIngestor
 from personal_ai.ollama_client import ChatMessage, OllamaClient
 from personal_ai.ollama_structured import OllamaStructuredExtractor
 from personal_ai.orchestration import ingest_source
-from personal_ai.retrieval import SearchDocumentsRequest, search_documents
+from personal_ai.retrieval import (
+    RetrievalService,
+    SearchDocumentsRequest,
+    search_documents,
+)
 from personal_ai.sources.base import SourceError
 from personal_ai.sources.registry import known_source_types, resolve_source_adapter
 from personal_ai.storage import (
     ChunkStore,
+    ConversationStore,
     DocumentStore,
     EmbeddingStore,
+    EventStore,
     ExtractionStore,
     connect_database,
 )
-from personal_ai.tools import create_default_registry
+from personal_ai.tools import ToolRegistry, create_default_registry
 
 MODEL = "qwen3.5:9b"
 
@@ -33,7 +40,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--database",
         type=Path,
-        help="SQLite database holding the ingested knowledge base.",
+        help=(
+            "SQLite database holding the ingested knowledge base. In agent "
+            "mode this also enables the knowledge-search and temporal-event "
+            "tools."
+        ),
     )
     parser.add_argument(
         "--ingest",
@@ -151,6 +162,45 @@ def run_ingest(source_type: str, source_path: Path, database: Path) -> None:
     print(f"chunks: {summary.chunk_count}")
 
 
+def _connect_agent_registry(
+    workspace: Path, database: Path
+) -> tuple[ToolRegistry, sqlite3.Connection]:
+    """Build the agent tool registry backed by the knowledge and event stores.
+
+    Opens the workspace knowledge database and wires the existing stores into
+    the default tool registry so the agent can use ``search_knowledge``
+    (via :class:`~personal_ai.retrieval.RetrievalService`) and ``query_events``
+    (via :class:`~personal_ai.storage.events.EventStore`).
+
+    Returns the registry together with the underlying connection so the caller
+    can keep the stores alive for the whole agent session and close it
+    cleanly on exit.
+    """
+    connection = connect_database(database)
+    try:
+        document_store = DocumentStore(connection)
+        chunk_store = ChunkStore(connection)
+        extraction_store = ExtractionStore(connection)
+        conversation_store = ConversationStore(connection)
+        event_store = EventStore(connection)
+        retrieval_service = RetrievalService(
+            chunk_store,
+            extraction_store,
+            document_store,
+            conversation_store,
+        )
+        registry = create_default_registry(
+            workspace,
+            chunk_store=chunk_store,
+            retrieval_service=retrieval_service,
+            event_store=event_store,
+        )
+        return registry, connection
+    except BaseException:
+        connection.close()
+        raise
+
+
 def main() -> None:
     args = parse_args()
 
@@ -168,18 +218,26 @@ def main() -> None:
     if not workspace.is_dir():
         raise SystemExit(f"Workspace is not a directory: {workspace}")
 
-    registry = create_default_registry(workspace)
+    connection: sqlite3.Connection | None = None
+    if args.database is not None:
+        registry, connection = _connect_agent_registry(workspace, args.database)
+    else:
+        registry = create_default_registry(workspace)
 
-    with OllamaClient(model=MODEL) as client:
-        agent = Agent(client, registry)
-        response = agent.run(
-            [
-                ChatMessage(
-                    role="user",
-                    content=args.prompt,
-                )
-            ]
-        )
+    try:
+        with OllamaClient(model=MODEL) as client:
+            agent = Agent(client, registry)
+            response = agent.run(
+                [
+                    ChatMessage(
+                        role="user",
+                        content=args.prompt,
+                    )
+                ]
+            )
+    finally:
+        if connection is not None:
+            connection.close()
 
     print(response)
 

@@ -73,3 +73,18 @@ def test_registry_query_events_accepts_youtube_event_types(tmp_path: Path) -> No
             assert results == []
     finally:
         connection.close()
+
+
+def test_registry_query_events_schema_exposes_keyword(tmp_path: Path) -> None:
+    connection = connect_database(":memory:")
+    try:
+        event_store = EventStore(connection)
+        registry = create_default_registry(tmp_path, event_store=event_store)
+        schema = next(
+            s for s in registry.schemas() if s["function"]["name"] == "query_events"
+        )
+        props = schema["function"]["parameters"]["properties"]
+        assert "keyword" in props
+        assert props["keyword"]["type"] == "string"
+    finally:
+        connection.close()
