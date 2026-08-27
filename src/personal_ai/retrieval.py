@@ -12,6 +12,7 @@ single ranked result set.
 
 from dataclasses import dataclass
 
+from personal_ai.events.models import Event
 from personal_ai.storage.chunks import (
     DEFAULT_SEARCH_LIMIT,
     ChunkSearchResult,
@@ -23,13 +24,16 @@ from personal_ai.storage.conversations import (
     ConversationStore,
 )
 from personal_ai.storage.documents import DocumentStore
+from personal_ai.storage.events import EventQuery, EventStore
 from personal_ai.storage.extractions import ExtractionSearchResult, ExtractionStore
 
 __all__ = [
     "DEFAULT_SEARCH_LIMIT",
+    "EventQueryRequest",
     "RetrievalService",
     "SearchDocumentsRequest",
     "SearchResult",
+    "query_events",
     "search_documents",
 ]
 
@@ -223,3 +227,39 @@ class RetrievalService:
 
         results.sort(key=lambda r: (-r.score, r.document_id or "", r.result_type))
         return tuple(results[:limit])
+
+
+@dataclass(frozen=True, slots=True)
+class EventQueryRequest:
+    """A fully typed structural query against temporal events.
+
+    All bounds are inclusive ISO-8601 strings. ``source`` and ``event_type``
+    are optional exact-match filters. Temporal events are not documents and
+    are never searched semantically: this request maps directly onto indexed
+    time-range and filter predicates.
+    """
+
+    start_time: str | None = None
+    end_time: str | None = None
+    source: str | None = None
+    event_type: str | None = None
+    limit: int = 100
+
+
+def query_events(
+    event_store: EventStore, request: EventQueryRequest
+) -> tuple[Event, ...]:
+    """Run one structural temporal-event query.
+
+    Delegates to :class:`~personal_ai.storage.events.EventStore` and returns
+    events ordered by event_time then id.
+    """
+    return event_store.search(
+        EventQuery(
+            start_time=request.start_time,
+            end_time=request.end_time,
+            source=request.source,
+            event_type=request.event_type,
+            limit=request.limit,
+        )
+    )

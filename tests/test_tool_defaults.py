@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from personal_ai.storage import EventStore, connect_database
 from personal_ai.tools import create_default_registry
 
 
@@ -41,3 +42,22 @@ def test_default_registry_executes_list_directory(tmp_path: Path) -> None:
         {"name": "documents", "type": "directory"},
         {"name": "hello.txt", "type": "file"},
     ]
+
+
+def test_registry_no_event_store_without_event_tool(tmp_path: Path) -> None:
+    registry = create_default_registry(tmp_path)
+    names = {schema["function"]["name"] for schema in registry.schemas()}
+    assert "query_events" not in names
+
+
+def test_registry_registers_query_events_with_event_store(tmp_path: Path) -> None:
+    connection = connect_database(":memory:")
+    try:
+        event_store = EventStore(connection)
+        registry = create_default_registry(tmp_path, event_store=event_store)
+        names = {schema["function"]["name"] for schema in registry.schemas()}
+        assert "query_events" in names
+        results = registry.execute("query_events", {"event_type": "search_query"})
+        assert results == []
+    finally:
+        connection.close()

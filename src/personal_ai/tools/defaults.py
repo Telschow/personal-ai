@@ -4,6 +4,8 @@ from pathlib import Path
 
 from personal_ai.retrieval import RetrievalService
 from personal_ai.storage.chunks import DEFAULT_SEARCH_LIMIT, ChunkStore
+from personal_ai.storage.events import EventStore
+from personal_ai.tools.events import EventQueryTool
 from personal_ai.tools.filesystem import FilesystemTool
 from personal_ai.tools.knowledge import KnowledgeSearchTool
 from personal_ai.tools.registry import ToolDefinition, ToolRegistry
@@ -14,6 +16,7 @@ def create_default_registry(
     workspace: Path,
     chunk_store: ChunkStore | None = None,
     retrieval_service: RetrievalService | None = None,
+    event_store: EventStore | None = None,
 ) -> ToolRegistry:
     """Create a registry containing the standard personal-AI tools.
 
@@ -23,6 +26,9 @@ def create_default_registry(
 
     The ``search_knowledge`` tool is registered only when a retrieval
     service is provided; it searches both chunks and structured extractions.
+
+    The ``query_events`` tool is registered only when an event store is
+    provided; it answers structural temporal-event (browsing/search) queries.
     """
     filesystem = FilesystemTool(workspace)
     registry = ToolRegistry()
@@ -194,6 +200,62 @@ def create_default_registry(
                     "required": ["query"],
                 },
                 handler=knowledge.search_knowledge,
+            )
+        )
+
+    if event_store is not None:
+        events = EventQueryTool(event_store)
+        registry.register(
+            ToolDefinition(
+                name="query_events",
+                description=(
+                    "Query the temporal browsing-event store (Chrome history). "
+                    "Returns events filtered by optional inclusive ISO-8601 "
+                    "time range, event_type ('search_query' or 'url_visit'), "
+                    "and/or source. Use this to answer questions about what "
+                    "the user searched for or browsed around a given time "
+                    "period."
+                ),
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "start_time": {
+                            "type": "string",
+                            "description": (
+                                "Inclusive ISO-8601 lower bound on the event "
+                                "time (e.g. 2026-01-01T00:00:00+00:00)."
+                            ),
+                        },
+                        "end_time": {
+                            "type": "string",
+                            "description": (
+                                "Inclusive ISO-8601 upper bound on the event "
+                                "time (e.g. 2026-02-01T00:00:00+00:00)."
+                            ),
+                        },
+                        "event_type": {
+                            "type": "string",
+                            "description": (
+                                "Restrict to an event type: 'search_query' "
+                                "or 'url_visit'."
+                            ),
+                        },
+                        "source": {
+                            "type": "string",
+                            "description": (
+                                "Restrict to a source, e.g. 'chrome_history'."
+                            ),
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": (
+                                "Maximum number of results. Defaults to 100."
+                            ),
+                        },
+                    },
+                    "required": [],
+                },
+                handler=events.query_events,
             )
         )
 
