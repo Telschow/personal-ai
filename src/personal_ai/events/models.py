@@ -18,6 +18,8 @@ from dataclasses import dataclass, field
 # Canonical event types emitted by source loaders.
 EVENT_TYPE_URL_VISIT = "url_visit"
 EVENT_TYPE_SEARCH_QUERY = "search_query"
+EVENT_TYPE_VIDEO_WATCH = "video_watch"
+EVENT_TYPE_YOUTUBE_SEARCH = "youtube_search"
 
 
 def compute_event_id(

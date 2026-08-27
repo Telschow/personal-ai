@@ -209,16 +209,37 @@ def create_default_registry(
             ToolDefinition(
                 name="query_events",
                 description=(
-                    "Query the temporal browsing-event store (Chrome history). "
-                    "Returns events filtered by optional inclusive ISO-8601 "
-                    "time range, event_type ('search_query' or 'url_visit'), "
-                    "and/or source. Use this to answer questions about what "
-                    "the user searched for or browsed around a given time "
-                    "period."
+                    "Query the temporal event store (browsing, search, and "
+                    "YouTube watch/search history). Choose an 'operation': "
+                    "'events' returns detailed event rows; 'activity_summary' "
+                    "returns counts grouped by event_type and source; "
+                    "'top_searches' returns the most frequent search queries; "
+                    "'top_channels' and 'top_videos' return the most watched "
+                    "YouTube channels/videos; 'activity_by_bucket' returns "
+                    "activity counts grouped by a UTC time bucket (day, week, "
+                    "or month). All operations accept optional inclusive "
+                    "ISO-8601 start_time/end_time, source, and event_type "
+                    "filters. Use this to answer questions about what the "
+                    "user searched for, browsed, or watched, or to summarize "
+                    "activity over a time period."
                 ),
                 parameters={
                     "type": "object",
                     "properties": {
+                        "operation": {
+                            "type": "string",
+                            "enum": [
+                                "events",
+                                "activity_summary",
+                                "top_searches",
+                                "top_channels",
+                                "top_videos",
+                                "activity_by_bucket",
+                            ],
+                            "description": (
+                                "Which query to run. Defaults to 'events'."
+                            ),
+                        },
                         "start_time": {
                             "type": "string",
                             "description": (
@@ -236,20 +257,34 @@ def create_default_registry(
                         "event_type": {
                             "type": "string",
                             "description": (
-                                "Restrict to an event type: 'search_query' "
-                                "or 'url_visit'."
+                                "Restrict to an event type: 'search_query', "
+                                "'url_visit', 'video_watch', "
+                                "or 'youtube_search'. For top_searches only "
+                                "search types are allowed; for top_channels / "
+                                "top_videos only 'video_watch'."
                             ),
                         },
                         "source": {
                             "type": "string",
                             "description": (
-                                "Restrict to a source, e.g. 'chrome_history'."
+                                "Restrict to a source, e.g. 'chrome_history' "
+                                "or 'youtube'."
+                            ),
+                        },
+                        "bucket": {
+                            "type": "string",
+                            "enum": ["day", "week", "month"],
+                            "description": (
+                                "Time bucket for activity_by_bucket. "
+                                "Defaults to 'month'."
                             ),
                         },
                         "limit": {
                             "type": "integer",
                             "description": (
-                                "Maximum number of results. Defaults to 100."
+                                "Maximum number of results. Defaults to 100 "
+                                "for events/activity_by_bucket and 10 for "
+                                "the top_* operations."
                             ),
                         },
                     },

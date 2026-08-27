@@ -61,3 +61,15 @@ def test_registry_registers_query_events_with_event_store(tmp_path: Path) -> Non
         assert results == []
     finally:
         connection.close()
+
+
+def test_registry_query_events_accepts_youtube_event_types(tmp_path: Path) -> None:
+    connection = connect_database(":memory:")
+    try:
+        event_store = EventStore(connection)
+        registry = create_default_registry(tmp_path, event_store=event_store)
+        for event_type in ("video_watch", "youtube_search"):
+            results = registry.execute("query_events", {"event_type": event_type})
+            assert results == []
+    finally:
+        connection.close()

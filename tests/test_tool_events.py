@@ -5,6 +5,8 @@ import pytest
 from personal_ai.events.models import (
     EVENT_TYPE_SEARCH_QUERY,
     EVENT_TYPE_URL_VISIT,
+    EVENT_TYPE_VIDEO_WATCH,
+    EVENT_TYPE_YOUTUBE_SEARCH,
     Event,
     compute_event_id,
 )
@@ -95,3 +97,91 @@ class TestEventQueryTool:
     def test_rejects_negative_limit(self) -> None:
         with pytest.raises(ValueError, match="limit must be non-negative"):
             self.tool.query_events({"limit": -1})
+
+
+class TestEventQueryToolYouTube:
+    def setup_method(self) -> None:
+        self.connection = connect_database(":memory:")
+        self.store = EventStore(self.connection)
+        self.tool = EventQueryTool(self.store)
+
+    def teardown_method(self) -> None:
+        self.connection.close()
+
+    def _save_watch(self) -> None:
+        self.store.save_event(
+            Event(
+                id=compute_event_id(
+                    "youtube",
+                    EVENT_TYPE_VIDEO_WATCH,
+                    "2026-01-20T12:00:00+00:00",
+                    "https://www.youtube.com/watch?v=AAA",
+                ),
+                event_type=EVENT_TYPE_VIDEO_WATCH,
+                event_time="2026-01-20T12:00:00+00:00",
+                source="youtube",
+                title="Some Video",
+                url="https://www.youtube.com/watch?v=AAA",
+                channel_name="Podemos",
+                metadata={"video_id": "AAA", "channel_id": "UCtK"},
+            )
+        )
+
+    def _save_search(self) -> None:
+        self.store.save_event(
+            Event(
+                id=compute_event_id(
+                    "youtube",
+                    EVENT_TYPE_YOUTUBE_SEARCH,
+                    "2026-01-21T12:00:00+00:00",
+                    "https://www.youtube.com/results?search_query=career",
+                ),
+                event_type=EVENT_TYPE_YOUTUBE_SEARCH,
+                event_time="2026-01-21T12:00:00+00:00",
+                source="youtube",
+                url="https://www.youtube.com/results?search_query=career",
+                search_query="career",
+            )
+        )
+
+    def test_event_type_video_watch_accepted_and_formatted(self) -> None:
+        self._save_watch()
+        results = self.tool.query_events({"event_type": "video_watch"})
+        assert len(results) == 1
+        row = results[0]
+        assert row["event_type"] == "video_watch"
+        assert row["title"] == "Some Video"
+        assert row["channel_name"] == "Podemos"
+        assert row["video_id"] == "AAA"
+        assert row["source"] == "youtube"
+
+    def test_event_type_youtube_search_accepted(self) -> None:
+        self._save_search()
+        results = self.tool.query_events({"event_type": "youtube_search"})
+        assert len(results) == 1
+        assert results[0]["search_query"] == "career"
+
+    def test_mixes_youtube_and_chrome_without_conflict(self) -> None:
+        self._save_watch()
+        self.store.save_event(
+            Event(
+                id=compute_event_id(
+                    "chrome_history",
+                    EVENT_TYPE_SEARCH_QUERY,
+                    "2026-01-22T12:00:00+00:00",
+                    "https://www.google.de/search?q=goals",
+                ),
+                event_type=EVENT_TYPE_SEARCH_QUERY,
+                event_time="2026-01-22T12:00:00+00:00",
+                source="chrome_history",
+                url="https://www.google.de/search?q=goals",
+                search_query="goals",
+            )
+        )
+        assert len(self.tool.query_events({"event_type": "video_watch"})) == 1
+        assert len(self.tool.query_events({"source": "youtube"})) == 1
+        assert len(self.tool.query_events({"source": "chrome_history"})) == 1
+
+    def test_rejects_non_youtube_event_type(self) -> None:
+        with pytest.raises(ValueError, match="event_type must be one of"):
+            self.tool.query_events({"event_type": "email"})
