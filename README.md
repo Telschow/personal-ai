@@ -2,407 +2,774 @@
 
 Local-first personal knowledge and agent system.
 
-Text knowledge is ingested through typed source adapters into a durable,
-deterministic document store, chunked deterministically, and searchable via
-a derived SQLite FTS5 keyword index; optional provider-independent
-embeddings for future semantic retrieval remain a separate step. The model
-backend is Ollama; no cloud APIs are used.
+This project turns your personal history — conversation notes, chat logs,
+search history, and watched/browsed activity — into a personal history
+**retrieval** system you can ask questions of in natural language. It runs
+entirely on your own hardware with a local Ollama model. No cloud APIs are
+used and your personal data never leaves the machine.
 
-This file is the project's durable checkpoint record. It is written so a
-future session can resume exactly where work stopped without relying on
-chat history.
+> **Status: ACCEPTED / DEMO-READY proof of concept.**
+> This is a POC, not yet a fully autonomous personal assistant. It reliably
+> answers grounded, single-domain questions about your stored personal
+> history, and is honest about what it does not know. It is **not** a
+> general-purpose autonomous agent, and its known limitations are documented
+> below.
 
-## Current status snapshot
+---
 
-As of checkpoint `877cb96` ("Ignore raw data archive"), plus the FTS
-retrieval slice and a second corpus discovery on **2026-08-23**:
+## Table of contents
 
-- **Phase:** knowledge ingestion covers four sources end-to-end (Keep,
-  NotebookLM, Gemini, ChatGPT). SQLite FTS5 keyword retrieval over chunks is
-  implemented. The second archive's remaining families (PDFs, XLSX, email)
-  are inventoried but not yet ingested. Semantic/vector retrieval is not
-  started (blocked on embedding infrastructure).
-- **Tests:** 535 passing; `ruff check` clean; `ruff format --check` clean.
-- **First-corpus validation:** 838 knowledge documents / 4,542 chunks from
-  Google Keep and NotebookLM exports; fake-provider backfill produced
-  4,542 embeddings; re-running ingestion and backfill was fully idempotent.
-- **Gemini validation (2026-08-23):** all 170 conversations discovered and
-  ingested through the generic orchestration into a throwaway database —
-  170 documents / 1,344 chunks (167 TEXT_HEAVY + 3 MIXED), zero duplicates,
-  rerun idempotent, embedding store untouched.
-- **ChatGPT validation (2026-08-23):** all 469 conversations discovered
-  across the five shard files and ingested into a throwaway database —
-  469 documents / 3,363 chunks (451 TEXT_HEAVY + 18 MIXED), 451 structured
-  extractions, zero duplicates, rerun idempotent (extractor reused stored
-  extractions), embedding store untouched, no provider contacted.
-- **Measured knowledge total today:** 1,477 documents / 9,249 chunks
-  (838 Keep+NotebookLM, 170 Gemini, 469 ChatGPT).
-- **Second corpus (inventoried):** 41 personal PDFs (28 with usable text
-  layers), 6 XLSX spreadsheets, ~22.3k emails in three mbox segments
-  spanning 2015–2026, and media/attachments excluded.
-- **Blocked infrastructure:** local Ollama server does not serve embeddings
-  yet (`/api/embed` returns HTTP 501 "server does not support embeddings";
-  no embedding-capable model installed) and `PERSONAL_AI_EMBEDDING_MODEL`
-  is unset, so real embeddings are pending infrastructure, not code.
+- [What this is](#a-what-this-is)
+- [Current status](#b-current-status)
+- [What currently works](#c-what-currently-works)
+- [Known limitations](#d-known-limitations)
+- [Hardware/model decision](#e-hardwaremodel-decision)
+- [Evaluation history](#f-evaluation-history)
+- [Current architecture](#g-current-architecture)
+- [Current data sources](#h-current-data-sources)
+- [Roadmap](#i-roadmap)
+- [Missing implementation steps](#j-missing-implementation-steps)
+- [Open WebUI integration](#k-open-webui-integration)
+- [Local deployment example](#l-local-deployment-example)
+- [Usage](#m-usage)
+- [Testing](#n-testing)
+- [Repository state / git](#o-repository-state--git)
 
-## Pipeline architecture
+---
+
+## A. What this is
+
+- **Local-first:** everything runs on your machine. The model backend is a
+  local Ollama instance.
+- **Privacy-oriented:** personal content is never sent to a cloud service,
+  never committed, and never dumped into logs. Tests use synthetic fixtures,
+  never real personal data. The filesystem workspace is a hard sandbox.
+- **Personal-history retrieval:** the core value is *grounded recall* — you
+  ask a question and the Agent retrieves your actual records (conversations,
+  search/watch/browse events) and answers from them.
+- **Agent/tool-based retrieval:** a synchronous Agent loop lets the model
+  choose from an explicit, allow-listed set of tools (`search_knowledge`,
+  `query_events`, etc.) rather than having retrieval hard-wired to a query.
+- **Local Ollama model:** `qwen3.5:9b`.
+- **Current POC scope:** grounded personal-history lookup over a
+  conversation + temporal-event corpus, with document/PDF ingestion built in
+  code but not yet populated.
+
+### What it is NOT
+
+- **Not** a self-hosted ChatGPT/assistant clone with general world knowledge
+  as its core. It is a *personal* retrieval system grounded in *your* data.
+- **Not** a fully autonomous agent that can be left to run arbitrary tasks.
+- **Not** a multi-modal vision system yet (image-heavy PDFs are a planned
+  future source slice).
+- **Not** a client of any cloud AI API.
+- **Not** a vector-database / RAG retrieval product (semantic embeddings are
+  infrastructure-blocked; current retrieval is keyword/FTS over determinants).
+
+---
+
+## B. Current status
+
+### ACCEPTED / DEMO-READY POC
+
+Validated baseline:
+
+- Model: `qwen3.5:9b` (fixed deployment choice, see [Hardware/model decision](#e-hardwaremodel-decision))
+- Backend: **local Ollama** (GTX 1070, 8 GB VRAM, 15 GB RAM hardware)
+- Agent: existing synchronous `Agent` loop (`max_tool_rounds=8`)
+- Tool registry: existing `ToolRegistry` with the Phase 23 changes retained
+  (see [Evaluation history](#f-evaluation-history))
+- Retrieval: existing architecture — keyword/FTS over chunks + conversation
+  search + structural event queries. No retrieval heuristics added.
+- Prompt: **baseline only** — no extra system prompt is used.
+- Access: **CLI** (`python -m personal_ai.cli`) and, as of **Phase 30**, an
+  **OpenAI-compatible HTTP API** (`python -m personal_ai.server`) that reuses
+  the exact same Agent + ToolRegistry path — suitable as an Open WebUI backend.
+- Tests: 1237 passing (no network, no Ollama, no real personal data);
+  `ruff check` and `ruff format --check` clean.
+- No reproducible Category A (deterministic code-level) retrieval/tooling
+  defect has been found.
+
+The POC is **ACCEPTED / DEMO-READY**. `qwen3.5:9b` is the current deployable
+local model. The accepted limitation is **Category C model synthesis**: compound
+multi-domain questions can drop a domain or drift, which is not considered a
+deterministic retrieval/tooling defect. Users should split complex compound
+questions when necessary.
+
+The POC passed the acceptance suite (Phase 28) and a user-facing demo suite
+(Phase 29) for its intended core scope: grounded lookups, honesty about
+missing evidence, and correct temporal summaries.
+
+---
+
+## C. What currently works
+
+Demonstrated capabilities (via the production CLI path against the real
+conversation + event corpus):
+
+1. **Grounded knowledge lookup** — "What do I know about BCG?" returns real
+   stored knowledge, not a generic essay.
+2. **Personal search-history retrieval** — "What did I search for recently?"
+   returns actual recent search queries.
+3. **Watched-video retrieval** — "What videos did I watch about X?" returns
+   real records from the YouTube watch store.
+4. **Temporal activity lookup** — "What was my most recent career-related
+   activity?" returns a real recent record.
+5. **Aggregate temporal summaries** — "Summarize my activity from January
+   2026." returns correct, corpus-verified aggregate counts (e.g. total
+   events, watched videos, searches).
+6. **Negative evidence / "no records" answers** — "Do I have anything about
+   fly fishing?" plainly says there is no record, checking multiple sources,
+   and does not fabricate.
+7. **Grounded factual recall** — cited videos, searches, dates, and counts
+   are traceable to real stored records (verified against the corpus).
+8. **Local model execution** — the whole loop runs on a local GPU/VRAM
+   (warm queries ≈ 13–65 s; typical lookups ≈ 25–31 s).
+9. **Evidence-based answers** — the Agent selects sources and the final
+   answer is grounded in retrieved evidence.
+10. **Avoiding systematic fabrication** — across the acceptance and demo
+    suites, no fabricated watched video, search, date, or cross-source
+    connection was observed. Where an item was uncertain it was either
+    omitted or explicitly hedged.
+
+Example successful questions (see [Usage](#m-usage)):
 
 ```
-SourceAdapter -> SourceRecord -> DocumentIngestor -> DocumentStore
-                                     |
-                                     +-> extraction/classification/chunks
-                                              |                |
-                                              |          document_chunks_fts
-                                              |          (derived, rebuildable)
-                              EmbeddingBackfiller (separate step)
-                                               |
-                                        ChunkEmbeddingStore
+What do I know about BCG?
+What did I search for recently?
+What videos did I watch about job interviews?
+Do I have anything about fly fishing?
+Summarize my activity from January 2026.
 ```
 
-- Sources produce typed `SourceRecord`s with deterministic identity
-  (source type, stable key, content hash).
-- The ingestor persists documents, structured extractions, and chunks
-  idempotently; unchanged inputs produce zero new rows.
-- `document_chunks` is the authoritative chunk store. Keyword search runs
-  over a derived SQLite FTS5 index (`document_chunks_fts`) that
-  `ChunkStore` maintains inside the same transactions as every chunk
-  mutation and that can be rebuilt from scratch via
-  `rebuild_search_index()`. Search results are always projected from the
-  authoritative table.
-- Embeddings are derived state: rebuildable at any time from chunks via a
-  separate batched backfill (`backfill_documents`). Ingestion never calls
-  a model provider.
-- Embedding configuration is independent of chat configuration
-  (`PERSONAL_AI_EMBEDDING_MODEL`; `create_embedder`, `probe_embedding_backend`).
+---
 
-## Checkpoint history
+## D. Known limitations
 
-Status vocabulary:
+### Category C model synthesis — the main limitation
 
-- **implemented** — code and tests exist
-- **fake-validated** — exercised end-to-end with deterministic fakes
-- **corpus-validated** — run against the real local corpus
-- **blocked** — waiting on external infrastructure
-- **not started**
+The single most significant known limitation is **model synthesis** on the
+current 9B model. `qwen3.5:9b` can reliably:
 
-| Checkpoint | Commit | Status | What was established |
-|---|---|---|---|
-| Typed Ollama client | `ea0554f` | implemented | HTTP boundary, timeouts, error taxonomy; no app code talks to Ollama directly |
-| Tool calls + registry | `8cdf1d6`, `c86033d` | implemented | Model tool-call parsing; explicit allow-listed tools only |
-| Agent loop + sandboxed filesystem + CLI | `3d74678`..`740bfd7` | implemented | Synchronous agent over ToolRegistry; workspace-sandboxed fs tools; CLI entry point |
-| Source adapter boundary | `dd19f52` | implemented | `SourceAdapter` protocol, `SourceRecord` (source_type/key/hash/payload/metadata); filesystem discovery inside sandbox only |
-| Document model + SQLite store | `2736327` | implemented | Deterministic document persistence keyed by content hash |
-| Text extraction + classification | `3cc6766`, `b9ce4ce` | implemented | Provider-independent text extraction boundary; measurable text-vs-image heaviness classification (threshold 200 chars/page-equivalent heuristic) |
-| Structured extraction boundary | `b5c0e75` | implemented | Typed extraction schema; Ollama provider isolated behind interface |
-| Extraction storage + idempotent ingestor | `969446b` | implemented | `structured_extractions` table; fail-fast ingestion; unchanged docs re-ingest as no-ops |
-| Chunk store + deterministic chunks | `429d659`, `6f7477f` | implemented | Stable chunk ids derived from content; persisted during ingestion |
-| Embedding contract + Ollama embedder | `cbab79b` | implemented | Provider-independent `EmbeddingProvider`; unit-tested via mock transport |
-| SQLite embedding storage | `affed3f` | implemented | Idempotent `(chunk_id, model)` embedding persistence |
-| Backfill decoupled from ingestion | `29abef0`, `8fae403` | implemented | Embeddings generated in a separate step; ingestion has no provider dependency |
-| Raw corpus ignored by git | `cbabd1e` | implemented | `previous_project_and_raw_data/` excluded; read-only inspection only |
-| Keep source adapter | `6fe028f` | implemented, corpus-validated | 731 notes on disk -> 695 records discovered (36 contentless rejected); composed-text payload hashing; trashed/empty filtering |
-| NotebookLM article adapter | `cbdd97f` | implemented, corpus-validated | Structural discovery of `*/Sources/*.html`; HTML-to-text composition (stdlib parser, images counted not embedded); metadata sidecar parsing; chat history excluded structurally |
-| Generic source orchestration | `df42a50` | implemented, corpus-validated | `discover_source` / `ingest_source` summaries; no per-source branching allowed (static guard test) |
-| Embedding configuration | `f5bf1e7` | implemented | Env-driven model selection; explicit error when unset; readiness probe seam for `/api/embed` |
-| Batched embedding backfill | `f3d6537` | implemented, corpus-validated (fake provider) | `backfill_documents`: sorted-id order, per-document atomicity, exact totals vs chunk rows |
-| Real-corpus pipeline validation | this checkpoint | corpus-validated | Keep 695 docs/236 chunks; NotebookLM 143 docs/4,306 chunks; total 838 docs/4,542 chunks; fake-provider backfill produced 4,542 embeddings; second run fully idempotent |
-| Structured-data investigation | this checkpoint | corpus-validated (read-only) | Maps/Chrome/YouTube/Google Pay/timeline families measured and classified; none ingested; boundaries recorded below |
-| Corpus discovery 2 (`raw_data.zip`) | this checkpoint | inventoried **2026-08-23** | Second archive inspected read-only: Gemini/ChatGPT exports, personal PDFs, XLSX, mbox email, attachments/media. Nothing ingested; see "Corpus discovery 2" for the family inventory and revised plan |
-| Gemini conversation adapter | this checkpoint | implemented, corpus-validated | Per-conversation JSON only (`.md` twins and `_`-prefixed aggregates excluded structurally); composed speaker-labeled text; provenance in metadata. Real corpus: 170/170 discovered, zero schema anomalies, 167 TEXT_HEAVY + 3 MIXED; throwaway ingestion: 170 docs / 1,344 chunks, rerun idempotent, embeddings untouched |
-| ChatGPT conversation adapter | this checkpoint | implemented, corpus-validated | Official shard export (`conversations-*.json`) parsed structurally; active-branch linearization over parent-pointer `mapping` trees (no `children` arrays exist in the export); voice transcriptions rendered as text; media pointers and model reasoning excluded but counted; synthetic `<conversation_id>.json` source keys stable across re-sharding. Real corpus: 469/469 discovered, 451 TEXT_HEAVY + 18 MIXED, throwaway ingestion 469 docs / 3,363 chunks / 451 extractions, rerun idempotent, embeddings untouched. See "ChatGPT export schema notes" below |
-| Real embeddings | — | **blocked** | Local Ollama lacks embeddings support (HTTP 501; no model). Requires enabling the server flag/installing an embedding model and setting `PERSONAL_AI_EMBEDDING_MODEL`. No code work blocked on this. |
-| SQLite FTS5 keyword retrieval | this checkpoint | implemented | Derived `document_chunks_fts` index over authoritative chunks, maintained transactionally by `ChunkStore` (insert/update/delete stay in sync); `search()` returns typed `ChunkSearchResult` with native BM25 ranking and deterministic chunk-id tie-break; free-text queries sanitized into literal quoted terms so punctuation/operators in personal content can never alter query syntax; empty queries return no results; `rebuild_search_index()` re-derives the whole index from `document_chunks` (also populates pre-existing databases). 23 focused tests; semantic/vector retrieval remains pending on embedding infrastructure |
-| Structured-data pipeline | — | **not started** | Maps/Chrome/YouTube/Google Pay exports inventoried but intentionally not ingested; see boundaries below |
+- retrieve the correct evidence,
+- ground individual facts in real records,
+- report the absence of evidence honestly,
+- answer single-domain, well-scoped questions.
 
-## Corpus inventory and boundaries
+But it can sometimes fail when the question asks it to:
 
-Local raw corpus: `previous_project_and_raw_data/` (~27 GB). It is
-git-ignored, must never be committed, copied into fixtures/tests/logs, or
-modified. All inspection is read-only. Old project directories are
-reference material only — not authoritative architecture.
+- combine **multiple evidence domains** in one answer,
+- synthesize watched-videos **and** notes together,
+- **compare** multiple people/topics across sources ("compare what I know
+  about BCG and McKinsey"),
+- perform broad **open-ended thematic** synthesis.
 
-### Classification
+Observed failure modes (stochastic — they vary run to run):
 
-**KNOWLEDGE (text/document pipeline):**
-- Google Keep notes (`Conservar/`): 731 files; 695 usable records — handled
-  by `KeepSourceAdapter`.
-- NotebookLM articles (`NotebookLM/*/Sources/*.html`): 143 — handled by
-  `NotebookLMSourceAdapter`.
-- Total measured today: **838 knowledge documents, 4,542 chunks**
-  (187 TEXT_HEAVY + 508 MIXED Keep; NotebookLM all TEXT_HEAVY).
-- A few scattered markdown/text files exist but are low volume.
-- ~30 personal PDFs referenced by the old project's index were absent from
-  this copy but have since been located in the second archive — see
-  "Corpus discovery 2".
+- drops one requested domain and answers only the other half,
+- answers only one half of a compound question,
+- drifts into generic advice (losing the personal evidence),
+- includes real-but-noisy records (matched on a substring) — though these
+  are usually hedged as uncertain, not asserted as fact,
+- occasionally produces an **empty final answer** (a silent blank after tool
+  calls), and
+- shows **stochastic variation** between repeated runs of the same question.
 
-**STRUCTURED DATA (never naive text-chunked):**
-- Maps places/Q&A/GeoJSON JSON (6,379 files), Chrome history (~26k entries),
-  YouTube CSV logs, Google Pay transaction CSVs, small timeline/location
-  exports. These require a future structured-record boundary, not
-  serialization into prose chunks.
+Mixture across repeated runs of a compound question:
+clean dual-domain answer / noisy-but-hedged / generic-drift / empty. This is
+the accepted, characterized behavior of the 9B model.
 
-**PERSONAL MEDIA (outside this pipeline entirely):**
-- Photos/video/audio: ~4,335 JPG, 98+11 MP4, 305 MP3, 9 WAV, 626 `.data`
-  blobs, PPTX/slide artifacts, one image-based PDF (pdftotext extracts
-  ~nothing). These belong to a media organization/import workflow, not to
-  text RAG.
+> **THIS IS NOT CLASSIFIED AS A RETRIEVAL BUG.** The tools *can* retrieve
+> the evidence — the weakness is the final model synthesis step.
+> Consequently this limitation is **not** "fixed" by prompt engineering,
+> retrieval heuristics, or swapping in another ≤9B model (see
+> [Hardware/model decision](#e-hardwaremodel-decision)).
 
-**PROJECT/SOURCE CODE (excluded):**
-- `data_handling/`, `archive/`, `chroma/`, `langchain/` — old/third-party
-  code. Evidence only; may inform requirements but must be independently
-  justified before any pattern is reused.
+### Temporal limitation
 
-### Do-not-ingest list
+- Simple recent/temporal questions usually work correctly.
+- "most recent" / "recent" is **approximate**: the model returns a real,
+  recent record, but on different runs it may surface a different one — it
+  does not always return the single newest record. Treat such answers as "a
+  real, recent record," not a guarantee of recency ordering.
+- This is a model/tool-selection behavior, not a demonstrated deterministic
+  retrieval defect.
 
-Never route through the document/chunk/embedding pipeline:
+### Empty-answer guidance
 
-1. Personal media (images/video/audio/media blobs/decks) — media workflow.
-2. Derived/private databases (`chroma_db/chroma.sqlite3`,
-   `private_storage/memory.db`) — derived indexes and extracted memories,
-   not source-of-truth documents. Potential future *import* targets behind
-   dedicated boundaries, never direct sources.
-3. Project/source code trees listed above.
-4. Event/tabular exports (history logs, transactions, GeoJSON dumps) — they
-   must first pass through a designed structured-record boundary.
+Because an occasional empty/generic answer is stochastic, the practical
+guidance to users is: **retry the same question** — the next attempt is
+usually fine, and **split compound questions** into single-domain
+sub-questions. See [Usage](#m-usage) and [`docs/USAGE.md`](docs/USAGE.md).
 
-## Corpus discovery 2 — `raw_data.zip` (inventoried 2026-08-23)
+---
 
-A second archive, `raw_data.zip` (2.12 GB, 466 files), was uploaded to the
-repository root. It is git-ignored and must never be committed or copied
-into tests/docs. Inspection was read-only (extracted to a temporary
-directory outside the repo). It contains the previously missing personal
-data. The Gemini and ChatGPT conversation exports have since been ingested
-(see the adapter checkpoints above); PDFs, spreadsheets, email, and
-structured-data families remain un-ingested by design.
+## E. Hardware/model decision
 
-| Family | Measured contents | Classification / boundary |
+The model was investigated across Phases 25–27. The conclusion is that the
+project is **hardware-bounded** and `qwen3.5:9b` is the fixed deployment
+choice for the current scope.
+
+- **`qwen3.5:9b` is the preferred model.** It is the most trustworthy of the
+  readily-hostable options on grounding and factual recall.
+- **`llama3.1:8b` was tested** (Phase 26) and was lighter/faster but
+  **materially worse on grounding** — it fabricated or departed from
+  evidence more often. It was rejected.
+- **A genuinely stronger model was investigated** (Phase 27):
+  `qwen3:14b` (Q4_K_M ≈ 9.3 GB) could **not be reliably hosted** on the
+  current GTX 1070 (8 GB VRAM) / 15 GB RAM configuration, and download was
+  impractically slow (~4 MB/s). The hardware stop-condition triggered.
+- Therefore **do not substitute another ≤9B model merely to claim a model
+  comparison** — that would not improve capability and would regress the
+  measured grounding quality.
+- `qwen3.5:9b` remains the deployment choice because it is the strongest
+  model that runs reliably on this hardware while meeting the grounding
+  requirement for the POC scope.
+
+If multi-domain compound synthesis ever becomes a hard *product* requirement
+(rather than a documented POC limitation), that requires a materially
+stronger model (≥14B, including a vision model) on adequate hardware, or a
+different deployment architecture — out of scope for this hardware.
+
+---
+
+## F. Evaluation history
+
+A concise record of why the architecture is the way it is. (This is a
+summary of an intentional evaluation process, not an experiment diary.)
+
+### Phase 23 — Retrieval fixes (RETAINED)
+
+Production changes that remain in the working tree and are part of the
+accepted baseline:
+
+- **`ChunkStore.count()`** (`src/personal_ai/storage/chunks.py`): a count of
+  indexed chunks.
+- **`search_documents` conditional registration**
+  (`src/personal_ai/tools/defaults.py`): the narrow chunk-only tool is
+  registered only when `chunk_store.count() > 0`, i.e. when there is actually
+  indexed document content. On a conversation/event-only corpus the model is
+  not shown a tool that can't return anything.
+- **Conversation `_match_score` / `_longest_content_run`**
+  (`src/personal_ai/storage/conversations.py`): a deterministic scorer that
+  rewards a specific multi-word phrase over scattered generic term matches,
+  and demotes title/speaker-only matches.
+
+These are retained because they improve retrieval/tool-availability behavior
+and are covered by regression tests in the normal (no-Ollama) suite.
+
+### Phase 24 — Controlled baseline evaluation
+
+Established a controlled baseline of the unmodified Agent + tools on
+`qwen3.5:9b` to measure grounding, temporal behavior, and synthesis.
+
+### Phase 25 — Prompt grounding experiment — **REJECTED**
+
+A system-prompt attempt to force better grounding. It improved a few narrow
+cases but **regressed synthesis and caused instability**, so it was rejected.
+The project uses the baseline prompt only.
+
+### Phase 26 — Model comparison: `qwen3.5:9b` preferred
+
+Compared `qwen3.5:9b` against `llama3.1:8b`. Result: **`qwen3.5:9b`
+preferred** because it is more trustworthy on grounding.
+
+### Phase 27 — Attempted stronger model — hardware stop
+
+Attempted a genuinely stronger model (`qwen3:14b`). The hardware
+stop-condition triggered (insufficient VRAM/RAM headroom; impractically slow
+download). No comparison run was possible.
+
+### Phase 28 — Acceptance suite — **ACCEPT**
+
+Ran the full 8-category acceptance suite. Single-domain grounded lookups,
+negative evidence, and temporal summaries were reliable; the dominant
+failure class was stochastic Category C compound synthesis. **Verdict:
+ACCEPT** for the POC scope.
+
+### Phase 29 — POC demonstration & user-facing hardening — **DEMO-READY**
+
+Ran a user-facing demo suite (knowledge recall, activity recall, temporal,
+negative-evidence, summary, watch/search history, and a compound-limitation
+demonstration), repeated key demos to quantify stochastic variation, and
+verified the safety boundary (no fabricated personal records across the
+suite). Produced [`docs/USAGE.md`](docs/USAGE.md). **Verdict: DEMO-READY.**
+
+---
+
+## G. Current architecture
+
+Based on the actual source (see `src/personal_ai/`). Mermaid diagram of the
+parts that exist today and where the future API/UI layer plugs in:
+
+```mermaid
+flowchart TD
+    CLI[CLI<br/>--workspace --database --verbose] --> AGENT
+    OW[Open WebUI<br/>PLANNED] -.-> API[Personal AI HTTP API<br/>PLANNED, Phase 30]
+    API -.-> AGENT
+
+    subgraph AGENT[Agent loop]
+        AG[Agent.run(messages)] --> REG[ToolRegistry]
+    end
+
+    REG --> T1[search_knowledge<br/>RetrievalService: chunks+extractions+conversations]
+    REG --> T2[query_events<br/>EventStore: aggregate/structural events]
+    REG --> T3[search_documents<br/>chunk-only, registered only when chunks>0]
+    REG --> T4[list_directory<br/>sandboxed filesystem]
+
+    T1 --> KB[(Knowledge: chunks,<br/>extractions, conversations)]
+    T2 --> EV[(Events: search/url/video)]
+    T3 --> DOC[(Documents/chunks)]
+    T4 --> FS[workspace sandbox]
+
+    AG --> OLL[OllamaClient<br/>qwen3.5:9b, local]
+
+    KB --> ING[Ingestion pipeline]
+    ING --> SRC[SourceAdapters: keep, notebooklm, gemini, chatgpt, email, filesystem]
+```
+
+Parts (existing vs. planned):
+
+- **Data ingestion** (existing): structured `SourceAdapter`s (Keep, NotebookLM,
+  Gemini, ChatGPT, email, filesystem) → typed `SourceRecord`s → a single
+  generic orchestration (`ingest_source`) → `DocumentIngestor`
+  (extract text → classify → persist → chunk → extract structured knowledge
+  for text-heavy docs). Idempotent: unchanged inputs produce no new rows.
+  Real embeddings are a separate, decoupled backfill step.
+- **Corpus/database** (existing): a single SQLite database with tables for
+  documents, document chunks (+ FTS5 index), structured extractions,
+  conversations (+ messages, attachments), events, and chunk embeddings. All
+  deterministic.
+- **Retrieval** (existing): `RetrievalService` unifies keyword/FTS over
+  chunks, structured extractions, and conversation messages; `EventStore`
+  provides structural temporal queries (events, activity summary, top
+  searches/channels/videos, per-bucket activity). Semantic/vector retrieval
+  is **not** active (embeddings infrastructure-blocked).
+- **Agent** (existing): synchronous `Agent.run(messages)` loop over
+  `OllamaClient`, calling `ToolRegistry`, bounded by `max_tool_rounds=8`.
+- **ToolRegistry** (existing): explicit, allow-listed tools only. The model
+  can never run arbitrary code, import modules, or escape the filesystem
+  sandbox.
+- **Ollama** (existing): provider-independent via `OllamaClient`
+  (HTTP boundary, structured tool-call parsing). Chat, structured
+  extraction, and (future) embeddings are separate concerns.
+- **CLI** (existing): `python -m personal_ai.cli --workspace ... --database
+  ... [--verbose] "question"`. Also supports `--search` and `--ingest`.
+- **API boundary** (PLANNED, Phase 30): there is currently **no HTTP/server
+  layer** anywhere in the repo. The smallest clean boundary is an HTTP API
+  that reuses the existing Agent + ToolRegistry wiring (see
+  [Open WebUI integration](#k-open-webui-integration) and the phase plan).
+- **Open WebUI frontend** (PLANNED, later): a UI that talks to the Personal
+  AI API — **not** directly to Ollama.
+
+---
+
+## H. Current data sources
+
+Exactly what is implemented vs. planned. Do not assume sources are live
+unless stated.
+
+**Implemented (code exists, exercised by tests):**
+
+| Source | Adapter / path | State |
 |---|---|---|
-| `Gemini/` | **170 conversations**, each as an `.md` render + `.json` twin with identical stems; clean schema `{id, title, messages[{role, content}], url, createdAt, lastMessageAt, messageCount}`; ~1.4 MB composed text; dates 2025-05 → 2026-07. Aggregates `_all_conversations.json`/`.md` duplicate all 170 ids | **KNOWLEDGE — now ingested.** `GeminiSourceAdapter` discovers the per-conversation JSON twins only; the `.md` renders and `_`-prefixed aggregates are derived duplicates and never yield records |
-| `ChatGPT_export/` | **469 conversations** across `conversations-000..004.json` (~13.9 MB), uniform top-level schema; 3,721 message nodes total (1,771 user + 1,950 assistant; zero system/tool messages); content types: 3,432 `text`, 169 `multimodal_text`, 79 `thoughts`, 41 `reasoning_recap`; plus `chat.html` render (duplicate representation), user/settings/shared/manifest sidecars. Measured details in "ChatGPT export schema notes" below | **KNOWLEDGE — now ingested.** `ChatGPTSourceAdapter` discovers the shard files structurally; `chat.html` and non-conversation sidecars are excluded structurally, `*.dat` attachments stay in the media workflow |
-| `ChatGPT_export/*.dat` | 26 attachment blobs: ~22 JPEG, 2 PNG, 3 HTML, 1 PDF | **PERSONAL MEDIA / mixed attachments** — excluded from text pipeline; HTML/PDF attachments revisit later via their own boundaries |
-| `pdfs/` | **41 PDFs, 330 MB**: CVs ×4, tax certificates/statements, rental/utility bills, SEPA mandate, legal complaint (`Anzeige`) ×2, therapy worksheets, life-goals/goals docs, BCG case/interview prep, receipts, `Sonnenkind.pdf` (79 MB). Text census: **28 with usable text layers** (~22.5k words total), 6 fully scanned (`pdftotext` ≈ 0 words: Nebenkostenabrechnung ×2, wirtschaftplan ×2, both Vision Boards at 72/163 MB), 7 thin (<300 words) | **KNOWLEDGE (personal documents)** — small volume, high personal/legal value. Text-layer PDFs fit the planned extraction slice; scanned ones are future vision inputs |
-| `Excel/` | 6 XLSX: salary history 2021–2026, finance overview, rent split among roommates, utility billing, self-reflection questions, song list | **STRUCTURED DATA (tabular personal documents)** — tiny but high value; needs spreadsheet-aware record boundary, never naive chunking |
-| `Email/` | Three Gmail mbox segments, **~22.3k unique Message-IDs, Jan 2015 → Jul 2026**, nearly pairwise-disjoint (overlaps ≤149): `Bandeja de entrada.mbox` 2.15 GB (2018→2026), `Bandeja de entrada.partial.mbox` 541 MB (2015→2018), `INBOX.mbox` 154 MB (2025→2026); binary `table_of_contents` sidecars (not plain text) | **KNOWLEDGE (email)** — largest volume, highest sensitivity; requires Message-ID dedupe, quote/signature stripping, and its own adapter. Deferred until chat exports and PDFs are handled |
-| `Gemini/Takeout 3/NotebookLM/Growth/` | Artifacts + Chat History byte-identical to the existing corpus's Growth notebook | **DUPLICATE** — ignore |
-| `Gemini/Takeout 3/Actividad de registro de accesos/` | Device/service access-log CSVs | **STRUCTURED telemetry** — no use case; ignore for now |
-| `whatsapp.txt` | 83-byte placeholder sample (synthetic names) | Ignore — not real data |
+| Google Keep notes | `sources/keep.py` | adapter + corpus-validated (695 records in the original corpus) |
+| NotebookLM articles | `sources/notebooklm.py` | adapter + corpus-validated |
+| Gemini conversations | `sources/gemini.py` | adapter + corpus-validated (170) |
+| ChatGPT conversations | `sources/chatgpt.py` | adapter + corpus-validated (469) |
+| Email (Gmail mbox) | `sources/email.py` | adapter implemented; real email not yet ingested at scale |
+| Generic files (txt/md/pdf/png/jpg/jpeg) | `sources/filesystem.py` | adapter implemented; workspace-scoped |
+| Chrome history (events) | `sources/chrome_history*.py` → `event_ingestion` | implemented; live in the event corpus |
+| YouTube watch/search (events) | `sources/youtube_history*.py` → `event_ingestion` | implemented; live in the event corpus |
 
-Revised knowledge totals once discovery-2 sources are ingested (projection,
-not measured): roughly **1,700–2,000 documents** and **12k–18k chunks**.
-Measured so far: Gemini adds 170 documents / 1,344 chunks and ChatGPT adds
-469 documents / 3,363 chunks on top of the first corpus's 838 / 4,542 —
-**1,477 documents / 9,249 chunks today**, leaving text-layer PDFs and email
-as the remaining additions. Projected embedding workload grows accordingly
-(~3–4× current backfill); still minutes-scale locally. Real embeddings
-remain blocked on Ollama infrastructure; nothing was run.
+**PDF text extraction** (code exists): `documents.extractor.extract_text`
+supports PDFs via PyMuPDF, with page-aware chunking (`chunk_document`) and
+classification (`TEXT_HEAVY` / `MIXED` / `IMAGE_HEAVY` / `EMPTY`). This is
+**implemented in code and covered by tests**, but the real personal PDFs are
+**not yet ingested** into a live corpus (see Roadmap Phase 31).
 
-### ChatGPT export schema notes (measured 2026-08-23)
+### The real, live corpus today
 
-Facts the adapter depends on, measured across all 469 conversations before
-the parser was finalized:
+The corpus used by the accepted demo suite (`/tmp/ph18_corpus.db`) is
+**conversation + event only**:
 
-- Every shard is a JSON list of conversation objects with a uniform
-  top-level schema (`conversation_id`, `title`, `create_time`,
-  `update_time`, `current_node`, `mapping`, `default_model_slug`,
-  `is_archived`, ...). `conversation_id == id` in all 469.
-- `mapping` nodes are `{id, message, parent}` only — **the export has no
-  `children` arrays**, so ancestry must be reconstructed from parent
-  pointers. Exactly one root node (`message == null`) per conversation;
-  `current_node` always present and resolvable.
-- **Branching exists:** 62 conversations contain alternative nodes (edited
-  user prompts and regenerated assistant replies) that are not part of the
-  displayed thread. Policy: render the active branch only (walk parents
-  from `current_node` to root, reverse). Alternatives are counted per
-  record in `alternative_node_count` (241 nodes corpus-wide), never
-  silently discarded. Identity ignores them: pruning alternatives does not
-  change payload or hash.
-- **Tree order beats timestamps:** 47 messages along otherwise-valid active
-  chains have `create_time` earlier than their predecessor. The adapter
-  therefore never sorts by time; message timestamps stay metadata-only.
-- Roles are only `user`/`assistant`. Unknown roles would pass through
-  verbatim as speaker labels, but none occur in this export.
-- **Voice conversations carry text in a non-obvious field:** 150
-  `audio_transcription` dict parts inside `multimodal_text` messages hold
-  the real transcription and are rendered as normal message text.
-- Media pointer parts (19 image assets, 76 audio asset pointers, 74
-  real-time voice/video containers) never enter text; they are counted in
-  `media_part_count`. Message-level `attachments` metadata (23
-  conversations) is preserved as `attachment_names` provenance only — the
-  blobs themselves belong to the media workflow.
-- Model reasoning content (`thoughts`, `reasoning_recap`; 115 on-chain
-  messages) is internal scratch work: excluded from text, counted in
-  `reasoning_message_count`.
-- Message-level `update_time` is absent everywhere; conversation-level
-  epoch-float `create_time`/`update_time` are always present and become
-  the record's UTC ISO `created_at`/`modified_at`.
-- One archived conversation exists; archiving is a UI state, not deletion,
-  so it is ingested and flagged via `metadata.is_archived`.
-- Source keys are synthetic `<conversation_id>.json` because no
-  per-conversation file exists; they survive re-exports that re-shard
-  conversations differently, keeping document identity stable.
+- **conversations** ~639 / **conversation_messages** ~4,531
+- **events** ~72,902 (search_query, url_visit, video_watch, youtube_search)
+- **documents** 0 / **document_chunks** 0 / **structured_extractions** 0
 
-Assumption changes caused by discovery 2:
+This is the concrete, verified "indexed document count is 0" limitation from
+earlier evaluations: with no indexed document chunks, the model's durable
+knowledge comes from **conversations and events** (the narrow
+`search_documents` tool is therefore hidden). **PDFs are the next major
+source slice** that will populate the document/chunk side.
 
-1. The "missing" ~30 personal PDFs referenced by the old project's index
-   now exist here (`pdfs/` matches the previously recorded filename list).
-   The PDF-extraction slice is unblocked.
-2. Email is confirmed present in volume (mbox, not PST/OST/MSG/EML) — the
-   email adapter must target Gmail mbox format specifically.
-3. No DOC/DOCX, PST, or additional messaging corpora were found.
-4. Chat-export adapters (Gemini, then ChatGPT) become the highest-value
-   next sources; retrieval design should wait for them so it is built once
-   over the full document mix.
+(Note: the `knowledge.db` at the repo root is a small, git-ignored local
+test/scratch database — 1 document, 0 chunks — and is not the demo corpus.)
 
-## Media boundary
+---
 
-Photos, videos, and audio are personal media. They are **not part of the
-text RAG ingestion pipeline** and must never be embedded as text merely
-because they exist in the corpus.
+## I. Roadmap
 
-Their future workflow lives outside this pipeline:
+Concrete, with statuses.
+
+### Completed
+
+- Source/ingestion foundation and document model
+- FTS / keyword retrieval
+- Conversation & knowledge retrieval
+- Activity / event retrieval and temporal aggregation
+- Temporal activity support
+- Phase 23 retrieval correctness fixes (retained)
+- `qwen3.5:9b` model evaluation
+- Prompt experiment and rejection, model comparison, hardware-limitation assessment
+- Acceptance suite — ACCEPT (Phase 28)
+- POC demonstration + user-facing hardening — DEMO-READY (Phase 29)
+- User documentation — `docs/USAGE.md`
+- **Phase 30 — OpenAI-compatible HTTP API** (server module, `/v1/chat/completions`,
+  `/v1/models`, localhost binding, optional token, tests)
+- **Open WebUI integration path** (see [Open WebUI integration](#k-open-webui-integration))
+
+### Current state
+
+The project is a **local-first personal-history POC / early daily-driver
+backend** — it is **not** a general autonomous assistant. `qwen3.5:9b` remains
+the deployable local model because it fits the hardware, it is more trustworthy
+than the tested `llama3.1:8b` on grounding, ≥14B testing was hardware-infeasible,
+and synthesis/compound-query limitations remain accepted POC constraints.
+
+Current interface: Open WebUI (or any OpenAI-compatible client) → Personal AI
+API → existing Agent + ToolRegistry → personal corpus + local Ollama.
+
+### Phase 30 — API boundary (DONE)
+
+Implemented. Reuses the existing Agent + ToolRegistry; the API is a thin
+OpenAI-compatible `/v1/chat/completions` boundary only. Non-streaming.
+See [Open WebUI integration](#k-open-webui-integration) and
+[`docs/OPEN_WEBUI.md`](docs/OPEN_WEBUI.md).
+
+### Phase 31 — PDF ingestion (NEXT)
+
+`pdfs/` — the inventoried 41 personal PDFs (28 with usable text layers). Text
+extraction and classification already exist; this phase wires them into a real
+ingestion run + indexing:
+
+- text extraction (exists: `extract_text`, PyMuPDF)
+- document classification (exists: `classify_document`)
+- metadata (filename, pages/images, source type)
+- indexing into `document_chunks` so `search_documents` appears and FTS hits
+  return personal PDF content
+- tests + regression validation (rerun idempotent)
+
+The live demo corpus currently still has **documents = 0, chunks = 0,
+extractions = 0** — PDF ingestion is the next major corpus expansion.
+
+### Phase 32 — Email ingestion
+
+Gmail/mbox ~22.3k messages (three near-disjoint segments 2015–2026). Adapter
+exists; this phase normalizes at scale:
+
+- normalization / Message-ID dedupe / quote+signature stripping
+- metadata (from/to/date/subject)
+- privacy considerations (highest-sensitivity family; never log content)
+- indexing + tests
+
+### Phase 33 — Open WebUI hardening
+
+UI-layer polish once the API exists:
+
+- authentication / local-only access
+- source/evidence citations surfaced in responses
+- error handling and retry guidance for known synthesis/empty-answer behavior
+- streaming UX
+- conversation handling (multi-turn stays within the Agent loop)
+
+### Phase 34+ — additional personal sources
+
+Only after each source has a clear adapter/normalization contract (the
+existing `SourceAdapter` boundary):
+
+- vision extraction for image-heavy documents (Vision Board PDFs, scanned
+  bills, slide decks) — needs a vision model
+- spreadsheet record boundary for the 6 personal XLSX files
+- structured-data record boundary for Maps places/Q&A, Chrome history links
+- durable "memories" concept distinct from document chunks (Phase 10)
+
+Each new source is a small vertical slice with tests behind the existing
+adapter contract — **not** a separate per-source pipeline.
+
+---
+
+## J. Missing implementation steps
+
+Checklist of what is still required for the POC to become a useful daily
+personal assistant. **REQUIRED** items block the daily-driver goal; OPTIONAL
+items are quality/robustness improvements.
+
+### REQUIRED
+
+- [x] **Stable HTTP API** (Phase 30) — `python -m personal_ai.server` exposes
+      the programmatic entry point alongside the CLI.
+- [x] **OpenAI-compatible endpoint** (Phase 30) — `POST /v1/chat/completions`
+      with `GET /v1/models`; usable as an Open WebUI backend.
+- [ ] **Streaming responses** — tool-call latency (13–65 s) is otherwise a
+      silent wait (Phase 33).
+- [ ] **Source/evidence metadata in responses** — so the user can see what a
+      claim is grounded in (Phase 33).
+- [ ] **PDF ingestion** into the live corpus (Phase 31).
+- [ ] **Email ingestion** at scale (Phase 32).
+- [ ] **Ingestion scheduling / re-ingestion** — a way to re-run `--ingest`
+      against the corpus without manual CLI invocations.
+- [ ] **Incremental updates** — add only what changed (idempotency already
+      exists; scheduling + invocation does not).
+- [ ] **Duplicate detection** — already deterministic via content hashes
+      (implemented); verify end-to-end for new sources.
+- [ ] **Stable source IDs + timestamps** — already in `SourceRecord` /
+      document identity (implemented); surface them through the API.
+- [ ] **Observability** (structured, non-content logging) — the CLI `--verbose`
+      trace exists; the API needs equivalent structured metadata.
+- [x] **Configuration** — `PERSONAL_AI_CHAT_MODEL` and API host/port/token are
+      environment-configurable (Phase 30); `cli.py` still hard-codes
+      `MODEL = "qwen3.5:9b"` via `config.DEFAULT_CHAT_MODEL`.
+- [ ] **Backup/recovery** — the SQLite database is the durable store; a
+      documented backup/restore path (and location) is needed.
+- [x] **Authentication/access control** — optional `PERSONAL_AI_API_TOKEN`
+      bearer token for the API (Phase 30), required for any non-localhost
+      exposure.
+- [ ] **Tests for all of the above** (following existing no-Ollama patterns).
+- [x] **Documentation** — README (this file), `docs/USAGE.md`,
+      `docs/OPEN_WEBUI.md`, and this Phase 30 report.
+
+### OPTIONAL
+
+- [ ] Real semantic/vector retrieval (blocked on Ollama embedding support +
+      `PERSONAL_AI_EMBEDDING_MODEL`) — hybrid search beyond keyword/FTS.
+- [ ] Vision extraction for image-heavy documents (needs a vision model +
+      hardware).
+- [ ] Durable "memories" as a distinct concept from document chunks.
+- [ ] Spreadsheet / structured-record boundaries for XLSX and Maps data.
+- [ ] Open WebUI UX polish, conversation persistence in the UI, citations UI.
+- [ ] Containerization (Dockerfile/compose) — none exists today.
+
+---
+
+## K. Open WebUI integration
+
+### Intended end state
 
 ```
-raw media -> identify / deduplicate / normalize metadata
-          -> organize / import -> Immich
+Open WebUI  (UI layer)
+    |
+    v
+Personal AI HTTP API   (OpenAI-compatible /v1/chat/completions)
+    |
+    v
+existing Agent  (+ ToolRegistry)
+    |
+    v
+personal corpus  +  local Ollama
 ```
 
-No media workflow code exists yet; nothing in the current architecture
-requires it.
+- **Ollama remains the local model runtime** (qwen3.5:9b).
+- **Open WebUI is the UI layer only.** It is **not** responsible for personal
+  retrieval, and it should **not** talk directly to Ollama for personal
+  questions, because a direct Ollama → Open WebUI path would **bypass the
+  personal-data Agent and its ToolRegistry** — the very layer that grounds
+  answers in your history.
 
-## Architectural decisions and rationale
+### Current repository state
 
-- **Deterministic identity over timestamps:** document and chunk IDs derive
-  from content hashes so re-runs are idempotent and safe.
-- **Embeddings are derived state:** rebuildable, stored separately
-  (`chunk_embeddings`), generated only by an explicitly invoked backfill.
-  Ingestion stays network-free and model-free.
-- **Provider independence:** all model access sits behind narrow interfaces
-  (`OllamaClient`, `StructuredExtractor`, `EmbeddingProvider`); application
-  code never imports provider internals. Static guard tests enforce that
-  orchestration/storage modules stay provider-free.
-- **Structural adapters over generic parsing:** Keep and NotebookLM adapters
-  encode each format's real structure (composed note text, article HTML
-  rendering, sidecar metadata) rather than guessing; malformed input fails
-  loudly instead of being silently dropped.
-- **No speculative frameworks:** no vector DB, LangChain/LlamaIndex, or
-  generic plugin system until the corpus justifies it. SQLite remains the
-  single durable store.
-- **Fail-fast orchestration with summaries:** `ingest_source` aborts on the
-  first corrupt record and reports counts; partial silent success is avoided.
-- **Privacy:** personal content is never logged; tests use synthetic
-  fixtures shaped like the real formats, never real personal data.
+Phase 30 is **implemented and smoke-tested** against the real corpus. The API
+lives in `src/personal_ai/server.py` and reuses the exact CLI wiring through
+`cli.build_agent()` — the same `_connect_agent_registry` + `Agent.run(messages)`
+path — so it does **not** reimplement retrieval. Both the CLI and the server go
+through one canonical construction path (`build_agent` in `cli.py`).
+
+### Alternative architecture (rejected as primary)
+
+```
+Open WebUI -> Ollama directly
+```
+
+This is **not sufficient for this project**: it bypasses the personal
+retrieval/tool layer, so answers would not be grounded in the user's stored
+personal history. It is at most a fallback for generic non-personal chat. The
+implemented integration keeps the Personal AI API in the middle.
+
+### Implemented API surface (Phase 30)
+
+- `POST /v1/chat/completions` — OpenAI-compatible request body (`model`,
+  `messages`) returning the Agent's answer. `stream` is rejected with `400`
+  (non-streaming in Phase 30; streaming is Phase 33).
+- `GET /v1/models` — lists `qwen3.5:9b` for Open WebUI model discovery.
+- The full `system` / `user` / `assistant` history is mapped to `ChatMessage`s
+  and passed straight to `Agent.run()`; multi-turn grounding is preserved and
+  **no extra grounding system prompt is injected** (production baseline stays
+  prompt-free).
+- Internal tool calls are **not** returned as assistant text — only the
+  Agent's final answer is.
+- Errors are clean HTTP codes (`400`/`401`/`500`/`502`) with an OpenAI-style
+  `{"error": {...}}` shape; details are logged without dumping corpus content.
+- Default bind is **localhost-only** (`127.0.0.1`); optional
+  `PERSONAL_AI_API_TOKEN` bearer token.
+
+Full setup, env vars, and the Docker networking note are in
+[`docs/OPEN_WEBUI.md`](docs/OPEN_WEBUI.md).
+
+See the planning notes in the next section for the precise Phase 30 plan and
+its constraints (do not rewrite the Agent/retrieval/ToolRegistry).
+
+---
+
+## L. Local deployment example
+
+Two entry points exist: the **CLI** and the **HTTP API** (Phase 30). Both share
+the same Agent/ToolRegistry wiring. There is no containerization yet.
+
+Hardware: GTX 1070 / 8 GB VRAM / 15 GB RAM.
+
+### 1. Ollama (local model runtime)
+
+Ollama runs locally and serves `qwen3.5:9b`. Cold model load can exceed the
+client's 180 s timeout, so **pre-warm the model** before latency-sensitive
+interactive use (e.g. send a trivial prompt first, or keep a session open).
+
+### 2. qwen3.5:9b
+
+The fixed chat model (see [Hardware/model decision](#e-hardwaremodel-decision)).
+Install/pull it via Ollama.
+
+### 3. Personal AI
+
+CLI:
+
+```
+uv run python -m personal_ai.cli \
+  --workspace /path/to/workspace \
+  --database /path/to/corpus.db \
+  --verbose "What do I know about BCG?"
+```
+
+- `--workspace` is the sandboxed directory the filesystem tool may inspect.
+- `--database` points at the SQLite personal corpus.
+- `--verbose` prints the agent trace (rounds, tool calls, timing) to stderr.
+- `--search QUERY` and `--ingest SOURCE PATH` exist (see `--help`).
+
+HTTP API (Phase 30) — localhost only by default (port 8000):
+
+```
+uv run python -m personal_ai.server \
+  --workspace /path/to/workspace \
+  --database /path/to/corpus.db
+```
+
+Then e.g.:
+
+```
+curl http://127.0.0.1:8000/v1/models
+curl -H 'Content-Type: application/json' \
+     -d '{"messages":[{"role":"user","content":"What do I know about BCG?"}]}' \
+     http://127.0.0.1:8000/v1/chat/completions
+```
+
+Config (env or flags): `PERSONAL_AI_CHAT_MODEL`, `PERSONAL_AI_API_HOST`,
+`PERSONAL_AI_API_PORT`, `PERSONAL_AI_API_TOKEN`. See
+[`docs/OPEN_WEBUI.md`](docs/OPEN_WEBUI.md).
+
+### 4. Open WebUI
+
+Configure Open WebUI to connect to the Personal AI API as an OpenAI-compatible
+backend (`http://127.0.0.1:8000/v1`, model `qwen3.5:9b`). The Personal AI API
+stays in the middle so answers remain grounded in your history — Open WebUI is
+the UI layer only. Full setup (including the Docker networking note) is in
+[`docs/OPEN_WEBUI.md`](docs/OPEN_WEBUI.md).
+
+---
+
+## M. Usage
+
+See [`docs/USAGE.md`](docs/USAGE.md) for the full user guide. The question-style
+guidance below applies to both the CLI and the HTTP API (which simply exposes
+the same Agent through `POST /v1/chat/completions`). For API endpoint details,
+env vars, and Open WebUI setup see [`docs/OPEN_WEBUI.md`](docs/OPEN_WEBUI.md).
+
+**Recommended question style — GOOD (single-domain, well-scoped):**
+
+- "What do I know about BCG?"
+- "What did I search for recently?"
+- "What videos did I watch about X?"
+- "Summarize my January 2026 activity."
+- "Do I have anything about fly fishing?" (returns an honest no-records answer)
+
+**LESS RELIABLE (multi-domain / open synthesis):**
+
+- "Compare everything I watched with everything in my notes and tell me what
+  career strategy I should pursue."
+
+**Guidance:** compound questions can be split into multiple grounded
+single-domain questions:
+
+```
+What did I watch about BCG?
+What do my notes say about BCG?
+```
+
+And because an occasional empty/generic answer is stochastic model behavior,
+**retry the same question** if you get nothing back. The next attempt is
+usually fine.
+
+---
+
+## N. Testing
+
+- **`uv run pytest`** — full suite: **1237 tests**, no network, no Ollama, no real
+  personal data. Uses `tmp_path`, `httpx.MockTransport`, in-memory/temp SQLite,
+  and deterministic fakes. This includes the API tests in `tests/test_server.py`
+  (request parsing, error mapping, `/v1/chat/completions`, `/v1/models`,
+  authentication, config precedence) which use a fake Agent, not a live server.
+- **`uv run ruff check .`** — clean.
+- **`uv run ruff format --check src tests`** — clean (123 files).
+- **Evaluation harnesses** — `scripts/evaluate_agent.py` (and the phase
+  drivers) are *manual/private* harnesses that require a live Ollama + real
+  corpus. They are **not** part of the automated suite and are not run by
+  `pytest`. `scripts/evaluate_agent.py` is currently an untracked private
+  harness and is **not** automatically added to commits.
+- **What is a regression:** any change that (a) breaks an existing test, (b)
+  fails `ruff`/format checks, (c) alters deterministic retrieval behavior
+  without a test update, or (d) introduces a network/Ollama dependency into
+  the normal suite.
+
+---
+
+## O. Repository state / git
+
+- HEAD: `59d89fa` (`feat(cli): add minimal --verbose agent observability`).
+  Local `main` is ahead of `origin/main` by 3 commits (not pushed).
+- **The retained Phase 23 production changes are currently UNcommitted** in
+  the working tree:
+  - `src/personal_ai/storage/chunks.py`
+  - `src/personal_ai/storage/conversations.py`
+  - `src/personal_ai/tools/defaults.py`
+  - `tests/test_cli_wiring.py`, `tests/test_storage_conversations.py`,
+    `tests/test_tool_defaults.py`, `tests/test_tool_search.py`
+- Untracked:
+  - `docs/` (contains `docs/USAGE.md`)
+  - `scripts/evaluate_agent.py` (private/manual eval harness — not intended
+    for automatic commit)
+- `knowledge.db` at the repo root, `previous_project_and_raw_data/`, and
+  `raw_data.zip` are git-ignored local data and must never be committed.
+
+Nothing here is committed automatically; commit decisions are made explicitly
+once the documentation and plan are reviewed.
+
+---
 
 ## Validation commands
 
 ```
-uv run pytest                      # full suite (no network/Ollama required)
+uv run pytest
 uv run ruff check .
 uv run ruff format --check src tests
 ```
 
-Real-corpus validation (read-only, manual, uses throwaway DB + fake
-embedding provider):
-
-```
-uv run python - <<'EOF'
-from pathlib import Path
-from tempfile import TemporaryDirectory
-from personal_ai.sources.keep import KeepSourceAdapter
-from personal_ai.sources.notebooklm import NotebookLMSourceAdapter
-from personal_ai.orchestration import discover_source, ingest_source
-from personal_ai.storage import connect_database
-# see tests/test_embeddings_batch.py for the fake-provider backfill pattern
-EOF
-```
-
-The corpus itself is validated by running the existing adapters' `discover()`
-against git-ignored local paths; expected current counts: Keep 695
-discovered records, NotebookLM 143 articles, Gemini 170 conversations,
-ChatGPT 469 conversations. Ingestion totals through the generic
-orchestration (throwaway DB): Keep + NotebookLM 838 documents / 4,542
-chunks, Gemini 170 / 1,344, ChatGPT 469 / 3,363 — 1,477 documents / 9,249
-chunks today, each rerun idempotent with zero embedding rows unless an
-explicit fake-provider backfill is invoked.
-
-## Structured-data inventory (investigated, not ingested)
-
-Measured read-only during this checkpoint. None of it may be serialized
-into text chunks; each family needs a purpose-built record boundary if and
-when a use case exists.
-
-| Family | Measured contents | Assessment |
-|---|---|---|
-| Maps `Fotos y vídeos/` | 5,059 per-media sidecar JSONs (title, taken/upload timestamps, EXIF lat/lng) | Belongs to the **media workflow** (Immich import metadata), not the structured pipeline |
-| Maps automated Q&A | 1,288 records `{placeUrl, question, selectedChoice}` (+24 suggested edits, same shape) | Place-engagement signal; low text value; sensitive (reveals frequented places) |
-| Maps authored Q&A (`Preguntas y respuestas.json`) | User-authored answers `{place_url, text}` | Genuine authored personal text; tiny volume |
-| Labeled/saved/reviewed places | GeoJSON: labeled sites (incl. home/work coordinates), saved places, reviews with ratings/Q&A | Small, highly sensitive, high assistant value; relational candidate if ever needed |
-| Commute routes (`Rutas de desplazamientos`) | Semantic trips: visits w/ lat-lng, travel modes | Location history; sensitive; no current use case |
-| Chrome `Historial.json` | 26,212 browser-history entries `{title, url, time_usec}` across 942 hosts (~Nov 2025–Aug 2026); Session 15 | Behavioral telemetry; must NOT become 26k chunks; possible future indexed lookup aid |
-| YouTube | CSVs are small logs (comments 70, music uploads 310, subscriptions 15, playlists ~72); real signal is two large activity HTMLs: watch history 40.4 MB, search history 13 MB | Watch/search titles would need an HTML record parser before any use; deferred |
-| Google Pay (dir name contains NBSP) | 6 transaction CSVs, 41 rows total `{time, id, description, product, masked payment method, status, amount}` | Financial-sensitive; trivially small; defer |
-| Timeline settings (`Cronología/Settings.json`) | 1.1 KB settings blob | Ignore |
-
-## Next planned phase
-
-Re-ranked after the FTS retrieval slice landed (2026-08-23), by measured
-value:
-
-1. **Retrieval over all ingested knowledge** — keyword-first (SQLite FTS),
-   designed once Keep + NotebookLM + Gemini + ChatGPT are in (done: 1,477
-   documents / 9,249 chunks). **Keyword retrieval over chunks is now
-   implemented** (`ChunkStore.search`). Remaining sub-slices: metadata
-   filtering (source_type, timestamps, titles), search over structured
-   extractions, and a CLI/agent surface for queries. Text-layer PDFs and
-   email can join later without redesign.
-2. **Personal-PDF text extraction** — 28 of 41 PDFs have usable text
-   layers; includes scanned classification (6 fully scanned stay
-   vision-only for now).
-3. **Email ingestion (Gmail mbox)** — largest remaining volume, highest
-   sensitivity.
-
-**Chosen next slice: 2 — personal-PDF text extraction**, or the remaining
-retrieval sub-slices above if retrieval value should compound first.
-
-Rationale: keyword retrieval exists but is not yet exposed to any caller;
-either deepening retrieval (filters/extraction search/agent tool) or adding
-the next source is justified from here. PDFs remain a clean follow-on
-source behind the existing adapter contract.
-
-## Deferred work
-
-- Personal-PDF text extraction (unblocked; includes scanned classification)
-- Email ingestion (Gmail mbox): ~22.3k messages across three nearly
-  disjoint segments; requires Message-ID dedupe, quote/signature stripping,
-  attachment exclusion; highest sensitivity of any family
-- Real embeddings (blocked on Ollama server flags/model install +
-  `PERSONAL_AI_EMBEDDING_MODEL`)
-- Personal-PDF text extraction (unblocked; includes scanned classification)
-- Spreadsheet record boundary for the 6 personal XLSX files
-- Semantic search (blocked on real embedding infrastructure) and retrieval
-  agent tools; metadata-filtered search and extraction search on top of
-  keyword retrieval
-- Durable memories concept distinct from document chunks (Phase 10);
-  candidate import source later: old project's extracted-memory database,
-  behind a dedicated deduplicating import boundary
-- Vision extraction for image-heavy documents (two large Vision Board PDFs,
-  slide decks, and scanned bills are known future inputs)
-- Structured-data record boundary for Maps places/Q&A, Chrome history,
-  YouTube activity, Google Pay transactions (first-corpus inventory table)
-- Immich media workflow (separate track entirely)
-
-## How to resume
-
-1. Read this file top to bottom; trust the checkpoint table over memory.
-2. Verify baseline: `uv run pytest && uv run ruff check . && uv run ruff
-   format --check src tests` — expect 535 passing, all green.
-3. Confirm HEAD matches or postdates `f3d6537`; the Gemini and ChatGPT
-   adapter slices are uncommitted working-tree state as of 2026-08-23 —
-   commit them before starting new work if not yet committed.
-4. Raw data lives in two git-ignored locations: `previous_project_and_raw_data/`
-   (first corpus, ~27 GB) and `raw_data.zip` at the repository root (second
-   archive, 2.12 GB). Treat both strictly read-only; never commit, move,
-   or copy from them into tests/docs/logs.
-5. Pick the single next slice from "Next planned phase", implement it as a
-   small vertical slice with tests following existing patterns (fakes over
-   `connect_database(":memory:")`, mock transports for Ollama), update the
-   checkpoint table, and report before committing.
+Real-corpus evaluation is manual and read-only (requires a live local Ollama
+and the real corpus database, which are never part of the test suite).
