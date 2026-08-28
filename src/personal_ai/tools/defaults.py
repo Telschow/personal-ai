@@ -133,10 +133,13 @@ def create_default_registry(
             ToolDefinition(
                 name="search_knowledge",
                 description=(
-                    "Search the personal knowledge base across both document "
-                    "text passages and structured extractions (people, "
-                    "organizations, projects, goals, topics). Returns ranked "
-                    "results with provenance information."
+                    "Search the personal knowledge base across document "
+                    "text passages, structured extractions (people, "
+                    "organizations, projects, goals, topics), and "
+                    "conversation messages. Returns ranked results with "
+                    "provenance information. The optional 'filter' "
+                    "created_after/created_before bounds apply to document "
+                    "results and to conversation messages."
                 ),
                 parameters={
                     "type": "object",

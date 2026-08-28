@@ -235,7 +235,14 @@ class RetrievalService:
         extraction_hits = self._extraction_store.search(query, limit=limit)
         conversation_hits: tuple[ConversationSearchResult, ...] = ()
         if self._conversation_store is not None:
-            conversation_hits = self._conversation_store.search(query, limit=limit)
+            created_after = filters.created_after if filters is not None else None
+            created_before = filters.created_before if filters is not None else None
+            conversation_hits = self._conversation_store.search(
+                query,
+                limit=limit,
+                created_after=created_after,
+                created_before=created_before,
+            )
 
         # Cache document titles to avoid repeated lookups
         title_cache: dict[str, str] = {}

@@ -17,12 +17,14 @@ from typing import Self
 import pytest
 
 from personal_ai import cli
+from personal_ai.documents.conversations import Conversation, ConversationMessage
 from personal_ai.documents.models import compute_content_hash
 from personal_ai.events.models import EVENT_TYPE_VIDEO_WATCH, Event, compute_event_id
 from personal_ai.ingestion import DocumentIngestor
 from personal_ai.sources.models import SourceRecord
 from personal_ai.storage import (
     ChunkStore,
+    ConversationStore,
     DocumentStore,
     EmbeddingStore,
     EventStore,
@@ -155,6 +157,69 @@ class TestConnectAgentRegistry:
             all_events = registry.execute("query_events", {})
             assert isinstance(all_events, list)
             assert len(all_events) == 2
+        finally:
+            connection.close()
+
+    def test_search_knowledge_created_before_filters_conversations(
+        self, tmp_path: Path
+    ) -> None:
+        """Phase 16: search_knowledge time bounds are honored for conversation
+        results through the full registry path
+        (search_knowledge -> RetrievalService -> ConversationStore)."""
+        workspace = tmp_path / "workspace"
+        workspace.mkdir()
+        database = tmp_path / "agent.db"
+
+        registry, connection = cli._connect_agent_registry(workspace, database)
+        try:
+            conversation_store = ConversationStore(connection)
+            conversation_store.save_conversation(
+                Conversation(
+                    id="conv-1",
+                    title="BCG Career",
+                    source_type="gemini",
+                    created_at="2026-01-01T00:00:00+00:00",
+                    modified_at="2026-02-16T00:00:00+00:00",
+                    metadata={},
+                )
+            )
+            conversation_store.save_message(
+                ConversationMessage(
+                    id="m-jan",
+                    conversation_id="conv-1",
+                    message_index=0,
+                    role="user",
+                    speaker="User",
+                    content_text="BCG early January",
+                    content_type="text",
+                    timestamp="2026-01-15T00:00:00+00:00",
+                )
+            )
+            conversation_store.save_message(
+                ConversationMessage(
+                    id="m-feb",
+                    conversation_id="conv-1",
+                    message_index=1,
+                    role="user",
+                    speaker="User",
+                    content_text="BCG mid February",
+                    content_type="text",
+                    timestamp="2026-02-15T00:00:00+00:00",
+                )
+            )
+
+            results = registry.execute(
+                "search_knowledge",
+                {
+                    "query": "BCG",
+                    "filter": {"created_before": "2026-02-01T00:00:00+00:00"},
+                },
+            )
+            conv_texts = [
+                r["text"] for r in results if r["result_type"] == "conversation"
+            ]
+            assert "BCG early January" in conv_texts
+            assert "BCG mid February" not in conv_texts
         finally:
             connection.close()
 

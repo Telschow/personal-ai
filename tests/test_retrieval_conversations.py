@@ -4,10 +4,12 @@ import json
 from pathlib import Path
 
 from personal_ai.conversation_ingestion import ingest_gemini_conversations
+from personal_ai.documents.conversations import Conversation, ConversationMessage
 from personal_ai.retrieval import RetrievalService, SearchResult
 from personal_ai.storage import (
     ChunkStore,
     ConversationStore,
+    DocumentFilter,
     DocumentStore,
     ExtractionStore,
     connect_database,
@@ -223,3 +225,101 @@ class TestConversationRetrieval:
         for r in conv_results:
             # Gemini messages are always active
             assert r.is_active_branch is True
+
+
+class TestConversationTemporalRegression:
+    """Phase 16: search_knowledge time bounds must apply to conversation results."""
+
+    JUST_AFTER = "2026-01-15T00:00:00+00:00"
+    JUST_BEFORE = "2026-02-15T00:00:00+00:00"
+
+    def setup_method(self) -> None:
+        self.connection = connect_database(":memory:")
+        self.chunk_store = ChunkStore(self.connection)
+        self.extraction_store = ExtractionStore(self.connection)
+        self.document_store = DocumentStore(self.connection)
+        self.conversation_store = ConversationStore(self.connection)
+        self.conversation_store.save_conversation(
+            Conversation(
+                id="conv-1",
+                title="BCG Career Discussion",
+                source_type="gemini",
+                created_at="2026-01-01T00:00:00+00:00",
+                modified_at="2026-02-16T00:00:00+00:00",
+                metadata={},
+            )
+        )
+        self.conversation_store.save_message(
+            ConversationMessage(
+                id="m-jan",
+                conversation_id="conv-1",
+                message_index=0,
+                role="user",
+                speaker="User",
+                content_text="BCG early January",
+                content_type="text",
+                timestamp=self.JUST_AFTER,
+                parent_message_id=None,
+                is_active_branch=True,
+                metadata={},
+            )
+        )
+        self.conversation_store.save_message(
+            ConversationMessage(
+                id="m-feb",
+                conversation_id="conv-1",
+                message_index=1,
+                role="user",
+                speaker="User",
+                content_text="BCG mid February",
+                content_type="text",
+                timestamp=self.JUST_BEFORE,
+                parent_message_id=None,
+                is_active_branch=True,
+                metadata={},
+            )
+        )
+
+    def teardown_method(self) -> None:
+        self.connection.close()
+
+    def _service(self) -> RetrievalService:
+        return RetrievalService(
+            self.chunk_store,
+            self.extraction_store,
+            self.document_store,
+            self.conversation_store,
+        )
+
+    def test_created_before_filters_conversation_results(self) -> None:
+        service = self._service()
+        results = service.search(
+            "BCG", filters=DocumentFilter(created_before="2026-02-01T00:00:00+00:00")
+        )
+        conv_texts = [r.text for r in results if r.result_type == "conversation"]
+        assert "BCG early January" in conv_texts
+        assert "BCG mid February" not in conv_texts
+
+    def test_window_both_ends_applies_to_conversations(self) -> None:
+        service = self._service()
+        results = service.search(
+            "BCG",
+            filters=DocumentFilter(
+                created_after=self.JUST_AFTER,
+                created_before=self.JUST_BEFORE,
+            ),
+        )
+        conv_texts = [r.text for r in results if r.result_type == "conversation"]
+        # Both boundaries inclusive: both messages match.
+        assert set(conv_texts) == {"BCG early January", "BCG mid February"}
+
+    def test_without_conversation_store_still_works(self) -> None:
+        service = RetrievalService(
+            self.chunk_store,
+            self.extraction_store,
+            self.document_store,
+        )
+        results = service.search(
+            "BCG", filters=DocumentFilter(created_before="2026-02-01T00:00:00+00:00")
+        )
+        assert results == ()

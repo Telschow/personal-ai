@@ -1,5 +1,7 @@
 """Tests for ConversationStore SQLite persistence."""
 
+import pytest
+
 from personal_ai.documents.conversations import (
     Conversation,
     ConversationAttachment,
@@ -445,3 +447,92 @@ class TestCountMessagesByContentType:
             self.store.count_messages_by_content_type("thoughts", source_type="gemini")
             == 0
         )
+
+
+class TestSearchTemporalBounds:
+    """Search creates_after/created_before bounds on message timestamps.
+
+    Bounds are inclusive ISO-8601 values applied to ``cm.timestamp`` with the
+    same validation and semantics as document temporal filtering.
+    """
+
+    def setup_method(self) -> None:
+        self.connection = connect_database(":memory:")
+        self.store = ConversationStore(self.connection)
+        self.store.save_conversation(_conv("conv-1", title="Test Conv"))
+        self.store.save_message(
+            _msg(
+                "m1",
+                index=0,
+                content="BCG early",
+                timestamp="2026-01-15T00:00:00+00:00",
+            )
+        )
+        self.store.save_message(
+            _msg(
+                "m2", index=1, content="BCG late", timestamp="2026-02-15T00:00:00+00:00"
+            )
+        )
+
+    def teardown_method(self) -> None:
+        self.connection.close()
+
+    def test_created_after_includes_exact_boundary(self) -> None:
+        results = self.store.search("BCG", created_after="2026-01-15T00:00:00+00:00")
+        assert [r.content_text for r in results] == ["BCG early", "BCG late"]
+
+    def test_created_after_excludes_earlier(self) -> None:
+        results = self.store.search("BCG", created_after="2026-02-01T00:00:00+00:00")
+        assert [r.content_text for r in results] == ["BCG late"]
+
+    def test_created_before_includes_exact_boundary(self) -> None:
+        results = self.store.search("BCG", created_before="2026-02-15T00:00:00+00:00")
+        assert [r.content_text for r in results] == ["BCG early", "BCG late"]
+
+    def test_created_before_excludes_later(self) -> None:
+        results = self.store.search("BCG", created_before="2026-02-01T00:00:00+00:00")
+        assert [r.content_text for r in results] == ["BCG early"]
+
+    def test_both_bounds_restrict_range(self) -> None:
+        results = self.store.search(
+            "BCG",
+            created_after="2026-01-20T00:00:00+00:00",
+            created_before="2026-02-20T00:00:00+00:00",
+        )
+        assert [r.content_text for r in results] == ["BCG late"]
+
+    def test_no_bounds_returns_all(self) -> None:
+        results = self.store.search("BCG")
+        assert [r.content_text for r in results] == ["BCG early", "BCG late"]
+
+    def test_no_timestamp_never_matches_bounded_window(self) -> None:
+        self.store.save_message(_msg("m3", index=2, content="BCG untimed"))
+        results = self.store.search("BCG", created_after="2026-01-01T00:00:00+00:00")
+        assert [r.content_text for r in results] == ["BCG early", "BCG late"]
+
+    def test_malformed_timestamp_bound_rejected(self) -> None:
+        with pytest.raises(ValueError, match="ISO-8601"):
+            self.store.search("BCG", created_after="not-a-timestamp")
+        with pytest.raises(ValueError, match="ISO-8601"):
+            self.store.search("BCG", created_before="not-a-timestamp")
+
+    def test_inverted_range_rejected(self) -> None:
+        with pytest.raises(ValueError, match="must not be later"):
+            self.store.search(
+                "BCG",
+                created_after="2026-02-15T00:00:00+00:00",
+                created_before="2026-01-15T00:00:00+00:00",
+            )
+
+    def test_mixed_offset_bounds_rejected(self) -> None:
+        with pytest.raises(ValueError, match="mix offset-naive"):
+            self.store.search(
+                "BCG",
+                created_after="2026-01-15T00:00:00",
+                created_before="2026-02-15T00:00:00+00:00",
+            )
+
+    def test_results_deterministic(self) -> None:
+        first = self.store.search("BCG", created_after="2026-01-01T00:00:00+00:00")
+        second = self.store.search("BCG", created_after="2026-01-01T00:00:00+00:00")
+        assert first == second

@@ -123,6 +123,21 @@ class TestKnowledgeSearchTool:
         assert service.last_filters.source_types == ("pdf",)
         assert service.last_filters.created_after == "2026-01-01T00:00:00+00:00"
 
+    def test_created_before_filter_reaches_retrieval_service(self) -> None:
+        """Phase 16: the tool passes created_before through to conversation
+        retrieval. The actual conversation-time filtering lives in
+        RetrievalService; here we prove the tool forwards the bound."""
+        service = FakeRetrievalService()
+        tool = KnowledgeSearchTool(service)
+        tool.search_knowledge(
+            {
+                "query": "BCG",
+                "filter": {"created_before": "2026-02-01T00:00:00+00:00"},
+            }
+        )
+        assert service.last_filters is not None
+        assert service.last_filters.created_before == "2026-02-01T00:00:00+00:00"
+
     def test_rejects_invalid_filter_key(self) -> None:
         service = FakeRetrievalService()
         tool = KnowledgeSearchTool(service)

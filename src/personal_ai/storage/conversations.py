@@ -11,6 +11,7 @@ from personal_ai.documents.conversations import (
     ConversationAttachment,
     ConversationMessage,
 )
+from personal_ai.storage.chunks import _validate_boundary, _validate_range
 
 _CONVERSATIONS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS conversations (
@@ -522,7 +523,12 @@ class ConversationStore:
     # ------------------------------------------------------------------
 
     def search(
-        self, query: str, *, limit: int = 10
+        self,
+        query: str,
+        *,
+        limit: int = 10,
+        created_after: str | None = None,
+        created_before: str | None = None,
     ) -> tuple[ConversationSearchResult, ...]:
         """Search conversation messages by case-insensitive substring match.
 
@@ -530,24 +536,51 @@ class ConversationStore:
         ('thoughts', 'reasoning_recap')) from normal search, as these
         are internal model reasoning, not conversational content.
 
+        ``created_after`` and ``created_before`` are optional inclusive
+        ISO-8601 bounds on the message timestamp (``cm.timestamp``), sharing
+        the same validation and lexical comparison semantics as document
+        temporal filtering. Messages without a timestamp never match a
+        bounded window.
+
         Uses LIKE for simplicity and correctness. Results are scored
         by match quality and returned in descending score order.
         """
         if not isinstance(query, str) or not query.strip():
             return ()
 
+        _validate_boundary("created_after", created_after)
+        _validate_boundary("created_before", created_before)
+        _validate_range("created", created_after, created_before)
+
         query_lower = query.strip().lower()
+        conditions = [
+            "cm.is_active_branch = 1",
+            "cm.content_type NOT IN ('thoughts', 'reasoning_recap')",
+            "(cm.content_text LIKE ? OR c.title LIKE ? OR cm.speaker LIKE ?)",
+        ]
+        params: list[object] = [
+            f"%{query_lower}%",
+            f"%{query_lower}%",
+            f"%{query_lower}%",
+        ]
+        if created_after is not None or created_before is not None:
+            conditions.append("cm.timestamp <> ''")
+        if created_after is not None:
+            conditions.append("cm.timestamp >= ?")
+            params.append(created_after)
+        if created_before is not None:
+            conditions.append("cm.timestamp <= ?")
+            params.append(created_before)
+
+        where = " AND ".join(conditions)
         rows = self._connection.execute(
             "SELECT cm.id, cm.conversation_id, c.title, "
             "cm.message_index, cm.role, cm.speaker, cm.content_text, "
             "cm.timestamp, cm.is_active_branch "
             "FROM conversation_messages cm "
             "JOIN conversations c ON cm.conversation_id = c.id "
-            "WHERE cm.is_active_branch = 1 "
-            "AND cm.content_type NOT IN ('thoughts', 'reasoning_recap') "
-            "AND (cm.content_text LIKE ? OR c.title LIKE ? "
-            "OR cm.speaker LIKE ?)",
-            (f"%{query_lower}%", f"%{query_lower}%", f"%{query_lower}%"),
+            f"WHERE {where}",
+            params,
         ).fetchall()
 
         results: list[ConversationSearchResult] = []
