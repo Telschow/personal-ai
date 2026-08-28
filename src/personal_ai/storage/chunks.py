@@ -412,6 +412,13 @@ class ChunkStore:
         self._connection.commit()
         return len(rows)
 
+    def count(self) -> int:
+        """Return the number of indexed chunks currently stored."""
+        row = self._connection.execute(
+            "SELECT COUNT(*) FROM document_chunks"
+        ).fetchone()
+        return int(row[0]) if row is not None else 0
+
     def close(self) -> None:
         """Release the underlying database connection."""
         self._connection.close()

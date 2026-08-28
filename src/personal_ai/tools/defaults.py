@@ -20,10 +20,12 @@ def create_default_registry(
 ) -> ToolRegistry:
     """Create a registry containing the standard personal-AI tools.
 
-    The ``search_documents`` tool is registered only when a chunk store is
-    provided; without a knowledge database there is nothing to search and
-    the model is never shown the tool. It is a narrow chunks-only search
-    primitive; ``search_knowledge`` is the broader knowledge search.
+    The ``search_documents`` tool is registered only when the chunk store
+    holds indexed documents (``count() > 0``). Without indexed document
+    content there is nothing for this narrow chunk-only tool to search, so
+    the model is never shown it; ``search_knowledge`` remains the broader
+    knowledge search. When indexed documents ARE present, ``search_documents``
+    is registered exactly as before.
 
     The ``search_knowledge`` tool is registered only when a retrieval
     service is provided; it searches chunks, structured extractions, and
@@ -55,7 +57,7 @@ def create_default_registry(
         )
     )
 
-    if chunk_store is not None:
+    if chunk_store is not None and chunk_store.count() > 0:
         search = SearchTool(chunk_store)
         registry.register(
             ToolDefinition(

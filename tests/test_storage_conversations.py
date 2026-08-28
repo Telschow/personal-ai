@@ -591,6 +591,53 @@ class TestSearchMultiTerm:
         # m-bcg matches "BCG" and "prep"; m-interview matches "interview" only.
         assert m_bcg.score > m_interview.score
 
+    def test_specific_concept_outranks_equal_coverage(self) -> None:
+        # Same number of matched terms, but "career transition" is a contiguous
+        # multi-word concept in the content, so it must rank above an isolated
+        # set of generic term matches.
+        self._add("m-concept", "my career transition into strategy consulting")
+        self._add("m-scattered", "a new job for the role in the industry")
+        results = self.store.search("career transition job role")
+        m_concept = next(r for r in results if r.message_id == "m-concept")
+        m_scattered = next(r for r in results if r.message_id == "m-scattered")
+        # Both match two terms, but only m-concept contains the phrase.
+        assert m_concept.score > m_scattered.score
+        assert results[0].message_id == "m-concept"
+
+    def test_long_query_concept_outranks_title_slop(self) -> None:
+        # A3-style: a long thesaurised OR query must not let a generic title-only
+        # match (which used to clamp to a 0.5 floor) outrank content that holds
+        # the specific concept phrase the user is actually asking about.
+        self._add(
+            "m-concept",
+            "I've been changing careers, planning my transition into consulting",
+        )
+        self.store.save_conversation(_conv("conv-titled", title="New Job Development"))
+        self.store.save_message(
+            _msg("m-titled", conv_id="conv-titled", content="Unrelated text")
+        )
+        results = self.store.search(
+            "changing careers job transition new industry professional development"
+        )
+        ranks = {r.message_id: r.score for r in results}
+        assert results[0].message_id == "m-concept"
+        assert ranks["m-concept"] > ranks["m-titled"]
+
+    def test_title_only_match_is_low_priority(self) -> None:
+        # A generic title match with no content should never outrank a genuine
+        # content match on the specific concept.
+        self.store.save_conversation(
+            _conv("conv-titled", title="Job Opportunities Overview")
+        )
+        self.store.save_message(
+            _msg("m-titled", conv_id="conv-titled", content="Unrelated notes")
+        )
+        self._add("m-concept", "my career transition into consulting")
+        results = self.store.search("career job transition")
+        ranks = {r.message_id: r.score for r in results}
+        assert ranks["m-concept"] > ranks["m-titled"]
+        assert ranks["m-concept"] > 0.25
+
     def test_case_insensitive(self) -> None:
         texts = self._texts("bCg CaReEr")
         assert "BCG case prep" in texts

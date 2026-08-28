@@ -94,13 +94,14 @@ class TestConnectAgentRegistry:
         try:
             names = {tool["function"]["name"] for tool in registry.schemas()}
             assert "list_directory" in names
-            assert "search_documents" in names
             assert "search_knowledge" in names
             assert "query_events" in names
+            # The empty corpus has no indexed documents, so the narrow
+            # chunk-only search tool is intentionally hidden (Phase 23).
+            assert "search_documents" not in names
             # Exactly the expected tools; no accidental duplication/re-design.
             assert names == {
                 "list_directory",
-                "search_documents",
                 "search_knowledge",
                 "query_events",
             }
@@ -284,6 +285,9 @@ class TestMainWithDatabase:
         assert "search_knowledge" in names
         assert "query_events" in names
         assert "list_directory" in names
+        # The database has events/conversations but no indexed documents, so
+        # the narrow chunk-only search tool must not be offered to the model.
+        assert "search_documents" not in names
         assert capsys.readouterr().out == "Agent response.\n"
 
     def test_agent_without_database_calls_registry_single_positional(

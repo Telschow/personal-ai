@@ -227,6 +227,31 @@ def _terms_from_query(query_lower: str) -> tuple[str, ...]:
     return tuple(seen)
 
 
+def _longest_content_run(terms: tuple[str, ...], content_l: str) -> int:
+    """Length of the longest contiguous query phrase present in content.
+
+    Counts the largest number of consecutive query terms (in query order)
+    whose space-joined phrase appears contiguously in the content text. A
+    phrase of length 2 or more is a specific multi-word concept that should
+    be weighted above isolated generic matches; returns 0 when no term is
+    present at all, 1 when only isolated terms match.
+    """
+    n = len(terms)
+    if not any(term in content_l for term in terms):
+        return 0
+    best = 1
+    for length in range(2, n + 1):
+        found = False
+        for i in range(n - length + 1):
+            if " ".join(terms[i : i + length]) in content_l:
+                found = True
+                best = length
+                break
+        if not found:
+            break
+    return best
+
+
 def _match_score(
     terms: tuple[str, ...],
     query_lower: str,
@@ -237,12 +262,17 @@ def _match_score(
     """Score one message against the query terms, or None when it matches none.
 
     A message matches any term found in its content, conversation title, or
-    speaker. Scores reward content matches proportional to term coverage, with
-    exact and leading-content matches boosted, and title/speaker-only matches
-    contributing lower floors. The result is deterministic and, for a
-    single-term query, identical to the historical whole-phrase scoring.
+    speaker. Content matches are the primary relevance signal: the score
+    rewards term coverage proportionally and adds a deterministic bonus for a
+    contiguous multi-word phrase of the query found in the content, so a
+    specific concept (e.g. "career transition") outranks a scattered set of
+    generic term matches. Exact and leading-content matches are boosted.
+    Title/speaker matches act as low-priority fallbacks that never outrank a
+    genuine content match. The result is deterministic and, for a single-term
+    query, identical to the historical whole-phrase scoring.
     """
     content_count = sum(1 for term in terms if term in content_l)
+    content_run = _longest_content_run(terms, content_l)
     title_matched = any(term in title_l for term in terms)
     speaker_matched = any(term in speaker_l for term in terms)
 
@@ -253,14 +283,17 @@ def _match_score(
     score = 0.0
     if content_count:
         score = 0.6 * (content_count / total)
+        if content_run >= 2:
+            score += 0.4 * (content_run / total)
         if content_l.strip() == query_lower:
             score = 1.0
         elif content_l.startswith(query_lower):
             score = max(score, 0.8)
+        score = min(score, 1.0)
     if title_matched:
-        score = max(score, 0.5)
+        score = max(score, 0.25)
     if speaker_matched:
-        score = max(score, 0.3)
+        score = max(score, 0.15)
     return score
 
 

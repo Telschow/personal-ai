@@ -211,3 +211,42 @@ def test_limit_bounds_result_count(knowledge: KnowledgeFixture, tmp_path: Path) 
     results = registry.execute("search_documents", {"query": "guitar", "limit": 1})
 
     assert len(results) == 1
+
+
+class TestConditionalRegistration:
+    """Phase 23, Fix 1: ``search_documents`` is registered only when the
+    chunk store holds indexed document content."""
+
+    def test_empty_corpus_hides_search_documents(self, tmp_path: Path) -> None:
+        connection = connect_database(":memory:")
+        try:
+            chunks = ChunkStore(connection)
+            registry = create_default_registry(tmp_path, chunk_store=chunks)
+            names = [schema["function"]["name"] for schema in registry.schemas()]
+            assert chunks.count() == 0
+            assert "search_documents" not in names
+            assert "list_directory" in names
+        finally:
+            connection.close()
+
+    def test_populated_corpus_registers_search_documents(self, tmp_path: Path) -> None:
+        connection = connect_database(":memory:")
+        try:
+            chunks = ChunkStore(connection)
+            document_store = DocumentStore(connection)
+            document_store.add(make_document(id="doc-1"))
+            chunks.add_many(
+                (
+                    DocumentChunk(
+                        id="chunk-1",
+                        document_id="doc-1",
+                        text="consulting case prep notes",
+                    ),
+                )
+            )
+            registry = create_default_registry(tmp_path, chunk_store=chunks)
+            names = [schema["function"]["name"] for schema in registry.schemas()]
+            assert chunks.count() == 1
+            assert "search_documents" in names
+        finally:
+            connection.close()

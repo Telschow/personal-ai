@@ -15,13 +15,38 @@ from personal_ai.tools import create_default_registry
 
 
 def _knowledge_and_event_registry(tmp_path: Path) -> object:
-    """Build a registry exposing both search_knowledge and query_events."""
+    """Build a registry exposing both search_knowledge and query_events.
+
+    The chunk store is seeded with one indexed chunk so the narrow
+    ``search_documents`` tool is also registered; without indexed document
+    content that tool is intentionally hidden (Phase 23).
+    """
     connection = connect_database(":memory:")
     chunk_store = ChunkStore(connection)
     extraction_store = ExtractionStore(connection)
     document_store = DocumentStore(connection)
     conversation_store = ConversationStore(connection)
     event_store = EventStore(connection)
+    from personal_ai.documents import Document, DocumentChunk
+
+    document_store.add(
+        Document(
+            id="doc-seed",
+            source="notes/seed.json",
+            source_type="keep",
+            content_hash="hash-seed",
+            created_at="2026-01-01T00:00:00+00:00",
+            modified_at="2026-01-01T00:00:00+00:00",
+            metadata={},
+        )
+    )
+    chunk_store.add(
+        DocumentChunk(
+            id="chunk-seed",
+            document_id="doc-seed",
+            text="career transition for consulting",
+        )
+    )
     service = RetrievalService(
         chunk_store,
         extraction_store,
