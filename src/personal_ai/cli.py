@@ -3,6 +3,7 @@
 import argparse
 import sqlite3
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 from personal_ai.agent import Agent, AgentObserver
@@ -210,6 +211,67 @@ def _connect_agent_registry(
         raise
 
 
+@dataclass
+class BuiltAgent:
+    """A fully constructed, ready-to-run Agent together with its resources.
+
+    ``build_agent`` is the single canonical construction path for the
+    production Agent. Both the CLI and the HTTP API use it so the two entry
+    points share identical wiring (model, ToolRegistry, stores, Agent). The
+    Ollama client is entered at construction and closed on :meth:`close`,
+    preserving the historical ``with OllamaClient(...)`` lifecycle.
+    """
+
+    agent: Agent
+    client: OllamaClient
+    connection: sqlite3.Connection | None = None
+
+    def __enter__(self) -> Agent:
+        return self.agent
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()
+
+    def close(self) -> None:
+        """Release the Ollama client and any opened database connection."""
+        exit_client = getattr(self.client, "__exit__", None)
+        if callable(exit_client):
+            exit_client(None, None, None)
+        if self.connection is not None:
+            self.connection.close()
+
+
+def build_agent(
+    workspace: Path,
+    database: Path | None = None,
+    *,
+    model: str = MODEL,
+    observer: AgentObserver | None = None,
+) -> BuiltAgent:
+    """Construct the production Agent from workspace and database settings.
+
+    This is the only place a production Agent is assembled. The ToolRegistry
+    is wired from the workspace-database stores (knowledge retrieval + event
+    queries) through the default registry, and the Agent is built around a
+    caller-supplied ``OllamaClient``. The client is entered as a context
+    manager (as the CLI has always done) and the returned
+    :class:`BuiltAgent` holds the open resources, closed via ``close()`` or
+    ``with``.
+    """
+    connection: sqlite3.Connection | None = None
+    if database is not None:
+        registry, connection = _connect_agent_registry(workspace, database)
+    else:
+        registry = create_default_registry(workspace)
+
+    client = OllamaClient(model=model)
+    enter_client = getattr(client, "__enter__", None)
+    if callable(enter_client):
+        enter_client()
+    agent = Agent(client, registry, observer=observer)
+    return BuiltAgent(agent=agent, client=client, connection=connection)
+
+
 def _make_agent_observer() -> AgentObserver:
     """Return an observer that prints operational agent progress to stderr.
 
@@ -270,27 +332,24 @@ def main() -> None:
     if not workspace.is_dir():
         raise SystemExit(f"Workspace is not a directory: {workspace}")
 
-    connection: sqlite3.Connection | None = None
-    if args.database is not None:
-        registry, connection = _connect_agent_registry(workspace, args.database)
-    else:
-        registry = create_default_registry(workspace)
-
     observer = _make_agent_observer() if args.verbose else None
+    built = build_agent(
+        workspace,
+        args.database,
+        model=MODEL,
+        observer=observer,
+    )
     try:
-        with OllamaClient(model=MODEL) as client:
-            agent = Agent(client, registry, observer=observer)
-            response = agent.run(
-                [
-                    ChatMessage(
-                        role="user",
-                        content=args.prompt,
-                    )
-                ]
-            )
+        response = built.agent.run(
+            [
+                ChatMessage(
+                    role="user",
+                    content=args.prompt,
+                )
+            ]
+        )
     finally:
-        if connection is not None:
-            connection.close()
+        built.close()
 
     print(response)
 
