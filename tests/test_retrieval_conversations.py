@@ -313,6 +313,18 @@ class TestConversationTemporalRegression:
         # Both boundaries inclusive: both messages match.
         assert set(conv_texts) == {"BCG early January", "BCG mid February"}
 
+    def test_multi_term_query_with_bounds_through_service(self) -> None:
+        """A natural multi-word query combined with temporal bounds must flow
+        all the way through RetrievalService into ConversationStore."""
+        service = self._service()
+        results = service.search(
+            "BCG McKinsey consulting strategy",
+            filters=DocumentFilter(created_before="2026-02-01T00:00:00+00:00"),
+        )
+        conv_texts = [r.text for r in results if r.result_type == "conversation"]
+        assert "BCG early January" in conv_texts
+        assert "BCG mid February" not in conv_texts
+
     def test_without_conversation_store_still_works(self) -> None:
         service = RetrievalService(
             self.chunk_store,
@@ -323,3 +335,75 @@ class TestConversationTemporalRegression:
             "BCG", filters=DocumentFilter(created_before="2026-02-01T00:00:00+00:00")
         )
         assert results == ()
+
+
+class TestConversationMultiTermRetrieval:
+    """Multi-term conversation retrieval through the full RetrievalService path."""
+
+    def setup_method(self) -> None:
+        self.connection = connect_database(":memory:")
+        self.chunk_store = ChunkStore(self.connection)
+        self.extraction_store = ExtractionStore(self.connection)
+        self.document_store = DocumentStore(self.connection)
+        self.conversation_store = ConversationStore(self.connection)
+        self._add("conv-bcg", "BCG case prep notes")
+        self._add("conv-career", "Career planning discussion")
+        self._add("conv-other", "Cooking recipes and food")
+
+    def teardown_method(self) -> None:
+        self.connection.close()
+
+    def _add(self, conv_id: str, content: str) -> None:
+        self.conversation_store.save_conversation(
+            Conversation(
+                id=conv_id,
+                title="Neutral",
+                source_type="gemini",
+                created_at="2026-01-01T00:00:00+00:00",
+                modified_at="2026-01-02T00:00:00+00:00",
+                metadata={},
+            )
+        )
+        self.conversation_store.save_message(
+            ConversationMessage(
+                id=f"m-{conv_id}",
+                conversation_id=conv_id,
+                message_index=0,
+                role="user",
+                speaker="User",
+                content_text=content,
+                content_type="text",
+                timestamp="2026-01-10T00:00:00+00:00",
+                parent_message_id=None,
+                is_active_branch=True,
+                metadata={},
+            )
+        )
+
+    def _service(self) -> RetrievalService:
+        return RetrievalService(
+            self.chunk_store,
+            self.extraction_store,
+            self.document_store,
+            self.conversation_store,
+        )
+
+    def test_multi_word_query_finds_any_term_match(self) -> None:
+        service = self._service()
+        results = service.search("BCG McKinsey Bain consulting")
+        conv_texts = [r.text for r in results if r.result_type == "conversation"]
+        assert "BCG case prep notes" in conv_texts
+        assert "Cooking recipes and food" not in conv_texts
+
+    def test_multi_word_query_ranks_more_terms_higher(self) -> None:
+        self._add("conv-case-only", "A case study example document")
+        service = self._service()
+        results = service.search("BCG case interview")
+        by_id = {r.message_id: r.score for r in results}
+        # m-conv-bcg matches "BCG"+"case"; m-conv-case-only matches "case" only.
+        assert by_id["m-conv-bcg"] > by_id["m-conv-case-only"]
+
+    def test_multi_word_query_respects_limit(self) -> None:
+        service = self._service()
+        results = service.search("BCG career food", limit=1)
+        assert len(results) <= 1

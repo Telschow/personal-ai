@@ -536,3 +536,152 @@ class TestSearchTemporalBounds:
         first = self.store.search("BCG", created_after="2026-01-01T00:00:00+00:00")
         second = self.store.search("BCG", created_after="2026-01-01T00:00:00+00:00")
         assert first == second
+
+
+class TestSearchMultiTerm:
+    """Multi-term conversation retrieval with OR (match-any-term) semantics.
+
+    Model-generated queries are often descriptive multi-word phrases; a
+    message should match when it contains *any* meaningful term rather than
+    the whole phrase contiguously. Messages matching more terms rank higher.
+    """
+
+    def setup_method(self) -> None:
+        self.connection = connect_database(":memory:")
+        self.store = ConversationStore(self.connection)
+        self._add("m-bcg", "BCG case prep")
+        self._add("m-career", "Career growth plan")
+        self._add("m-interview", "Interview tips and strategy")
+        self._add("m-none", "Cooking a simple dinner")
+
+    def teardown_method(self) -> None:
+        self.connection.close()
+
+    def _add(self, msg_id: str, content: str, **kwargs) -> None:
+        conv_id = f"conv-{msg_id}"
+        self.store.save_conversation(_conv(conv_id, title="Neutral"))
+        self.store.save_message(
+            _msg(msg_id, conv_id=conv_id, content=content, **kwargs)
+        )
+
+    def _texts(self, query: str, **kwargs) -> list[str]:
+        return [r.content_text for r in self.store.search(query, **kwargs)]
+
+    def test_single_term_compatibility(self) -> None:
+        texts = self._texts("career")
+        assert texts == ["Career growth plan"]
+
+    def test_multi_term_query_retrieves_any_match(self) -> None:
+        texts = self._texts("BCG career interview")
+        assert "BCG case prep" in texts
+        assert "Career growth plan" in texts
+        assert "Interview tips and strategy" in texts
+        assert "Cooking a simple dinner" not in texts
+
+    def test_partial_term_isolation(self) -> None:
+        # A multi-term query requires no single term -- a message matching
+        # just "BCG" is enough even when McKinsey/Bain/consulting are absent.
+        texts = self._texts("BCG McKinsey Bain consulting")
+        assert "BCG case prep" in texts
+
+    def test_more_terms_rank_higher(self) -> None:
+        results = self.store.search("BCG interview prep")
+        m_bcg = next(r for r in results if r.message_id == "m-bcg")
+        m_interview = next(r for r in results if r.message_id == "m-interview")
+        # m-bcg matches "BCG" and "prep"; m-interview matches "interview" only.
+        assert m_bcg.score > m_interview.score
+
+    def test_case_insensitive(self) -> None:
+        texts = self._texts("bCg CaReEr")
+        assert "BCG case prep" in texts
+        assert "Career growth plan" in texts
+
+    def test_title_match_contributes(self) -> None:
+        # A term appearing in the conversation title is a valid match.
+        self.store.save_conversation(_conv("conv-title", title="BCG Careers Overview"))
+        self.store.save_message(
+            _msg("m-title", conv_id="conv-title", content="Unrelated body text")
+        )
+        texts = self._texts("BCG")
+        assert "Unrelated body text" in texts
+
+    def test_speaker_match_contributes(self) -> None:
+        self._add("m-speaker", "Some generic content", speaker="Interviewer")
+        texts = self._texts("Interviewer")
+        assert "Some generic content" in texts
+
+    def test_special_characters_are_literal(self) -> None:
+        self._add("m-pct", "Scored 100% on test")
+        self._add("m-pct2", "Scored 100x on test")
+        self._add("m-undo", "best_notes")
+        self._add("m-undo2", "bestXnotes")
+        self._add("m-slash", "path/to/file")
+
+        assert self._texts("100%") == ["Scored 100% on test"]
+        assert self._texts("best_notes") == ["best_notes"]
+        assert self._texts("path/to/file") == ["path/to/file"]
+
+    def test_empty_and_whitespace_query(self) -> None:
+        assert self.store.search("") == ()
+        assert self.store.search("   ") == ()
+        assert self.store.search("-- --") == ()
+
+    def test_punctuation_only_terms_dropped(self) -> None:
+        # "career - . , interview" keeps only the meaningful words.
+        texts = self._texts("career - . , interview")
+        assert "Career growth plan" in texts
+        assert "Interview tips and strategy" in texts
+
+    def test_duplicate_terms_collapsed(self) -> None:
+        texts = self._texts("career career career")
+        assert texts == ["Career growth plan"]
+
+    def test_created_after_with_multi_term(self) -> None:
+        self._add(
+            "m-late",
+            "BCG late interview",
+            timestamp="2026-02-20T00:00:00+00:00",
+        )
+        texts = self._texts(
+            "BCG McKinsey consulting",
+            created_after="2026-02-01T00:00:00+00:00",
+        )
+        assert texts == ["BCG late interview"]
+
+    def test_created_before_with_multi_term(self) -> None:
+        texts = self._texts(
+            "BCG McKinsey consulting",
+            created_before="2026-01-01T00:00:00+00:00",
+        )
+        # Untimed messages never match a bounded window; none qualify here.
+        assert texts == []
+
+    def test_both_bounds_restrict_multi_term(self) -> None:
+        self._add(
+            "m-window",
+            "BCG window interview",
+            timestamp="2026-03-15T00:00:00+00:00",
+        )
+        texts = self._texts(
+            "BCG McKinsey consulting",
+            created_after="2026-03-01T00:00:00+00:00",
+            created_before="2026-03-31T00:00:00+00:00",
+        )
+        assert texts == ["BCG window interview"]
+
+    def test_null_timestamp_not_in_bounded_multi_term(self) -> None:
+        texts = self._texts(
+            "BCG McKinsey consulting",
+            created_after="2026-01-01T00:00:00+00:00",
+        )
+        # None of the untimed fixture messages may match a bounded window.
+        assert texts == []
+
+    def test_multi_term_deterministic(self) -> None:
+        first = self.store.search("BCG career interview")
+        second = self.store.search("BCG career interview")
+        assert first == second
+
+    def test_limit_respected(self) -> None:
+        results = self.store.search("BCG career interview", limit=2)
+        assert len(results) <= 2

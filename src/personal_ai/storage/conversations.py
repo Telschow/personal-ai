@@ -194,6 +194,76 @@ def _row_to_attachment(row: tuple[object, ...]) -> ConversationAttachment:
     )
 
 
+_LIKE_ESCAPE = "\\"
+
+_TERM_MATCH_FRAGMENT = (
+    "(cm.content_text LIKE ? ESCAPE '\\' "
+    "OR c.title LIKE ? ESCAPE '\\' "
+    "OR cm.speaker LIKE ? ESCAPE '\\')"
+)
+
+
+def _escape_like(text: str) -> str:
+    """Escape SQLite LIKE wildcards so a term matches literally.
+
+    Backslash, ``%`` and ``_`` are escaped with the ``ESCAPE '\\'`` clause so
+    user/model input is never interpreted as a wildcard.
+    """
+    return text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def _terms_from_query(query_lower: str) -> tuple[str, ...]:
+    """Split a lowercased query into de-duplicated meaningful terms.
+
+    Whitespace-separated tokens are kept only when they carry at least one
+    alphanumeric character; punctuation-only fragments (``-``, ``.``, ``%``)
+    are dropped. Duplicate terms collapse to one occurrence, preserving the
+    first-seen order.
+    """
+    seen: dict[str, None] = {}
+    for raw in query_lower.split():
+        if any(ch.isalnum() for ch in raw):
+            seen.setdefault(raw, None)
+    return tuple(seen)
+
+
+def _match_score(
+    terms: tuple[str, ...],
+    query_lower: str,
+    content_l: str,
+    title_l: str,
+    speaker_l: str,
+) -> float | None:
+    """Score one message against the query terms, or None when it matches none.
+
+    A message matches any term found in its content, conversation title, or
+    speaker. Scores reward content matches proportional to term coverage, with
+    exact and leading-content matches boosted, and title/speaker-only matches
+    contributing lower floors. The result is deterministic and, for a
+    single-term query, identical to the historical whole-phrase scoring.
+    """
+    content_count = sum(1 for term in terms if term in content_l)
+    title_matched = any(term in title_l for term in terms)
+    speaker_matched = any(term in speaker_l for term in terms)
+
+    if content_count == 0 and not title_matched and not speaker_matched:
+        return None
+
+    total = len(terms)
+    score = 0.0
+    if content_count:
+        score = 0.6 * (content_count / total)
+        if content_l.strip() == query_lower:
+            score = 1.0
+        elif content_l.startswith(query_lower):
+            score = max(score, 0.8)
+    if title_matched:
+        score = max(score, 0.5)
+    if speaker_matched:
+        score = max(score, 0.3)
+    return score
+
+
 @dataclass(frozen=True)
 class ConversationSearchResult:
     """A search hit from conversation message search."""
@@ -530,11 +600,18 @@ class ConversationStore:
         created_after: str | None = None,
         created_before: str | None = None,
     ) -> tuple[ConversationSearchResult, ...]:
-        """Search conversation messages by case-insensitive substring match.
+        """Search conversation messages by case-insensitive multi-term match.
 
-        Excludes thought/reasoning messages (content_type in
-        ('thoughts', 'reasoning_recap')) from normal search, as these
-        are internal model reasoning, not conversational content.
+        The query is tokenized into lowercase terms on whitespace. A message
+        matches when *any* meaningful term appears (case-insensitively) in its
+        content, its conversation title, or its speaker. Matching each term as
+        a literal SQLite ``LIKE`` substring (with ``%``/``_``/``\\`` escaped)
+        keeps model-generated multi-word queries useful: ``"BCG career
+        interview"`` finds messages mentioning any of those words rather than
+        requiring the whole phrase contiguously.
+
+        Thoughts/reasoning messages (content_type in ('thoughts',
+        'reasoning_recap')) are excluded from normal search.
 
         ``created_after`` and ``created_before`` are optional inclusive
         ISO-8601 bounds on the message timestamp (``cm.timestamp``), sharing
@@ -542,8 +619,9 @@ class ConversationStore:
         temporal filtering. Messages without a timestamp never match a
         bounded window.
 
-        Uses LIKE for simplicity and correctness. Results are scored
-        by match quality and returned in descending score order.
+        Results are scored by match quality (messages matching more terms
+        rank higher) and returned in descending score order, with
+        ``(conversation_id, message_index)`` as the deterministic tie-break.
         """
         if not isinstance(query, str) or not query.strip():
             return ()
@@ -553,16 +631,19 @@ class ConversationStore:
         _validate_range("created", created_after, created_before)
 
         query_lower = query.strip().lower()
+        terms = _terms_from_query(query_lower)
+        if not terms:
+            return ()
+
         conditions = [
             "cm.is_active_branch = 1",
             "cm.content_type NOT IN ('thoughts', 'reasoning_recap')",
-            "(cm.content_text LIKE ? OR c.title LIKE ? OR cm.speaker LIKE ?)",
+            "(" + " OR ".join(_TERM_MATCH_FRAGMENT for _ in terms) + ")",
         ]
-        params: list[object] = [
-            f"%{query_lower}%",
-            f"%{query_lower}%",
-            f"%{query_lower}%",
-        ]
+        params: list[object] = []
+        for term in terms:
+            pattern = f"%{_escape_like(term)}%"
+            params.extend((pattern, pattern, pattern))
         if created_after is not None or created_before is not None:
             conditions.append("cm.timestamp <> ''")
         if created_after is not None:
@@ -595,17 +676,15 @@ class ConversationStore:
             timestamp = row[7] if row[7] is not None else None
             is_active = bool(row[8])
 
-            score = 0.0
-            if query_lower in content.lower():
-                score = 0.6
-                if content.lower().strip() == query_lower:
-                    score = 1.0
-                elif content.lower().startswith(query_lower):
-                    score = 0.8
-            if query_lower in title.lower():
-                score = max(score, 0.5)
-            if query_lower in speaker.lower():
-                score = max(score, 0.3)
+            score = _match_score(
+                terms,
+                query_lower,
+                content.lower(),
+                title.lower(),
+                speaker.lower(),
+            )
+            if score is None:
+                continue
 
             results.append(
                 ConversationSearchResult(

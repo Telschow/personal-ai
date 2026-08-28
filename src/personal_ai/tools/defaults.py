@@ -22,10 +22,12 @@ def create_default_registry(
 
     The ``search_documents`` tool is registered only when a chunk store is
     provided; without a knowledge database there is nothing to search and
-    the model is never shown the tool.
+    the model is never shown the tool. It is a narrow chunks-only search
+    primitive; ``search_knowledge`` is the broader knowledge search.
 
     The ``search_knowledge`` tool is registered only when a retrieval
-    service is provided; it searches both chunks and structured extractions.
+    service is provided; it searches chunks, structured extractions, and
+    conversation messages.
 
     The ``query_events`` tool is registered only when an event store is
     provided; it answers structural temporal-event (browsing/search) queries.
@@ -59,9 +61,15 @@ def create_default_registry(
             ToolDefinition(
                 name="search_documents",
                 description=(
-                    "Search the ingested personal knowledge base by keyword. "
-                    "Returns ranked matching text passages with their "
-                    "document identity."
+                    "Narrow search over the indexed document/chunk corpus "
+                    "only. Returns ranked document passages (chunk text) "
+                    "with their document identity. Use this only when the "
+                    "user specifically wants document/chunk content. It does "
+                    "NOT search conversations, notes, or structured "
+                    "extractions, and it is not the general-purpose "
+                    "knowledge search. For broad questions about what the "
+                    "user wrote, discussed, researched, or recorded, prefer "
+                    "search_knowledge, which also covers documents."
                 ),
                 parameters={
                     "type": "object",
@@ -133,13 +141,20 @@ def create_default_registry(
             ToolDefinition(
                 name="search_knowledge",
                 description=(
-                    "Search the personal knowledge base across document "
-                    "text passages, structured extractions (people, "
+                    "General-purpose search over durable personal knowledge: "
+                    "document/chunk passages, structured extractions (people, "
                     "organizations, projects, goals, topics), and "
                     "conversation messages. Returns ranked results with "
-                    "provenance information. The optional 'filter' "
-                    "created_after/created_before bounds apply to document "
-                    "results and to conversation messages."
+                    "provenance information. This is the preferred knowledge "
+                    "tool for questions about what the user knows, wrote, "
+                    "discussed, researched, or recorded, including when "
+                    "documents are part of the answer. It is broader than "
+                    "search_documents (a narrow chunks-only search) and "
+                    "complements query_events for activity-history questions. "
+                    "The optional 'filter' created_after/created_before "
+                    "bounds apply to document results and to conversation "
+                    "messages. A single question may require both tools when "
+                    "it spans knowledge and activity history."
                 ),
                 parameters={
                     "type": "object",
@@ -225,7 +240,13 @@ def create_default_registry(
                     "literal 'keyword' substring filter (against title/URL/"
                     "search query/channel). Use this to answer questions "
                     "about what the user searched for, browsed, or watched, "
-                    "or to summarize activity over a time period."
+                    "or to summarize activity over a time period. When "
+                    "summarizing activity, prefer the aggregate operations "
+                    "(top_searches, top_videos, top_channels, "
+                    "activity_summary) over the raw 'events' operation. A "
+                    "single question may also need search_knowledge when it "
+                    "spans both activity history and the user's durable "
+                    "knowledge/notes."
                 ),
                 parameters={
                     "type": "object",

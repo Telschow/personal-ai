@@ -218,3 +218,34 @@ class TestKnowledgeSearchToolConversations:
         results = tool.search_knowledge({"query": "Hello"})
         provenance = results[0]["provenance"]
         assert "Timestamp:" not in provenance
+
+    def test_multi_word_query_passed_through_without_schema_change(self) -> None:
+        """search_knowledge must accept a natural multi-word query unchanged;
+        no schema change or query rewriting is needed for multi-term retrieval."""
+        service = FakeRetrievalService(
+            results=(
+                SearchResult(
+                    result_type="conversation",
+                    document_id=None,
+                    score=0.7,
+                    title="BCG Prep",
+                    text="BCG case interview tips",
+                    page_number=None,
+                    matched_fields=("content_text",),
+                    conversation_id="conv-1",
+                    message_id="msg-1",
+                    message_index=1,
+                    role="user",
+                    speaker="User",
+                    timestamp="2026-01-01T12:00:00+00:00",
+                    is_active_branch=True,
+                ),
+            )
+        )
+        tool = KnowledgeSearchTool(service)
+        query = "BCG McKinsey Bain consulting business strategy case interview"
+        results = tool.search_knowledge({"query": query, "limit": 12})
+        assert service.last_query == query
+        assert len(results) == 1
+        assert results[0]["result_type"] == "conversation"
+        assert results[0]["text"] == "BCG case interview tips"
