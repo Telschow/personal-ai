@@ -2,9 +2,10 @@
 
 import argparse
 import sqlite3
+import sys
 from pathlib import Path
 
-from personal_ai.agent import Agent
+from personal_ai.agent import Agent, AgentObserver
 from personal_ai.ingestion import DocumentIngestor
 from personal_ai.ollama_client import ChatMessage, OllamaClient
 from personal_ai.ollama_structured import OllamaStructuredExtractor
@@ -72,6 +73,14 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=10,
         help="Maximum number of search results (default: 10).",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help=(
+            "Print operational agent progress (rounds, tool calls, timing, "
+            "completion) to stderr. The final answer is unaffected."
+        ),
     )
     parser.add_argument(
         "prompt",
@@ -201,6 +210,49 @@ def _connect_agent_registry(
         raise
 
 
+def _make_agent_observer() -> AgentObserver:
+    """Return an observer that prints operational agent progress to stderr.
+
+    Only round number, tool names, sanitized tool arguments, success/error
+    status, timing, and completion state are printed. Hidden model reasoning,
+    secrets, and raw tool payloads are never exposed.
+    """
+
+    def observe(event: dict[str, object]) -> None:
+        kind = event["event"]
+        if kind == "round":
+            calls = event["tool_calls"]
+            print(
+                f"[agent] round {event['round']} ({len(calls)} tool call(s))",
+                file=sys.stderr,
+            )
+        elif kind == "tool_start":
+            print(
+                f"[tool] {event['name']}({event['arguments']})",
+                file=sys.stderr,
+            )
+        elif kind == "tool_end":
+            print(
+                f"[tool] {event['name']} "
+                f"{event['status']} in {event['latency_sec']:.2f}s",
+                file=sys.stderr,
+            )
+        elif kind == "completed":
+            print(
+                f"[agent] completed in {event['latency_sec']:.2f}s "
+                f"after {event['round']} rounds",
+                file=sys.stderr,
+            )
+        elif kind == "max_rounds":
+            print(
+                f"[agent] stopped: exceeded max rounds "
+                f"after {event['latency_sec']:.2f}s",
+                file=sys.stderr,
+            )
+
+    return observe
+
+
 def main() -> None:
     args = parse_args()
 
@@ -224,9 +276,10 @@ def main() -> None:
     else:
         registry = create_default_registry(workspace)
 
+    observer = _make_agent_observer() if args.verbose else None
     try:
         with OllamaClient(model=MODEL) as client:
-            agent = Agent(client, registry)
+            agent = Agent(client, registry, observer=observer)
             response = agent.run(
                 [
                     ChatMessage(

@@ -57,6 +57,7 @@ def make_agent(
     client: ScriptedClient,
     handler: Callable[[dict[str, object]], object] = echo_handler,
     max_tool_rounds: int = 8,
+    observer=None,
 ) -> tuple[Agent, ToolRegistry]:
     registry = ToolRegistry()
     registry.register(
@@ -67,7 +68,9 @@ def make_agent(
             handler=handler,
         )
     )
-    return Agent(client, registry, max_tool_rounds=max_tool_rounds), registry
+    return Agent(
+        client, registry, max_tool_rounds=max_tool_rounds, observer=observer
+    ), registry
 
 
 def test_plain_text_response_is_returned_directly() -> None:
@@ -331,3 +334,80 @@ def test_wire_format_matches_ollama_chat_api() -> None:
         {"role": "tool", "content": "22C"},
     ]
     assert second["tools"] == registry.schemas()
+
+
+class TestAgentObserver:
+    """The optional observer reports operational progress without changing
+    the default (no-observer) behavior or exposing hidden reasoning."""
+
+    def test_observer_receives_tool_and_completion_events(self) -> None:
+        events: list[dict[str, object]] = []
+        client = ScriptedClient(
+            tool_response(TOOL_CALL),
+            text_response("final answer"),
+        )
+        agent, _ = make_agent(client, observer=events.append)
+
+        assert agent.run(USER_TURN) == "final answer"
+
+        kinds = [e["event"] for e in events]
+        assert kinds == [
+            "round",
+            "tool_start",
+            "tool_end",
+            "completed",
+        ]
+        round_event = events[0]
+        assert round_event["round"] == 1
+        assert round_event["tool_calls"][0].name == "get_weather"
+        start = events[1]
+        assert start["name"] == "get_weather"
+        assert "Tokyo" in str(start["arguments"])
+        end = events[2]
+        assert end["status"] == "ok"
+        assert isinstance(end["latency_sec"], float)
+        assert events[3]["latency_sec"] >= 0.0
+
+    def test_observer_reports_tool_error_status(self) -> None:
+        events: list[dict[str, object]] = []
+
+        def failing(arguments: dict[str, object]) -> object:
+            raise ValueError("boom")
+
+        client = ScriptedClient(
+            tool_response(TOOL_CALL),
+            text_response("handled"),
+        )
+        agent, _ = make_agent(client, handler=failing, observer=events.append)
+        agent.run(USER_TURN)
+
+        end = next(e for e in events if e["event"] == "tool_end")
+        assert end["status"] == "error"
+
+    def test_observer_max_rounds_event(self) -> None:
+        events: list[dict[str, object]] = []
+        client = ScriptedClient(tool_response(TOOL_CALL), tool_response(TOOL_CALL))
+        agent, _ = make_agent(client, max_tool_rounds=2, observer=events.append)
+
+        with pytest.raises(MaxToolRoundsError):
+            agent.run(USER_TURN)
+
+        assert events[-1]["event"] == "max_rounds"
+        assert events[-1]["round"] == 2
+
+    def test_no_observer_behavior_unchanged(self) -> None:
+        client = ScriptedClient(
+            tool_response(TOOL_CALL),
+            text_response("final answer"),
+        )
+        agent, _ = make_agent(client)
+        assert agent.observer is None
+        assert agent.run(USER_TURN) == "final answer"
+
+    def test_arguments_sanitized_to_bounded_length(self) -> None:
+        from personal_ai.agent import _sanitize_arguments
+
+        big = "x" * 1000
+        sanitized = _sanitize_arguments({"query": big})
+        assert len(sanitized["query"]) <= 205
+        assert sanitized["query"].endswith("...")

@@ -79,7 +79,9 @@ def test_main_runs_agent_and_prints_response(
             calls["client_exited"] = True
 
     class FakeAgent:
-        def __init__(self, client: object, registry: object) -> None:
+        def __init__(
+            self, client: object, registry: object, observer: object = None
+        ) -> None:
             calls["client"] = client
             calls["registry"] = registry
 

@@ -255,7 +255,9 @@ class TestMainWithDatabase:
                 return None
 
         class FakeAgent:
-            def __init__(self, client: object, registry: object) -> None:
+            def __init__(
+                self, client: object, registry: object, observer: object = None
+            ) -> None:
                 captured["registry"] = registry
 
             def run(self, messages: object) -> str:
@@ -300,7 +302,9 @@ class TestMainWithDatabase:
                 return None
 
         class FakeAgent:
-            def __init__(self, client: object, registry: object) -> None:
+            def __init__(
+                self, client: object, registry: object, observer: object = None
+            ) -> None:
                 captured["registry"] = registry
 
             def run(self, messages: object) -> str:
@@ -332,3 +336,74 @@ class TestMainWithDatabase:
 
         assert captured["registry"] is registry
         assert capsys.readouterr().out == "Agent response.\n"
+
+
+class TestVerboseMode:
+    """``--verbose`` exposes operational progress on stderr without altering
+    the final answer on stdout or exposing hidden reasoning."""
+
+    def _run(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        capsys,
+        tmp_path: Path,
+        verbose_args: list[str],
+    ) -> dict[str, object]:
+        captured: dict[str, object] = {}
+        workspace = tmp_path / "workspace"
+        workspace.mkdir()
+
+        class FakeClient:
+            def __enter__(self) -> Self:
+                return self
+
+            def __exit__(self, *args: object) -> None:
+                return None
+
+        class FakeAgent:
+            def __init__(
+                self, client: object, registry: object, observer: object = None
+            ) -> None:
+                captured["observer"] = observer
+                if observer is not None:
+                    observer(
+                        {
+                            "event": "tool_start",
+                            "name": "search_knowledge",
+                            "arguments": {"query": "'BCG'"},
+                        }
+                    )
+                    observer({"event": "completed", "round": 1, "latency_sec": 1.5})
+
+            def run(self, messages: object) -> str:
+                return "Agent response."
+
+        monkeypatch.setattr(cli, "OllamaClient", lambda model: FakeClient())
+        monkeypatch.setattr(cli, "Agent", FakeAgent)
+        monkeypatch.setattr(
+            "sys.argv",
+            ["personal-ai", "--workspace", str(workspace), *verbose_args, "Prompt?"],
+        )
+
+        cli.main()
+        return captured
+
+    def test_verbose_emits_operational_info_to_stderr(
+        self, monkeypatch: pytest.MonkeyPatch, capsys, tmp_path: Path
+    ) -> None:
+        captured = self._run(monkeypatch, capsys, tmp_path, ["--verbose"])
+        assert captured["observer"] is not None
+        captured_out = capsys.readouterr()
+        assert captured_out.out == "Agent response.\n"
+        assert "[tool] search_knowledge" in captured_out.err
+        assert "[agent] completed" in captured_out.err
+        assert "round" in captured_out.err
+
+    def test_default_mode_has_no_observer_and_no_stderr_output(
+        self, monkeypatch: pytest.MonkeyPatch, capsys, tmp_path: Path
+    ) -> None:
+        captured = self._run(monkeypatch, capsys, tmp_path, [])
+        assert captured["observer"] is None
+        captured_out = capsys.readouterr()
+        assert captured_out.out == "Agent response.\n"
+        assert captured_out.err == ""

@@ -1,7 +1,8 @@
 """Agent loop connecting Ollama chat completion with registered tools."""
 
 import json
-from collections.abc import Sequence
+import time
+from collections.abc import Callable, Sequence
 
 from personal_ai.ollama_client import (
     ChatMessage,
@@ -12,6 +13,8 @@ from personal_ai.ollama_client import (
 from personal_ai.tools.registry import ToolError, ToolRegistry
 
 MAX_TOOL_RESULT_CHARS = 12000
+
+AgentObserver = Callable[[dict[str, object]], None]
 
 
 class AgentError(Exception):
@@ -50,6 +53,20 @@ def _format_error(exc: ToolError) -> str:
     return f"error: {detail}"
 
 
+def _sanitize_arguments(arguments: dict[str, object]) -> dict[str, object]:
+    """Return tool arguments safe for operational logging.
+
+    Only a bounded-per-key representation is produced; long values (for
+    example query strings) are truncated so verbose output never dumps large
+    payloads. This is for observability only and does not alter execution.
+    """
+    sanitized: dict[str, object] = {}
+    for key, value in arguments.items():
+        text = repr(value)
+        sanitized[key] = text if len(text) <= 200 else text[:200] + "..."
+    return sanitized
+
+
 class Agent:
     """Runs a synchronous tool-calling loop against a local Ollama model."""
 
@@ -58,6 +75,7 @@ class Agent:
         client: OllamaClient,
         registry: ToolRegistry,
         max_tool_rounds: int = 8,
+        observer: AgentObserver | None = None,
     ) -> None:
         if max_tool_rounds < 1:
             msg = f"max_tool_rounds must be >= 1, got {max_tool_rounds}"
@@ -65,15 +83,29 @@ class Agent:
         self.client = client
         self.registry = registry
         self.max_tool_rounds = max_tool_rounds
+        self.observer = observer
 
     def run(self, messages: Sequence[ChatMessage]) -> str:
         conversation = list(messages)
         schemas = self.registry.schemas()
+        started = time.monotonic()
 
-        for _ in range(self.max_tool_rounds):
+        for round_index in range(1, self.max_tool_rounds + 1):
             response = self.client.chat(conversation, tools=schemas)
             if not response.tool_calls:
+                if self.observer is not None:
+                    self.observer(
+                        {
+                            "event": "completed",
+                            "round": round_index,
+                            "latency_sec": time.monotonic() - started,
+                        }
+                    )
                 return response.content
+            self._notify(
+                "round",
+                {"round": round_index, "tool_calls": response.tool_calls},
+            )
             conversation.append(self._assistant_message(response))
             for call in response.tool_calls:
                 conversation.append(
@@ -84,6 +116,14 @@ class Agent:
             f"Model exceeded {self.max_tool_rounds} tool rounds "
             "without producing a final answer"
         )
+        if self.observer is not None:
+            self.observer(
+                {
+                    "event": "max_rounds",
+                    "round": self.max_tool_rounds,
+                    "latency_sec": time.monotonic() - started,
+                }
+            )
         raise MaxToolRoundsError(msg)
 
     def _assistant_message(self, response: ChatResponse) -> ChatMessage:
@@ -93,9 +133,32 @@ class Agent:
             tool_calls=response.tool_calls,
         )
 
+    def _notify(self, event: str, payload: dict[str, object]) -> None:
+        if self.observer is None:
+            return
+        self.observer({"event": event, **payload})
+
     def _execute(self, call: ToolCall) -> str:
+        self._notify(
+            "tool_start",
+            {
+                "name": call.name,
+                "arguments": _sanitize_arguments(call.arguments),
+            },
+        )
+        tool_started = time.monotonic()
         try:
             output = _serialize_result(self.registry.execute(call.name, call.arguments))
+            status = "ok"
         except ToolError as exc:
             output = _format_error(exc)
+            status = "error"
+        self._notify(
+            "tool_end",
+            {
+                "name": call.name,
+                "status": status,
+                "latency_sec": time.monotonic() - tool_started,
+            },
+        )
         return _bound_result(output)
