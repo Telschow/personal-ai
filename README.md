@@ -742,24 +742,21 @@ usually fine.
 
 ## O. Repository state / git
 
-- HEAD: `59d89fa` (`feat(cli): add minimal --verbose agent observability`).
-  Local `main` is ahead of `origin/main` by 3 commits (not pushed).
-- **The retained Phase 23 production changes are currently UNcommitted** in
-  the working tree:
-  - `src/personal_ai/storage/chunks.py`
-  - `src/personal_ai/storage/conversations.py`
-  - `src/personal_ai/tools/defaults.py`
-  - `tests/test_cli_wiring.py`, `tests/test_storage_conversations.py`,
-    `tests/test_tool_defaults.py`, `tests/test_tool_search.py`
+- HEAD: `1f2fb4a` (`docs: document the personal AI HTTP API and Open WebUI
+  integration`). Local `main` is ahead of `origin/main` by 6 commits (not
+  pushed).
+- Phase 23 retrieval correctness fixes and Phase 30 (API) are **committed**
+  in the three most recent commits:
+  1. `1a9c130 fix(retrieval): retain phase 23 multi-term ...`
+  2. `0133892 feat(api): add OpenAI-compatible personal AI HTTP API`
+  3. `1f2fb4a docs: document the personal AI HTTP API and Open WebUI integration`
 - Untracked:
-  - `docs/` (contains `docs/USAGE.md`)
   - `scripts/evaluate_agent.py` (private/manual eval harness — not intended
     for automatic commit)
 - `knowledge.db` at the repo root, `previous_project_and_raw_data/`, and
   `raw_data.zip` are git-ignored local data and must never be committed.
-
-Nothing here is committed automatically; commit decisions are made explicitly
-once the documentation and plan are reviewed.
+- `/tmp` corpus artifacts (e.g. `/tmp/ph18_corpus.db`) live outside the repo
+  and are never committed.
 
 ---
 
