@@ -102,6 +102,8 @@ def test_successful_search_returns_serialized_hits(registry) -> None:
             "chunk_index": None,
             "text": "guitar practice log",
             "rank": results[0]["rank"],  # type: ignore[index]
+            "source_type": "keep",
+            "source": "notes/doc-1.json",
         },
         {
             "chunk_id": "chunk-b",
@@ -109,6 +111,8 @@ def test_successful_search_returns_serialized_hits(registry) -> None:
             "chunk_index": 1,
             "text": "guitar chord theory",
             "rank": results[1]["rank"],  # type: ignore[index]
+            "source_type": "notebooklm",
+            "source": "notes/doc-1.json",
         },
     ]
     assert isinstance(results[0]["rank"], float)  # type: ignore[index]
@@ -121,6 +125,48 @@ def test_source_type_filter_narrows_results(registry) -> None:
     )
 
     assert [hit["chunk_id"] for hit in results] == ["chunk-b"]  # type: ignore[index]
+
+
+def test_mime_filter_narrows_results(tmp_path: Path) -> None:
+    connection = connect_database(":memory:")
+    try:
+        documents = DocumentStore(connection)
+        chunks = ChunkStore(connection)
+        documents.add(
+            make_document(id="doc-pdf", metadata={"mime_type": "application/pdf"})
+        )
+        documents.add(make_document(id="doc-keep", metadata={}))
+        chunks.add_many(
+            (
+                DocumentChunk(
+                    id="chunk-pdf", document_id="doc-pdf", text="guitar pdf notes"
+                ),
+                DocumentChunk(
+                    id="chunk-keep", document_id="doc-keep", text="guitar plain notes"
+                ),
+            )
+        )
+        registry = create_default_registry(tmp_path, chunk_store=chunks)
+
+        pdf_only = registry.execute(
+            "search_documents",
+            {
+                "query": "guitar",
+                "filter": {"mime_types": ["application/pdf"]},
+            },
+        )
+        text_only = registry.execute(
+            "search_documents",
+            {
+                "query": "guitar",
+                "filter": {"mime_types": ["text/plain"]},
+            },
+        )
+
+        assert [hit["chunk_id"] for hit in pdf_only] == ["chunk-pdf"]
+        assert text_only == []
+    finally:
+        connection.close()
 
 
 def test_date_filter_excludes_documents_outside_window(registry) -> None:

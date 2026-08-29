@@ -89,13 +89,21 @@ LIMIT ?
 
 @dataclass(frozen=True, slots=True)
 class ChunkSearchResult:
-    """One keyword-search hit, projected from the authoritative chunk row."""
+    """One keyword-search hit, projected from the authoritative chunk row.
+
+    ``source_type`` and ``source`` carry the owning document's provenance,
+    resolved in one batched lookup after the rank query (see
+    :func:`_load_document_provenance`). Orphaned chunks and standalone
+    chunk stores without a ``documents`` table report ``None`` provenance.
+    """
 
     chunk_id: str
     document_id: str
     chunk_index: int | None
     text: str
     rank: float
+    source_type: str | None = None
+    source: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -103,8 +111,11 @@ class DocumentFilter:
     """Explicit constraints on authoritative document metadata.
 
     Every field is optional; a filter with no fields set matches every
-    document exactly like no filter at all. ``source_types`` is an explicit
-    inclusion list. Date boundaries are inclusive and compared lexically
+    document exactly like no filter at all. ``source_types`` and
+    ``mime_types`` are explicit inclusion lists. The MIME filter reads the
+    authoritative ``documents.metadata`` record (where source adapters
+    store ``mime_type``); documents without a MIME type never match. Date
+    boundaries are inclusive and compared lexically
     against the stored ISO-8601 timestamps, so boundaries written in the
     same format as the documents compare naturally; date-only strings act
     as inclusive whole-day bounds. Documents whose timestamp is unknown
@@ -112,26 +123,28 @@ class DocumentFilter:
 
     Invalid values fail loudly at construction instead of silently
     narrowing results: unparsable boundaries, inverted ranges, mixed
-    offset-naive/aware boundary pairs, and empty or blank source types are
-    all rejected.
+    offset-naive/aware boundary pairs, and empty or blank source or MIME
+    types are all rejected.
     """
 
     source_types: tuple[str, ...] | None = None
+    mime_types: tuple[str, ...] | None = None
     created_after: str | None = None
     created_before: str | None = None
     modified_after: str | None = None
     modified_before: str | None = None
 
     def __post_init__(self) -> None:
-        if self.source_types is not None:
-            source_types = tuple(self.source_types)
-            if not source_types:
-                msg = "source_types must be None or non-empty"
-                raise ValueError(msg)
-            if any(not isinstance(value, str) or not value for value in source_types):
-                msg = "source_types entries must be non-empty strings"
-                raise ValueError(msg)
-            object.__setattr__(self, "source_types", source_types)
+        object.__setattr__(
+            self,
+            "source_types",
+            _validate_type_list("source_types", self.source_types),
+        )
+        object.__setattr__(
+            self,
+            "mime_types",
+            _validate_type_list("mime_types", self.mime_types),
+        )
         _validate_boundary("created_after", self.created_after)
         _validate_boundary("created_before", self.created_before)
         _validate_boundary("modified_after", self.modified_after)
@@ -144,11 +157,28 @@ class DocumentFilter:
         """True when no field constrains the search."""
         return (
             self.source_types is None
+            and self.mime_types is None
             and self.created_after is None
             and self.created_before is None
             and self.modified_after is None
             and self.modified_before is None
         )
+
+
+def _validate_type_list(
+    field: str, value: tuple[str, ...] | None
+) -> tuple[str, ...] | None:
+    """Validate an inclusion-list filter field (source/MIME types)."""
+    if value is None:
+        return None
+    entries = tuple(value)
+    if not entries:
+        msg = f"{field} must be None or non-empty"
+        raise ValueError(msg)
+    if any(not isinstance(entry, str) or not entry for entry in entries):
+        msg = f"{field} entries must be non-empty strings"
+        raise ValueError(msg)
+    return entries
 
 
 def _parse_boundary(field: str, value: str) -> dt.datetime:
@@ -189,6 +219,12 @@ def _document_constraints(
         placeholders = ", ".join("?" * len(filters.source_types))
         clauses.append(f"documents.source_type IN ({placeholders})")
         parameters.extend(filters.source_types)
+    if filters.mime_types is not None:
+        placeholders = ", ".join("?" * len(filters.mime_types))
+        clauses.append(
+            "json_extract(documents.metadata, '$.mime_type') IN (" + placeholders + ")"
+        )
+        parameters.extend(filters.mime_types)
     for column, after_field, before_field in (
         ("created_at", "created_after", "created_before"),
         ("modified_at", "modified_after", "modified_before"),
@@ -219,6 +255,40 @@ def _match_expression(query: str) -> str | None:
     if not terms:
         return None
     return " ".join(f'"{term.replace('"', '""')}"' for term in terms)
+
+
+def _document_provenance(
+    connection: sqlite3.Connection, rows: list[tuple[object, ...]]
+) -> tuple[tuple[str | None, str | None], ...]:
+    """Resolve owning-document provenance for search hit rows in one query.
+
+    Returns one ``(source_type, source)`` pair per input row, aligned with
+    ``rows`` by order. The lookup is batched by document id (never one query
+    per hit). Documents without a row in the ``documents`` table (orphaned
+    chunks) and standalone chunk stores that never created that table both
+    yield ``None`` provenance.
+    """
+    if not rows:
+        return ()
+    has_documents_table = (
+        connection.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'documents'"
+        ).fetchone()
+        is not None
+    )
+    if not has_documents_table:
+        return ((None, None),) * len(rows)
+    document_ids = {row[1] for row in rows}
+    placeholders = ", ".join("?" * len(document_ids))
+    fetched = {
+        row[0]: (row[1], row[2])
+        for row in connection.execute(
+            "SELECT id, source_type, source FROM documents "
+            f"WHERE id IN ({placeholders})",
+            tuple(document_ids),
+        ).fetchall()
+    }
+    return tuple(fetched.get(row[1], (None, None)) for row in rows)
 
 
 def _order_index(chunk: DocumentChunk) -> int | None:
@@ -384,6 +454,7 @@ class ChunkStore:
             rows = self._connection.execute(
                 sql, (expression, *parameters, limit)
             ).fetchall()
+        provenance = _document_provenance(self._connection, rows)
         return tuple(
             ChunkSearchResult(
                 chunk_id=str(row[0]),
@@ -391,8 +462,10 @@ class ChunkStore:
                 chunk_index=row[2] if row[2] is None else int(row[2]),
                 text=str(row[3]),
                 rank=float(row[4]),
+                source_type=provenance[index][0],
+                source=provenance[index][1],
             )
-            for row in rows
+            for index, row in enumerate(rows)
         )
 
     def rebuild_search_index(self) -> int:

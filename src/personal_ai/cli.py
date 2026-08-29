@@ -7,9 +7,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from personal_ai.agent import Agent, AgentObserver
+from personal_ai.config import load_vision_settings
 from personal_ai.ingestion import DocumentIngestor
 from personal_ai.ollama_client import ChatMessage, OllamaClient
 from personal_ai.ollama_structured import OllamaStructuredExtractor
+from personal_ai.ollama_vision import OllamaVisionExtractor
 from personal_ai.orchestration import ingest_source
 from personal_ai.retrieval import (
     RetrievalService,
@@ -17,6 +19,8 @@ from personal_ai.retrieval import (
     search_documents,
 )
 from personal_ai.sources.base import SourceError
+from personal_ai.sources.email import SOURCE_TYPE as EMAIL_SOURCE_TYPE
+from personal_ai.sources.financial import SOURCE_TYPE as FINANCIAL_SOURCE_TYPE
 from personal_ai.sources.registry import known_source_types, resolve_source_adapter
 from personal_ai.storage import (
     ChunkStore,
@@ -25,6 +29,7 @@ from personal_ai.storage import (
     EmbeddingStore,
     EventStore,
     ExtractionStore,
+    VisionStore,
     connect_database,
 )
 from personal_ai.tools import ToolRegistry, create_default_registry
@@ -151,16 +156,42 @@ def run_ingest(source_type: str, source_path: Path, database: Path) -> None:
         extraction_store = ExtractionStore(connection)
         chunk_store = ChunkStore(connection)
         embedding_store = EmbeddingStore(connection)
+        vision_store = VisionStore(connection)
+        vision_settings = load_vision_settings()
 
-        with OllamaClient(model=MODEL) as client:
-            ingestor = DocumentIngestor(
+        def build_ingestor(
+            client: OllamaClient | None,
+            vision_extractor: OllamaVisionExtractor | None = None,
+        ) -> DocumentIngestor:
+            extractor = None if client is None else OllamaStructuredExtractor(client)
+            return DocumentIngestor(
                 document_store,
                 extraction_store,
-                OllamaStructuredExtractor(client),
+                extractor,
                 chunk_store,
                 embedding_store,
+                vision_extractor=vision_extractor,
+                vision_store=vision_store,
             )
-            summary = ingest_source(adapter, ingestor)
+
+        if source_type in (EMAIL_SOURCE_TYPE, FINANCIAL_SOURCE_TYPE):
+            # Email and financial extraction are fully local and deterministic;
+            # no model call is needed, so structured and vision extraction are
+            # disabled entirely.
+            summary = ingest_source(adapter, build_ingestor(None))
+        else:
+            with OllamaClient(model=MODEL) as client:
+                if vision_settings.model:
+                    with OllamaClient(model=vision_settings.model) as vision_client:
+                        vision_extractor = OllamaVisionExtractor(
+                            vision_client,
+                            prompt_version=vision_settings.prompt_version,
+                        )
+                        summary = ingest_source(
+                            adapter, build_ingestor(client, vision_extractor)
+                        )
+                else:
+                    summary = ingest_source(adapter, build_ingestor(client))
     finally:
         connection.close()
 

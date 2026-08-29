@@ -12,6 +12,10 @@ from dataclasses import dataclass
 
 EMBEDDING_MODEL_ENV = "PERSONAL_AI_EMBEDDING_MODEL"
 
+VISION_MODEL_ENV = "PERSONAL_AI_VISION_MODEL"
+VISION_PROMPT_VERSION_ENV = "PERSONAL_AI_VISION_PROMPT_VERSION"
+DEFAULT_VISION_PROMPT_VERSION = "v1"
+
 CHAT_MODEL_ENV = "PERSONAL_AI_CHAT_MODEL"
 API_HOST_ENV = "PERSONAL_AI_API_HOST"
 API_PORT_ENV = "PERSONAL_AI_API_PORT"
@@ -40,6 +44,31 @@ def load_embedding_settings(
     source = os.environ if environ is None else environ
     raw = source.get(EMBEDDING_MODEL_ENV, "").strip()
     return EmbeddingSettings(model=raw or None)
+
+
+@dataclass(frozen=True, slots=True)
+class VisionSettings:
+    """Vision extraction configuration.
+
+    ``model`` is ``None`` when :data:`VISION_MODEL_ENV` is absent or blank,
+    which disables page-level vision extraction entirely: image-heavy
+    documents keep their existing store-without-chunks behavior. The chat
+    model never becomes a vision model implicitly.
+    """
+
+    model: str | None
+    prompt_version: str = DEFAULT_VISION_PROMPT_VERSION
+
+
+def load_vision_settings(
+    environ: Mapping[str, str] | None = None,
+) -> VisionSettings:
+    """Read vision configuration from the given (or real) environment."""
+    source = os.environ if environ is None else environ
+    raw_model = source.get(VISION_MODEL_ENV, "").strip()
+    raw_version = source.get(VISION_PROMPT_VERSION_ENV, "").strip()
+    prompt_version = raw_version or DEFAULT_VISION_PROMPT_VERSION
+    return VisionSettings(model=raw_model or None, prompt_version=prompt_version)
 
 
 @dataclass(frozen=True, slots=True)

@@ -70,6 +70,8 @@ def _parse_tool_call(raw_call: Any, position: int) -> ToolCall:
 
 def _serialize_message(message: ChatMessage) -> dict[str, Any]:
     serialized: dict[str, Any] = {"role": message.role, "content": message.content}
+    if message.images:
+        serialized["images"] = list(message.images)
     if message.tool_calls:
         serialized["tool_calls"] = [
             {
@@ -94,11 +96,17 @@ class ToolCall:
 
 @dataclass(frozen=True, slots=True)
 class ChatMessage:
-    """A single message in an Ollama conversation."""
+    """A single message in an Ollama conversation.
+
+    ``images`` holds base64-encoded image payloads (as expected by
+    Ollama's ``/api/chat`` endpoint), forwarded verbatim by the client;
+    encoding PNG/JPEG bytes into base64 is the caller's responsibility.
+    """
 
     role: str
     content: str
     tool_calls: tuple[ToolCall, ...] = ()
+    images: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

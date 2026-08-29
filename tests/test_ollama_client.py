@@ -345,3 +345,75 @@ def test_think_and_format_absent_when_not_provided() -> None:
     body = json.loads(requests[0].content)
     assert "think" not in body
     assert "format" not in body
+
+
+def test_images_serialized_into_request_payload() -> None:
+    message = ChatMessage(
+        role="user",
+        content="read this page",
+        images=("<base64-alpha>", "<base64-beta>"),
+    )
+    client, requests = make_client(
+        lambda request: httpx.Response(200, json=chat_payload())
+    )
+
+    with client:
+        client.chat([message])
+
+    body = json.loads(requests[0].content)
+    assert body["messages"] == [
+        {
+            "role": "user",
+            "content": "read this page",
+            "images": ["<base64-alpha>", "<base64-beta>"],
+        }
+    ]
+
+
+def test_image_payload_is_forwarded_verbatim() -> None:
+    encoded = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+    message = ChatMessage(role="user", content="", images=(encoded,))
+    client, requests = make_client(
+        lambda request: httpx.Response(200, json=chat_payload("description"))
+    )
+
+    with client:
+        result = client.chat([message])
+
+    body = json.loads(requests[0].content)
+    assert body["messages"][0]["images"] == [encoded]
+    assert result.content == "description"
+
+
+def test_messages_without_images_never_include_images_key() -> None:
+    client, requests = make_client(
+        lambda request: httpx.Response(200, json=chat_payload())
+    )
+
+    with client:
+        client.chat(USER_MESSAGE)
+
+    body = json.loads(requests[0].content)
+    assert "images" not in body["messages"][0]
+    assert body["messages"][0] == {"role": "user", "content": "hi"}
+
+
+def test_images_and_tool_calls_serialize_independently() -> None:
+    message = ChatMessage(
+        role="assistant",
+        content="",
+        tool_calls=(
+            ToolCall(id="c1", name="list_directory", arguments={"path": "/tmp"}),
+        ),
+        images=("<base64>",),
+    )
+    client, requests = make_client(
+        lambda request: httpx.Response(200, json=tool_call_payload())
+    )
+
+    with client:
+        client.chat([message])
+
+    body = json.loads(requests[0].content)
+    assert body["messages"][0]["images"] == ["<base64>"]
+    assert body["messages"][0]["tool_calls"][0]["function"]["name"] == "list_directory"

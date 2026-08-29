@@ -8,6 +8,8 @@ from personal_ai.documents.models import compute_content_hash
 from personal_ai.sources.base import SourceError
 from personal_ai.sources.models import SourceRecord
 
+SOURCE_TYPE = "file"
+
 SUPPORTED_EXTENSIONS: dict[str, str] = {
     ".txt": "text/plain",
     ".md": "text/markdown",
@@ -64,7 +66,7 @@ class FilesystemSourceAdapter:
 
     @property
     def source_type(self) -> str:
-        return "file"
+        return SOURCE_TYPE
 
     def discover(self) -> list[SourceRecord]:
         records: list[SourceRecord] = []

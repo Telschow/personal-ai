@@ -270,11 +270,11 @@ class TestNonPDFRegression:
         finally:
             harness.close()
 
-    def test_mixed_pdf_skips_chunking(self, tmp_path: object) -> None:
+    def test_image_only_pdf_is_stored_without_chunks(self, tmp_path: object) -> None:
         import pathlib
 
         workspace = pathlib.Path(tmp_path)
-        # Image-only PDF: should be IMAGE_HEAVY, no chunks
+        # Image-only PDF: IMAGE_HEAVY, stored as a document but never chunked.
         doc = pymupdf.open()
         page = doc.new_page(width=200, height=200)
         pixmap = pymupdf.Pixmap(pymupdf.csRGB, pymupdf.IRect(0, 0, 50, 50), 0)
@@ -295,6 +295,57 @@ class TestNonPDFRegression:
             assert result.kind is DocumentKind.IMAGE_HEAVY
             assert result.chunks == ()
             assert result.structured_extraction is None
+            assert harness.document_store.get(result.document_id) is not None
+        finally:
+            harness.close()
+
+
+# ---------------------------------------------------------------------------
+# C2. Mixed PDF (usable text + image evidence)
+# ---------------------------------------------------------------------------
+
+
+class TestMixedPDFEndToEnd:
+    def test_mixed_pdf_is_chunked_but_never_reaches_the_model(
+        self, tmp_path: object
+    ) -> None:
+        import pathlib
+
+        workspace = pathlib.Path(tmp_path)
+        # A text page above the chunking threshold plus an image-only page
+        # classifies as MIXED: chunked from extracted text, no extraction.
+        doc = pymupdf.open()
+        text_page = doc.new_page(width=595, height=842)
+        lines = [_MIN_TEXT[i : i + 80] for i in range(0, len(_MIN_TEXT), 80)]
+        text_page.insert_text((36, 36), "\n".join(lines))
+
+        image_page = doc.new_page(width=200, height=200)
+        pixmap = pymupdf.Pixmap(pymupdf.csRGB, pymupdf.IRect(0, 0, 50, 50), 0)
+        pixmap.clear_with(255)
+        image_page.insert_image(
+            pymupdf.Rect(10, 10, 190, 190), stream=pixmap.tobytes("png")
+        )
+        pdf_bytes = doc.tobytes()
+        doc.close()
+
+        (workspace / "mixed.pdf").write_bytes(pdf_bytes)
+
+        adapter = FilesystemSourceAdapter(workspace)
+        harness = IngestionHarness()
+        try:
+            records = adapter.discover()
+            result = harness.ingestor.ingest(records[0])
+
+            assert result.kind is DocumentKind.MIXED
+            assert result.structured_extraction is None
+            assert harness.extractor.calls == []
+            assert harness.extraction_store.get(result.document_id) is None
+
+            stored_chunks = harness.chunk_store.list_for_document(result.document_id)
+            assert stored_chunks == result.chunks
+            assert result.chunks
+            assert all(c.page_number == 1 for c in stored_chunks)
+            assert "project" in stored_chunks[0].text
         finally:
             harness.close()
 

@@ -12,6 +12,10 @@ from personal_ai.sources.chatgpt import SOURCE_TYPE as CHATGPT_SOURCE_TYPE
 from personal_ai.sources.chatgpt import ChatGPTSourceAdapter
 from personal_ai.sources.email import SOURCE_TYPE as EMAIL_SOURCE_TYPE
 from personal_ai.sources.email import EmailSourceAdapter
+from personal_ai.sources.filesystem import SOURCE_TYPE as FILE_SOURCE_TYPE
+from personal_ai.sources.filesystem import FilesystemSourceAdapter
+from personal_ai.sources.financial import SOURCE_TYPE as FINANCIAL_SOURCE_TYPE
+from personal_ai.sources.financial import FinancialSourceAdapter
 from personal_ai.sources.gemini import SOURCE_TYPE as GEMINI_SOURCE_TYPE
 from personal_ai.sources.gemini import GeminiSourceAdapter
 from personal_ai.sources.keep import SOURCE_TYPE as KEEP_SOURCE_TYPE
@@ -25,6 +29,8 @@ _ADAPTER_CLASSES: dict[str, type] = {
     GEMINI_SOURCE_TYPE: GeminiSourceAdapter,
     CHATGPT_SOURCE_TYPE: ChatGPTSourceAdapter,
     EMAIL_SOURCE_TYPE: EmailSourceAdapter,
+    FINANCIAL_SOURCE_TYPE: FinancialSourceAdapter,
+    FILE_SOURCE_TYPE: FilesystemSourceAdapter,
 }
 
 

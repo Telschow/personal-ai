@@ -27,6 +27,25 @@ def _make_record(payload: bytes, source_key: str = "notes.txt") -> SourceRecord:
     )
 
 
+def _make_email_record(payload: bytes, subject: str) -> SourceRecord:
+    return SourceRecord(
+        source_type="email",
+        source_key="synthetic-phase33@example.test",
+        content_hash=compute_content_hash(payload),
+        created_at="2026-08-26T10:00:00+00:00",
+        modified_at="2026-08-26T10:00:00+00:00",
+        payload=payload,
+        metadata={
+            "filename": "synthetic-phase33@example.test",
+            "mime_type": "message/rfc822",
+            "subject": subject,
+            "sender": "sender@example.test",
+            "to": "me@example.test",
+            "message_id": "<synthetic-phase33@example.test>",
+        },
+    )
+
+
 class FakeStructuredExtractor:
     def __init__(self) -> None:
         self.calls = 0
@@ -200,3 +219,53 @@ class TestRetrievalService:
         results = service.search("BCG")
         doc_ids = {r.document_id for r in results}
         assert len(doc_ids) >= 1
+
+    # --- Phase 33: result provenance and source identity -------------------
+
+    def test_source_type_present_on_chunk_and_extraction_results(self) -> None:
+        self._ingest(TEXT_HEAVY_TEXT.encode())
+        service = self._service()
+
+        results = service.search("BCG")
+        assert len(results) > 0
+        for result in results:
+            assert result.source_type == "file"
+
+    def test_email_subject_becomes_result_title(self) -> None:
+        record = _make_email_record(
+            b"Guitar chord charts phase33mbox. " * 20,
+            subject="Phase 33 Email Subject",
+        )
+        ingested = self.ingestor.ingest(record)
+        service = self._service()
+
+        hits = [
+            result
+            for result in service.search("phase33mbox")
+            if result.document_id == ingested.document_id
+        ]
+        assert len(hits) > 0
+        for result in hits:
+            assert result.title == "Phase 33 Email Subject"
+            assert result.source_type == "email"
+
+    def test_email_without_subject_falls_back_to_source_identity(self) -> None:
+        record = _make_email_record(
+            b"Guitar chord charts phase33fallback. " * 20,
+            subject="",
+        )
+        ingested = self.ingestor.ingest(record)
+        document = self.document_store.get(ingested.document_id)
+        assert document is not None
+        service = self._service()
+
+        hits = [
+            result
+            for result in service.search("phase33fallback")
+            if result.document_id == ingested.document_id
+        ]
+        assert len(hits) > 0
+        for result in hits:
+            assert result.title == document.source
+            assert result.title != "Phase 33 Email Subject"
+            assert result.source_type == "email"

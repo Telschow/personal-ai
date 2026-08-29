@@ -50,6 +50,7 @@ class TestKnowledgeSearchToolConversations:
         assert r["speaker"] == "User"
         assert r["timestamp"] == "2026-01-01T12:00:00+00:00"
         assert r["is_active_branch"] is True
+        assert r["source_type"] is None
         assert "[CONVERSATION]" in r["provenance"]
         assert "Career Goals" in r["provenance"]
         assert "Message 5" in r["provenance"]

@@ -129,6 +129,26 @@ def test_blank_source_types_member_is_rejected() -> None:
         DocumentFilter(source_types=("keep", ""))
 
 
+def test_mime_types_accepts_sequences_and_normalizes_to_tuples() -> None:
+    assert DocumentFilter(
+        mime_types=["application/pdf", "text/plain"]
+    ) == DocumentFilter(mime_types=("application/pdf", "text/plain"))
+
+
+def test_empty_mime_types_sequence_is_rejected() -> None:
+    with pytest.raises(ValueError, match="non-empty"):
+        DocumentFilter(mime_types=())
+
+
+def test_blank_mime_types_member_is_rejected() -> None:
+    with pytest.raises(ValueError, match="non-empty"):
+        DocumentFilter(mime_types=("application/pdf", ""))
+
+
+def test_mime_filter_is_not_empty() -> None:
+    assert not DocumentFilter(mime_types=("text/plain",)).is_empty
+
+
 def test_unparsable_date_boundary_is_rejected() -> None:
     with pytest.raises(ValueError, match="ISO-8601"):
         DocumentFilter(created_after="not-a-date")
@@ -287,6 +307,108 @@ def test_orphaned_chunks_leave_filtered_results_but_not_unfiltered(
 
     assert "chunk-orphan" in hit_ids(unfiltered)
     assert "chunk-orphan" not in hit_ids(filtered)
+
+
+# --- MIME-type filtering ----------------------------------------------------
+
+
+def _seed_mime_documents(harness: SearchHarness) -> None:
+    harness.seed(
+        make_document(
+            id="doc-pdf",
+            source="reports/annual.pdf",
+            source_type="file",
+            content_hash="hash-pdf",
+            metadata={"mime_type": "application/pdf"},
+        ),
+        make_chunk(
+            id="chunk-pdf",
+            document_id="doc-pdf",
+            text="guitar quarterly report",
+        ),
+    )
+    harness.seed(
+        make_document(
+            id="doc-txt",
+            source="notes/journal.txt",
+            source_type="file",
+            content_hash="hash-txt",
+            metadata={"mime_type": "text/plain"},
+        ),
+        make_chunk(
+            id="chunk-txt",
+            document_id="doc-txt",
+            text="guitar practice journal",
+        ),
+    )
+    harness.seed(
+        make_document(
+            id="doc-untyped",
+            source="notes/scratch.txt",
+            source_type="file",
+            content_hash="hash-untyped",
+            metadata={},
+        ),
+        make_chunk(
+            id="chunk-untyped",
+            document_id="doc-untyped",
+            text="guitar scratch notes",
+        ),
+    )
+
+
+def test_single_mime_type_restricts_hits(harness: SearchHarness) -> None:
+    _seed_mime_documents(harness)
+
+    hits = search(harness, filters=DocumentFilter(mime_types=("application/pdf",)))
+
+    assert hit_ids(hits) == ["chunk-pdf"]
+    assert hits[0].source_type == "file"
+    assert hits[0].source == "reports/annual.pdf"
+
+
+def test_multiple_mime_types_use_inclusion_semantics(harness: SearchHarness) -> None:
+    _seed_mime_documents(harness)
+
+    hits = search(
+        harness,
+        filters=DocumentFilter(mime_types=("application/pdf", "text/plain")),
+    )
+
+    assert sorted(hit_ids(hits)) == ["chunk-pdf", "chunk-txt"]
+
+
+def test_document_without_mime_metadata_never_matches_mime_filter(
+    harness: SearchHarness,
+) -> None:
+    _seed_mime_documents(harness)
+
+    hits = search(harness, filters=DocumentFilter(mime_types=("text/plain",)))
+
+    assert hit_ids(hits) == ["chunk-txt"]
+
+
+def test_combined_source_and_mime_filters_narrow_jointly(
+    harness: SearchHarness,
+) -> None:
+    _seed_mime_documents(harness)
+
+    hits = search(
+        harness,
+        filters=DocumentFilter(source_types=("file",), mime_types=("application/pdf",)),
+    )
+
+    assert hit_ids(hits) == ["chunk-pdf"]
+
+
+def test_source_types_never_replace_mime_filtering(
+    harness: SearchHarness,
+) -> None:
+    """A PDF is a ``file`` source, never a ``pdf`` source type."""
+    _seed_mime_documents(harness)
+
+    assert search(harness, filters=DocumentFilter(source_types=("pdf",))) == ()
+    assert search(harness, filters=DocumentFilter(mime_types=("application/pdf",)))
 
 
 # --- preserved search behavior under filtering -----------------------------

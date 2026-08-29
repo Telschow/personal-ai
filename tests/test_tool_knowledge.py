@@ -114,14 +114,55 @@ class TestKnowledgeSearchTool:
             {
                 "query": "BCG",
                 "filter": {
-                    "source_types": ["pdf"],
+                    "source_types": ["file"],
                     "created_after": "2026-01-01T00:00:00+00:00",
                 },
             }
         )
         assert service.last_filters is not None
-        assert service.last_filters.source_types == ("pdf",)
+        assert service.last_filters.source_types == ("file",)
         assert service.last_filters.created_after == "2026-01-01T00:00:00+00:00"
+
+    def test_passes_mime_types_filter_to_service(self) -> None:
+        """Phase 33: PDF filtering is MIME-based, forwarded unchanged."""
+        service = FakeRetrievalService()
+        tool = KnowledgeSearchTool(service)
+        tool.search_knowledge(
+            {
+                "query": "BCG",
+                "filter": {"mime_types": ["application/pdf"]},
+            }
+        )
+        assert service.last_filters is not None
+        assert service.last_filters.mime_types == ("application/pdf",)
+
+    def test_rejects_non_string_mime_types(self) -> None:
+        service = FakeRetrievalService()
+        tool = KnowledgeSearchTool(service)
+        with pytest.raises(ValueError, match="list of strings"):
+            tool.search_knowledge({"query": "BCG", "filter": {"mime_types": [1, 2, 3]}})
+
+    def test_output_includes_source_type(self) -> None:
+        from personal_ai.retrieval import SearchResult
+
+        service = FakeRetrievalService(
+            results=(
+                SearchResult(
+                    result_type="chunk",
+                    document_id="doc-1",
+                    score=0.85,
+                    title="Phase 33 Email Subject",
+                    text="BCG consulting project notes",
+                    page_number=None,
+                    matched_fields=(),
+                    source_type="email",
+                ),
+            )
+        )
+        tool = KnowledgeSearchTool(service)
+        results = tool.search_knowledge({"query": "BCG"})
+        assert results[0]["source_type"] == "email"
+        assert results[0]["title"] == "Phase 33 Email Subject"
 
     def test_created_before_filter_reaches_retrieval_service(self) -> None:
         """Phase 16: the tool passes created_before through to conversation

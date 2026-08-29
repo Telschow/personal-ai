@@ -12,6 +12,7 @@ single ranked result set.
 
 from dataclasses import dataclass
 
+from personal_ai.documents.models import Document
 from personal_ai.events.models import (
     EVENT_TYPE_SEARCH_QUERY,
     EVENT_TYPE_VIDEO_WATCH,
@@ -122,6 +123,10 @@ class SearchResult:
     Conversation-specific fields (``conversation_id``, ``message_id``,
     ``message_index``, ``role``, ``speaker``) are populated only for
     ``result_type="conversation"`` and are ``None`` otherwise.
+
+    ``source_type`` identifies the owning document's source for ``chunk``
+    and ``structured_extraction`` results (for example ``"file"``,
+    ``"email"``) and is ``None`` for conversation results.
     """
 
     result_type: str
@@ -138,9 +143,12 @@ class SearchResult:
     speaker: str | None = None
     timestamp: str | None = None
     is_active_branch: bool | None = None
+    source_type: str | None = None
 
 
-def _chunk_to_search_result(hit: ChunkSearchResult, title: str) -> SearchResult:
+def _chunk_to_search_result(
+    hit: ChunkSearchResult, title: str, source_type: str | None
+) -> SearchResult:
     """Convert a chunk search hit to the unified result format."""
     # BM25 rank is negative (closer to 0 = better).  Normalize to [0, 1].
     # Clamp very negative ranks to 0.
@@ -153,11 +161,12 @@ def _chunk_to_search_result(hit: ChunkSearchResult, title: str) -> SearchResult:
         text=hit.text,
         page_number=None,
         matched_fields=(),
+        source_type=source_type,
     )
 
 
 def _extraction_to_search_result(
-    hit: ExtractionSearchResult, title: str
+    hit: ExtractionSearchResult, title: str, source_type: str | None
 ) -> SearchResult:
     """Convert an extraction search hit to the unified result format."""
     return SearchResult(
@@ -168,6 +177,7 @@ def _extraction_to_search_result(
         text=hit.summary,
         page_number=None,
         matched_fields=hit.matched_fields,
+        source_type=source_type,
     )
 
 
@@ -244,22 +254,32 @@ class RetrievalService:
                 created_before=created_before,
             )
 
-        # Cache document titles to avoid repeated lookups
-        title_cache: dict[str, str] = {}
+        # Cache document rows to avoid repeated lookups. Titles prefer the
+        # email subject so mail results read naturally; the source key is
+        # the fallback identity. source_type travels with the same row.
+        document_cache: dict[str, Document | None] = {}
 
-        def _get_title(document_id: str) -> str:
-            if document_id not in title_cache:
-                doc = self._document_store.get(document_id)
-                title_cache[document_id] = doc.source if doc else document_id
-            return title_cache[document_id]
+        def _resolve_document(document_id: str) -> Document | None:
+            if document_id not in document_cache:
+                document_cache[document_id] = self._document_store.get(document_id)
+            return document_cache[document_id]
+
+        def _document_provenance(document_id: str) -> tuple[str, str | None]:
+            document = _resolve_document(document_id)
+            if document is None:
+                return document_id, None
+            subject = document.metadata.get("subject")
+            if isinstance(subject, str) and subject.strip():
+                return subject.strip(), document.source_type
+            return document.source, document.source_type
 
         results: list[SearchResult] = []
         for hit in chunk_hits:
-            results.append(_chunk_to_search_result(hit, _get_title(hit.document_id)))
+            title, source_type = _document_provenance(hit.document_id)
+            results.append(_chunk_to_search_result(hit, title, source_type))
         for hit in extraction_hits:
-            results.append(
-                _extraction_to_search_result(hit, _get_title(hit.document_id))
-            )
+            title, source_type = _document_provenance(hit.document_id)
+            results.append(_extraction_to_search_result(hit, title, source_type))
         for hit in conversation_hits:
             results.append(_conversation_to_search_result(hit))
 

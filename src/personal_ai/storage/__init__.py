@@ -13,6 +13,7 @@ from personal_ai.storage.documents import DocumentStore, connect_database
 from personal_ai.storage.embeddings import EmbeddingStore
 from personal_ai.storage.events import EventQuery, EventStore
 from personal_ai.storage.extractions import ExtractionSearchResult, ExtractionStore
+from personal_ai.storage.vision import StoredVisionPage, VisionStore
 
 __all__ = [
     "ChunkSearchResult",
@@ -26,5 +27,7 @@ __all__ = [
     "EventStore",
     "ExtractionSearchResult",
     "ExtractionStore",
+    "StoredVisionPage",
+    "VisionStore",
     "connect_database",
 ]

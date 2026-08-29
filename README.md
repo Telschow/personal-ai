@@ -85,7 +85,7 @@ Validated baseline:
 - Access: **CLI** (`python -m personal_ai.cli`) and, as of **Phase 30**, an
   **OpenAI-compatible HTTP API** (`python -m personal_ai.server`) that reuses
   the exact same Agent + ToolRegistry path — suitable as an Open WebUI backend.
-- Tests: 1237 passing (no network, no Ollama, no real personal data);
+- Tests: 1337 passing (no network, no Ollama, no real personal data);
   `ruff check` and `ruff format --check` clean.
 - No reproducible Category A (deterministic code-level) retrieval/tooling
   defect has been found.
@@ -377,16 +377,16 @@ unless stated.
 | NotebookLM articles | `sources/notebooklm.py` | adapter + corpus-validated |
 | Gemini conversations | `sources/gemini.py` | adapter + corpus-validated (170) |
 | ChatGPT conversations | `sources/chatgpt.py` | adapter + corpus-validated (469) |
-| Email (Gmail mbox) | `sources/email.py` | adapter implemented; real email not yet ingested at scale |
-| Generic files (txt/md/pdf/png/jpg/jpeg) | `sources/filesystem.py` | adapter implemented; workspace-scoped |
+| Email (Gmail mbox) | `sources/email.py` + `sources/email_normalization.py` | adapter + deterministic Message-ID identity + quote/signature normalization; model-free ingestion (Phase 32) |
+| Generic files (txt/md/pdf/png/jpg/jpeg) | `sources/filesystem.py` | adapter + CLI `--ingest file`; corpus-validated (41 PDFs ingested, Phase 31) |
 | Chrome history (events) | `sources/chrome_history*.py` → `event_ingestion` | implemented; live in the event corpus |
 | YouTube watch/search (events) | `sources/youtube_history*.py` → `event_ingestion` | implemented; live in the event corpus |
 
-**PDF text extraction** (code exists): `documents.extractor.extract_text`
-supports PDFs via PyMuPDF, with page-aware chunking (`chunk_document`) and
-classification (`TEXT_HEAVY` / `MIXED` / `IMAGE_HEAVY` / `EMPTY`). This is
-**implemented in code and covered by tests**, but the real personal PDFs are
-**not yet ingested** into a live corpus (see Roadmap Phase 31).
+**PDF ingestion** (implemented, Phase 31): `documents.extractor.extract_text`
+supports PDFs via PyMuPDF with page-aware chunking (`chunk_document`) and
+classification (`TEXT_HEAVY` / `MIXED` / `IMAGE_HEAVY` / `EMPTY`). The 41
+personal PDFs are ingested via the CLI into a local SQLite database; see
+[Phase 31](#phase-31--pdf-ingestion-done).
 
 ### The real, live corpus today
 
@@ -400,8 +400,14 @@ The corpus used by the accepted demo suite (`/tmp/ph18_corpus.db`) is
 This is the concrete, verified "indexed document count is 0" limitation from
 earlier evaluations: with no indexed document chunks, the model's durable
 knowledge comes from **conversations and events** (the narrow
-`search_documents` tool is therefore hidden). **PDFs are the next major
-source slice** that will populate the document/chunk side.
+`search_documents` tool is therefore hidden).
+
+Phase 31 adds the first **document corpus**: the 41 personal PDFs are ingested
+into a local SQLite knowledge base (`--ingest file`, see
+[docs/USAGE.md](docs/USAGE.md)), keyed by content hash and idempotent to
+re-run. Extractions and chunks live in that database; the demo corpus above and
+the filesystem scratch `knowledge.db` are separate. Merging the document corpus
+into a single always-on knowledge base used by agent mode is the next step.
 
 (Note: the `knowledge.db` at the repo root is a small, git-ignored local
 test/scratch database — 1 document, 0 chunks — and is not the demo corpus.)
@@ -427,6 +433,8 @@ Concrete, with statuses.
 - User documentation — `docs/USAGE.md`
 - **Phase 30 — OpenAI-compatible HTTP API** (server module, `/v1/chat/completions`,
   `/v1/models`, localhost binding, optional token, tests)
+- **Phase 34a — vision extraction for image-heavy PDFs** (optional local-only
+  page-level vision, per-page cache, additive chunk augmentation)
 - **Open WebUI integration path** (see [Open WebUI integration](#k-open-webui-integration))
 
 ### Current state
@@ -447,31 +455,135 @@ OpenAI-compatible `/v1/chat/completions` boundary only. Non-streaming.
 See [Open WebUI integration](#k-open-webui-integration) and
 [`docs/OPEN_WEBUI.md`](docs/OPEN_WEBUI.md).
 
-### Phase 31 — PDF ingestion (NEXT)
+### Phase 31 — PDF ingestion (DONE)
 
-`pdfs/` — the inventoried 41 personal PDFs (28 with usable text layers). Text
-extraction and classification already exist; this phase wires them into a real
-ingestion run + indexing:
+The machine-found `raw_data_extracted/raw_data/pdfs/` — the inventoried 41
+personal PDFs (19 text-heavy, 16 mixed, 6 image-heavy) — is wired into the CLI
+as the `file` source and ingested into a local SQLite knowledge base via
+`--ingest file <dir> --database <db>`:
 
 - text extraction (exists: `extract_text`, PyMuPDF)
 - document classification (exists: `classify_document`)
 - metadata (filename, pages/images, source type)
-- indexing into `document_chunks` so `search_documents` appears and FTS hits
-  return personal PDF content
-- tests + regression validation (rerun idempotent)
+- chunking: every document with ≥200 extracted non-whitespace characters is
+  indexed into `document_chunks`, so `search_documents` appears and FTS hits
+  return personal PDF content; mixed documents are chunked from extracted text
+  alone while the vision path is being built
+- structured extraction stays text-heavy-only: the model is called only for
+  text-heavy documents (never for mixed/image-only content)
+- image-heavy and near-empty documents are stored as documents but not chunked
+  (vision-capable pipeline lands in Phase 34a)
+- tests + regression validation (rerun idempotent; validated by
+  `scripts/validate_pdf_ingestion.py` and the unit/integration suite)
 
-The live demo corpus currently still has **documents = 0, chunks = 0,
-extractions = 0** — PDF ingestion is the next major corpus expansion.
+The 41 PDFs ingest deterministically (41 documents, 246 chunks, 35 chunked
+documents, idempotent re-run). The result lives in a dedicated local database,
+separate from the conversation/event demo corpus.
 
-### Phase 32 — Email ingestion
+### Phase 32 — Email ingestion (DONE)
 
-Gmail/mbox ~22.3k messages (three near-disjoint segments 2015–2026). Adapter
-exists; this phase normalizes at scale:
+Gmail/mbox ~22.3k messages (three near-disjoint segments 2015–2026). Email now
+ingests at scale through the existing generic pipeline — **no separate email
+pipeline**:
 
-- normalization / Message-ID dedupe / quote+signature stripping
-- metadata (from/to/date/subject)
-- privacy considerations (highest-sensitivity family; never log content)
-- indexing + tests
+- **Identity**: each message is keyed by its normalized `Message-ID`
+  (delimiters stripped, whitespace folded, domain lowercased), feeding the
+  existing content-hash-based document id. The same message present in several
+  mailboxes maps to one document; a message whose body changed gets a new
+  document, the old id stays. Messages without a `Message-ID` (2 in the real
+  corpus) fall back to a deterministic `noid/<sha1>` digest of their payload.
+- **Deterministic normalization** (`sources/email_normalization.py`, stdlib-only
+  pure functions): trailing `>`-quoted replies, `On ... wrote:`, original/
+  forwarded separators, and conservative trailing signatures are stripped;
+  HTML keeps paragraph/line structure as separate lines; blank runs collapse.
+  Where rules are uncertain the text is preserved, never silently deleted.
+- **Model-free ingestion**: email runs with structured extraction disabled
+  (`structured_extractor=None`), so email ingestion makes **zero Ollama calls**.
+  `DocumentIngestor` gained an optional extractor; text-heavy records are still
+  chunked and searchable.
+- **CLI**: `--ingest email <Takeout/Email dir>`; deterministic, idempotent
+  re-runs; metadata (from/to/subject/date/message-id/mailbox) only, never
+  message content in logs.
+- Mailbox-attachment content and conversation *threading* are deferred
+  (attachment metadata only), per the Phase 33 notes below.
+
+**Real-corpus validation** (local SQLite, `/tmp/phase32.db`, aggregate counts
+only): the full ~2.7 GB export (three mbox segments) discovers deterministically
+in ~94 s — 22,403 records from 22,401 Message-ID keys + 2 `noid/` fallbacks
+(152 duplicate copies, 6 of which carry distinct bodies). Ingestion is
+model-free: **22,257 documents, 80,892 searchable chunks, 0 structured
+extractions** (no Ollama calls). Body normalization shifts 22 short messages
+from text-heavy to mixed (quoted-only tails no longer count as content). A full
+re-run is byte-identical: same summary, same DB counts, ~102 s with zero writes.
+
+### Phase 33 — Unified corpus search provenance, email titles, MIME filtering (DONE)
+
+The PDF corpus (Phase 31) and email corpus (Phase 32) now search as **one
+unified corpus** with source identity surfaced to the model:
+
+- **Result provenance** — every `search_documents` and `search_knowledge`
+  result carries the owning document's `source_type` (`file`, `email`, ...)
+  and `source` identifier (workspace-relative path for files; normalized
+  `Message-ID` for email). `SearchResult` and `ChunkSearchResult` grew a
+  `source_type` field; the chunk-store provenance is resolved in one batched
+  lookup (no N+1).
+- **Email titles** — email search results now display the email **subject**
+  when present; emails without one fall back to the source `Message-ID`.
+  This is presentation-only — email identity/normalization is untouched.
+- **MIME-type filtering** — `DocumentFilter` gained an optional `mime_types`
+  inclusion list (also exposed in the `filter` argument of both search tools),
+  reading the authoritative `metadata["mime_type"]` recorded at ingestion.
+  PDFs are `file` sources with MIME type `application/pdf` — filtering for
+  PDFs uses `mime_types: ["application/pdf"]`, never a `"pdf"` source type.
+- `--search` CLI output is unchanged; no schema migration, no new tables, no
+  new dependencies, no Agent/prompt/model changes.
+
+**Tests**: 24 new/updated — `tests/test_corpus_unified_e2e.py` (PDF + txt +
+mbox in one corpus, provenance, MIME filters, tool output contract), plus MIME
+filter tests in `test_storage_chunk_search_filters.py`, tool provenance tests
+in `test_tool_search.py`/`test_tool_knowledge.py`, and RetrievalService
+source-type/email-title tests in `test_retrieval_service.py`.
+
+**Real-corpus validation** (`/tmp/phase33.db`, merged private build of the real
+41-PDF + 22,257-email corpora, aggregate counts only): 22,298 documents /
+81,138 chunks; `mime_types=["application/pdf"]` isolates the 41 PDFs; email
+titles resolve to subjects where one exists, with the `Message-ID` fallback for
+the rest.
+
+### Phase 34a — Vision extraction for image-heavy PDFs (LOCAL, OPT-IN)
+
+Page-level vision extraction makes image-only and scanned PDFs searchable
+without changing the chat or text pipelines. Everything is local and opt-in
+via environment configuration:
+
+- `PERSONAL_AI_VISION_MODEL` (default: unset = disabled) names a local
+  vision-capable Ollama model; `PERSONAL_AI_VISION_PROMPT_VERSION` (default
+  `v1`) identifies the extraction prompt.
+- Only `image_heavy` PDFs route to the vision model. Text-heavy, mixed, and
+  email sources never do. Routing and classification are untouched.
+- Each page is rendered locally to a PNG capped at 1568px on the long side;
+  the model output is appended to that page's original extracted text and
+  chunked through the existing deterministic chunker (no pages merged, page
+  numbers preserved, original text verbatim).
+- Results are cached per `(document_id, page_number, vision_model,
+  prompt_version)` in a new derived `vision_pages` table (the only schema
+  addition). Re-ingesting unchanged scans makes zero vision calls; changing
+  the model or prompt version re-extracts only those pages.
+- Failure semantics: a page that cannot be rendered is skipped and retried on
+  the next run; empty model output is not cached; provider (Ollama) failures
+  propagate and never silently disable the pipeline; a stored document is
+  never modified or lost.
+- No new dependencies, no Tesseract/Poppler, no cloud APIs, no vision batch
+  or parallelism.
+
+**Tests**: `tests/test_vision_extractor.py`, `tests/test_vision_storage.py`,
+`tests/test_vision_configuration.py`, `tests/test_vision_ingestion.py`, plus
+vision cases in `tests/test_ollama_client.py` and `tests/test_cli_ingest.py`.
+
+**Real-corpus validation** (local SQLite, `/tmp/phase34a.db`, aggregate counts
+only): the six image-heavy PDFs in `raw_data_extracted/raw_data/pdfs` become
+searchable via `PERSONAL_AI_VISION_MODEL=qwen3.5:9b` (the only currently
+installed vision-capable model), with a deterministic idempotent re-run.
 
 ### Phase 33 — Open WebUI hardening
 
@@ -488,8 +600,6 @@ UI-layer polish once the API exists:
 Only after each source has a clear adapter/normalization contract (the
 existing `SourceAdapter` boundary):
 
-- vision extraction for image-heavy documents (Vision Board PDFs, scanned
-  bills, slide decks) — needs a vision model
 - spreadsheet record boundary for the 6 personal XLSX files
 - structured-data record boundary for Maps places/Q&A, Chrome history links
 - durable "memories" concept distinct from document chunks (Phase 10)
@@ -516,7 +626,9 @@ items are quality/robustness improvements.
 - [ ] **Source/evidence metadata in responses** — so the user can see what a
       claim is grounded in (Phase 33).
 - [ ] **PDF ingestion** into the live corpus (Phase 31).
-- [ ] **Email ingestion** at scale (Phase 32).
+- [x] **Email ingestion** at scale (Phase 32) — deterministic Message-ID
+      identity + model-free normalization; validated against the real corpus
+      (see Phase 32 section).
 - [ ] **Ingestion scheduling / re-ingestion** — a way to re-run `--ingest`
       against the corpus without manual CLI invocations.
 - [ ] **Incremental updates** — add only what changed (idempotency already
@@ -721,13 +833,13 @@ usually fine.
 
 ## N. Testing
 
-- **`uv run pytest`** — full suite: **1237 tests**, no network, no Ollama, no real
+- **`uv run pytest`** — full suite: **1337 tests**, no network, no Ollama, no real
   personal data. Uses `tmp_path`, `httpx.MockTransport`, in-memory/temp SQLite,
   and deterministic fakes. This includes the API tests in `tests/test_server.py`
   (request parsing, error mapping, `/v1/chat/completions`, `/v1/models`,
   authentication, config precedence) which use a fake Agent, not a live server.
 - **`uv run ruff check .`** — clean.
-- **`uv run ruff format --check src tests`** — clean (123 files).
+- **`uv run ruff format --check src tests`** — clean (127 files).
 - **Evaluation harnesses** — `scripts/evaluate_agent.py` (and the phase
   drivers) are *manual/private* harnesses that require a live Ollama + real
   corpus. They are **not** part of the automated suite and are not run by

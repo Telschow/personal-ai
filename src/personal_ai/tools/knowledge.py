@@ -9,6 +9,7 @@ _ALLOWED_ARGUMENT_KEYS = frozenset({"query", "limit", "filter"})
 _ALLOWED_FILTER_KEYS = frozenset(
     {
         "source_types",
+        "mime_types",
         "created_after",
         "created_before",
         "modified_after",
@@ -51,6 +52,13 @@ def _parse_document_filter(arguments: dict[str, object]) -> DocumentFilter | Non
         ):
             raise ValueError("filter.source_types must be a list of strings")
         kwargs["source_types"] = tuple(source_types)
+    mime_types = raw_filter.get("mime_types")
+    if mime_types is not None:
+        if not isinstance(mime_types, list) or not all(
+            isinstance(value, str) for value in mime_types
+        ):
+            raise ValueError("filter.mime_types must be a list of strings")
+        kwargs["mime_types"] = tuple(mime_types)
     for key in (
         "created_after",
         "created_before",
@@ -96,6 +104,7 @@ def _format_conversation_result(hit: dict[str, object]) -> dict[str, object]:
         "matched_fields": hit.get("matched_fields", []),
         "timestamp": hit.get("timestamp"),
         "is_active_branch": hit.get("is_active_branch"),
+        "source_type": hit.get("source_type"),
     }
 
 
@@ -141,6 +150,7 @@ class KnowledgeSearchTool:
                 "speaker": hit.speaker,
                 "timestamp": hit.timestamp,
                 "is_active_branch": hit.is_active_branch,
+                "source_type": hit.source_type,
             }
             if hit.result_type == "conversation":
                 output.append(_format_conversation_result(base))

@@ -65,9 +65,10 @@ def create_default_registry(
                 description=(
                     "Narrow search over the indexed document/chunk corpus "
                     "only. Returns ranked document passages (chunk text) "
-                    "with their document identity. Use this only when the "
-                    "user specifically wants document/chunk content. It does "
-                    "NOT search conversations, notes, or structured "
+                    "annotated with their document identity and source "
+                    "provenance (source_type, source). Use this only when "
+                    "the user specifically wants document/chunk content. It "
+                    "does NOT search conversations, notes, or structured "
                     "extractions, and it is not the general-purpose "
                     "knowledge search. For broad questions about what the "
                     "user wrote, discussed, researched, or recorded, prefer "
@@ -98,6 +99,15 @@ def create_default_registry(
                                     "items": {"type": "string"},
                                     "description": (
                                         "Only include documents of these types."
+                                    ),
+                                },
+                                "mime_types": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
+                                    "description": (
+                                        "Only include documents of these MIME "
+                                        "types (for example the PDF format is "
+                                        "'application/pdf')."
                                     ),
                                 },
                                 "created_after": {
@@ -184,6 +194,15 @@ def create_default_registry(
                                     "items": {"type": "string"},
                                     "description": (
                                         "Only include documents of these types."
+                                    ),
+                                },
+                                "mime_types": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
+                                    "description": (
+                                        "Only include documents of these MIME "
+                                        "types (for example the PDF format is "
+                                        "'application/pdf')."
                                     ),
                                 },
                                 "created_after": {

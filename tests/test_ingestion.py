@@ -66,6 +66,13 @@ class FailingStructuredExtractor:
         raise RuntimeError("model backend unavailable")
 
 
+class _Unspecified:
+    pass
+
+
+_UNSPECIFIED_EXTRACTOR = _Unspecified()
+
+
 class FakeEmbeddingProvider:
     """Deterministic vector source recording calls."""
 
@@ -138,7 +145,7 @@ class IngestionHarness(NamedTuple):
 
 
 def make_ingestor(
-    extractor: object | None = None,
+    extractor: object | None = _UNSPECIFIED_EXTRACTOR,
     *,
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
@@ -148,7 +155,9 @@ def make_ingestor(
     extraction_store = ExtractionStore(connection)
     chunk_store = ChunkStore(connection)
     embedding_store = EmbeddingStore(connection)
-    fake_extractor = extractor if extractor is not None else FakeStructuredExtractor()
+    fake_extractor = (
+        FakeStructuredExtractor() if extractor is _UNSPECIFIED_EXTRACTOR else extractor
+    )
     ingestor = DocumentIngestor(
         document_store,
         extraction_store,
@@ -259,12 +268,68 @@ def test_mixed_document_skips_structured_extraction() -> None:
     assert harness.extraction_store.get(result.document_id) is None
 
 
+def test_mixed_document_with_usable_text_is_chunked_without_extraction(
+    monkeypatch,
+) -> None:
+    """A MIXED document with usable text reaches the chunker, never the model.
+
+    Image evidence (future vision analysis / PDF image counts) paired with
+    at least the text threshold is MIXED by the classifier. Its extracted
+    text is still chunked and searchable while the vision path is being
+    built, but structured extraction stays TEXT_HEAVY-only.
+    """
+
+    def mixed_classification(extraction):
+        return DocumentClassification(
+            document_id=extraction.document_id,
+            kind=DocumentKind.MIXED,
+            characteristics=measure_text(extraction.text),
+        )
+
+    monkeypatch.setattr("personal_ai.ingestion.classify_document", mixed_classification)
+    harness = make_ingestor()
+
+    result = harness.ingestor.ingest(make_record(TEXT_HEAVY_TEXT.encode()))
+
+    assert result.kind is DocumentKind.MIXED
+    assert result.structured_extraction is None
+    assert harness.extractor.calls == []
+    assert harness.extraction_store.get(result.document_id) is None
+
+    expected = chunk_document(extract_text(make_record(TEXT_HEAVY_TEXT.encode())))
+    assert result.chunks == expected
+    assert harness.chunk_store.list_for_document(result.document_id) == expected
+
+
+def test_reingesting_unchanged_mixed_document_does_not_duplicate_chunks(
+    monkeypatch,
+) -> None:
+    """MIXED chunking is idempotent exactly like the TEXT_HEAVY path."""
+
+    def mixed_classification(extraction):
+        return DocumentClassification(
+            document_id=extraction.document_id,
+            kind=DocumentKind.MIXED,
+            characteristics=measure_text(extraction.text),
+        )
+
+    monkeypatch.setattr("personal_ai.ingestion.classify_document", mixed_classification)
+    harness = make_ingestor()
+
+    first = harness.ingestor.ingest(make_record(TEXT_HEAVY_TEXT.encode()))
+    second = harness.ingestor.ingest(make_record(TEXT_HEAVY_TEXT.encode()))
+
+    assert second == first
+    assert len(harness.extractor.calls) == 0
+    assert harness.chunk_store.list_for_document(first.document_id) == first.chunks
+
+
 def test_image_heavy_documents_never_touch_the_embedding_store(monkeypatch) -> None:
     """Image evidence cannot arise from text measurement yet; force it here.
 
-    The ingestor also has no embedding provider dependency at all, so the
-    strongest available proof is that classification away from TEXT_HEAVY
-    leaves the embedding store completely untouched.
+    The fixture keeps the IMAGE_HEAVY state classifier-consistent: short
+    extracted text below the chunking threshold, so the ingestor stores the
+    document unchunked and never touches the embedding store.
     """
 
     def image_heavy_classification(extraction):
@@ -279,12 +344,13 @@ def test_image_heavy_documents_never_touch_the_embedding_store(monkeypatch) -> N
     )
     harness = make_ingestor()
 
-    result = harness.ingestor.ingest(make_record(TEXT_HEAVY_TEXT.encode()))
+    result = harness.ingestor.ingest(make_record(b"Vision board scan, handwriting"))
 
     assert result.kind is DocumentKind.IMAGE_HEAVY
     assert result.chunks == ()
     assert result.structured_extraction is None
     assert harness.extractor.calls == []
+    assert harness.document_store.get(result.document_id) is not None
 
 
 def test_text_extraction_failure_propagates_without_persistence() -> None:

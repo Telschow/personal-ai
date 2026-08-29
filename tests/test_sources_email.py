@@ -43,6 +43,8 @@ def make_message(
     msg["Subject"] = subject
     msg["Date"] = date
     msg["Message-ID"] = message_id
+    if message_id is None:
+        del msg["Message-ID"]
     if in_reply_to:
         msg["In-Reply-To"] = in_reply_to
     if references:
@@ -238,14 +240,30 @@ class TestEmailSourceAdapter:
 
         # Create a simple mbox with 2 messages
         messages = [
-            make_message(subject="First", body="First message body"),
-            make_message(subject="Second", body="Second message body"),
+            make_message(
+                subject="First",
+                body="First message body",
+                message_id="<first@example.com>",
+            ),
+            make_message(
+                subject="Second",
+                body="Second message body",
+                message_id="<second@example.com>",
+            ),
         ]
         write_mbox(root, "INBOX.mbox", messages)
 
         # Create another mbox with 1 message
         write_mbox(
-            root, "Sent.mbox", [make_message(subject="Sent", body="Sent message")]
+            root,
+            "Sent.mbox",
+            [
+                make_message(
+                    subject="Sent",
+                    body="Sent message",
+                    message_id="<sent@example.com>",
+                )
+            ],
         )
 
         return root
@@ -272,10 +290,15 @@ class TestEmailSourceAdapter:
         loaded = adapter.load_record(first.source_key)
         assert loaded == first
 
-    def test_load_record_invalid_key_raises(self, email_dir: Path) -> None:
+    def test_load_record_unknown_key_raises(self, email_dir: Path) -> None:
+        adapter = EmailSourceAdapter(email_dir)
+        with pytest.raises(SourceNotFoundError):
+            adapter.load_record("invalid_key")
+
+    def test_load_record_empty_key_raises(self, email_dir: Path) -> None:
         adapter = EmailSourceAdapter(email_dir)
         with pytest.raises(UnsupportedMessageError):
-            adapter.load_record("invalid_key")
+            adapter.load_record("")
 
     def test_load_record_missing_mbox_raises(self, email_dir: Path) -> None:
         adapter = EmailSourceAdapter(email_dir)
@@ -288,12 +311,15 @@ class TestEmailSourceAdapter:
             subject="Multipart",
             plain_body="Plain text version",
             html_body="<p>HTML version</p>",
+            message_id="<multi@example.com>",
         )
         write_mbox(email_dir, "Multi.mbox", [multipart_msg])
 
         adapter = EmailSourceAdapter(email_dir)
         records = adapter.discover()
-        multi_records = [r for r in records if "Multi" in r.source_key]
+        multi_records = [
+            r for r in records if r.metadata["message_id"] == "<multi@example.com>"
+        ]
         assert len(multi_records) == 1
         assert b"Plain text version" in multi_records[0].payload
         assert b"HTML version" not in multi_records[0].payload
@@ -304,18 +330,26 @@ class TestEmailSourceAdapter:
             email_dir,
             "Empty.mbox",
             [
-                make_message(subject="Empty", body=""),
-                make_message(subject="Real", body="Real content"),
+                make_message(
+                    subject="Empty",
+                    body="",
+                    message_id="<empty@example.com>",
+                ),
+                make_message(
+                    subject="Real",
+                    body="Real content",
+                    message_id="<real@example.com>",
+                ),
             ],
         )
 
         adapter = EmailSourceAdapter(email_dir)
         records = adapter.discover()
-        empty_subjects = [
-            r.metadata["subject"] for r in records if "Empty.mbox" in r.source_key
-        ]
-        # Only the real message should be present; the empty one was skipped
-        assert empty_subjects == ["Real"]
+        # The empty message never appears; the real one still does
+        assert all(r.metadata["subject"] != "Empty" for r in records)
+        real = [r for r in records if r.metadata["subject"] == "Real"]
+        assert len(real) == 1
+        assert real[0].metadata["mbox"] == "Empty.mbox"
 
     def test_message_index_is_stable(self, email_dir: Path) -> None:
         adapter = EmailSourceAdapter(email_dir)
@@ -328,3 +362,196 @@ class TestEmailSourceAdapter:
         records = adapter.discover()
         for record in records:
             assert "mbox" in record.metadata
+
+
+class TestMessageIdentity:
+    def test_same_message_id_across_mboxes_maps_to_same_key(
+        self, tmp_path: Path
+    ) -> None:
+        root = tmp_path / "Email"
+        root.mkdir(parents=True)
+        msg = make_message(
+            subject="Shared",
+            body="The very same message bytes everywhere",
+            message_id="<shared@example.com>",
+        )
+        write_mbox(root, "INBOX.mbox", [msg])
+        write_mbox(root, "Sent.mbox", [msg])
+
+        adapter = EmailSourceAdapter(root)
+        records = adapter.discover()
+        keys = {record.source_key for record in records}
+        hashes = {record.content_hash for record in records}
+        assert len(records) == 2
+        assert keys == {"shared@example.com"}
+        assert len(hashes) == 1
+
+    def test_message_id_domain_is_normalized(self, tmp_path: Path) -> None:
+        root = tmp_path / "Email"
+        root.mkdir(parents=True)
+        msg = make_message(
+            subject="Casey",
+            body="Case sensitive local part",
+            message_id="<UPPER.Local@Example.ORG>",
+        )
+        write_mbox(root, "INBOX.mbox", [msg])
+
+        adapter = EmailSourceAdapter(root)
+        records = adapter.discover()
+        assert records[0].source_key == "UPPER.Local@example.org"
+
+    def test_same_message_id_different_bodies_both_survive(
+        self, tmp_path: Path
+    ) -> None:
+        root = tmp_path / "Email"
+        root.mkdir(parents=True)
+        original = make_message(
+            subject="Edited copy",
+            body="First version of the body",
+            message_id="<edited@example.com>",
+        )
+        edited = make_message(
+            subject="Edited copy",
+            body="Second version of the body",
+            message_id="<edited@example.com>",
+        )
+        write_mbox(root, "INBOX.mbox", [original, edited])
+
+        adapter = EmailSourceAdapter(root)
+        records = adapter.discover()
+        assert len(records) == 2
+        assert {record.source_key for record in records} == {"edited@example.com"}
+        assert len({record.content_hash for record in records}) == 2
+
+    def test_missing_message_id_uses_deterministic_fallback(
+        self, tmp_path: Path
+    ) -> None:
+        root = tmp_path / "Email"
+        root.mkdir(parents=True)
+        msg = make_message(
+            subject="No id",
+            body="Payload without an identifier anywhere",
+            message_id=None,
+        )
+        write_mbox(root, "INBOX.mbox", [msg])
+        write_mbox(root, "Sent.mbox", [msg])
+
+        adapter = EmailSourceAdapter(root)
+        records = adapter.discover()
+        keys = {record.source_key for record in records}
+        assert len(records) == 2
+        assert len(keys) == 1
+        key = keys.pop()
+        assert key.startswith("noid/")
+        assert records[0].source_key == records[1].source_key
+
+    def test_missing_message_id_distinguishes_payloads(self, tmp_path: Path) -> None:
+        root = tmp_path / "Email"
+        root.mkdir(parents=True)
+        first = make_message(subject="No id", body="Payload one", message_id=None)
+        second = make_message(subject="No id", body="Payload two", message_id=None)
+        write_mbox(root, "INBOX.mbox", [first, second])
+
+        adapter = EmailSourceAdapter(root)
+        records = adapter.discover()
+        keys = [record.source_key for record in records]
+        assert keys[0] != keys[1]
+        assert all(key.startswith("noid/") for key in keys)
+
+    def test_discover_sorted_by_source_key(self, tmp_path: Path) -> None:
+        root = tmp_path / "Email"
+        root.mkdir(parents=True)
+        write_mbox(
+            root,
+            "INBOX.mbox",
+            [
+                make_message(body="Zeta", message_id="<zeta@example.com>"),
+                make_message(body="Alpha", message_id="<alpha@example.com>"),
+                make_message(body="Middle", message_id="<middle@example.com>"),
+            ],
+        )
+
+        adapter = EmailSourceAdapter(root)
+        records = adapter.discover()
+        keys = [record.source_key for record in records]
+        assert keys == sorted(keys)
+
+    def test_load_record_by_normalized_message_id(self, tmp_path: Path) -> None:
+        root = tmp_path / "Email"
+        root.mkdir(parents=True)
+        write_mbox(
+            root,
+            "INBOX.mbox",
+            [
+                make_message(
+                    subject="Only", body="Only body", message_id="<X@Example.com>"
+                )
+            ],
+        )
+
+        adapter = EmailSourceAdapter(root)
+        loaded = adapter.load_record("X@example.com")
+        assert loaded.source_key == "X@example.com"
+        assert loaded.metadata["subject"] == "Only"
+        assert b"Only body" in loaded.payload
+
+    def test_load_record_by_fallback_key(self, tmp_path: Path) -> None:
+        root = tmp_path / "Email"
+        root.mkdir(parents=True)
+        msg = make_message(subject="No id", body="Fallback body here", message_id=None)
+        write_mbox(root, "INBOX.mbox", [msg])
+
+        adapter = EmailSourceAdapter(root)
+        discovered = adapter.discover()
+        key = discovered[0].source_key
+        assert key.startswith("noid/")
+        assert adapter.load_record(key) == discovered[0]
+
+
+class TestBodyNormalization:
+    def test_plain_body_passes_through(self) -> None:
+        msg = make_message(body="Simple text message")
+        assert _extract_text_body(msg) == "Simple text message"
+
+    def test_plain_body_preserves_internal_whitespace(self) -> None:
+        msg = make_message(body="line one\n\nline two\n")
+        assert _extract_text_body(msg) == "line one\n\nline two"
+
+    def test_html_blocks_become_separate_lines(self) -> None:
+        html = (
+            "<p>First paragraph about cooking</p><p>Second paragraph about travel</p>"
+        )
+        msg = MIMEText(html, "html")
+        msg["From"] = "test@example.com"
+        result = _extract_text_body(msg)
+        assert "First paragraph about cooking" in result
+        assert "Second paragraph about travel" in result
+        body_lines = result.splitlines()
+        cooking = next(line for line in body_lines if "cooking" in line)
+        travel = next(line for line in body_lines if "travel" in line)
+        assert cooking != travel
+
+    def test_quoted_tail_and_signature_normalized(self) -> None:
+        body = (
+            "Real reply content\n\n"
+            "On Tue, Jan 1 2026 wrote:\n"
+            "> earlier message\n"
+            "\n"
+            "--\n"
+            "Jane"
+        )
+        msg = make_message(body=body)
+        record = build_message_record(None, msg, mbox_name="INBOX.mbox")
+        payload = record.payload.decode("utf-8")
+        assert "Real reply content" in payload
+        assert "earlier message" not in payload
+        assert "wrote:" not in payload
+        assert "Jane" not in payload
+
+    def test_quoted_tail_in_middle_is_preserved(self) -> None:
+        body = "First thought\n> intermediate quote\nConcluding thought"
+        msg = make_message(body=body)
+        record = build_message_record(None, msg, mbox_name="INBOX.mbox")
+        payload = record.payload.decode("utf-8")
+        assert "> intermediate quote" in payload
+        assert "Concluding thought" in payload
