@@ -3,12 +3,15 @@
 A local-first control plane for the agent-orchestration runtime: durable
 executions, cursor-based event streams, task-/permission-scoped approvals, and
 a Kanban read projection. Everything is single-user, offline, and SQLite-backed
-— there is no distributed stack and no UI server yet.
+— there is no distributed stack and no dedicated control-plane UI yet (the
+Phase 44 HTTP gateway serves the `/api/*` contract to clients such as a
+future UI).
 
 ```
-CLI (personal_ai.execution.cli)
-   │   --database orch.db
-   ▼
+CLI (personal_ai.execution.cli)   HTTP gateway (Phase 44: /api/executions/*)
+   │  --database orch.db                     │
+   └───────────────┬─────────────────────────┘
+                   ▼
 ControlPlane            (service boundary; the only client entry point)
    │
    ▼
@@ -132,8 +135,9 @@ tool calls) so a UI never needs to read task internals.
 
 ## Service boundary
 
-`ControlPlane` is the **only** client entry point (CLI today; a future HTTP
-API tomorrow). It owns construction of the policy engine with the durable
+`ControlPlane` is the **only** client entry point (the CLI and, as of
+Phase 44, the HTTP gateway at `/api/executions/*`). It owns construction of
+the policy engine with the durable
 approver, the router, planner, executor, and board. No client touches SQLite
 store internals. Lifecycle: `create_research_execution`, `run/resume`,
 `pause`, `cancel`, `approve/reject`, `retry`. Reads: `list_executions`,
@@ -322,8 +326,13 @@ client — there is no reverse dependency:
 
 ## Roadmap (after Phase 39)
 
+Phase 39 is implemented and shipped, and the `/api/executions/*` HTTP
+gateway (Phase 44) now serves the durable contract described above. Remaining
+planned work:
+
 - A dedicated control-plane UI (Kanban + approvals) consuming the `/api/...`
-  contract above.
+  contract — this does **not** exist yet.
 - Multi-agent task graphs beyond the researcher → verifier workflow.
-- `search_documents`-style retrieval exposed as agent tools once the memory
-  layer (Phase 10) exists.
+- Agent memory tools are live (`search_memory`, Phase 41); further
+  document-retrieval and memory producer surfaces beyond the current
+  allowlist are future work (see `docs/ROADMAP.md`).

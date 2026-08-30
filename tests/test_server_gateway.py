@@ -625,6 +625,81 @@ def test_workout_endpoints_are_read_only_over_http(tmp_path: Path) -> None:
     assert outcome["missing_status"] == 404
 
 
+def test_full_gateway_services_copresent_over_http(tmp_path: Path) -> None:
+    """Chat + memory + workouts + control plane all live on one gateway app."""
+
+    async def main() -> dict[str, object]:
+        connection, store = open_orchestration_store(tmp_path / "all.db")
+        memory = MemoryService(MemoryStore(connection))
+        workout_store = WorkoutStore(connection)
+        records, _ = parse_workout_file(
+            FIXTURE_CSV.encode("utf-8"), source_file="boostcamp.csv"
+        )
+        workout_store.import_records(records, source_file="boostcamp.csv")
+        workout = WorkoutQueryService(workout_store)
+        plane = ControlPlane(store, memory=memory, workout=workout)
+        registry = create_default_registry(workspace=tmp_path, workout_service=workout)
+        client_fake = _WorkoutChatClient()
+        agent = Agent(client_fake, registry)
+        app = create_app(
+            tmp_path,
+            tmp_path / "all.db",
+            model=DEFAULT_MODEL,
+            agent_factory=lambda: _FakeBuilt(agent),
+            control_plane=plane,
+            workout_service=workout,
+        )
+        try:
+            transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
+            async with (
+                app.router.lifespan_context(app),
+                httpx.AsyncClient(
+                    transport=transport, base_url="http://test"
+                ) as client,
+            ):
+                models = await client.get("/v1/models")
+                chat = await client.post(
+                    "/v1/chat/completions",
+                    json={
+                        "model": "anything",
+                        "messages": [{"role": "user", "content": "bench press?"}],
+                    },
+                )
+                plane.memory_create_user("I train in the morning.", scope="global")
+                memory_search = await client.get(
+                    "/api/memory/search", params={"q": "morning"}
+                )
+                workout_stats = await client.get("/api/workouts/stats")
+                execution = plane.create_execution("Write a note")
+                executions = await client.get("/api/executions")
+                return {
+                    "models": models,
+                    "chat": chat,
+                    "chat_body": chat.json(),
+                    "memory_search": memory_search,
+                    "workout_stats": workout_stats,
+                    "executions": executions,
+                    "execution_id": execution.plan_id,
+                }
+        finally:
+            connection.close()
+
+    outcome = _run(main())
+    assert outcome["models"].status_code == 200
+    assert [m["id"] for m in outcome["models"].json()["data"]] == [MODEL_ID]
+    assert outcome["chat"].status_code == 200
+    assert (
+        "Bench Press (Barbell)"
+        in outcome["chat_body"]["choices"][0]["message"]["content"]
+    ), "workout-gated tool executed during chat"
+    assert [h["memory"]["memory_id"] for h in outcome["memory_search"].json()["hits"]]
+    assert outcome["workout_stats"].json()["workout_count"] >= 1
+    assert (
+        outcome["executions"].json()["executions"][0]["execution_id"]
+        == outcome["execution_id"]
+    )
+
+
 def test_gateway_returns_503_when_services_not_configured(tmp_path: Path) -> None:
     async def scenario(client, **kw) -> dict[str, object]:
         return {

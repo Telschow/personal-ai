@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from personal_ai.agent import Agent, AgentObserver
-from personal_ai.config import load_vision_settings
+from personal_ai.config import load_ollama_settings, load_vision_settings
 from personal_ai.ingestion import DocumentIngestor
 from personal_ai.memory import (
     ChatMemory,
@@ -633,6 +633,7 @@ def build_agent(
     database: Path | None = None,
     *,
     model: str = MODEL,
+    base_url: str | None = None,
     observer: AgentObserver | None = None,
     workout_service: object | None = None,
 ) -> BuiltAgent:
@@ -649,6 +650,11 @@ def build_agent(
     When ``workout_service`` is given, the policy-gated ``search_workouts``
     chat tool is registered so conversational chat can answer movement-based
     questions about the user's workout history through the policy engine.
+
+    The Ollama endpoint defaults to the local daemon and is overridable with
+    ``base_url``, which falls back to the ``OLLAMA_BASE_URL`` environment
+    variable — this is how the Dockerized gateway reaches a containerized
+    Ollama without changing any client code.
     """
     connection: sqlite3.Connection | None = None
     if database is not None:
@@ -658,7 +664,10 @@ def build_agent(
     else:
         registry = create_default_registry(workspace)
 
-    client = OllamaClient(model=model)
+    client = OllamaClient(
+        model=model,
+        base_url=base_url or load_ollama_settings().base_url,
+    )
     enter_client = getattr(client, "__enter__", None)
     if callable(enter_client):
         enter_client()

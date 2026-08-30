@@ -1,9 +1,10 @@
 """Explicit environment-driven configuration for optional model backends.
 
 Configuration here is deliberately narrow: only backends that are not yet
-wired elsewhere read environment variables through this module. There is
-no fallback chain — an unset embedding model simply means embedding work
-is unavailable, and a chat model can never become an embedding model.
+wired elsewhere read environment variables through this module. Ollama's HTTP
+endpoint is configurable via ``OLLAMA_BASE_URL`` for containerized deployments.
+There is no fallback chain — an unset embedding model simply means embedding
+work is unavailable, and a chat model can never become an embedding model.
 """
 
 import os
@@ -102,3 +103,32 @@ def load_api_settings(
         msg = f"{API_PORT_ENV} must be a valid port in (0, 65536), got {port}"
         raise ValueError(msg)
     return ApiSettings(model=model, host=host, port=port)
+
+
+OLLAMA_BASE_URL_ENV = "OLLAMA_BASE_URL"
+
+#: The default Ollama endpoint matches the local CLI runtime. Override with
+#: ``OLLAMA_BASE_URL`` — for example ``http://ollama:11434`` when the gateway
+#: runs in Docker on the same network as an Ollama container.
+DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
+
+
+@dataclass(frozen=True, slots=True)
+class OllamaSettings:
+    """Ollama backend configuration.
+
+    ``base_url`` is the HTTP endpoint the chat agent talks to; it defaults to
+    the local Ollama daemon and can be pointed at a container over a Docker
+    network without changing application code.
+    """
+
+    base_url: str
+
+
+def load_ollama_settings(
+    environ: Mapping[str, str] | None = None,
+) -> OllamaSettings:
+    """Read Ollama endpoint configuration from the given (or real) environment."""
+    source = os.environ if environ is None else environ
+    raw = source.get(OLLAMA_BASE_URL_ENV, "").strip()
+    return OllamaSettings(base_url=raw or DEFAULT_OLLAMA_BASE_URL)

@@ -196,8 +196,9 @@ suite — it reads real personal data.
 ## Control plane and durable approvals
 
 `personal_ai/execution/control_plane.py` is the single service boundary every
-client (CLI today; a future HTTP/Open WebUI) talks to. It owns the runtime
-components — and crucially wires an `ApprovalContext` approver into the
+client (the CLI and, as of Phase 44, the HTTP gateway that Open WebUI-facing
+chat and control-plane `/api/*` endpoints build on) talks to. It owns the
+runtime components — and crucially wires an `ApprovalContext` approver into the
 `PolicyEngine` so approvals are **durable** (SQLite), **execution-scoped**,
 **task-scoped**, and **permission-scoped**:
 

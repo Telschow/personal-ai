@@ -264,7 +264,9 @@ class TestMainWithDatabase:
             def run(self, messages: object) -> str:
                 return "Agent response."
 
-        monkeypatch.setattr(cli, "OllamaClient", lambda model: FakeClient())
+        monkeypatch.setattr(
+            cli, "OllamaClient", lambda model, base_url=None: FakeClient()
+        )
         monkeypatch.setattr(cli, "Agent", FakeAgent)
         monkeypatch.setattr(
             "sys.argv",
@@ -324,7 +326,9 @@ class TestMainWithDatabase:
         monkeypatch.setattr(
             cli, "create_default_registry", fake_create_default_registry
         )
-        monkeypatch.setattr(cli, "OllamaClient", lambda model: FakeClient())
+        monkeypatch.setattr(
+            cli, "OllamaClient", lambda model, base_url=None: FakeClient()
+        )
         monkeypatch.setattr(cli, "Agent", FakeAgent)
         monkeypatch.setattr(
             "sys.argv",
@@ -382,7 +386,9 @@ class TestVerboseMode:
             def run(self, messages: object) -> str:
                 return "Agent response."
 
-        monkeypatch.setattr(cli, "OllamaClient", lambda model: FakeClient())
+        monkeypatch.setattr(
+            cli, "OllamaClient", lambda model, base_url=None: FakeClient()
+        )
         monkeypatch.setattr(cli, "Agent", FakeAgent)
         monkeypatch.setattr(
             "sys.argv",

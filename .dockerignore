@@ -1,0 +1,39 @@
+# Build context is the repository root (docker/Dockerfile is referenced from
+# docker/docker-compose.yml with `context: ..`). NEVER copy private personal
+# data or local development artifacts into the image.
+
+# Private raw data (also git-ignored) — never shipped in an image.
+Email_Outlook
+Financial_data
+Workouts
+previous_project_and_raw_data
+raw_data.zip
+raw_data_extracted
+
+# Local runtime data / SQLite databases.
+data
+knowledge.db
+
+# Local development artifacts.
+.git
+.venv
+.pytest_cache
+.ruff_cache
+__pycache__
+*.py[cod]
+*.pyc
+*.log
+.DS_Store
+
+# Test tooling is not needed in the production image.
+tests
+
+# Dev docs / scratch scripts are not part of the runtime image.
+docs
+scripts
+AGENTS.md
+
+# Keep git/Docker meta files out of the image where harmless; README.md and
+# uv.lock / pyproject.toml stay in (hatchling needs README.md to build).
+.gitignore
+.dockerignore

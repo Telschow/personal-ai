@@ -1,0 +1,71 @@
+# Personal AI gateway — Docker Compose (Phase 45).
+#
+# Runs the Personal AI HTTP gateway as a Docker service that Open WebUI
+# reaches over a shared Docker network as `http://personal-ai:8000/v1`.
+#
+# Networking topology:
+#
+#   Mac/iPhone
+#     -> Tailscale
+#     -> Open WebUI (open-webui project, network `open-webui_default`)
+#     -> http://personal-ai:8000/v1   (this service, on `open-webui_default`)
+#     -> Ollama (`http://ollama:11434`, network `ollama_default`)
+#
+# The gateway intentionally publishes NO host port mappings: port 8000 is
+# private to the Docker networks. It joins two *external* networks so it can
+# (a) be reached by the Open WebUI container and (b) reach the Ollama container
+# without touching the host firewall (`FORWARD` is DROP on this host;
+# container-to-container traffic on a shared bridge network is unaffected).
+#
+# Up (from the repository root):
+#   docker compose -f docker/docker-compose.yml up -d --build
+# Down:
+#   docker compose -f docker/docker-compose.yml down
+# Verify from the Open WebUI container:
+#   docker exec open-webui curl -s http://personal-ai:8000/v1/models
+
+name: personal-ai
+
+services:
+  personal-ai:
+    image: personal-ai:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: personal-ai
+    restart: unless-stopped
+    environment:
+      # Runtime paths, provided by the mounts below — never baked into the image.
+      PERSONAL_AI_WORKSPACE: /data/workspace
+      PERSONAL_AI_DATABASE: /data/personal-ai.db
+      # The gateway talks to the containerized Ollama on its own bridge network.
+      OLLAMA_BASE_URL: http://ollama:11434
+      PERSONAL_AI_CHAT_MODEL: ${PERSONAL_AI_CHAT_MODEL:-qwen3.5:9b}
+    volumes:
+      # Dedicated writable runtime location: SQLite database + agent workspace.
+      - ../data:/data
+      - ../data/workspace:/data/workspace
+    networks:
+      - open-webui
+      - ollama
+    healthcheck:
+      # Lightweight existing endpoint; /v1/models answers without a database.
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request as u; u.urlopen('http://127.0.0.1:8000/v1/models', timeout=5)
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  open-webui:
+    # Belongs to the Open WebUI Compose project (open-webui_default).
+    external: true
+    name: open-webui_default
+  ollama:
+    # Belongs to the Ollama Compose project (ollama_default).
+    external: true
+    name: ollama_default

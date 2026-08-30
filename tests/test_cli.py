@@ -93,7 +93,7 @@ def test_main_runs_agent_and_prints_response(
     client = FakeClient()
 
     monkeypatch.setattr(cli, "create_default_registry", lambda path: registry)
-    monkeypatch.setattr(cli, "OllamaClient", lambda model: client)
+    monkeypatch.setattr(cli, "OllamaClient", lambda model, base_url=None: client)
     monkeypatch.setattr(cli, "Agent", FakeAgent)
     monkeypatch.setattr(
         "sys.argv",
