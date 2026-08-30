@@ -10,6 +10,7 @@ from personal_ai.tools.filesystem import FilesystemTool
 from personal_ai.tools.knowledge import KnowledgeSearchTool
 from personal_ai.tools.registry import ToolDefinition, ToolRegistry
 from personal_ai.tools.search import SearchTool
+from personal_ai.tools.workouts import build_policy_gated_workout_handler
 
 
 def create_default_registry(
@@ -17,6 +18,7 @@ def create_default_registry(
     chunk_store: ChunkStore | None = None,
     retrieval_service: RetrievalService | None = None,
     event_store: EventStore | None = None,
+    workout_service: object | None = None,
 ) -> ToolRegistry:
     """Create a registry containing the standard personal-AI tools.
 
@@ -33,6 +35,11 @@ def create_default_registry(
 
     The ``query_events`` tool is registered only when an event store is
     provided; it answers structural temporal-event (browsing/search) queries.
+
+    The ``search_workouts`` tool is registered only when a workout query
+    service is provided; it searches the user's workout activity by movement
+    name through the policy engine (the chat path never reaches the workout
+    service without an ALLOWED policy decision).
     """
     filesystem = FilesystemTool(workspace)
     registry = ToolRegistry()
@@ -347,6 +354,45 @@ def create_default_registry(
                     "required": [],
                 },
                 handler=events.query_events,
+            )
+        )
+
+    if workout_service is not None:
+        registry.register(
+            ToolDefinition(
+                name="search_workouts",
+                description=(
+                    "Search the user's workout activity by movement name "
+                    "(for example 'bench press' or 'squat') and return "
+                    "deterministic workout summaries: dates, activity type, "
+                    "duration, exercise count, set count, total volume in kg, "
+                    "and the matching exercise names. The results are ordered "
+                    "newest first. Use this to answer questions about the "
+                    "user's training history, how often they performed a "
+                    "movement, or their volume for an exercise. It is "
+                    "read-only: workout data can inform answers but cannot "
+                    "be modified through chat."
+                ),
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": (
+                                "Space-separated movement tokens to match "
+                                "against exercise names (e.g. 'bench press')."
+                            ),
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "description": (
+                                "Maximum number of workouts to return. Defaults to 10."
+                            ),
+                        },
+                    },
+                    "required": ["query"],
+                },
+                handler=build_policy_gated_workout_handler(workout_service),
             )
         )
 

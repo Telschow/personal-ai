@@ -16,6 +16,7 @@ from personal_ai.config import CHAT_MODEL_ENV, load_api_settings
 from personal_ai.ollama_client import ChatMessage, OllamaConnectionError
 from personal_ai.server import (
     API_TOKEN_ENV,
+    MODEL_ID,
     CompletionRequest,
     build_response,
     complete_chat,
@@ -182,13 +183,22 @@ class TestCompletionRequest:
             CompletionRequest({}).validate()
         assert ei.value.status_code == 400
 
-    def test_rejects_stream(self):
+    def test_rejects_stream_as_non_boolean(self):
+        request = CompletionRequest(
+            {"messages": [{"role": "user", "content": "hi"}], "stream": "yes"}
+        )
         with pytest.raises(Exception) as ei:
+            _ = request.stream
+        assert ei.value.status_code == 400
+
+    def test_stream_property_true_and_false(self):
+        assert CompletionRequest({}).stream is False
+        assert (
             CompletionRequest(
                 {"messages": [{"role": "user", "content": "hi"}], "stream": True}
-            ).validate()
-        assert ei.value.status_code == 400
-        assert "streaming" in ei.value.message
+            ).stream
+            is True
+        )
 
     def test_rejects_unknown_role(self):
         with pytest.raises(Exception) as ei:
@@ -207,9 +217,9 @@ class TestCompletionRequest:
 
 class TestCompleteChat:
     def test_build_response_shape(self):
-        resp = build_response("the answer", DEFAULT_MODEL)
+        resp = build_response("the answer", MODEL_ID)
         assert resp["object"] == "chat.completion"
-        assert resp["model"] == DEFAULT_MODEL
+        assert resp["model"] == MODEL_ID
         choice = resp["choices"][0]
         assert choice["message"]["role"] == "assistant"
         assert choice["message"]["content"] == "the answer"
@@ -281,7 +291,7 @@ class TestRoutes:
         assert res.status_code == 200
         body = res.json()
         assert body["choices"][0]["message"]["content"] == "hi there"
-        assert body["model"] == DEFAULT_MODEL
+        assert body["model"] == MODEL_ID
 
     def test_route_rejects_invalid_body(self):
         app, _, _ = make_app()
@@ -308,17 +318,35 @@ class TestRoutes:
         assert res.status_code == 200
         body = res.json()
         assert body["object"] == "list"
-        assert body["data"][0]["id"] == DEFAULT_MODEL
+        assert body["data"][0]["id"] == MODEL_ID
         assert body["data"][0]["object"] == "model"
 
-    def test_route_rejects_stream(self):
-        app, _, _ = make_app()
+    def test_route_streams_openai_sse(self):
+        app, _, _ = make_app(answer="hi there")
         with TestClient(app) as client:
             res = client.post(
                 "/v1/chat/completions",
                 json={"messages": [{"role": "user", "content": "hi"}], "stream": True},
             )
-        assert res.status_code == 400
+        assert res.status_code == 200
+        assert res.headers["content-type"].startswith("text/event-stream")
+        body = res.text
+        assert '"delta": {"role": "assistant", "content": ""}' in body
+        assert '"delta": {"content": "hi there"}' in body
+        assert '"finish_reason": "stop"' in body
+        assert "data: [DONE]" in body
+        assert f'"model": "{MODEL_ID}"' in body
+
+    def test_route_stream_maps_model_unavailable(self):
+        app, _, _ = make_app(error=OllamaConnectionError("down"))
+        with TestClient(app) as client:
+            res = client.post(
+                "/v1/chat/completions",
+                json={"messages": [{"role": "user", "content": "hi"}], "stream": True},
+            )
+        assert res.status_code == 502
+        assert res.json()["error"]["type"] == "model_unavailable"
+        assert "data: [DONE]" not in res.text
 
     def test_route_maps_model_unavailable(self):
         app, _, _ = make_app(error=OllamaConnectionError("down"))

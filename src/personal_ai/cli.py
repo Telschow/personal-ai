@@ -1,6 +1,8 @@
 """Command-line interface for the personal AI agent."""
 
 import argparse
+import hashlib
+import json
 import sqlite3
 import sys
 from dataclasses import dataclass
@@ -9,6 +11,11 @@ from pathlib import Path
 from personal_ai.agent import Agent, AgentObserver
 from personal_ai.config import load_vision_settings
 from personal_ai.ingestion import DocumentIngestor
+from personal_ai.memory import (
+    ChatMemory,
+    MemoryService,
+    open_memory_store,
+)
 from personal_ai.ollama_client import ChatMessage, OllamaClient
 from personal_ai.ollama_structured import OllamaStructuredExtractor
 from personal_ai.ollama_vision import OllamaVisionExtractor
@@ -33,11 +40,25 @@ from personal_ai.storage import (
     connect_database,
 )
 from personal_ai.tools import ToolRegistry, create_default_registry
+from personal_ai.workouts import (
+    WorkoutQueryService,
+    import_workout_directory,
+    open_workout_store,
+)
 
 MODEL = "qwen3.5:9b"
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == "workouts":
+        args = _build_workouts_parser().parse_args(argv[1:])
+        args.command = "workouts"
+        return args
+    return _parse_agent_args(argv)
+
+
+def _parse_agent_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the personal AI agent.")
     parser.add_argument(
         "--workspace",
@@ -203,15 +224,349 @@ def run_ingest(source_type: str, source_path: Path, database: Path) -> None:
     print(f"chunks: {summary.chunk_count}")
 
 
+def _build_workouts_parser() -> argparse.ArgumentParser:
+    """Parser for ``personal-ai workouts ...`` (import/list/show/exercises).
+
+    Kept separate from the agent CLI parser: the ``workouts`` verb is
+    dispatched in :func:`parse_args` when it is the first positional token, so
+    the existing agent flag surface (``--workspace``, ``--database``,
+    positional ``prompt``) is untouched.
+    """
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument(
+        "--database",
+        type=Path,
+        required=True,
+        help="SQLite database holding the workout store (required).",
+    )
+    common.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit machine-consumable JSON instead of human text.",
+    )
+    parser = argparse.ArgumentParser(
+        prog="personal-ai workouts",
+        description="Manage the personal workout dataset (local, offline).",
+    )
+    sub = parser.add_subparsers(
+        dest="verb", required=True, metavar="{import,list,show,exercises}"
+    )
+
+    importer = sub.add_parser(
+        "import",
+        parents=[common],
+        help="Import workout exports from a directory or file.",
+    )
+    importer.add_argument(
+        "path",
+        type=Path,
+        help="Directory (or single export file) containing workout exports.",
+    )
+
+    lst = sub.add_parser("list", parents=[common], help="List workouts newest-first.")
+    lst.add_argument(
+        "--date-from", help="Inclusive start day (YYYY-MM-DD) on session date."
+    )
+    lst.add_argument(
+        "--date-to", help="Inclusive end day (YYYY-MM-DD) on session date."
+    )
+    lst.add_argument("--program", dest="program_id", help="Restrict to one program id.")
+    lst.add_argument("--limit", type=int, help="Maximum number of workouts to list.")
+
+    show = sub.add_parser("show", parents=[common], help="Show one full workout.")
+    show.add_argument("workout_id", help="Stable workout id (the wkt-... string).")
+
+    exercises = sub.add_parser("exercises", parents=[common], help="List exercises.")
+    exercises.add_argument(
+        "--name", help="Filter by a movement name (case-insensitive)."
+    )
+    exercises.add_argument(
+        "--workout", dest="workout_id", help="Restrict to one workout."
+    )
+    exercises.add_argument(
+        "--limit", type=int, help="Maximum number of exercises to list."
+    )
+    return parser
+
+
+def _print_json(value: object) -> None:
+    print(json.dumps(value, indent=2, default=str))
+
+
+def _workout_summary_dict(workout: object) -> dict[str, object]:
+    return {
+        "id": workout.workout_id,
+        "name": workout.name,
+        "started_at": workout.started_at,
+        "ended_at": workout.ended_at,
+        "activity_type": workout.activity_type,
+        "duration_seconds": workout.duration_seconds,
+        "program_id": workout.program_id,
+        "exercise_count": workout.exercise_count,
+        "set_count": workout.set_count,
+        "completed_set_count": workout.completed_set_count,
+        "total_volume_kg": workout.total_volume_kg,
+    }
+
+
+def _workout_dict(workout: object) -> dict[str, object]:
+    return {
+        "id": workout.workout_id,
+        "source_type": workout.source_type,
+        "source_file": workout.source_file,
+        "source_id": workout.source_id,
+        "content_hash": workout.content_hash,
+        "created_at": workout.created_at,
+        "updated_at": workout.updated_at,
+        "started_at": workout.started_at,
+        "ended_at": workout.ended_at,
+        "name": workout.name,
+        "activity_type": workout.activity_type,
+        "week": workout.week,
+        "day": workout.day,
+        "program_id": workout.program_id,
+        "program_log_id": workout.program_log_id,
+        "duration_seconds": workout.duration_seconds,
+        "notes": workout.notes,
+        "finished_v2_at": workout.finished_v2_at,
+        "exercise_count": workout.exercise_count(),
+        "set_count": workout.set_count(),
+        "completed_set_count": workout.completed_set_count(),
+        "total_volume_kg": workout.total_volume_kg(),
+        "exercises": [
+            {
+                "id": exercise.exercise_id,
+                "name": exercise.name,
+                "normalized_name": exercise.normalized_name,
+                "order_index": exercise.order_index,
+                "source_exercise_id": exercise.source_exercise_id,
+                "equipment_type": exercise.equipment_type,
+                "target_type": exercise.target_type,
+                "notes": exercise.notes,
+                "sets": [
+                    {
+                        "id": workout_set.set_id,
+                        "set_index": workout_set.set_index,
+                        "value_raw": workout_set.value_raw,
+                        "amount_raw": workout_set.amount_raw,
+                        "weight": workout_set.weight,
+                        "weight_unit": workout_set.weight_unit,
+                        "reps": workout_set.reps,
+                        "reps_open_ended": workout_set.reps_open_ended,
+                        "target_type": workout_set.target_type,
+                        "intensity": workout_set.intensity,
+                        "intensity_unit": workout_set.intensity_unit,
+                        "completed": workout_set.completed,
+                        "custom": workout_set.custom,
+                        "source": workout_set.source,
+                    }
+                    for workout_set in exercise.sets
+                ],
+            }
+            for exercise in workout.exercises
+        ],
+    }
+
+
+def _exercise_summary_dict(exercise: object) -> dict[str, object]:
+    return {
+        "id": exercise.exercise_id,
+        "workout_id": exercise.workout_id,
+        "name": exercise.name,
+        "normalized_name": exercise.normalized_name,
+        "order_index": exercise.order_index,
+        "equipment_type": exercise.equipment_type,
+        "target_type": exercise.target_type,
+        "set_count": exercise.set_count,
+        "completed_set_count": exercise.completed_set_count,
+        "max_weight_kg": exercise.max_weight_kg,
+    }
+
+
+def run_workouts(args: argparse.Namespace) -> int:
+    """Dispatch a ``workouts`` subcommand and return a process exit code."""
+    verb = args.verb
+    database = args.database
+    if verb == "import":
+        return _run_workouts_import(args.path, database, args.json)
+    if verb == "list":
+        return _run_workouts_list(database, args)
+    if verb == "show":
+        return _run_workouts_show(args.workout_id, database, args.json)
+    if verb == "exercises":
+        return _run_workouts_exercises(database, args)
+    raise SystemExit(f"Unknown workouts verb: {verb}")
+
+
+def _run_workouts_import(path: Path, database: Path, as_json: bool) -> int:
+    if not path.exists():
+        raise SystemExit(f"Workout path does not exist: {path}")
+    if not path.is_dir() and path.is_file() and path.suffix.lower() != ".csv":
+        raise SystemExit(f"Unsupported workout file: {path}")
+
+    connection, store = open_workout_store(database)
+    try:
+        if path.is_dir():
+            result = import_workout_directory(path, store)
+        else:
+            raw = path.read_bytes()
+            source = path.name
+            from personal_ai.workouts import parse_workout_file
+
+            records, warnings = parse_workout_file(
+                raw,
+                source_file=source,
+                source_checksum=_sha256_hex(raw),
+            )
+            result = store.import_records(
+                records,
+                source_file=source,
+                checksum=_sha256_hex(raw),
+                size_bytes=len(raw),
+            )
+            result.files_seen.append(source)
+            result.files_imported.append(source)
+            result.warnings.extend(warnings)
+    finally:
+        connection.close()
+
+    if as_json:
+        _print_json(result.to_dict())
+        return 0
+    print(f"workouts import: {', '.join(result.files_imported) or '(none)'}")
+    print(f"  files_seen: {len(result.files_seen)}")
+    print(f"  files_imported: {len(result.files_imported)}")
+    print(f"  files_skipped: {len(result.files_skipped)}")
+    print(f"  workouts_created: {result.workouts_created}")
+    print(f"  workouts_updated: {result.workouts_updated}")
+    print(f"  workouts_skipped: {result.workouts_skipped}")
+    print(f"  records_with_warnings: {result.records_with_warnings}")
+    print(f"  errors: {len(result.errors)}")
+    for warning in result.warnings:
+        print(f"  warning {warning.source_file}:{warning.index}: {warning.message}")
+    for error in result.errors:
+        print(f"  error: {error}")
+    return 0
+
+
+def _run_workouts_list(database: Path, args: argparse.Namespace) -> int:
+    connection, store = open_workout_store(database)
+    try:
+        service = WorkoutQueryService(store)
+        workouts = service.list_workouts(
+            date_from=args.date_from,
+            date_to=args.date_to,
+            program_id=getattr(args, "program_id", None),
+            limit=args.limit,
+        )
+    finally:
+        connection.close()
+    if args.json:
+        _print_json(
+            {"workouts": [_workout_summary_dict(workout) for workout in workouts]}
+        )
+        return 0
+    if not workouts:
+        print("No workouts.")
+        return 0
+    for workout in workouts:
+        print(
+            f"{workout.workout_id}  {workout.started_at}  {workout.name or '-':<22}"
+            f"  {workout.exercise_count} ex, {workout.set_count} sets, "
+            f"{workout.total_volume_kg:.1f} kg"
+        )
+    return 0
+
+
+def _run_workouts_show(workout_id: str, database: Path, as_json: bool) -> int:
+    connection, store = open_workout_store(database)
+    try:
+        workout = WorkoutQueryService(store).get_workout(workout_id)
+    finally:
+        connection.close()
+    if workout is None:
+        raise SystemExit(f"No such workout: {workout_id}")
+    if as_json:
+        _print_json({"workout": _workout_dict(workout)})
+        return 0
+    print(f"id: {workout.workout_id}")
+    print(f"source: {workout.source_type} ({workout.source_file}, {workout.source_id})")
+    print(f"started_at: {workout.started_at}")
+    print(f"ended_at: {workout.ended_at}")
+    print(f"name: {workout.name or '-'}")
+    print(f"activity_type: {workout.activity_type}")
+    if workout.week is not None or workout.day is not None:
+        print(f"program_position: week {workout.week} day {workout.day}")
+    if workout.program_id:
+        print(f"program_id: {workout.program_id}")
+    if workout.duration_seconds is not None:
+        print(f"duration_seconds: {workout.duration_seconds:.1f}")
+    if workout.notes:
+        print(f"notes: {workout.notes}")
+    print(f"sets: {workout.set_count()} ({workout.completed_set_count()} completed)")
+    print(f"total_volume_kg: {workout.total_volume_kg():.1f}")
+    for exercise in workout.exercises:
+        sets = ", ".join(
+            f"{workout_set.weight or workout_set.value_raw or '-'}x{workout_set.reps or workout_set.amount_raw or '-'}"
+            for workout_set in exercise.sets
+        )
+        print(
+            f"  {exercise.order_index}. {exercise.name}"
+            + (f"  [{sets}]" if sets else "")
+        )
+    return 0
+
+
+def _run_workouts_exercises(database: Path, args: argparse.Namespace) -> int:
+    connection, store = open_workout_store(database)
+    try:
+        service = WorkoutQueryService(store)
+        exercises = service.list_exercises(
+            workout_id=getattr(args, "workout_id", None),
+            name=getattr(args, "name", None),
+            limit=args.limit,
+        )
+    finally:
+        connection.close()
+    if args.json:
+        _print_json(
+            {"exercises": [_exercise_summary_dict(exercise) for exercise in exercises]}
+        )
+        return 0
+    if not exercises:
+        print("No exercises.")
+        return 0
+    for exercise in exercises:
+        print(
+            f"{exercise.exercise_id}  {exercise.name}"
+            + (f"  [{exercise.equipment_type}]" if exercise.equipment_type else "")
+            + f"  {exercise.set_count} sets"
+            + (
+                f", max {exercise.max_weight_kg:.1f} kg"
+                if exercise.max_weight_kg is not None
+                else ""
+            )
+        )
+    return 0
+
+
+def _sha256_hex(raw: bytes) -> str:
+    return hashlib.sha256(raw).hexdigest()
+
+
 def _connect_agent_registry(
-    workspace: Path, database: Path
+    workspace: Path,
+    database: Path,
+    workout_service: object | None = None,
 ) -> tuple[ToolRegistry, sqlite3.Connection]:
     """Build the agent tool registry backed by the knowledge and event stores.
 
     Opens the workspace knowledge database and wires the existing stores into
     the default tool registry so the agent can use ``search_knowledge``
     (via :class:`~personal_ai.retrieval.RetrievalService`) and ``query_events``
-    (via :class:`~personal_ai.storage.events.EventStore`).
+    (via :class:`~personal_ai.storage.events.EventStore`). When a workout query
+    service is provided, the policy-gated ``search_workouts`` chat tool is
+    registered as well.
 
     Returns the registry together with the underlying connection so the caller
     can keep the stores alive for the whole agent session and close it
@@ -235,6 +590,7 @@ def _connect_agent_registry(
             chunk_store=chunk_store,
             retrieval_service=retrieval_service,
             event_store=event_store,
+            workout_service=workout_service,
         )
         return registry, connection
     except BaseException:
@@ -278,6 +634,7 @@ def build_agent(
     *,
     model: str = MODEL,
     observer: AgentObserver | None = None,
+    workout_service: object | None = None,
 ) -> BuiltAgent:
     """Construct the production Agent from workspace and database settings.
 
@@ -288,10 +645,16 @@ def build_agent(
     manager (as the CLI has always done) and the returned
     :class:`BuiltAgent` holds the open resources, closed via ``close()`` or
     ``with``.
+
+    When ``workout_service`` is given, the policy-gated ``search_workouts``
+    chat tool is registered so conversational chat can answer movement-based
+    questions about the user's workout history through the policy engine.
     """
     connection: sqlite3.Connection | None = None
     if database is not None:
-        registry, connection = _connect_agent_registry(workspace, database)
+        registry, connection = _connect_agent_registry(
+            workspace, database, workout_service=workout_service
+        )
     else:
         registry = create_default_registry(workspace)
 
@@ -301,6 +664,39 @@ def build_agent(
         enter_client()
     agent = Agent(client, registry, observer=observer)
     return BuiltAgent(agent=agent, client=client, connection=connection)
+
+
+@dataclass
+class BuiltChatMemory:
+    """A constructed :class:`ChatMemory` together with its database resource.
+
+    ``build_chat_memory`` is the application-layer construction path for
+    automatic chat recall. Persistence lives here (SQLite), so the HTTP layer
+    never touches the database or :class:`MemoryStore` directly.
+    """
+
+    chat: ChatMemory
+    connection: sqlite3.Connection | None = None
+
+    def close(self) -> None:
+        if self.connection is not None:
+            self.connection.close()
+
+
+def build_chat_memory(database: Path | None) -> BuiltChatMemory | None:
+    """Construct bounded automatic chat memory recall, or ``None``.
+
+    Called by the application layer (server ``main``) only — never by the
+    HTTP handlers. When ``database`` is ``None`` no memory is wired and chat
+    works exactly as before. Memory and orchestration tables co-locate in the
+    same database file (:func:`open_memory_store`), so memories written by the
+    CLI and executions persist across restarts.
+    """
+    if database is None:
+        return None
+    connection, store = open_memory_store(database)
+    service = MemoryService(store)
+    return BuiltChatMemory(chat=ChatMemory(service), connection=connection)
 
 
 def _make_agent_observer() -> AgentObserver:
@@ -346,8 +742,12 @@ def _make_agent_observer() -> AgentObserver:
     return observe
 
 
-def main() -> None:
-    args = parse_args()
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
+
+    if getattr(args, "command", None) == "workouts":
+        run_workouts(args)
+        return
 
     if args.search_query is not None:
         run_search(args.search_query, args.database, args.limit)

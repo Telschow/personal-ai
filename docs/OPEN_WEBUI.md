@@ -92,7 +92,8 @@ In Open WebUI → **Settings → Connections → OpenAI API / Add connection**:
 * **Base URL**: `http://127.0.0.1:8000/v1`
 * **API key**: the `PERSONAL_AI_API_TOKEN` value **if** one is configured, else
   any non-empty placeholder (e.g. `personal-ai`)
-* **Model**: `qwen3.5:9b` (listed by `GET /v1/models`)
+* **Model**: `personal-ai` (the served id listed by `GET /v1/models`; the
+  underlying Ollama model is internal)
 
 Open WebUI talks to:
 
@@ -103,9 +104,8 @@ Open WebUI
     -> POST   /v1/chat/completions
 ```
 
-The API currently supports **non-streaming** responses (Phase 30). If Open
-WebUI requests `stream=true` the API returns `400` with a clear message;
-streaming is a Phase 33 follow-up.
+The API supports both **non-streaming** responses and **streaming** via SSE
+(`"stream": true`, OpenAI-style `data:` frames ending in `data: [DONE]`).
 
 ---
 
@@ -163,18 +163,19 @@ when you want container networking.** For a purely local Open WebUI install the
 Lists the single served model for Open WebUI discovery.
 
 ```json
-{"object":"list","data":[{"id":"qwen3.5:9b","object":"model","created":0,"owned_by":"personal-ai"}]}
+{"object":"list","data":[{"id":"personal-ai","object":"model","created":0,"owned_by":"personal-ai"}]}
 ```
 
 ### `POST /v1/chat/completions`
 
-OpenAI-compatible request (non-streaming). Full `system` / `user` /
-`assistant` history is passed straight to the Agent, so multi-turn grounding is
-preserved. No extra grounding system prompt is injected.
+OpenAI-compatible request (non-streaming, or `"stream": true` for SSE). Full
+`system` / `user` / `assistant` history is passed straight to the Agent, so
+multi-turn grounding is preserved. No extra grounding system prompt is
+injected.
 
 ```json
 {
-  "model": "qwen3.5:9b",
+  "model": "personal-ai",
   "messages": [
     {"role": "system", "content": "Optional system context."},
     {"role": "user", "content": "What do I know about BCG?"}
@@ -189,7 +190,7 @@ Response:
   "id": "chatcmpl-...",
   "object": "chat.completion",
   "created": 1787948472,
-  "model": "qwen3.5:9b",
+  "model": "personal-ai",
   "choices": [
     {
       "index": 0,
@@ -212,7 +213,7 @@ the Agent's final answer.
 | malformed JSON body | `400` |
 | `messages` missing / empty / no `user` message | `400` |
 | unsupported role / non-string content | `400` |
-| `stream: true` | `400` (not supported in Phase 30) |
+| `stream` present but not a boolean | `400` |
 | missing or wrong API token | `401` |
 | model service unreachable | `502` |
 | Agent error / empty answer / max rounds | `500` |
@@ -236,3 +237,26 @@ curl -H 'Content-Type: application/json' \
 
 The first request after startup can be slow while `qwen3.5:9b` warms up.
 Subsequent warm requests run at the normal 13–65 s lookup latency.
+
+---
+
+## 6. Hybrid surface (Phase 39 decision)
+
+Open WebUI **is the chat surface only**. The execution control plane (Kanban
+board, durable approvals, execution history) is deliberately **not** exposed
+through the OpenAI-compatible chat completion loop: those operations are
+asynchronous and require explicit per-task, per-permission approvals, so they
+do not belong in a request/response chat loop.
+
+The split:
+
+```
+Open WebUI      → Personal AI chat API   (grounded personal chat)
+Control plane   → /api/... gateway       (dedicated control-plane UI, future)
+                 consuming the HTTP contract in docs/CONTROL_PLANE.md
+```
+
+The control-plane HTTP gateway (`/api/executions*`, `/api/memory`,
+`/api/workouts`, served by `personal_ai.server`) already exists for a future
+dedicated UI — it maps 1:1 onto `ControlPlane` and exposes no path from chat
+into approvals. Open WebUI needs no plugin or dependency for any of this.
