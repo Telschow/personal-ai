@@ -459,6 +459,87 @@ class TestRedaction:
         assert "Incoming transfer from" in result.canonical_text
         assert "at Bank" in result.canonical_text
 
+    def test_embedded_ref_style_payment_reference_never_canonicalized(self) -> None:
+        row = list(BANK_ROWS[0])
+        row[5] = "Miete Januar ABC-REF1234567890"
+        result = canonicalize_csv(bank_csv_builder(rows=[row]).encode())
+        assert "ABC-REF1234567890" not in result.canonical_text
+        assert "Miete Januar" in result.canonical_text
+
+    def test_exact_ref_style_payment_reference_never_canonicalized(self) -> None:
+        row = list(BANK_ROWS[0])
+        row[5] = "ABC-REF1234567890"
+        result = canonicalize_csv(bank_csv_builder(rows=[row]).encode())
+        assert "ABC-REF1234567890" not in result.canonical_text
+        assert "ABC" not in result.canonical_text
+        assert "REF1234567890" not in result.canonical_text
+
+    def test_embedded_ref_style_reference_in_middle_of_description_is_stripped(
+        self,
+    ) -> None:
+        row = list(BANK_ROWS[0])
+        row[5] = "Beginn ABC-REF1234567890 Ende"
+        result = canonicalize_csv(bank_csv_builder(rows=[row]).encode())
+        assert "ABC-REF1234567890" not in result.canonical_text
+        assert "Beginn" in result.canonical_text
+        assert "Ende" in result.canonical_text
+
+    def test_multiple_ref_style_references_are_stripped(self) -> None:
+        row = list(BANK_ROWS[0])
+        row[5] = "ABC-REF1234567890 xyz DEF-REF0987654321"
+        result = canonicalize_csv(bank_csv_builder(rows=[row]).encode())
+        assert "ABC-REF1234567890" not in result.canonical_text
+        assert "DEF-REF0987654321" not in result.canonical_text
+        assert "xyz" in result.canonical_text
+
+    def test_ref_like_but_not_payment_reference_is_kept(self) -> None:
+        for purpose in (
+            "ABC-DEF1234567890",
+            "ABC-REFMAZ4100101128",
+            "ABC-REF123456789",
+        ):
+            row = list(BANK_ROWS[0])
+            row[5] = purpose
+            result = canonicalize_csv(bank_csv_builder(rows=[row]).encode())
+            assert purpose in result.canonical_text, purpose
+
+    def test_embedded_sepa_creditor_reference_is_stripped(self) -> None:
+        row = list(BANK_ROWS[0])
+        row[5] = "Rechnung RF1853902347034 vom Mai"
+        result = canonicalize_csv(bank_csv_builder(rows=[row]).encode())
+        assert "RF1853902347034" not in result.canonical_text
+        assert "Rechnung" in result.canonical_text
+        assert "vom Mai" in result.canonical_text
+
+    def test_ordinary_words_that_resemble_references_are_kept(self) -> None:
+        for purpose in (
+            "REFUND supermarket",
+            "REFINANCE home loan",
+            "Referenz Rechnung",
+            "RFID tag 1234",
+            "RefNr 12345",
+        ):
+            row = list(BANK_ROWS[0])
+            row[5] = purpose
+            result = canonicalize_csv(bank_csv_builder(rows=[row]).encode())
+            assert purpose in result.canonical_text, purpose
+
+    def test_legitimate_description_with_digits_remains_searchable(self) -> None:
+        row = list(BANK_ROWS[0])
+        row[5] = "Gehalt Januar 2025"
+        result = canonicalize_csv(bank_csv_builder(rows=[row]).encode())
+        assert "Gehalt Januar 2025" in result.canonical_text
+
+    def test_embedded_payment_reference_keeps_redaction_deterministic(self) -> None:
+        row = list(BANK_ROWS[0])
+        row[5] = "Zahlung ABC-REF1234567890"
+        first = canonicalize_csv(bank_csv_builder(rows=[row]).encode())
+        second = canonicalize_csv(bank_csv_builder(rows=[row]).encode())
+        assert first.source_key == second.source_key
+        assert first.content_hash == second.content_hash
+        assert first.canonical_text == second.canonical_text
+        assert "ABC-REF1234567890" not in first.canonical_text
+
 
 class TestSchemaRecognition:
     def _adapter(self, tmp_path, files):

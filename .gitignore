@@ -35,3 +35,8 @@ raw_data.zip
 # Local/generated data
 knowledge.db
 raw_data_extracted/
+
+# Private personal data (never committed)
+/Workouts/
+/Email_Outlook/
+/Financial_data/

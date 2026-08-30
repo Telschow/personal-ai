@@ -30,13 +30,16 @@ Undated portfolio snapshots are rendered with an explicit
 Privacy: canonical searchable text *never* contains stable account identifiers
 such as IBAN, counterparty IBAN, Glaeubiger-ID, Mandatsreferenz, or
 Kundenreferenz / payment references. Those columns are dropped outright,
-never masked. Where an export embeds an IBAN inside a free-text column (for
-example a brokerage ``description`` such as ``Incoming transfer from ...
-DE12...``), the embedded identifier is removed by a word-boundary IBAN
-pattern; the surrounding words remain searchable. Counterparty names,
-purposes/descriptions, dates, amounts, status, type, product, ticker/ISIN,
-quantity, price, value, and ``transaction_id`` (as provenance only) remain
-searchable.
+never masked. Where an export embeds an identifier inside a free-text column
+(for example a brokerage ``description`` such as ``Incoming transfer from ...
+DE12...``), the embedded identifier is removed by a word-boundary pattern; the
+surrounding words remain searchable. This covers both ISO 11649 SEPA creditor
+references (``RF`` check-digit form) and the free-format ``REF``-style
+payment-reference codes (three uppercase letters, a dash, ``REF``, then
+digits) that appear embedded in a bank export's purpose field.
+Counterparty names, purposes/descriptions, dates, amounts, status, type,
+product, ticker/ISIN, quantity, price, value, and ``transaction_id`` (as
+provenance only) remain searchable.
 
 No network, model, or external service is involved: canonicalization is pure
 deterministic local parsing, so the CLI ingests ``financial`` sources without
@@ -71,6 +74,24 @@ _REDACT = "redact"
 # ordinary words and short codes (transaction ids, ``XXXX`` symbols) intact.
 _IBAN_PATTERN = re.compile(r"(?<![A-Z0-9])[A-Z]{2}[0-9]{2}[A-Z0-9]{12,29}(?![A-Z0-9])")
 
+# ISO 11649 SEPA creditor reference (``RF`` + two check digits + up to 21
+# alphanumerics). At a word boundary and always starting with the literal
+# ``RF`` marker followed by digits, this never collides with ordinary words or
+# legitimate transaction descriptions.
+_CREDITOR_REFERENCE_PATTERN = re.compile(
+    r"(?<![A-Z0-9])RF[0-9]{2}[A-Z0-9]{1,21}(?![A-Z0-9])"
+)
+
+# Free-format REF-style payment reference embedded in a bank export's purpose
+# field. Observed shape: three uppercase letters, a dash, the ``REF`` marker,
+# then a solid run of digits (e.g. ``ABC-REF1234567890``). The ``-REF`` marker
+# preceded by an uppercase run and followed directly by a long digit run is
+# unambiguous, so the surrounding description remains searchable while the
+# reference code is dropped. ``REF`` must be the literal marker (so
+# ``ABC-DEF1234...`` and ordinary words are untouched) and must be followed by
+# digits (so tokens with further letters after ``REF`` are not references).
+_REF_STYLE_PATTERN = re.compile(r"(?<![A-Z0-9])[A-Z]{3}-REF[0-9]{10,}(?![A-Z0-9])")
+
 _SECTIONS = {
     "bank": "TRANSACTION",
     "card": "CARD_PAYMENT",
@@ -104,8 +125,15 @@ def _normalize_header(field: str) -> str:
 
 
 def _normalize_text(value: str) -> str:
-    """Collapse whitespace and newlines, then drop embedded IBAN identifiers."""
-    return _IBAN_PATTERN.sub("", " ".join(value.split()))
+    """Collapse whitespace and newlines, then drop embedded identifiers.
+
+    Embedded payment references (SEPA creditor references and the REF-style
+    codes) and IBANs are removed; the surrounding words are preserved.
+    """
+    collapsed = " ".join(value.split())
+    collapsed = _CREDITOR_REFERENCE_PATTERN.sub("", collapsed)
+    collapsed = _REF_STYLE_PATTERN.sub("", collapsed)
+    return _IBAN_PATTERN.sub("", collapsed)
 
 
 _EMPTY_AMOUNT_MARKERS = frozenset({"-", "+", "\u2013", "\u2212", ".", "--"})

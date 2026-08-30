@@ -175,6 +175,14 @@ def _built_bank_csv():
     )
 
 
+def _built_bank_csv_with(rows):
+    return (
+        'Girokonto;"DE16120300001085646543"\r\n'
+        "Zeitraum:;2024\r\n"
+        "Kontostand vom 31.12.2024:;1234,56\r\n" + _render(BANK_COLUMNS, rows, ";")
+    )
+
+
 def make_corpus(tmp_path):
     directory = tmp_path / "finance"
     directory.mkdir()
@@ -256,6 +264,7 @@ class TestFinancialIngestionE2E:
                 "REF-KND-2024",
                 "DE00000000000000000000",
                 "REF-2022-0001",
+                "ABC-REF1234567890",
             ]
             for token in sensitive:
                 hits = search_documents(
@@ -266,6 +275,31 @@ class TestFinancialIngestionE2E:
             assert (
                 search_documents(
                     chunk_store, SearchDocumentsRequest(query="HACKER", limit=10)
+                )
+                == ()
+            )
+        finally:
+            connection.close()
+
+    def test_embedded_ref_reference_in_purpose_not_searchable(self, tmp_path) -> None:
+        directory = make_corpus(tmp_path)
+        rows = [list(row) for row in BANK_ROWS]
+        rows[0][5] = "Miete Januar ABC-REF1234567890"
+        (directory / "Umsatzliste_2024.csv").write_text(
+            _built_bank_csv_with(rows), encoding="utf-8"
+        )
+        connection = connect_database(":memory:")
+        try:
+            ingest_source(FinancialSourceAdapter(directory), make_ingestor(connection))
+            chunk_store = ChunkStore(connection)
+            assert search_documents(
+                chunk_store,
+                SearchDocumentsRequest(query="Miete", limit=10),
+            )
+            assert (
+                search_documents(
+                    chunk_store,
+                    SearchDocumentsRequest(query="ABC-REF1234567890", limit=10),
                 )
                 == ()
             )
