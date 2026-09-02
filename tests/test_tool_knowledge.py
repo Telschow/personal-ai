@@ -79,7 +79,12 @@ class TestKnowledgeSearchTool:
             )
         )
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "BCG"})
+        envelope = tool.search_knowledge({"query": "BCG"})
+        results = envelope["results"]
+        assert envelope["status"] == "results"
+        assert envelope["total_returned"] == 1
+        assert envelope["truncated"] is False
+        assert envelope["error"] is None
         assert len(results) == 1
         assert results[0]["result_type"] == "chunk"
         assert results[0]["document_id"] == "doc-1"
@@ -104,7 +109,7 @@ class TestKnowledgeSearchTool:
             )
         )
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "consulting"})
+        results = tool.search_knowledge({"query": "consulting"})["results"]
         assert results[0]["matched_fields"] == ["organizations", "topics"]
 
     def test_passes_filter_to_service(self) -> None:
@@ -160,7 +165,7 @@ class TestKnowledgeSearchTool:
             )
         )
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "BCG"})
+        results = tool.search_knowledge({"query": "BCG"})["results"]
         assert results[0]["source_type"] == "email"
         assert results[0]["title"] == "Phase 33 Email Subject"
 
@@ -196,5 +201,9 @@ class TestKnowledgeSearchTool:
     def test_empty_results(self) -> None:
         service = FakeRetrievalService(results=())
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "nonexistent"})
-        assert results == []
+        envelope = tool.search_knowledge({"query": "nonexistent"})
+        assert envelope["status"] == "no_matches"
+        assert envelope["results"] == []
+        assert envelope["total_returned"] == 0
+        assert envelope["truncated"] is False
+        assert envelope["error"] is None

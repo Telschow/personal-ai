@@ -1,8 +1,19 @@
-"""Agent tool exposing keyword search over persisted knowledge."""
+"""Agent tool exposing keyword search over persisted knowledge.
+
+The result of a query is wrapped in the canonical retrieval envelope so the
+model can always distinguish ``results``, ``no_matches``, and ``error``. A
+store-level failure is reported as a safe ``error`` outcome, never as an empty
+successful result.
+"""
+
+from dataclasses import asdict
 
 from personal_ai.retrieval import (
     DEFAULT_SEARCH_LIMIT,
+    MAX_SEARCH_LIMIT,
+    MAX_SEARCH_QUERY_CHARS,
     SearchDocumentsRequest,
+    build_retrieval_outcome,
     search_documents,
 )
 from personal_ai.storage.chunks import ChunkStore, DocumentFilter
@@ -24,6 +35,8 @@ def _parse_query(arguments: dict[str, object]) -> str:
     query = arguments.get("query")
     if not isinstance(query, str):
         raise TypeError("query must be a string")
+    if len(query) > MAX_SEARCH_QUERY_CHARS:
+        raise ValueError(f"query exceeds the {MAX_SEARCH_QUERY_CHARS}-character limit")
     return query
 
 
@@ -31,6 +44,8 @@ def _parse_limit(arguments: dict[str, object]) -> int:
     limit = arguments.get("limit", DEFAULT_SEARCH_LIMIT)
     if not isinstance(limit, int) or isinstance(limit, bool):
         raise TypeError("limit must be an integer")
+    if limit > MAX_SEARCH_LIMIT:
+        raise ValueError(f"limit exceeds the maximum of {MAX_SEARCH_LIMIT}")
     return limit
 
 
@@ -88,8 +103,14 @@ class SearchTool:
     def __init__(self, chunk_store: ChunkStore) -> None:
         self._chunk_store = chunk_store
 
-    def search_documents(self, arguments: dict[str, object]) -> list[dict[str, object]]:
-        """Run one search request from model-supplied JSON arguments."""
+    def search_documents(self, arguments: dict[str, object]) -> dict[str, object]:
+        """Run one search request from model-supplied JSON arguments.
+
+        Returns the canonical retrieval envelope. Argument validation errors
+        (unknown keys, non-string query, out-of-bounds limit) still raise and
+        are surfaced as tool execution errors; only a failure to *execute* the
+        query against the store is converted into a safe ``error`` outcome.
+        """
         unknown_keys = sorted(set(arguments) - _ALLOWED_ARGUMENT_KEYS)
         if unknown_keys:
             msg = f"unsupported arguments: {', '.join(unknown_keys)}"
@@ -100,16 +121,25 @@ class SearchTool:
             limit=_parse_limit(arguments),
             document_filter=_parse_document_filter(arguments),
         )
-        results = search_documents(self._chunk_store, request)
-        return [
-            {
-                "chunk_id": hit.chunk_id,
-                "document_id": hit.document_id,
-                "chunk_index": hit.chunk_index,
-                "text": hit.text,
-                "rank": hit.rank,
-                "source_type": hit.source_type,
-                "source": hit.source,
-            }
-            for hit in results
-        ]
+        try:
+            results = search_documents(self._chunk_store, request)
+            hits = tuple(
+                {
+                    "chunk_id": hit.chunk_id,
+                    "document_id": hit.document_id,
+                    "chunk_index": hit.chunk_index,
+                    "text": hit.text,
+                    "rank": hit.rank,
+                    "source_type": hit.source_type,
+                    "source": hit.source,
+                }
+                for hit in results
+            )
+        except Exception:  # noqa: BLE001 - convert operational failure to safe error status
+            outcome = build_retrieval_outcome(
+                request.query, (), limit=request.limit, error=True
+            )
+            return asdict(outcome)
+
+        outcome = build_retrieval_outcome(request.query, hits, limit=request.limit)
+        return asdict(outcome)

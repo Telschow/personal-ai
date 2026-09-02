@@ -10,6 +10,7 @@ chunks, structured extractions, and conversation messages, returning a
 single ranked result set.
 """
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 from personal_ai.documents.models import Document
@@ -47,14 +48,46 @@ DEFAULT_SEARCH_EVENT_TYPES = (EVENT_TYPE_SEARCH_QUERY, EVENT_TYPE_YOUTUBE_SEARCH
 # Event types treated as "video" (watchable) events by temporal aggregation.
 DEFAULT_VIDEO_EVENT_TYPES = (EVENT_TYPE_VIDEO_WATCH,)
 
+# Canonical retrieval status values. These are the safety-relevant states the
+# agent layer must be able to distinguish:
+#
+# * ``RESULTS_AVAILABLE``  -- a query ran and returned one or more matches.
+# * ``NO_MATCHES``          -- a query ran cleanly but nothing matched. This is
+#                              a real, verified outcome and is the ONLY state in
+#                              which the model may reason that no relevant data
+#                              exists.
+# * ``RETRIEVAL_ERROR``     -- the query could not be executed (for example the
+#                              underlying store was unavailable). The model must
+#                              treat this as an operational failure, never as
+#                              "no documents exist".
+RETRIEVAL_STATUS_RESULTS = "results"
+RETRIEVAL_STATUS_NO_MATCHES = "no_matches"
+RETRIEVAL_STATUS_ERROR = "error"
+
+# Canonical retrieval error category. A deliberately generic, leak-free signal.
+RETRIEVAL_ERROR_UNAVAILABLE = "retrieval_unavailable"
+
+# Hard bounds on model-supplied retrieval input. Kept conservative so that a
+# single query never allocates unbounded work, and so observability never has
+# to log or evaluate arbitrarily large query text.
+MAX_SEARCH_QUERY_CHARS = 500
+MAX_SEARCH_LIMIT = 50
+
 __all__ = [
     "DEFAULT_SEARCH_EVENT_TYPES",
     "DEFAULT_SEARCH_LIMIT",
     "DEFAULT_VIDEO_EVENT_TYPES",
+    "MAX_SEARCH_LIMIT",
+    "MAX_SEARCH_QUERY_CHARS",
+    "RETRIEVAL_ERROR_UNAVAILABLE",
+    "RETRIEVAL_STATUS_ERROR",
+    "RETRIEVAL_STATUS_NO_MATCHES",
+    "RETRIEVAL_STATUS_RESULTS",
     "ActivityBucketsRequest",
     "ActivitySummaryRequest",
     "ChannelTrendsRequest",
     "EventQueryRequest",
+    "RetrievalOutcome",
     "RetrievalService",
     "SearchDocumentsRequest",
     "SearchResult",
@@ -62,12 +95,39 @@ __all__ = [
     "VideoTrendsRequest",
     "activity_by_bucket",
     "activity_summary",
+    "build_retrieval_outcome",
     "query_events",
     "search_documents",
     "top_channels",
     "top_searches",
     "top_videos",
 ]
+
+
+def _validate_model_query(query: str) -> None:
+    """Validate a model-supplied query against canonical length bounds.
+
+    Raises ``ValueError`` when the query exceeds
+    :data:`MAX_SEARCH_QUERY_CHARS`. This is a validation concern (the model
+    supplied an out-of-bounds argument), distinct from an operational
+    retrieval failure.
+    """
+    if len(query) > MAX_SEARCH_QUERY_CHARS:
+        msg = (
+            f"query exceeds the {MAX_SEARCH_QUERY_CHARS}-character limit"
+            f" ({len(query)} characters)"
+        )
+        raise ValueError(msg)
+
+
+def _validate_model_limit(limit: int) -> None:
+    """Validate a model-supplied result limit cap.
+
+    Raises ``ValueError`` when ``limit`` exceeds :data:`MAX_SEARCH_LIMIT`.
+    """
+    if limit > MAX_SEARCH_LIMIT:
+        msg = f"limit exceeds the maximum of {MAX_SEARCH_LIMIT}"
+        raise ValueError(msg)
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,6 +161,53 @@ def search_documents(
     """Run one search request and return deterministic ranked hits."""
     return chunk_store.search(
         request.query, limit=request.limit, filters=request.document_filter
+    )
+
+
+def build_retrieval_outcome(
+    query: str,
+    results: Sequence[dict[str, object]],
+    *,
+    limit: int,
+    truncated_any: bool = False,
+    error: bool = False,
+) -> RetrievalOutcome:
+    """Build a canonical :class:`RetrievalOutcome` from a result set.
+
+    ``error`` forces :data:`RETRIEVAL_STATUS_ERROR` (used when the underlying
+    store could not be reached) so that an operational failure is never
+    surfaced as an empty, successful result. ``truncated_any`` is True when the
+    caller knows additional matches were dropped even though the returned count
+    is below ``limit``; otherwise ``truncated`` is True only when the count
+    equals or exceeds the limit.
+    """
+    if error:
+        return RetrievalOutcome(
+            query=query,
+            status=RETRIEVAL_STATUS_ERROR,
+            results=[],
+            total_returned=0,
+            truncated=False,
+            query_length=len(query),
+            error=RETRIEVAL_ERROR_UNAVAILABLE,
+        )
+    if not results:
+        return RetrievalOutcome(
+            query=query,
+            status=RETRIEVAL_STATUS_NO_MATCHES,
+            results=[],
+            total_returned=0,
+            truncated=False,
+            query_length=len(query),
+        )
+    truncated = truncated_any or len(results) >= limit
+    return RetrievalOutcome(
+        query=query,
+        status=RETRIEVAL_STATUS_RESULTS,
+        results=list(results),
+        total_returned=len(results),
+        truncated=truncated,
+        query_length=len(query),
     )
 
 
@@ -144,6 +251,52 @@ class SearchResult:
     timestamp: str | None = None
     is_active_branch: bool | None = None
     source_type: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class RetrievalOutcome:
+    """The canonical, status-aware outcome of a retrieval operation.
+
+    This is the explicit contract between the retrieval layer and the agent.
+    It decouples *content* (``results``) from *status* so that a successful
+    query with no matches is never confused with an operational failure.
+
+    ``status`` is one of :data:`RETRIEVAL_STATUS_RESULTS`,
+    :data:`RETRIEVAL_STATUS_NO_MATCHES`, or :data:`RETRIEVAL_STATUS_ERROR`.
+
+    ``total_returned`` is the number of results actually returned (==
+    ``len(results)``). ``truncated`` is True when more matches existed than
+    were returned and the result set was cut at the limit. For
+    ``RETRIEVAL_STATUS_ERROR``, ``results`` is empty and ``error`` carries a
+    single safe, generic :data:`RETRIEVAL_ERROR_UNAVAILABLE` category.
+
+    ``query`` echoes the validated query text (the model's own input) so the
+    agent can ground its answer on exactly what was searched. ``query_length``
+    is a privacy-safe scalar usable for observability without logging content.
+    """
+
+    query: str
+    status: str
+    results: list[dict[str, object]]
+    total_returned: int = 0
+    truncated: bool = False
+    query_length: int = 0
+    error: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.status not in (
+            RETRIEVAL_STATUS_RESULTS,
+            RETRIEVAL_STATUS_NO_MATCHES,
+            RETRIEVAL_STATUS_ERROR,
+        ):
+            msg = f"invalid retrieval status: {self.status!r}"
+            raise ValueError(msg)
+        if self.status == RETRIEVAL_STATUS_ERROR and self.error is None:
+            msg = "an error status requires a non-None error category"
+            raise ValueError(msg)
+        if self.status != RETRIEVAL_STATUS_ERROR and self.error is not None:
+            msg = "only an error status may carry an error category"
+            raise ValueError(msg)
 
 
 def _chunk_to_search_result(

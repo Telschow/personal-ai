@@ -39,7 +39,7 @@ class TestKnowledgeSearchToolConversations:
             )
         )
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "BCG"})
+        results = tool.search_knowledge({"query": "BCG"})["results"]
         assert len(results) == 1
         r = results[0]
         assert r["result_type"] == "conversation"
@@ -72,7 +72,7 @@ class TestKnowledgeSearchToolConversations:
             )
         )
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "BCG"})
+        results = tool.search_knowledge({"query": "BCG"})["results"]
         r = results[0]
         assert r["result_type"] == "chunk"
         assert r["document_id"] == "doc-1"
@@ -93,7 +93,7 @@ class TestKnowledgeSearchToolConversations:
             )
         )
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "consulting"})
+        results = tool.search_knowledge({"query": "consulting"})["results"]
         r = results[0]
         assert r["result_type"] == "structured_extraction"
         assert "provenance" not in r
@@ -127,7 +127,7 @@ class TestKnowledgeSearchToolConversations:
             )
         )
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "BCG"})
+        results = tool.search_knowledge({"query": "BCG"})["results"]
         assert len(results) == 2
         types = {r["result_type"] for r in results}
         assert "chunk" in types
@@ -154,7 +154,7 @@ class TestKnowledgeSearchToolConversations:
         )
         tool = KnowledgeSearchTool(service)
         results = tool.search_knowledge({"query": "consulting"})
-        provenance = results[0]["provenance"]
+        provenance = results["results"][0]["provenance"]
         lines = provenance.split("\n")
         assert lines[0] == "[CONVERSATION]"
         assert lines[1] == "Gemini Career Discussion"
@@ -189,8 +189,7 @@ class TestKnowledgeSearchToolConversations:
             )
         )
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "answer"})
-        r = results[0]
+        r = tool.search_knowledge({"query": "answer"})["results"][0]
         assert "(inactive branch)" in r["provenance"]
         assert r["is_active_branch"] is False
 
@@ -217,7 +216,7 @@ class TestKnowledgeSearchToolConversations:
         )
         tool = KnowledgeSearchTool(service)
         results = tool.search_knowledge({"query": "Hello"})
-        provenance = results[0]["provenance"]
+        provenance = results["results"][0]["provenance"]
         assert "Timestamp:" not in provenance
 
     def test_multi_word_query_passed_through_without_schema_change(self) -> None:
@@ -245,7 +244,7 @@ class TestKnowledgeSearchToolConversations:
         )
         tool = KnowledgeSearchTool(service)
         query = "BCG McKinsey Bain consulting business strategy case interview"
-        results = tool.search_knowledge({"query": query, "limit": 12})
+        results = tool.search_knowledge({"query": query, "limit": 12})["results"]
         assert service.last_query == query
         assert len(results) == 1
         assert results[0]["result_type"] == "conversation"

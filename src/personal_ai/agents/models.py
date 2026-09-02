@@ -61,6 +61,8 @@ class Permission(Enum):
     MEMORY_READ = "memory.read"
     # read-only workout activity retrieval
     WORKOUT_READ = "workout.read"
+    # read-only personal-context overview retrieval (aggregate metadata)
+    PERSONAL_CONTEXT_READ = "personal_context.read"
     # workspace mutation
     FILESYSTEM_WRITE = "filesystem.write"
     # execution

@@ -1,8 +1,21 @@
 """Agent tool exposing unified search over document chunks, structured
 extractions, and conversation messages.
+
+The result of a query is wrapped in the canonical retrieval envelope so the
+model can always distinguish ``results``, ``no_matches``, and ``error``. A
+service-level failure is reported as a safe ``error`` outcome, never as an
+empty successful result.
 """
 
-from personal_ai.retrieval import DEFAULT_SEARCH_LIMIT, RetrievalService
+from dataclasses import asdict
+
+from personal_ai.retrieval import (
+    DEFAULT_SEARCH_LIMIT,
+    MAX_SEARCH_LIMIT,
+    MAX_SEARCH_QUERY_CHARS,
+    RetrievalService,
+    build_retrieval_outcome,
+)
 from personal_ai.storage.chunks import DocumentFilter
 
 _ALLOWED_ARGUMENT_KEYS = frozenset({"query", "limit", "filter"})
@@ -22,6 +35,8 @@ def _parse_query(arguments: dict[str, object]) -> str:
     query = arguments.get("query")
     if not isinstance(query, str):
         raise TypeError("query must be a string")
+    if len(query) > MAX_SEARCH_QUERY_CHARS:
+        raise ValueError(f"query exceeds the {MAX_SEARCH_QUERY_CHARS}-character limit")
     return query
 
 
@@ -29,6 +44,8 @@ def _parse_limit(arguments: dict[str, object]) -> int:
     limit = arguments.get("limit", DEFAULT_SEARCH_LIMIT)
     if not isinstance(limit, int) or isinstance(limit, bool):
         raise TypeError("limit must be an integer")
+    if limit > MAX_SEARCH_LIMIT:
+        raise ValueError(f"limit exceeds the maximum of {MAX_SEARCH_LIMIT}")
     return limit
 
 
@@ -120,18 +137,31 @@ class KnowledgeSearchTool:
     def __init__(self, retrieval_service: RetrievalService) -> None:
         self._service = retrieval_service
 
-    def search_knowledge(self, arguments: dict[str, object]) -> list[dict[str, object]]:
-        """Run one unified search from model-supplied JSON arguments."""
+    def search_knowledge(self, arguments: dict[str, object]) -> dict[str, object]:
+        """Run one unified search from model-supplied JSON arguments.
+
+        Returns the canonical retrieval envelope. Argument validation errors
+        (unknown keys, non-string query, out-of-bounds limit) still raise and
+        are surfaced as tool execution errors; only a failure to *execute* the
+        query against the service is converted into a safe ``error`` outcome.
+        """
         unknown_keys = sorted(set(arguments) - _ALLOWED_ARGUMENT_KEYS)
         if unknown_keys:
             msg = f"unsupported arguments: {', '.join(unknown_keys)}"
             raise ValueError(msg)
 
-        results = self._service.search(
-            query=_parse_query(arguments),
-            limit=_parse_limit(arguments),
-            filters=_parse_document_filter(arguments),
-        )
+        query = _parse_query(arguments)
+        limit = _parse_limit(arguments)
+        document_filter = _parse_document_filter(arguments)
+        try:
+            results = self._service.search(
+                query=query,
+                limit=limit,
+                filters=document_filter,
+            )
+        except Exception:  # noqa: BLE001 - convert operational failure to safe error status
+            outcome = build_retrieval_outcome(query, (), limit=limit, error=True)
+            return asdict(outcome)
 
         output: list[dict[str, object]] = []
         for hit in results:
@@ -156,4 +186,6 @@ class KnowledgeSearchTool:
                 output.append(_format_conversation_result(base))
             else:
                 output.append(base)
-        return output
+
+        outcome = build_retrieval_outcome(query, tuple(output), limit=limit)
+        return asdict(outcome)

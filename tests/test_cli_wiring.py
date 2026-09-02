@@ -96,6 +96,10 @@ class TestConnectAgentRegistry:
             assert "list_directory" in names
             assert "search_knowledge" in names
             assert "query_events" in names
+            # The DB-backed registry also exposes the read-only personal-context
+            # overview (counts/provenance) so the model can discover what
+            # personal data exists before narrowing a search.
+            assert "personal_context" in names
             # The empty corpus has no indexed documents, so the narrow
             # chunk-only search tool is intentionally hidden (Phase 23).
             assert "search_documents" not in names
@@ -104,6 +108,7 @@ class TestConnectAgentRegistry:
                 "list_directory",
                 "search_knowledge",
                 "query_events",
+                "personal_context",
             }
 
             # Populate knowledge rows through the real ingest path on the same
@@ -136,12 +141,12 @@ class TestConnectAgentRegistry:
 
             # search_knowledge executes against the real retrieval service.
             knowledge_results = registry.execute("search_knowledge", {"query": "BCG"})
-            assert isinstance(knowledge_results, list)
-            assert len(knowledge_results) > 0
+            assert isinstance(knowledge_results, dict)
+            assert knowledge_results["status"] == "results"
+            hits = knowledge_results["results"]
+            assert len(hits) > 0
             texts = [
-                r["text"]
-                for r in knowledge_results
-                if r["result_type"] == "structured_extraction"
+                r["text"] for r in hits if r["result_type"] == "structured_extraction"
             ]
             assert any("Summary about BCG project" in text for text in texts)
 
@@ -217,7 +222,9 @@ class TestConnectAgentRegistry:
                 },
             )
             conv_texts = [
-                r["text"] for r in results if r["result_type"] == "conversation"
+                r["text"]
+                for r in results["results"]
+                if r["result_type"] == "conversation"
             ]
             assert "BCG early January" in conv_texts
             assert "BCG mid February" not in conv_texts

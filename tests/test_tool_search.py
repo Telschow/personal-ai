@@ -93,7 +93,13 @@ def test_registry_with_store_exposes_search_schema(registry) -> None:
 
 
 def test_successful_search_returns_serialized_hits(registry) -> None:
-    results = registry.execute("search_documents", {"query": "guitar"})
+    envelope = registry.execute("search_documents", {"query": "guitar"})
+    results = envelope["results"]
+
+    assert envelope["status"] == "results"
+    assert envelope["total_returned"] == 2
+    assert envelope["truncated"] is False
+    assert envelope["error"] is None
 
     assert results == [
         {
@@ -122,7 +128,7 @@ def test_source_type_filter_narrows_results(registry) -> None:
     results = registry.execute(
         "search_documents",
         {"query": "guitar", "filter": {"source_types": ["notebooklm"]}},
-    )
+    )["results"]
 
     assert [hit["chunk_id"] for hit in results] == ["chunk-b"]  # type: ignore[index]
 
@@ -154,14 +160,14 @@ def test_mime_filter_narrows_results(tmp_path: Path) -> None:
                 "query": "guitar",
                 "filter": {"mime_types": ["application/pdf"]},
             },
-        )
+        )["results"]
         text_only = registry.execute(
             "search_documents",
             {
                 "query": "guitar",
                 "filter": {"mime_types": ["text/plain"]},
             },
-        )
+        )["results"]
 
         assert [hit["chunk_id"] for hit in pdf_only] == ["chunk-pdf"]
         assert text_only == []
@@ -176,7 +182,7 @@ def test_date_filter_excludes_documents_outside_window(registry) -> None:
             "query": "guitar",
             "filter": {"created_after": "2026-02-01T00:00:00+00:00"},
         },
-    )
+    )["results"]
 
     assert [hit["chunk_id"] for hit in results] == ["chunk-b"]  # type: ignore[index]
 
@@ -229,22 +235,31 @@ def test_unknown_filter_fields_are_rejected(registry) -> None:
 
 
 def test_empty_query_returns_no_results(registry) -> None:
-    assert registry.execute("search_documents", {"query": ""}) == []
-    assert registry.execute("search_documents", {"query": "   "}) == []
+    for query in ("", "   "):
+        envelope = registry.execute("search_documents", {"query": query})
+        assert envelope["status"] == "no_matches"
+        assert envelope["results"] == []
+        assert envelope["total_returned"] == 0
+        assert envelope["truncated"] is False
+        assert envelope["error"] is None
 
 
-def test_no_match_returns_empty_list(registry) -> None:
-    assert registry.execute("search_documents", {"query": "zeppelin"}) == []
+def test_no_match_returns_no_matches_envelope(registry) -> None:
+    envelope = registry.execute("search_documents", {"query": "zeppelin"})
+    assert envelope["status"] == "no_matches"
+    assert envelope["results"] == []
 
 
 def test_operator_words_stay_literal_through_the_tool(registry) -> None:
     # Boolean OR syntax would match both chunks; literal terms match none.
-    assert registry.execute("search_documents", {"query": "practice OR theory"}) == []
+    envelope = registry.execute("search_documents", {"query": "practice OR theory"})
+    assert envelope["status"] == "no_matches"
+    assert envelope["results"] == []
 
 
 def test_equal_ranks_order_deterministically(registry) -> None:
-    first = registry.execute("search_documents", {"query": "guitar"})
-    second = registry.execute("search_documents", {"query": "guitar"})
+    first = registry.execute("search_documents", {"query": "guitar"})["results"]
+    second = registry.execute("search_documents", {"query": "guitar"})["results"]
 
     ids = ["chunk-a", "chunk-b"]
     assert [hit["chunk_id"] for hit in first] == ids  # type: ignore[index]
@@ -254,9 +269,10 @@ def test_equal_ranks_order_deterministically(registry) -> None:
 def test_limit_bounds_result_count(knowledge: KnowledgeFixture, tmp_path: Path) -> None:
     registry = create_default_registry(tmp_path, chunk_store=knowledge.chunks)
 
-    results = registry.execute("search_documents", {"query": "guitar", "limit": 1})
+    envelope = registry.execute("search_documents", {"query": "guitar", "limit": 1})
 
-    assert len(results) == 1
+    assert len(envelope["results"]) == 1
+    assert envelope["truncated"] is True
 
 
 class TestConditionalRegistration:

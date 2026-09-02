@@ -273,8 +273,9 @@ class TestUnifiedCorpusE2E:
 
         results = registry.execute("search_documents", {"query": PHASE33_EMAIL_MARKER})
 
-        assert results
-        hit = results[0]
+        assert results["status"] == "results"
+        assert results["results"]
+        hit = results["results"][0]
         assert {
             "document_id",
             "chunk_id",
@@ -294,7 +295,8 @@ class TestUnifiedCorpusE2E:
                 "filter": {"mime_types": ["application/pdf"]},
             },
         )
-        assert pdf_only == []
+        assert pdf_only["status"] == "no_matches"
+        assert pdf_only["results"] == []
 
     def test_search_knowledge_tool_output_includes_provenance(
         self,
@@ -311,7 +313,8 @@ class TestUnifiedCorpusE2E:
 
         results = registry.execute("search_knowledge", {"query": PHASE33_EMAIL_MARKER})
 
-        assert results
-        hit = results[0]
+        assert results["status"] == "results"
+        assert results["results"]
+        hit = results["results"][0]
         assert hit["source_type"] == "email"
         assert hit["title"] == EMAIL_SUBJECT

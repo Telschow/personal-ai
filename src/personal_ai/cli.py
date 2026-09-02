@@ -40,6 +40,7 @@ from personal_ai.storage import (
     connect_database,
 )
 from personal_ai.tools import ToolRegistry, create_default_registry
+from personal_ai.tools.personal_context import PersonalContextService
 from personal_ai.workouts import (
     WorkoutQueryService,
     import_workout_directory,
@@ -558,6 +559,7 @@ def _connect_agent_registry(
     workspace: Path,
     database: Path,
     workout_service: object | None = None,
+    memory_service: object | None = None,
 ) -> tuple[ToolRegistry, sqlite3.Connection]:
     """Build the agent tool registry backed by the knowledge and event stores.
 
@@ -566,7 +568,8 @@ def _connect_agent_registry(
     (via :class:`~personal_ai.retrieval.RetrievalService`) and ``query_events``
     (via :class:`~personal_ai.storage.events.EventStore`). When a workout query
     service is provided, the policy-gated ``search_workouts`` chat tool is
-    registered as well.
+    registered as well. When a memory service is provided, the read-only
+    ``personal_context`` overview also reports durable-memory availability.
 
     Returns the registry together with the underlying connection so the caller
     can keep the stores alive for the whole agent session and close it
@@ -585,12 +588,19 @@ def _connect_agent_registry(
             document_store,
             conversation_store,
         )
+        personal_context_service = PersonalContextService(
+            memory=memory_service,
+            workout=workout_service,
+            document=document_store,
+            event=event_store,
+        )
         registry = create_default_registry(
             workspace,
             chunk_store=chunk_store,
             retrieval_service=retrieval_service,
             event_store=event_store,
             workout_service=workout_service,
+            personal_context_service=personal_context_service,
         )
         return registry, connection
     except BaseException:
@@ -636,6 +646,7 @@ def build_agent(
     base_url: str | None = None,
     observer: AgentObserver | None = None,
     workout_service: object | None = None,
+    memory_service: object | None = None,
 ) -> BuiltAgent:
     """Construct the production Agent from workspace and database settings.
 
@@ -650,6 +661,9 @@ def build_agent(
     When ``workout_service`` is given, the policy-gated ``search_workouts``
     chat tool is registered so conversational chat can answer movement-based
     questions about the user's workout history through the policy engine.
+    When ``memory_service`` is given, the read-only ``personal_context``
+    overview also reports durable-memory availability (counts + provenance
+    only, never memory content).
 
     The Ollama endpoint defaults to the local daemon and is overridable with
     ``base_url``, which falls back to the ``OLLAMA_BASE_URL`` environment
@@ -659,7 +673,10 @@ def build_agent(
     connection: sqlite3.Connection | None = None
     if database is not None:
         registry, connection = _connect_agent_registry(
-            workspace, database, workout_service=workout_service
+            workspace,
+            database,
+            workout_service=workout_service,
+            memory_service=memory_service,
         )
     else:
         registry = create_default_registry(workspace)

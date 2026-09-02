@@ -474,6 +474,7 @@ def create_app(
     chat_memory: ChatMemory | None = None,
     control_plane: ControlPlane | None = None,
     workout_service: WorkoutQueryService | None = None,
+    memory_service: object | None = None,
 ) -> FastAPI:
     """Build the FastAPI application bound to a Personal AI Agent.
 
@@ -490,12 +491,18 @@ def create_app(
     ``control_plane`` and ``workout_service`` are optional application
     services. When present, the read-only control-plane / memory / workout
     endpoints are served from them; when absent those endpoints answer
-    ``503``. HTTP handlers never touch SQLite or the stores directly — they
-    only call :class:`ControlPlane` / :class:`WorkoutQueryService`.
+    ``503``. ``memory_service`` is threaded into the default agent build so
+    the read-only ``personal_context`` overview reports durable-memory
+    availability. HTTP handlers never touch SQLite or the stores directly —
+    they only call :class:`ControlPlane` / :class:`WorkoutQueryService`.
     """
     agent_factory = agent_factory or (
         lambda: cli.build_agent(
-            workspace, database, model=model, workout_service=workout_service
+            workspace,
+            database,
+            model=model,
+            workout_service=workout_service,
+            memory_service=memory_service,
         )
     )
 
@@ -1175,6 +1182,7 @@ def main(
         chat_memory=chat_memory,
         control_plane=control_plane,
         workout_service=workout_service,
+        memory_service=memory_service,
     )
     if not run:
         return app
