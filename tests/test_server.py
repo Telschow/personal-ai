@@ -9,6 +9,8 @@ These tests deliberately avoid Ollama and the real Agent. They exercise:
 * the FastAPI route itself, using a fake agent factory
 """
 
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -16,12 +18,14 @@ from personal_ai.config import CHAT_MODEL_ENV, load_api_settings
 from personal_ai.ollama_client import ChatMessage, OllamaConnectionError
 from personal_ai.server import (
     API_TOKEN_ENV,
+    DEFAULT_DATABASE_ENV,
     MODEL_ID,
     CompletionRequest,
     build_response,
     complete_chat,
     create_app,
     main,
+    parse_args,
     resolve_config,
 )
 
@@ -107,11 +111,27 @@ def test_resolve_config_overrides():
     assert cfg.model == DEFAULT_MODEL
 
 
+def test_database_env_is_honored_by_parse_args(monkeypatch):
+    """The container sets ``PERSONAL_AI_DATABASE`` (see docker-compose) but the
+    server must actually read it, otherwise the corpus stores are never wired
+    and the live agent answers as if it knows nothing. Mirrors how
+    ``PERSONAL_AI_WORKSPACE`` is read for ``--workspace``."""
+    monkeypatch.setenv(DEFAULT_DATABASE_ENV, "/data/personal-ai.db")
+    args = parse_args([])
+    assert isinstance(args.database, Path)
+    assert str(args.database) == "/data/personal-ai.db"
+
+
+def test_database_env_none_when_unset(monkeypatch):
+    monkeypatch.delenv(DEFAULT_DATABASE_ENV, raising=False)
+    assert parse_args([]).database is None
+
+
 def test_main_builds_app_without_database(tmp_path):
     """Phase 46 regression: serving with a workspace but no ``--database``
     must not raise ``UnboundLocalError`` (``memory_service`` only exists when a
-    database is configured). This mirrors the container, which runs without
-    ``PERSONAL_AI_DATABASE``."""
+    database is configured). This guards the no-database configuration path
+    (when ``PERSONAL_AI_DATABASE`` is unset and no ``--database`` is given)."""
     workspace = tmp_path / "workspace"
     workspace.mkdir()
 

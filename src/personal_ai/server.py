@@ -120,7 +120,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--database",
         type=Path,
-        default=None,
+        default=config_env_str(DEFAULT_DATABASE_ENV),
         help=f"Path to the personal corpus SQLite database (default: ${DEFAULT_DATABASE_ENV})",
     )
     parser.add_argument(
