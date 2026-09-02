@@ -21,6 +21,7 @@ from personal_ai.server import (
     build_response,
     complete_chat,
     create_app,
+    main,
     resolve_config,
 )
 
@@ -104,6 +105,19 @@ def test_resolve_config_overrides():
     assert cfg.host == "0.0.0.0"
     assert cfg.port == 1234
     assert cfg.model == DEFAULT_MODEL
+
+
+def test_main_builds_app_without_database(tmp_path):
+    """Phase 46 regression: serving with a workspace but no ``--database``
+    must not raise ``UnboundLocalError`` (``memory_service`` only exists when a
+    database is configured). This mirrors the container, which runs without
+    ``PERSONAL_AI_DATABASE``."""
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+
+    app = main(["--workspace", str(workspace)], run=False)
+
+    assert app is not None
 
 
 class TestCompletionRequest:

@@ -1161,6 +1161,7 @@ def main(
     orb_connection: sqlite3.Connection | None = None
     control_plane: ControlPlane | None = None
     workout_service: WorkoutQueryService | None = None
+    memory_service: MemoryService | None = None
     if cfg.database is not None:
         orb_connection, store = open_orchestration_store(cfg.database)
         try:
