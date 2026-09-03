@@ -64,6 +64,31 @@ dataset — all backed by local SQLite and a local vision/chat model.
 
 ---
 
+## Current status
+
+A running, single-user system validated end to end against the live stack:
+
+- **Sources ingested into one SQLite DB:** workouts (412), financial
+  documents, ~22,257 email documents, and **26,212 browsing/activity events**
+  (Chrome history — 38 search queries, 26,174 URL visits) — plus documents and
+  chunks. Re-ingesting an unchanged source stores zero new rows (idempotent).
+- **Bounded cross-domain context** (`personal_context(all)`): only aggregate
+  counts and short recency samples per domain are surfaced to the agent; raw
+  URLs, search terms, messages and account details are never dumped.
+- **Real Ollama tool calling** on the local `qwen3.5:9b` model through an
+  allow-listed `ToolRegistry` (`search_documents`, `search_knowledge`,
+  `query_events`, `search_workouts`, ...).
+- **Activity event ingestion** (`--ingest chrome_history` / `--ingest youtube`)
+  is fully local and model-free; events go to the event store, separate from
+  the document pipeline.
+- **Validated through the deployment:** direct gateway tests and real Open
+  WebUI usage, on both streaming (SSE) and non-streaming paths.
+
+The live database, workspaces, raw exports, and backups are local state —
+excluded from the repo (`.gitignore`) and from Docker images (`.dockerignore`).
+
+---
+
 ## Current architecture
 
 ```

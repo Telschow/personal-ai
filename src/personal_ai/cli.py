@@ -10,6 +10,10 @@ from pathlib import Path
 
 from personal_ai.agent import Agent, AgentObserver
 from personal_ai.config import load_ollama_settings, load_vision_settings
+from personal_ai.event_ingestion import (
+    ingest_chrome_history,
+    ingest_youtube_history,
+)
 from personal_ai.ingestion import DocumentIngestor
 from personal_ai.memory import (
     ChatMemory,
@@ -26,9 +30,11 @@ from personal_ai.retrieval import (
     search_documents,
 )
 from personal_ai.sources.base import SourceError
+from personal_ai.sources.chrome_history import SOURCE_TYPE as CHROME_SOURCE_TYPE
 from personal_ai.sources.email import SOURCE_TYPE as EMAIL_SOURCE_TYPE
 from personal_ai.sources.financial import SOURCE_TYPE as FINANCIAL_SOURCE_TYPE
 from personal_ai.sources.registry import known_source_types, resolve_source_adapter
+from personal_ai.sources.youtube_history import SOURCE_TYPE as YOUTUBE_SOURCE_TYPE
 from personal_ai.storage import (
     ChunkStore,
     ConversationStore,
@@ -48,6 +54,19 @@ from personal_ai.workouts import (
 )
 
 MODEL = "qwen3.5:9b"
+
+
+EVENT_SOURCE_TYPES = (CHROME_SOURCE_TYPE, YOUTUBE_SOURCE_TYPE)
+
+
+def ingestable_source_types() -> tuple[str, ...]:
+    """All source types accepted by ``--ingest`` (document + event sources).
+
+    Document sources come from the source-adapter registry; event sources
+    are the temporal/chrome-history and YouTube history exports, which are
+    ingested through the event store rather than the document pipeline.
+    """
+    return tuple(known_source_types()) + EVENT_SOURCE_TYPES
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -83,7 +102,7 @@ def _parse_agent_args(argv: list[str]) -> argparse.Namespace:
         help=(
             "Ingest a source directory into the knowledge base instead of "
             "running the agent; requires --database. Known sources: "
-            + ", ".join(known_source_types())
+            + ", ".join(ingestable_source_types())
             + "."
         ),
     )
@@ -223,6 +242,42 @@ def run_ingest(source_type: str, source_path: Path, database: Path) -> None:
     for kind in sorted(summary.kind_counts):
         print(f"  {kind}: {summary.kind_counts[kind]}")
     print(f"chunks: {summary.chunk_count}")
+
+
+def run_event_ingest(source_type: str, source_path: Path, database: Path) -> None:
+    """Ingest one temporal/activity source (chrome_history, youtube) into the event store.
+
+    Event sources are fully local and deterministic: they are parsed into
+    typed events and persisted through :class:`EventStore` with no model call.
+    Idempotency follows from deterministic event identity, so re-running the
+    same unchanged source inserts no new rows.
+    """
+    if not source_path.is_dir():
+        raise SystemExit(f"Source path is not a directory: {source_path}")
+
+    connection = connect_database(database)
+    try:
+        store = EventStore(connection)
+        if source_type == CHROME_SOURCE_TYPE:
+            summary = ingest_chrome_history(source_path, store)
+        elif source_type == YOUTUBE_SOURCE_TYPE:
+            summary = ingest_youtube_history(source_path, store)
+        else:
+            raise SourceError(f"Unknown event source type {source_type!r}")
+    finally:
+        connection.close()
+
+    print(f"source_type: {summary.source_type}")
+    print(f"files: {summary.files_discovered}")
+    print(f"records: {summary.records_discovered}")
+    print(f"events_stored: {summary.events_stored}")
+    if source_type == CHROME_SOURCE_TYPE:
+        print(f"search_queries: {summary.search_queries}")
+        print(f"url_visits: {summary.url_visits}")
+    else:
+        print(f"video_watches: {summary.video_watches}")
+        print(f"youtube_searches: {summary.youtube_searches}")
+    print(f"skipped: {summary.skipped}")
 
 
 def _build_workouts_parser() -> argparse.ArgumentParser:
@@ -781,7 +836,10 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.ingest_source_args is not None:
         source_type, source_path = args.ingest_source_args
-        run_ingest(source_type, Path(source_path), args.database)
+        if source_type in EVENT_SOURCE_TYPES:
+            run_event_ingest(source_type, Path(source_path), args.database)
+        else:
+            run_ingest(source_type, Path(source_path), args.database)
         return
 
     workspace = args.workspace.resolve()
