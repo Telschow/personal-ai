@@ -397,19 +397,37 @@ class ConversationStore:
         return _row_to_conversation(row) if row is not None else None
 
     def list_conversations(
-        self, *, source_type: str | None = None
+        self,
+        *,
+        source_type: str | None = None,
+        limit: int | None = None,
+        offset: int = 0,
     ) -> tuple[Conversation, ...]:
+        """Return conversations in deterministic (created-at, id) order.
+
+        Optionally filtered by an exact ``source_type``. ``limit`` bounds the
+        number of rows returned and ``offset`` skips rows, letting callers
+        page through a conversation corpus deterministically without loading
+        it all into memory at once.
+        """
+        where = " WHERE source_type = ?" if source_type is not None else ""
+        params: list[object] = []
         if source_type is not None:
-            rows = self._connection.execute(
-                f"SELECT {', '.join(_CONVERSATION_COLUMNS)} FROM conversations "
-                "WHERE source_type = ? ORDER BY created_at, id",
-                (source_type,),
-            ).fetchall()
-        else:
-            rows = self._connection.execute(
-                f"SELECT {', '.join(_CONVERSATION_COLUMNS)} FROM conversations "
-                "ORDER BY created_at, id"
-            ).fetchall()
+            params.append(source_type)
+        sql = (
+            f"SELECT {', '.join(_CONVERSATION_COLUMNS)} FROM conversations"
+            f"{where} ORDER BY created_at, id"
+        )
+        if limit is not None:
+            sql += " LIMIT ?"
+            params.append(limit)
+            if offset:
+                sql += " OFFSET ?"
+                params.append(offset)
+        elif offset:
+            sql += " LIMIT -1 OFFSET ?"
+            params.append(offset)
+        rows = self._connection.execute(sql, params).fetchall()
         return tuple(_row_to_conversation(r) for r in rows)
 
     def count_conversations(self, *, source_type: str | None = None) -> int:
@@ -484,22 +502,38 @@ class ConversationStore:
         return _row_to_message(row) if row is not None else None
 
     def list_messages(
-        self, conversation_id: str, *, include_inactive: bool = False
+        self,
+        conversation_id: str,
+        *,
+        include_inactive: bool = False,
+        limit: int | None = None,
+        offset: int = 0,
     ) -> tuple[ConversationMessage, ...]:
-        if include_inactive:
-            rows = self._connection.execute(
-                f"SELECT {', '.join(_MESSAGE_COLUMNS)} FROM conversation_messages "
-                "WHERE conversation_id = ? "
-                "ORDER BY message_index, id",
-                (conversation_id,),
-            ).fetchall()
-        else:
-            rows = self._connection.execute(
-                f"SELECT {', '.join(_MESSAGE_COLUMNS)} FROM conversation_messages "
-                "WHERE conversation_id = ? AND is_active_branch = 1 "
-                "ORDER BY message_index, id",
-                (conversation_id,),
-            ).fetchall()
+        """Return messages in deterministic (message_index, id) order.
+
+        ``include_inactive`` controls whether non-active-branch rows are
+        included. ``limit`` bounds the number of rows returned and ``offset``
+        skips rows, letting callers page through a conversation without
+        loading the whole message list into memory at once.
+        """
+        where = " WHERE conversation_id = ?"
+        params: list[object] = [conversation_id]
+        if not include_inactive:
+            where += " AND is_active_branch = 1"
+        sql = (
+            f"SELECT {', '.join(_MESSAGE_COLUMNS)} FROM conversation_messages"
+            f"{where} ORDER BY message_index, id"
+        )
+        if limit is not None:
+            sql += " LIMIT ?"
+            params.append(limit)
+            if offset:
+                sql += " OFFSET ?"
+                params.append(offset)
+        elif offset:
+            sql += " LIMIT -1 OFFSET ?"
+            params.append(offset)
+        rows = self._connection.execute(sql, params).fetchall()
         return tuple(_row_to_message(r) for r in rows)
 
     def count_messages(

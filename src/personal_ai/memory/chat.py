@@ -156,6 +156,15 @@ class ChatMemory:
         deterministic retriever orders results. Memories may only be active,
         unexpired, and in scope — archived, deleted, and expired memories are
         never resurrected, and nothing here records access.
+
+        When lexical recall returns nothing for a tokenized query, a bounded
+        salient-context fallback returns the most important active in-scope
+        memories (relevance 0.0). This keeps explicitly stored, high-importance
+        facts reachable from questions that share no tokens with their content
+        — for example an identity memory ("preferred name") answering
+        "Who am I?". The fallback is bounded (:attr:`limit`), deterministic,
+        and never invents content: it reuses the existing empty-query ranking
+        (importance/confidence/recency) and stays untrusted reference data.
         """
         query = _bounded_query(user_message)
         scopes = derive_chat_scopes(
@@ -165,6 +174,8 @@ class ChatMemory:
         if not query or not tokenize(query):
             return MemoryContext(query=query, memories=(), scopes=scopes)
         hits = self._service.search(query, scopes, limit=self._limit)
+        if not hits:
+            hits = self._service.search("", scopes, limit=self._limit)
         if self._min_relevance is not None:
             hits = tuple(h for h in hits if h.relevance >= self._min_relevance)
         return MemoryContext(query=query, memories=hits, scopes=scopes)

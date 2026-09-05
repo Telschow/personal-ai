@@ -101,7 +101,9 @@ def test_list_filters_by_status(store: MemoryStore) -> None:
 def test_counts_match_rows(store: MemoryStore) -> None:
     assert store.counts() == {
         "memories": 0,
+        "candidate": 0,
         "active": 0,
+        "superseded": 0,
         "archived": 0,
         "deleted": 0,
         "purged": 0,

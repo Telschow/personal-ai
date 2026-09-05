@@ -798,6 +798,273 @@ Memories should not simply be copies of document chunks.
 
 A memory represents extracted durable knowledge about the user.
 
+PHASE 11 — MEMORY WRITES (IMPLEMENTED)
+
+Memory is now read-ignorable, write-gated:
+
+- Read retrieval is application-controlled: the read-only `search_memory`
+  agent tool (permission `memory.read`) and automatic `ChatMemory.recall`
+  (bounded lexical query + deterministic salient-context fallback). Both emit
+  UNTRUSTED-labeled context, never instructions.
+- The ONLY agent write route is the approval-gated `propose_memory` chat tool:
+  `PolicyEngine.execute(curator, "propose_memory", {...})`, where
+  `memory.write` lives in the curator policy's `approval_required`. No approver
+  wired ⇒ `ApprovalRequiredError` (default-deny). The handler exposes a bounded
+  draft surface (content/kind/summary/confidence/importance) and always writes
+  global, user-sourced memory via `MemoryService.create_user_memory`.
+- Registration is default-deny: `create_default_registry` registers
+  `propose_memory` only when BOTH a `MemoryService` and a
+  `memory_proposal_approver` are supplied; the server/Open WebUI path registers
+  no write tool.
+- Never add another memory-write path (no background memorization, no inferred
+  writes, no write via `search_memory`).
+
+PHASE 12 — AUTOMATIC MEMORY POLICY (IMPLEMENTED)
+
+Deterministic automatic acceptance coexists with the manual-gate rules above —
+governing invariants are unchanged:
+
+- `MemoryPolicy.evaluate(candidate)` is a pure, DETERMINISTIC policy (accept /
+  reject / defer / require_approval). It is never an LLM judge: model-generated
+  candidate metadata is untrusted input and every numeric/enum/evidence field
+  is validated at candidate construction (`tests/test_memory_candidate.py`).
+- SECRET content (keys, tokens, JWTs, credential keywords) is ALWAYS rejected
+  before any write path — never deferred, never escalated, never stored.
+- Every write — automatic acceptance incl. — still goes through
+  `PolicyEngine.execute(CURATOR, "propose_memory", ...)`;
+  `AutomaticMemoryCurator` grants the `memory.write` approval gate only by
+  re-verifying the deterministic policy for exactly that candidate, so a
+  denied/absent gate still raises `ApprovalRequiredError` and writes nothing
+  (`tests/test_automatic_memory_curator.py`). The curator is a builder in
+  `tools/memory.py`; it is NOT wired into `create_default_registry` (the
+  production chat path remains interactive-only).
+- Multi-evidence provenance (`memory_evidence`, idempotent) and the lifecycle
+  `candidate -> active -> superseded(-> archived/deleted)` are enforced in the
+  storage/service layer; reconciliation is lexical (no vector search, no LLM),
+  conflicts surface via `MemoryConflictError`, and superseded/candidate/
+  archived/deleted memories never surface in search or recall.
+- `MemoryService.apply_candidate(candidate)` is the ONLY write route that
+  bypasses human interaction, and it is reachable ONLY via the policy engine
+  `propose_memory` gate. Do not add any other automatic write path.
+
+PHASE 13 — CORPUS-LAYER MEMORY INGESTION (IMPLEMENTED)
+
+Deterministic, bounded corpus extraction feeds the exact same policy-gated
+write path as above — all Phase 11/12 invariants are unchanged:
+
+- `CorpusMemoryIngestor` (`memory/corpus.py`) derives `MemoryCandidate`
+  instances from already-ingested structured material and routes every one
+  through `AutomaticMemoryCurator` (→ `propose_memory` gate →
+  `MemoryService.apply_candidate`). It performs no raw SQL and no direct writes.
+- Extraction is deterministic and conservative — no LLM, no body parsing, no
+  invented facts: workouts propose a generic recurring `habit` only above
+  session/month thresholds; chrome URL visits aggregate per normalized domain
+  into recurring `interest` candidates (never raw URLs/titles/query strings in
+  memory content or identifiers); email/financial documents are scanned for
+  counts only (their metadata has no safely-deterministic facts this slice).
+- All real corpus signals are behavioral provenance ⇒ `MemoryPolicy` defers
+  them (nothing auto-writes on a live run). The auto-accept path is still
+  honored and tested with personal-document/conversation provenance.
+- Every step is bounded: batch reads (`DocumentStore.list_documents` /
+  `EventStore.list_events` gained `limit`/`offset` + source filters), a
+  `max_records_per_source` cap, and a `max_candidates_per_source` cap.
+  `CorpusIngestionReport` is aggregate-only; rerunning is idempotent.
+- Do NOT wire corpus ingestion into `create_default_registry`, and do not add
+  a corpus CLI/checkpoint yet — those belong to later curation slices.
+
+PHASE 14 — CONVERSATION-LAYER MEMORY INGESTION (IMPLEMENTED)
+
+Conversation exports (ChatGPT/Gemini) are now first-class sources beside
+documents. Phase 11/12/13 invariants are unchanged:
+
+- `--ingest chatgpt|gemini <dir> --database <db>` routes to the typed
+  `ConversationStore` (idempotent, no model call). This is the ONLY route for
+  conversation exports — the document pipeline never sees them. The chatgpt
+  document adapters (`sources/chatgpt.py`, `sources/gemini.py`) remain library
+  API and are NOT wired into the CLI.
+- The optional `--memory` flag runs bounded deterministic extraction over the
+  stored conversations of the requested source and prints an aggregate-only
+  report under `memory:`. Without the flag, memory is never touched.
+- `ConversationMemoryExtractor` (`memory/conversations.py`) derives
+  `MemoryCandidate` instances from user-authored, active-branch, first-person
+  self-assertions only (assistant/system/tool claims are never user facts);
+  negation, questions, model-directed requests, quoted content, and sensitive
+  material are skipped. Temporal scope is derived from the trigger
+  (current/historical/recurring); "I want to do X" is a `goal`, never a fact.
+- Every candidate is routed through the same gate as corpus extraction:
+  `AutomaticMemoryCurator` (→ `propose_memory` gate →
+  `MemoryService.apply_candidate`). No raw SQL, no direct writes.
+- Evidence is provenance-only: stable identifiers and ISO timestamps, never
+  message content. Repeated facts across conversations accumulate evidence on
+  a single memory via the reconciler; reruns are idempotent.
+- Every step is bounded (batch reads with `limit`/`offset`, caps on
+  conversations/messages/candidates) and reports are aggregate-only.
+- Memory ingestion is never wired into `create_default_registry`; the
+  production chat path remains interactive-only.
+- Add no other conversation-exports ingestion route, and do not auto-run
+  `--memory` without the flag.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff clean).
+
+PHASE 15 — LLM-ASSISTED MEMORY CANDIDATE PROPOSALS (IMPLEMENTED)
+
+A bounded LLM *proposal* layer (`memory/proposals.py`) now sits on top of the
+deterministic Slice 4 extractor. Phase 11–14 invariants are unchanged; the
+LLM is a **proposal generator only**, never a decision-maker or a writer:
+
+- The model proposes ONLY `statement`, `kind`, `temporal_scope`,
+  `confidence`, and the `evidence_message_ids` it saw in ONE bounded
+  conversation window. It does NOT decide accept/reject/defer/approval,
+  conflicts, supersession, sensitivity, or permission, and it never writes.
+- Every proposal still flows through the exact same single policy-gated write
+  path: validated `MemoryProposal` → `to_memory_candidate` → `MemoryPolicy`
+  → `AutomaticMemoryCurator` → `propose_memory` gate →
+  `MemoryService.apply_candidate`. Do NOT add any second write path; do not
+  bypass `PolicyEngine`; do not touch SQLite from the proposal layer; do not
+  weaken `MemoryPolicy` (secrets stay hard-rejected; keyword-sensitive content
+  stays `require_approval`).
+- Durability/relevance/specificity/utility come from a fixed application
+  table; `assertion_status`/`recurrence`/evidence refs are set by the
+  application. Deterministic trigger phrases override the model's labels
+  ("wants to …" → goal/current; recurring timeframes → recurring; past tense
+  → historical). `LLM confidence` is a policy input, not authorization.
+- Strict output contract: JSON object with a `proposals` array
+  (`MEMORY_PROPOSAL_SCHEMA`, validated via the existing `OllamaClient.chat`
+  `format=` surface). Malformed structure raises
+  `MalformedMemoryProposalError` (whole batch → zero candidates); invalid
+  items are dropped and counted. Output is never repaired or guessed.
+- Deterministic conversion guards in `to_memory_candidate`: referenced
+  evidence must exist in the bounded window and include at least one
+  user-authored self-assertion (questions/requests are not user facts);
+  statements must canonicalize to a "The user …" form; sensitive forms,
+  questions, and negations are dropped.
+- Bounded I/O: one model call per conversation window (`max_messages`,
+  `max_prompt_chars`), `MAX_PROPOSALS_PER_BATCH`/`max_candidates_per_unit`/
+  `MAX_EVIDENCE_PER_PROPOSAL` caps, `CONVERSATION_SOURCE_TYPES`-scoped reads
+  with limits/offsets. Never send the corpus to the model in one call.
+- Failure behavior: model errors/malformed output retry at most
+  `max_retries` times; persistent failure yields zero candidates for that
+  batch with count-only reasons (`ollama_error`/`malformed_output`/
+  `model_error`). Empty `proposals: []` is a successful no-op. A denied
+  `memory.write` gate still raises `ApprovalRequiredError` and writes nothing
+  (mandatory regression test).
+- Provenance stays id-only and idempotent (reconciliation merges, reruns do
+  not duplicate). Diagnostics aggregate-only: prompts, responses, and
+  candidate statements are never logged or printed.
+- `LLMConversationMemoryIngestor` / `LLMMemoryProposalExtractor` are library
+  API only — NOT wired into the CLI, NOT registered in
+  `create_default_registry`; the production chat path remains interactive-only.
+- Do not add other LLM-proposal routes, do not auto-run LLM proposals without
+  explicit invocation, and keep the deterministic Slice 4 extractor in place
+  (the LLM layer is additive, not a replacement).
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff clean).
+
+PHASE 16 — DURABLE, RESUMABLE FULL-CORPUS MEMORY CURATION (IMPLEMENTED)
+
+A durable, resumable curation layer (`memory/curation.py`) now turns
+already-ingested conversations into memories through the exact same
+policy-gated write path as every other memory feature. Phase 11–15 invariants
+are unchanged; curation adds **no new write route**:
+
+- Every candidate flows deterministic `MemoryPolicy` → `AutomaticMemoryCurator`
+  → `propose_memory` gate → `MemoryService.apply_candidate`; a denied
+  `memory.write` gate still raises `ApprovalRequiredError` and writes nothing
+  (mandatory regression test). No raw SQL against memory tables; no second
+  write path.
+- Runs are **idempotent** (reruns reconcile evidence onto the same memories),
+  **resumable** (`memory curate --resume` completes exactly the unfinished
+  units of the latest run for a source/extraction pair: completed units are
+  skipped, stale `running` units recovered, `failed` units retried with
+  incremented attempts), and **durable** (unit progress is checkpointed before
+  any model call; a failed/timeout unit never aborts a run). A run that ends
+  with failed units is recorded `failed` (failure_reason `unit_failures`) so it
+  remains resumable; a wholly successful run is `completed` (terminal).
+- `dry_run` analyzes the window (policy + reconciliation only) and creates NO
+  rows and NO writes; `dry_run` and `resume` are mutually exclusive.
+- The only content-bearing table is the explicit review queue
+  (`memory_curation_review`): candidates the policy escalates
+  (`require_approval`, e.g. keyword-sensitive salary material) are parked there
+  with id-only evidence and never auto-written. Run/unit checkpoints store
+  identifiers, counts, hashes, timestamps, and statuses only.
+- Bounded I/O everywhere: `ConversationStore.list_conversations` /
+  `list_messages` paging with `limit`/`offset`, `max_messages`,
+  `max_prompt_chars`, `max_candidates_per_unit`, `max_retries`,
+  `max_model_calls` (0 = unlimited), and a per-unit wall-clock
+  `unit_timeout_seconds` (one worker thread per unit).
+- Reports are aggregate-only (`CurationReport.summary()`): totals, decision
+  counts, error reasons, versions — never statements, unit ids, or
+  prompt/response text. Versioning: extractor/policy/prompt hashes recorded on
+  every run row.
+- CLI surface is `personal-ai memory curate|runs|review` (kept separate from
+  the `--ingest --memory` flag and from `personal_ai.execution.cli`). `review`
+  is the only command that prints statement text (the minimal surface for
+  human adjudication). No file, document, or corpus source is wired yet, and
+  curation is NOT part of `create_default_registry` — the production chat path
+  remains interactive-only.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff clean).
+
+PHASE 17 — UNIFIED FULL-CORPUS MEMORY CURATION (IMPLEMENTED)
+
+Slice 6's durable, resumable curation is now source-independent. Phase 11–16
+invariants are unchanged; **no new write route exists**.
+
+- Source adapters (`memory/adapters.py`) discover bounded `CurationUnit`
+  objects and derive `MemoryCandidate` instances that flow through the exact
+  same single write path as conversations: deterministic `MemoryPolicy` →
+  `AutomaticMemoryCurator` → `propose_memory` gate →
+  `MemoryService.apply_candidate`. Adapters never write SQLite; adapters never
+  touch memory tables. A denied `memory.write` gate still raises
+  `ApprovalRequiredError` and writes nothing.
+- `CurationAdapterRegistry` maps `CurationConfig.source_type` to a single
+  adapter; the runner resolves it in `run()`. `CurationUnit` carries
+  `source_id`/`source_version`/`signal`, and checkpoints record
+  `source_version` (guarded ALTER TABLE). Versioning is adapter-aware:
+  `CurationAdapter.version(extraction)` yields per-source extractor versions
+  and, for LLM document proposals, the prompt hash.
+- Supported sources and behavior:
+  - **chatgpt/gemini** — existing conversation adapter (unchanged).
+  - **email** — one unit per recurring non-webmail sender domain (≥5 emails,
+    ≥2 distinct months); deterministic mode is metadata-only (never reads
+    subject/body/chunks) and proposes a recurring `interest` candidate with
+    id-only, one-ref-per-month evidence (≤5 refs); LLM mode adds a bounded
+    representative-email window through `DocumentProposalExtractor`.
+  - **financial** — counted only. Zero candidates and ZERO model calls in
+    both modes; financial content is never sent to the model.
+  - **document** (generic docs) — deterministic mode proposes nothing and
+    never loads chunks; LLM mode shows the model bounded document windows and
+    gates every proposal on `allowed_document_ids` (strict JSON
+    `DOCUMENT_PROPOSAL_SCHEMA`, malformed output retried ≤ `max_retries`, then
+    the unit fails).
+  - **workout / activity** — deterministic-only adapters (single bounded
+    aggregate unit each) reusing the conserved corpus extractors
+    (`extract_workout_routine` / `extract_activity_patterns`); behavioral
+    provenance means the policy defers them; LLM mode raises
+    `CurationConfigError`.
+- Adaptive LLM gating: `--min-signal` and `--sample` downgrade low-signal /
+  over-budget LLM units to deterministic processing (counted
+  `units_signal_skipped`); `_apply_gate` never calls the model for a
+  downgraded unit.
+- Bounds hold everywhere: `max_records_per_source`-equivalent caps per
+  adapter (`_MAX_*`), `max_messages`/`max_prompt_chars`/
+  `max_candidates_per_unit`/`max_retries`, run-wide `max_model_calls`, per-unit
+  `unit_timeout_seconds`. Diagnostics and run/report checkpoints stay
+  aggregate-only; review-queue rows remain the only statement-bearing table.
+- CLI (`personal-ai memory curate`): `--source` (chatgpt/gemini/email/
+  financial/document/workout/activity, default chatgpt), `--mode` (alias of
+  `--extraction`), `--limit`/`--max-units` alias and `--offset`,
+  `--max-messages`, `--max-model-calls`, `--max-retries`, `--min-signal`,
+  `--sample`, `--unit-timeout`. The registry is built conditionally so only the
+  request's source store tables are created. Curation is NOT part of
+  `create_default_registry`; the production chat path remains interactive-only.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff clean).
+
 ==================================================
 IMPORTANT IMPLEMENTATION WORKFLOW
 ==================================================

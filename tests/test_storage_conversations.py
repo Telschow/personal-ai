@@ -327,6 +327,53 @@ class TestAttachmentStore:
         assert [a.filename for a in atts] == ["a.pdf", "b.pdf"]
 
 
+class TestListConversationsPagination:
+    """list_conversations limit/offset deterministic paging."""
+
+    def setup_method(self) -> None:
+        self.connection = connect_database(":memory:")
+        self.store = ConversationStore(self.connection)
+
+    def teardown_method(self) -> None:
+        self.connection.close()
+
+    def test_limit_bounds_rows(self) -> None:
+        for index in range(5):
+            self.store.save_conversation(_conv(f"c{index}", f"C{index}"))
+        page = self.store.list_conversations(limit=2)
+        assert [c.id for c in page] == ["c0", "c1"]
+
+    def test_offset_skips_rows(self) -> None:
+        for index in range(5):
+            self.store.save_conversation(_conv(f"c{index}", f"C{index}"))
+        page = self.store.list_conversations(offset=2)
+        assert [c.id for c in page] == ["c2", "c3", "c4"]
+
+    def test_limit_and_offset_combine(self) -> None:
+        for index in range(5):
+            self.store.save_conversation(_conv(f"c{index}", f"C{index}"))
+        page = self.store.list_conversations(limit=2, offset=2)
+        assert [c.id for c in page] == ["c2", "c3"]
+
+    def test_pages_are_disjoint_complete_and_ordered(self) -> None:
+        for index in range(5):
+            self.store.save_conversation(_conv(f"c{index}", f"C{index}"))
+        pages = [
+            self.store.list_conversations(limit=2, offset=offset)
+            for offset in (0, 2, 4)
+        ]
+        ids = [c.id for page in pages for c in page]
+        assert ids == ["c0", "c1", "c2", "c3", "c4"]
+
+    def test_source_filter_combines_with_pagination(self) -> None:
+        for index in range(3):
+            self.store.save_conversation(_conv(f"g{index}", source_type="gemini"))
+        for index in range(3):
+            self.store.save_conversation(_conv(f"c{index}", source_type="chatgpt"))
+        page = self.store.list_conversations(source_type="gemini", limit=2, offset=1)
+        assert [c.id for c in page] == ["g1", "g2"]
+
+
 class TestSearchWithThoughts:
     """Search should exclude thoughts and reasoning_recap by default."""
 

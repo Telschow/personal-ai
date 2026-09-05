@@ -136,11 +136,41 @@ class DocumentStore:
         ).fetchone()
         return _row_to_document(row) if row is not None else None
 
-    def list_documents(self) -> list[Document]:
-        """Return all documents in deterministic created-at order."""
-        rows = self._connection.execute(
-            _select_sql(" ORDER BY created_at, id")
-        ).fetchall()
+    def list_documents(
+        self,
+        *,
+        source_type: str | None = None,
+        source: str | None = None,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[Document]:
+        """Return documents in deterministic (created-at, id) order.
+
+        Optionally filtered by an exact ``source_type`` and/or ``source``.
+        ``limit`` bounds the number of rows returned and ``offset`` skips
+        rows, letting callers page through a corpus deterministically without
+        loading it all into memory at once.
+        """
+        clauses: list[str] = []
+        params: list[object] = []
+        if source_type is not None:
+            clauses.append("source_type = ?")
+            params.append(source_type)
+        if source is not None:
+            clauses.append("source = ?")
+            params.append(source)
+        where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
+        sql = _select_sql(f"{where} ORDER BY created_at, id")
+        if limit is not None:
+            sql += " LIMIT ?"
+            params.append(limit)
+            if offset:
+                sql += " OFFSET ?"
+                params.append(offset)
+        elif offset:
+            sql += " LIMIT -1 OFFSET ?"
+            params.append(offset)
+        rows = self._connection.execute(sql, params).fetchall()
         return [_row_to_document(row) for row in rows]
 
     def close(self) -> None:

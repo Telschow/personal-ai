@@ -172,8 +172,13 @@ def test_memory_read_is_a_distinct_permission() -> None:
         Permission.PYTHON.value,
     }
     assert Permission.MEMORY_READ.value not in others
-    # No memory.write permission exists to accidentally conflate with.
-    assert not any(p.value.startswith("memory.write") for p in Permission)
+    # Memory writing is a separate, approval-gated permission — never
+    # conflated with the read permission.
+    assert Permission.MEMORY_WRITE.value == "memory.write"
+    assert Permission.MEMORY_WRITE is not Permission.MEMORY_READ
+    assert SEARCH_MEMORY.permissions == (Permission.MEMORY_READ,)
+    assert SEARCH_MEMORY.risk is RiskLevel.READ
+    assert SEARCH_MEMORY.mutates_state is False
 
 
 def test_researcher_declares_search_memory_and_memory_read() -> None:

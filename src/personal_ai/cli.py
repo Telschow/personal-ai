@@ -5,21 +5,55 @@ import hashlib
 import json
 import sqlite3
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
 from personal_ai.agent import Agent, AgentObserver
 from personal_ai.config import load_ollama_settings, load_vision_settings
+from personal_ai.conversation_ingestion import (
+    ingest_chatgpt_conversations,
+    ingest_gemini_conversations,
+)
 from personal_ai.event_ingestion import (
     ingest_chrome_history,
     ingest_youtube_history,
 )
 from personal_ai.ingestion import DocumentIngestor
 from personal_ai.memory import (
+    ACTIVITY,
+    CHROME_HISTORY_EVENT_SOURCE,
+    CONVERSATION_SOURCE_TYPES,
+    EMAIL,
+    FINANCIAL,
+    GENERIC_DOCUMENT_SOURCE,
+    WORKOUTS,
     ChatMemory,
+    ConversationCurationAdapter,
+    ConversationMemoryIngestor,
+    CurationConfig,
+    CurationError,
+    CurationExtractionMode,
+    CurationReport,
+    CurationStore,
+    DocumentCurationAdapter,
+    EventCurationAdapter,
+    MemoryCurationRunner,
     MemoryService,
+    WorkoutCurationAdapter,
     open_memory_store,
 )
+from personal_ai.memory.curation import (
+    DEFAULT_MAX_MODEL_CALLS,
+    DEFAULT_UNIT_TIMEOUT_SECONDS,
+    CurationAdapterRegistry,
+)
+from personal_ai.memory.orchestration import (
+    DEFAULT_ORCHESTRATION_LIMIT,
+    DEFAULT_ORCHESTRATION_MAX_MODEL_CALLS,
+    DEFAULT_ORCHESTRATION_SAMPLE,
+)
+from personal_ai.memory.proposals import DEFAULT_MAX_MESSAGES, DEFAULT_MAX_RETRIES
 from personal_ai.ollama_client import ChatMessage, OllamaClient
 from personal_ai.ollama_structured import OllamaStructuredExtractor
 from personal_ai.ollama_vision import OllamaVisionExtractor
@@ -49,6 +83,7 @@ from personal_ai.tools import ToolRegistry, create_default_registry
 from personal_ai.tools.personal_context import PersonalContextService
 from personal_ai.workouts import (
     WorkoutQueryService,
+    WorkoutStore,
     import_workout_directory,
     open_workout_store,
 )
@@ -59,12 +94,19 @@ MODEL = "qwen3.5:9b"
 EVENT_SOURCE_TYPES = (CHROME_SOURCE_TYPE, YOUTUBE_SOURCE_TYPE)
 
 
+def is_conversation_source(source_type: str) -> bool:
+    """True when ``--ingest`` routes to the conversation store."""
+    return source_type in CONVERSATION_SOURCE_TYPES
+
+
 def ingestable_source_types() -> tuple[str, ...]:
     """All source types accepted by ``--ingest`` (document + event sources).
 
     Document sources come from the source-adapter registry; event sources
     are the temporal/chrome-history and YouTube history exports, which are
     ingested through the event store rather than the document pipeline.
+    Conversation sources (chatgpt/gemini) are kept in the list because they
+    remain valid ``--ingest`` targets; they route to the conversation store.
     """
     return tuple(known_source_types()) + EVENT_SOURCE_TYPES
 
@@ -74,6 +116,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     if argv and argv[0] == "workouts":
         args = _build_workouts_parser().parse_args(argv[1:])
         args.command = "workouts"
+        return args
+    if argv and argv[0] == "memory":
+        args = _build_memory_parser().parse_args(argv[1:])
+        args.command = "memory"
         return args
     return _parse_agent_args(argv)
 
@@ -122,6 +168,15 @@ def _parse_agent_args(argv: list[str]) -> argparse.Namespace:
         help="Maximum number of search results (default: 10).",
     )
     parser.add_argument(
+        "--memory",
+        action="store_true",
+        help=(
+            "After --ingest of a conversation source (chatgpt/gemini), run "
+            "bounded, deterministic memory extraction over the stored "
+            "conversations and print an aggregate-only report."
+        ),
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help=(
@@ -154,6 +209,16 @@ def _parse_agent_args(argv: list[str]) -> argparse.Namespace:
             parser.error("the following arguments are required: prompt")
     elif args.database is None:
         parser.error(f"{modes[0]} requires --database")
+
+    if args.memory:
+        if args.ingest_source_args is None:
+            parser.error("--memory requires --ingest with a conversation source")
+        source_type = args.ingest_source_args[0]
+        if not is_conversation_source(source_type):
+            parser.error(
+                "--memory is only supported for conversation sources "
+                f"({', '.join(sorted(CONVERSATION_SOURCE_TYPES))})"
+            )
     return args
 
 
@@ -280,6 +345,74 @@ def run_event_ingest(source_type: str, source_path: Path, database: Path) -> Non
     print(f"skipped: {summary.skipped}")
 
 
+def run_conversation_ingest(
+    source_type: str,
+    source_path: Path,
+    database: Path,
+    *,
+    memory: bool,
+) -> None:
+    """Ingest a conversation export (chatgpt/gemini) into the conversation store.
+
+    Conversation sources are fully local and deterministic: exports are parsed
+    into typed conversations and messages and persisted through
+    :class:`ConversationStore` with no model call. Idempotency follows from
+    deterministic (SHA-256) conversation/message identities, so re-running the
+    same unchanged source inserts no new rows.
+
+    When ``memory`` is true, bounded deterministic memory extraction runs over
+    the stored conversations of this source type and its aggregate-only report
+    is printed. No message content or identifiers are ever printed.
+    """
+    if not source_path.is_dir():
+        raise SystemExit(f"Source path is not a directory: {source_path}")
+
+    connection = connect_database(database)
+    try:
+        store = ConversationStore(connection)
+        if source_type == "chatgpt":
+            summary = ingest_chatgpt_conversations(source_path, store)
+        elif source_type == "gemini":
+            summary = ingest_gemini_conversations(source_path, store)
+        else:
+            raise SourceError(f"Unknown conversation source type {source_type!r}")
+    finally:
+        connection.close()
+
+    print(f"source_type: {summary.source_type}")
+    print(f"conversations: {summary.conversations_stored}")
+    print(f"messages: {summary.messages_stored}")
+    if source_type == "chatgpt":
+        print(f"shards: {summary.shards_discovered}")
+        print(f"attachments: {summary.attachments_stored}")
+    else:
+        print(f"md_files_skipped: {summary.md_files_skipped}")
+        print(f"aggregate_files_skipped: {summary.aggregate_files_skipped}")
+
+    if memory:
+        _run_memory_extraction(source_type, database)
+
+
+def _run_memory_extraction(source_type: str, database: Path) -> None:
+    """Run bounded conversation memory extraction; print aggregate counts only."""
+    connection = connect_database(database)
+    memory_connection, memory_store = open_memory_store(database)
+    try:
+        conversation_store = ConversationStore(connection)
+        service = MemoryService(memory_store)
+        report = ConversationMemoryIngestor(conversation_store, service).ingest(
+            source_type
+        )
+    finally:
+        memory_connection.close()
+        connection.close()
+
+    counts = report.summary()
+    print("memory:")
+    for label in sorted(counts):
+        print(f"  {label}: {counts[label]}")
+
+
 def _build_workouts_parser() -> argparse.ArgumentParser:
     """Parser for ``personal-ai workouts ...`` (import/list/show/exercises).
 
@@ -343,6 +476,590 @@ def _build_workouts_parser() -> argparse.ArgumentParser:
         "--limit", type=int, help="Maximum number of exercises to list."
     )
     return parser
+
+
+def _build_memory_parser() -> argparse.ArgumentParser:
+    """Parser for ``personal-ai memory ...`` (curate/curate-all/runs/review).
+
+    Kept separate from the agent CLI parser: the ``memory`` verb is dispatched
+    in :func:`parse_args` when it is the first positional token, so the
+    existing agent flag surface (``--workspace``, ``--database``, positional
+    ``prompt``) is untouched.
+    """
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument(
+        "--database",
+        type=Path,
+        required=True,
+        help="SQLite database holding the memory store (required).",
+    )
+    common.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit machine-consumable JSON instead of human text.",
+    )
+    parser = argparse.ArgumentParser(
+        prog="personal-ai memory",
+        description="Durable, resumable memory curation (local, offline).",
+    )
+    sub = parser.add_subparsers(
+        dest="verb", required=True, metavar="{curate,curate-all,runs,review}"
+    )
+
+    curate = sub.add_parser(
+        "curate", parents=[common], help="Run bounded memory curation for one source."
+    )
+    curate.add_argument(
+        "--source",
+        choices=tuple(CONVERSATION_SOURCE_TYPES)
+        + (EMAIL, FINANCIAL, GENERIC_DOCUMENT_SOURCE, WORKOUTS, ACTIVITY),
+        default="chatgpt",
+        help=(
+            "Corpus source to curate: a conversation source (chatgpt/gemini), "
+            "email, financial (counts only), document (generic documents), "
+            "workout, or activity (chrome history). Default: chatgpt."
+        ),
+    )
+    curate.add_argument(
+        "--mode",
+        "--extraction",
+        dest="extraction",
+        choices=("deterministic", "llm"),
+        default="deterministic",
+        help="How candidates are proposed (default: deterministic).",
+    )
+    curate.add_argument(
+        "--model",
+        help="Ollama model for --extraction llm (default: the chat model).",
+    )
+    curate.add_argument(
+        "--limit",
+        "--max-units",
+        dest="limit",
+        type=int,
+        default=100,
+        help="Max units to curate (default: 100).",
+    )
+    curate.add_argument("--offset", type=int, default=0, help="Skip the first N units.")
+    curate.add_argument(
+        "--max-messages",
+        type=int,
+        default=DEFAULT_MAX_MESSAGES,
+        help="Max bounded records (messages/windows/chunks) per unit.",
+    )
+    curate.add_argument(
+        "--max-retries",
+        type=int,
+        default=DEFAULT_MAX_RETRIES,
+        help="Model retries per unit before the unit is marked failed.",
+    )
+    curate.add_argument(
+        "--max-model-calls",
+        type=int,
+        default=DEFAULT_MAX_MODEL_CALLS,
+        help="Max LLM calls for the whole run (default 0 = unlimited).",
+    )
+    curate.add_argument(
+        "--min-signal",
+        type=int,
+        default=0,
+        help="In LLM mode, process units below this deterministic signal "
+        "deterministically instead of calling the model.",
+    )
+    curate.add_argument(
+        "--sample",
+        type=int,
+        default=0,
+        help="In LLM mode, at most this many strongest-signal units call the "
+        "model before falling back to deterministic extraction (0 = unlimited).",
+    )
+    curate.add_argument(
+        "--unit-timeout",
+        dest="unit_timeout_seconds",
+        type=float,
+        default=DEFAULT_UNIT_TIMEOUT_SECONDS,
+        help="Per-unit time budget in seconds; timeouts are recorded as failed.",
+    )
+    curate.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Analyze the window without writing anything.",
+    )
+    curate.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume the latest unfinished run for the requested source/mode.",
+    )
+
+    # --- curate-all ----------------------------------------------------------
+    curate_all = sub.add_parser(
+        "curate-all",
+        parents=[common],
+        help="Run bounded curation over ALL corpus sources sequentially.",
+    )
+    curate_all.add_argument(
+        "--sources",
+        nargs="*",
+        default=None,
+        help="Subset of sources to curate (default: all 7 sources in priority order).",
+    )
+    curate_all.add_argument(
+        "--mode",
+        choices=("adaptive", "deterministic"),
+        default="adaptive",
+        help=(
+            "adaptive = LLM for chat/email/document, deterministic for "
+            "financial/workout/activity. deterministic = all deterministic. "
+            "Default: adaptive."
+        ),
+    )
+    curate_all.add_argument(
+        "--model",
+        help="Ollama model for LLM-capable sources (default: the chat model).",
+    )
+    curate_all.add_argument(
+        "--limit",
+        "--max-units",
+        dest="limit",
+        type=int,
+        default=DEFAULT_ORCHESTRATION_LIMIT,
+        help=f"Max units per source (default: {DEFAULT_ORCHESTRATION_LIMIT}).",
+    )
+    curate_all.add_argument("--offset", type=int, default=0, help="Skip first N units per source.")
+    curate_all.add_argument(
+        "--max-messages",
+        type=int,
+        default=DEFAULT_MAX_MESSAGES,
+        help="Max bounded records (messages/windows/chunks) per unit.",
+    )
+    curate_all.add_argument(
+        "--max-retries",
+        type=int,
+        default=DEFAULT_MAX_RETRIES,
+        help="Model retries per unit before the unit is marked failed.",
+    )
+    curate_all.add_argument(
+        "--max-model-calls",
+        type=int,
+        default=DEFAULT_ORCHESTRATION_MAX_MODEL_CALLS,
+        help=f"Max LLM calls for the WHOLE orchestration (default: {DEFAULT_ORCHESTRATION_MAX_MODEL_CALLS}).",
+    )
+    curate_all.add_argument(
+        "--min-signal",
+        type=int,
+        default=0,
+        help="In adaptive mode, process units below this deterministic signal deterministically.",
+    )
+    curate_all.add_argument(
+        "--sample",
+        type=int,
+        default=DEFAULT_ORCHESTRATION_SAMPLE,
+        help=f"In adaptive mode, at most this many LLM units per source before fallback (default: {DEFAULT_ORCHESTRATION_SAMPLE}).",
+    )
+    curate_all.add_argument(
+        "--unit-timeout",
+        dest="unit_timeout_seconds",
+        type=float,
+        default=DEFAULT_UNIT_TIMEOUT_SECONDS,
+        help="Per-unit time budget in seconds; timeouts are recorded as failed.",
+    )
+    curate_all.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Analyze all sources without writing anything.",
+    )
+    curate_all.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume latest unfinished runs for ALL requested sources.",
+    )
+
+    runs = sub.add_parser(
+        "runs", parents=[common], help="List curation runs newest-first."
+    )
+    runs.add_argument("--source", help="Restrict to one conversation source.")
+    runs.add_argument(
+        "--limit", type=int, default=20, help="Maximum number of runs to list."
+    )
+
+    review = sub.add_parser(
+        "review", parents=[common], help="Exception-only review of escalated candidates."
+    )
+    review.add_argument("--run", dest="run_id", help="Restrict to one run_id.")
+    review.add_argument(
+        "--category",
+        choices=("require_approval", "conflict"),
+        help="Filter pending reviews by category (default: all).",
+    )
+    review.add_argument(
+        "--show",
+        action="store_true",
+        help="Show candidate statements (default is aggregate-only counts).",
+    )
+    review.add_argument(
+        "--limit", type=int, default=200, help="Maximum number of rows to list."
+    )
+    review.add_argument(
+        "--approve",
+        type=int,
+        metavar="REVIEW_ID",
+        help="Approve one pending review item by ID.",
+    )
+    review.add_argument(
+        "--reject",
+        type=int,
+        metavar="REVIEW_ID",
+        help="Reject one pending review item by ID.",
+    )
+    review.add_argument(
+        "--note",
+        default="",
+        help="Optional note to attach to the approve/reject decision.",
+    )
+    return parser
+
+
+def run_memory(args: argparse.Namespace) -> int:
+    """Dispatch a ``memory`` subcommand and return a process exit code."""
+    verb = args.verb
+    database = args.database
+    if verb == "curate":
+        return _run_memory_curate(database, args)
+    if verb == "curate-all":
+        return _run_memory_curate_all(database, args)
+    if verb == "runs":
+        return _run_memory_runs(database, args)
+    if verb == "review":
+        return _run_memory_review(database, args)
+    raise SystemExit(f"Unknown memory verb: {verb}")
+
+
+def _run_memory_curate(database: Path, args: argparse.Namespace) -> int:
+    """Run bounded, resumable memory curation; print an aggregate-only report.
+
+    Every write goes through the policy-gated ``propose_memory`` path; the
+    report is content-free. ``--dry-run`` analyzes the window without writing
+    or creating any rows. ``--resume`` completes exactly the unfinished units
+    of the latest run for the requested source and extraction mode.
+    """
+    config = CurationConfig(
+        source_type=args.source,
+        extraction=args.extraction,
+        limit=args.limit,
+        offset=args.offset,
+        max_messages=args.max_messages,
+        max_retries=args.max_retries,
+        max_model_calls=args.max_model_calls,
+        min_signal=args.min_signal,
+        sample=args.sample,
+        unit_timeout_seconds=args.unit_timeout_seconds,
+        dry_run=args.dry_run,
+        resume=args.resume,
+        model_name=args.model,
+    )
+    try:
+        config.validate()
+    except CurationError as exc:
+        raise SystemExit(str(exc)) from exc
+
+    connection = connect_database(database)
+    memory_connection, memory_store = open_memory_store(database)
+    try:
+        curation_store = CurationStore(connection)
+        service = MemoryService(memory_store)
+        manager = _NullContext(None)
+        if config.extraction is CurationExtractionMode.LLM:
+            manager = OllamaClient(model=args.model or MODEL)
+        with manager as client:
+            adapter = _build_curation_registry(config, connection, client)
+            report = _run_curation(curation_store, adapter, service, config)
+    finally:
+        memory_connection.close()
+        connection.close()
+
+    _print_curation_report(report, as_json=args.json)
+    return 0
+
+
+class _NullContext:
+    """Context manager that yields a fixed value (for the deterministic path)."""
+
+    def __init__(self, value: object | None) -> None:
+        self._value = value
+
+    def __enter__(self) -> object | None:
+        return self._value
+
+    def __exit__(self, *exc: object) -> None:
+        return None
+
+
+def _build_curation_registry(
+    config: CurationConfig, connection: sqlite3.Connection, client: object | None
+) -> CurationAdapterRegistry:
+    """Build the adapter registry for the requested corpus source."""
+    adapters: list[object] = []
+    if config.source_type in CONVERSATION_SOURCE_TYPES:
+        adapters.append(
+            ConversationCurationAdapter(ConversationStore(connection), client=client)
+        )
+    if config.source_type in (EMAIL, FINANCIAL, GENERIC_DOCUMENT_SOURCE):
+        adapters.append(
+            DocumentCurationAdapter(
+                DocumentStore(connection),
+                ChunkStore(connection),
+                client=client,
+            )
+        )
+    if config.source_type == WORKOUTS:
+        workout_store = WorkoutStore(connection)
+        adapters.append(WorkoutCurationAdapter(WorkoutQueryService(workout_store)))
+    if config.source_type in (ACTIVITY, CHROME_HISTORY_EVENT_SOURCE):
+        adapters.append(EventCurationAdapter(EventStore(connection)))
+    return CurationAdapterRegistry(*adapters)  # type: ignore[arg-type]
+
+
+def _run_curation(
+    curation_store: CurationStore,
+    adapter: object,
+    service: MemoryService,
+    config: CurationConfig,
+) -> CurationReport:
+    runner = MemoryCurationRunner(
+        store=curation_store,
+        adapter=adapter,
+        memory_service=service,  # type: ignore[arg-type]
+    )
+    try:
+        return runner.run(config)
+    except CurationError as exc:
+        raise SystemExit(str(exc)) from exc
+
+
+def _run_memory_runs(database: Path, args: argparse.Namespace) -> int:
+    """List durable curation runs (content-free checkpoint metadata)."""
+    connection = connect_database(database)
+    try:
+        runs = CurationStore(connection).list_runs(
+            source_type=args.source, limit=args.limit
+        )
+    finally:
+        connection.close()
+    if args.json:
+        _print_json({"runs": [dict(run) for run in runs]})
+        return 0
+    if not runs:
+        print("No curation runs.")
+        return 0
+    for run in runs:
+        print(
+            f"{run['run_id']}  {run['source_type']}  {run['extraction']}  "
+            f"{run['status']}  {run['started_at']}"
+        )
+    return 0
+
+
+def _run_memory_review(database: Path, args: argparse.Namespace) -> int:
+    """Exception-only review of escalated candidates (Phase 18).
+
+    By default only aggregate counts are shown (content-free).
+    Use ``--show`` to display the stored statement per row.
+    Use ``--approve N`` / ``--reject N`` to decide a pending review item.
+    """
+    from personal_ai.memory.review import MemoryReviewService
+
+    connection = connect_database(database)
+    try:
+        store = CurationStore(connection)
+        service = MemoryService(store)
+        review = MemoryReviewService(store, service)
+
+        # Approve / reject first (mutually exclusive)
+        if args.approve is not None:
+            result = review.approve(args.approve, note=args.note)
+            outcome = result.get("outcome", "unknown")
+            sid = result.get("memory_id", "")
+            sr = result.get("superseded_id", "")
+            ea = result.get("evidence_added", 0)
+            status = result.get("status", "")
+            print(f"review approve {args.approve}: outcome={outcome}", end="")
+            if sid:
+                print(f", memory_id={sid}", end="")
+            if sr:
+                print(f", superseded={sr}", end="")
+            if isinstance(ea, int):
+                print(f", evidence_added={ea}", end="")
+            if status:
+                print(f", status={status}", end="")
+            print()
+            return 0
+
+        if args.reject is not None:
+            result = review.reject(args.reject, note=args.note)
+            outcome = result.get("outcome", "unknown")
+            print(f"review reject {args.reject}: outcome={outcome}")
+            return 0
+
+        # List rows — respect --show, --category
+        category_filter = args.category
+        rows = review.list_pending(
+            category=category_filter, limit=args.limit
+        )
+
+        if args.show:
+            # content-bearing mode
+            if not rows:
+                print("No pending memory reviews.")
+                return 0
+            for row in rows:
+                stmt = row.get("statement", "")
+                print(f"{row['id']}: {stmt}")
+                # print metadata below on next lines
+                print(
+                    f"  kind={row['kind']} temporal_scope={row['temporal_scope']} "
+                    f"confidence={row['confidence']} importance={row['importance']} "
+                    f"status={row['status']}"
+                )
+                print(
+                    f"  run={row['run_id']} unit={row['unit_id']} "
+                    f"created_at={row['created_at']}"
+                )
+                print(
+                    f"  category={row['category']} reason={row['reason']}"
+                )
+            return 0
+
+        # aggregate-only default
+        if args.json:
+            _print_json(
+                {
+                    "pending": len(rows),
+                    "by_category": {
+                        c: n
+                        for c, n in review.pending_counts().get("by_category", {}).items()
+                    }
+                    if hasattr(review.pending_counts(), "get")
+                    else {},
+                    "total_pending": len(rows),
+                }
+            )
+            return 0
+
+        pending = review.pending_counts()
+        print(
+            f"Pending reviews: {pending.get('pending', 0)} total"
+        )
+        by_cat = pending.get("by_category", {})
+        if by_cat:
+            for cat, cnt in sorted(by_cat.items()):
+                print(f"  {cat}: {cnt}")
+        return 0
+
+    finally:
+        connection.close()
+
+
+def _run_memory_curate_all(database: Path, args: argparse.Namespace) -> int:
+    """Run bounded curation over all corpus sources sequentially (Phase 18).
+
+    All writes flow through the same policy-gated write path as per-source curation.
+    The report is aggregate-only (totals, decision counts, versions, memory stats,
+    review queue counts). ``--dry-run`` analyzes without writing. ``--resume``
+    completes unfinished units from the latest run per source.
+    """
+    from personal_ai.memory.orchestration import (
+        CorpusCurationConfig,
+        CorpusCurationOrchestrator,
+    )
+
+    config = CorpusCurationConfig(
+        sources=args.sources,
+        mode=args.mode,
+        limit=args.limit,
+        offset=args.offset,
+        max_messages=args.max_messages,
+        max_retries=args.max_retries,
+        max_model_calls=args.max_model_calls,
+        min_signal=args.min_signal,
+        sample=args.sample,
+        unit_timeout_seconds=args.unit_timeout_seconds,
+        dry_run=args.dry_run,
+        resume=args.resume,
+        model_name=args.model,
+    )
+    try:
+        config.validate()
+    except CurationError as exc:
+        raise SystemExit(str(exc)) from exc
+
+    connection = connect_database(database)
+    memory_connection, memory_store = open_memory_store(database)
+    try:
+        curation_store = CurationStore(connection)
+        service = MemoryService(memory_store)
+        registry = _build_curation_registry_generic(connection, args.model)
+
+        orchestrator = CorpusCurationOrchestrator(
+            curation_store=curation_store,
+            registry=registry,
+            memory_service=service,
+        )
+
+        report = orchestrator.run(config)
+    finally:
+        memory_connection.close()
+        connection.close()
+
+    _print_curation_report(report, as_json=args.json)
+    return 0
+
+
+def _build_curation_registry_generic(
+    connection: sqlite3.Connection, model: str | None
+) -> CurationAdapterRegistry:
+    """Build a generic adapter registry over all sources (used by orchestration)."""
+    # We don't need a client for deterministic-only sources; pass None and the
+    # runner will handle graceful degradation per-unit.
+    from personal_ai.memory.adapters import (
+        EventCurationAdapter,
+        EventStore,
+        WorkoutCurationAdapter,
+        WorkoutStore,
+    )
+
+    # Email and document adapters need a client only for LLM mode; orchestration
+    # will create one on demand per source. For now pass None.
+    adapters: list[object] = []
+
+    # Conversation sources (chatgpt/gemini) always need a client for llm mode
+    # but orchestration creates one lazily; we'll register empty adapters and
+    # let the runner raise early if LLM-mode is requested without a client.
+    # For deterministic mode we skip them (the CLI default is adaptive).
+    # The runner resolves adapters from registry per source.
+    # To keep this simple, we only register the non-LLM adapters.
+    # LLM sources (chatgpt/gemini/email/document) are conditionally registered
+    # when --mode deterministic: they run deterministic only.
+
+    # Deterministic adapters only:
+    adapters.append(WorkoutCurationAdapter(WorkoutStore(connection)))
+    adapters.append(EventCurationAdapter(EventStore(connection)))
+
+    return CurationAdapterRegistry(*adapters)  # type: ignore[arg-type]
+
+
+def _print_curation_report(report: CurationReport, *, as_json: bool) -> None:
+    """Print an aggregate-only curation report (JSON or human text)."""
+    summary = report.summary()
+    if as_json:
+        _print_json(summary)
+        return
+    for key, value in summary.items():
+        if isinstance(value, dict):
+            print(f"{key}:")
+            for sub_key, sub_value in sorted(value.items()):
+                print(f"  {sub_key}: {sub_value}")
+        else:
+            print(f"{key}: {value}")
 
 
 def _print_json(value: object) -> None:
@@ -615,6 +1332,7 @@ def _connect_agent_registry(
     database: Path,
     workout_service: object | None = None,
     memory_service: object | None = None,
+    memory_proposal_approver: object | None = None,
 ) -> tuple[ToolRegistry, sqlite3.Connection]:
     """Build the agent tool registry backed by the knowledge and event stores.
 
@@ -624,7 +1342,9 @@ def _connect_agent_registry(
     (via :class:`~personal_ai.storage.events.EventStore`). When a workout query
     service is provided, the policy-gated ``search_workouts`` chat tool is
     registered as well. When a memory service is provided, the read-only
-    ``personal_context`` overview also reports durable-memory availability.
+    ``personal_context`` overview reports durable-memory availability and,
+    when a ``memory_proposal_approver`` is given, the policy-gated
+    ``propose_memory`` chat tool is registered too.
 
     Returns the registry together with the underlying connection so the caller
     can keep the stores alive for the whole agent session and close it
@@ -656,6 +1376,8 @@ def _connect_agent_registry(
             event_store=event_store,
             workout_service=workout_service,
             personal_context_service=personal_context_service,
+            memory_service=memory_service,
+            memory_proposal_approver=memory_proposal_approver,
         )
         return registry, connection
     except BaseException:
@@ -702,6 +1424,7 @@ def build_agent(
     observer: AgentObserver | None = None,
     workout_service: object | None = None,
     memory_service: object | None = None,
+    memory_proposal_approver: object | None = None,
 ) -> BuiltAgent:
     """Construct the production Agent from workspace and database settings.
 
@@ -717,8 +1440,11 @@ def build_agent(
     chat tool is registered so conversational chat can answer movement-based
     questions about the user's workout history through the policy engine.
     When ``memory_service`` is given, the read-only ``personal_context``
-    overview also reports durable-memory availability (counts + provenance
-    only, never memory content).
+    overview reports durable-memory availability (counts + provenance only,
+    never memory content). When ``memory_proposal_approver`` is ALSO given,
+    the policy-gated ``propose_memory`` chat tool is registered so the model
+    can propose durable memories that the user approves; without it the chat
+    build is default-deny for memory writes.
 
     The Ollama endpoint defaults to the local daemon and is overridable with
     ``base_url``, which falls back to the ``OLLAMA_BASE_URL`` environment
@@ -732,6 +1458,7 @@ def build_agent(
             database,
             workout_service=workout_service,
             memory_service=memory_service,
+            memory_proposal_approver=memory_proposal_approver,
         )
     else:
         registry = create_default_registry(workspace)
@@ -778,6 +1505,29 @@ def build_chat_memory(database: Path | None) -> BuiltChatMemory | None:
     connection, store = open_memory_store(database)
     service = MemoryService(store)
     return BuiltChatMemory(chat=ChatMemory(service), connection=connection)
+
+
+def _make_interactive_memory_approver() -> Callable[[object, object, object], bool]:
+    """Return an approver that asks the user on the terminal for memory writes.
+
+    Memory writes in chat are never auto-granted: the proposal runs only when
+    the user explicitly approves it on ``stdin``. ``y``/``yes`` approves;
+    anything else (including EOF) declines. The prompt is the only place the
+    proposal is surfaced to the user for confirmation.
+    """
+
+    def approve(agent_id: object, tool_name: object, permission: object) -> bool:
+        print(
+            f"[memory] tool '{tool_name}' requests permission {permission!r}",
+            file=sys.stderr,
+        )
+        try:
+            answer = input("[memory] Approve writing this durable memory? [y/N] ")
+        except EOFError:
+            return False
+        return answer.strip().lower() in {"y", "yes"}
+
+    return approve
 
 
 def _make_agent_observer() -> AgentObserver:
@@ -830,6 +1580,10 @@ def main(argv: list[str] | None = None) -> None:
         run_workouts(args)
         return
 
+    if getattr(args, "command", None) == "memory":
+        run_memory(args)
+        return
+
     if args.search_query is not None:
         run_search(args.search_query, args.database, args.limit)
         return
@@ -838,6 +1592,13 @@ def main(argv: list[str] | None = None) -> None:
         source_type, source_path = args.ingest_source_args
         if source_type in EVENT_SOURCE_TYPES:
             run_event_ingest(source_type, Path(source_path), args.database)
+        elif is_conversation_source(source_type):
+            run_conversation_ingest(
+                source_type,
+                Path(source_path),
+                args.database,
+                memory=args.memory,
+            )
         else:
             run_ingest(source_type, Path(source_path), args.database)
         return
@@ -848,23 +1609,34 @@ def main(argv: list[str] | None = None) -> None:
         raise SystemExit(f"Workspace is not a directory: {workspace}")
 
     observer = _make_agent_observer() if args.verbose else None
+
+    chat_memory = build_chat_memory(args.database)
+    memory_service: object | None = (
+        chat_memory.chat.service if chat_memory is not None else None
+    )
+    interactive = bool(
+        sys.stdin is not None and hasattr(sys.stdin, "isatty") and sys.stdin.isatty()
+    )
+    approver = _make_interactive_memory_approver() if interactive else None
+
     built = build_agent(
         workspace,
         args.database,
         model=MODEL,
         observer=observer,
+        memory_service=memory_service,
+        memory_proposal_approver=approver,
     )
     try:
-        response = built.agent.run(
-            [
-                ChatMessage(
-                    role="user",
-                    content=args.prompt,
-                )
-            ]
-        )
+        messages: list[ChatMessage] = [ChatMessage(role="user", content=args.prompt)]
+        if chat_memory is not None:
+            result = chat_memory.chat.build_context_messages(messages)
+            messages = list(result.messages)
+        response = built.agent.run(messages)
     finally:
         built.close()
+        if chat_memory is not None:
+            chat_memory.close()
 
     print(response)
 

@@ -59,6 +59,8 @@ class Permission(Enum):
     FILESYSTEM_READ = "filesystem.read"
     # read-only durable memory retrieval
     MEMORY_READ = "memory.read"
+    # durable-memory writing (gated on explicit user approval)
+    MEMORY_WRITE = "memory.write"
     # read-only workout activity retrieval
     WORKOUT_READ = "workout.read"
     # read-only personal-context overview retrieval (aggregate metadata)

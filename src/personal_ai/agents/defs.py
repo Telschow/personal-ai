@@ -180,9 +180,45 @@ REVIEWER = Agent(
     max_retries=2,
 )
 
+CURATOR = Agent(
+    id="curator",
+    role="Records explicitly requested durable memory, with user approval.",
+    system_instructions=(
+        "You help the user record durable personal facts as memory entries. "
+        "You propose a memory only when the user explicitly asked you to "
+        "remember it; you never infer, auto-record, or restate retrieved "
+        "content as memory. Every write goes through an explicit user "
+        "approval gate; a declined write is never retried."
+    ),
+    skills=frozenset(),
+    tools=frozenset({"propose_memory"}),
+    permissions=frozenset(),
+    policy=AccessPolicy(
+        name="curator",
+        allowed=frozenset({Permission.MEMORY_READ}),
+        approval_required=frozenset({Permission.MEMORY_WRITE}),
+        denied=frozenset(
+            {
+                Permission.CORPUS_SEARCH,
+                Permission.CORPUS_FETCH,
+                Permission.FILESYSTEM_WRITE,
+                Permission.SHELL,
+                Permission.PYTHON,
+                Permission.GIT_WRITE,
+                Permission.NETWORK,
+                Permission.DESTRUCTIVE,
+                Permission.SYSTEM_CONFIG,
+            }
+        ),
+        autonomy=AutonomyLevel.READ_ONLY_RESEARCH,
+    ),
+    model=None,
+    max_retries=2,
+)
+
 
 def build_default_agent_registry() -> AgentRegistry:
     registry = AgentRegistry()
-    for agent in (ORCHESTRATOR, RESEARCHER, ENGINEER, REVIEWER):
+    for agent in (ORCHESTRATOR, RESEARCHER, ENGINEER, REVIEWER, CURATOR):
         registry.register(agent)
     return registry

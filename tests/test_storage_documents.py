@@ -14,14 +14,16 @@ CREATED_AT = "2026-08-22T10:00:00+00:00"
 def make_document(
     document_id: str = "doc-1",
     *,
+    source: str = "notes/ideas.txt",
+    source_type: str = "file",
     created_at: str = CREATED_AT,
     modified_at: str = CREATED_AT,
     metadata: dict[str, object] | None = None,
 ) -> Document:
     return Document(
         id=document_id,
-        source="notes/ideas.txt",
-        source_type="file",
+        source=source,
+        source_type=source_type,
         content_hash=f"hash-for-{document_id}",
         created_at=created_at,
         modified_at=modified_at,
@@ -90,6 +92,60 @@ def test_list_documents_orders_deterministically() -> None:
         ids = [document.id for document in store.list_documents()]
 
     assert ids == ["earlier-doc", "a-doc", "later-doc"]
+
+
+def test_list_documents_filters_by_source_type_and_source() -> None:
+    email = make_document("email-1", source="msg-1", source_type="email")
+    financial = make_document("fin-1", source="fin/2024", source_type="financial")
+    file_doc = make_document("file-1")
+
+    with make_store() as store:
+        store.add(email)
+        store.add(financial)
+        store.add(file_doc)
+
+        emails = store.list_documents(source_type="email")
+        same_source = store.list_documents(source="msg-1")
+
+    assert [document.id for document in emails] == ["email-1"]
+    assert [document.id for document in same_source] == ["email-1"]
+
+
+def test_list_documents_supports_limit_and_offset_paging() -> None:
+    documents = [
+        make_document(f"doc-{index}", created_at=CREATED_AT) for index in range(7)
+    ]
+
+    with make_store() as store:
+        for document in documents:
+            store.add(document)
+
+        page_one = store.list_documents(limit=3)
+        page_two = store.list_documents(limit=3, offset=3)
+        tail = store.list_documents(limit=3, offset=6)
+
+    assert [document.id for document in page_one] == [
+        "doc-0",
+        "doc-1",
+        "doc-2",
+    ]
+    assert [document.id for document in page_two] == [
+        "doc-3",
+        "doc-4",
+        "doc-5",
+    ]
+    assert [document.id for document in tail] == ["doc-6"]
+
+
+def test_list_documents_pages_without_limit_via_negative_limit() -> None:
+    documents = [make_document(f"doc-{index}") for index in range(3)]
+    with make_store() as store:
+        for document in documents:
+            store.add(document)
+
+        offset_into_all = store.list_documents(offset=2)
+
+    assert [document.id for document in offset_into_all] == ["doc-2"]
 
 
 def test_metadata_is_snapshotted_at_write_time() -> None:

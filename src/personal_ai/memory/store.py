@@ -15,15 +15,18 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 from personal_ai.memory.models import (
     Memory,
+    MemoryEvidenceRef,
     MemoryKind,
     MemoryScope,
     MemorySourceType,
     MemoryStatus,
+    TemporalScope,
     now_iso,
     validate_memory,
 )
@@ -45,7 +48,8 @@ CREATE TABLE IF NOT EXISTS memories (
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     last_accessed_at TEXT,
-    expires_at TEXT
+    expires_at TEXT,
+    temporal_scope TEXT NOT NULL DEFAULT 'unknown'
 )
 """
 
@@ -59,6 +63,18 @@ CREATE TABLE IF NOT EXISTS memory_events (
 )
 """
 
+_MEMORY_EVIDENCE_SCHEMA = """
+CREATE TABLE IF NOT EXISTS memory_evidence (
+    seq INTEGER PRIMARY KEY AUTOINCREMENT,
+    memory_id TEXT NOT NULL,
+    source_type TEXT NOT NULL,
+    source_id TEXT NOT NULL,
+    source_document_id TEXT,
+    source_timestamp TEXT,
+    created_at TEXT NOT NULL
+)
+"""
+
 # Retrieval filters on (status, scope, scope_id); listing orders by updated_at.
 _MEMORIES_INDEX = (
     "CREATE INDEX IF NOT EXISTS idx_memories_status_scope "
@@ -66,6 +82,17 @@ _MEMORIES_INDEX = (
 )
 _MEMORY_EVENTS_INDEX = (
     "CREATE INDEX IF NOT EXISTS idx_memory_events_memory ON memory_events(memory_id)"
+)
+_MEMORY_EVIDENCE_INDEX = (
+    "CREATE INDEX IF NOT EXISTS idx_memory_evidence_memory "
+    "ON memory_evidence(memory_id)"
+)
+# Idempotent evidence: NULL document ids are normalized to '' so re-adding the
+# same evidence does not create duplicates.
+_MEMORY_EVIDENCE_DEDUPE = (
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_memory_evidence_dedupe "
+    "ON memory_evidence(memory_id, source_type, source_id, "
+    "COALESCE(source_document_id, ''))"
 )
 
 _MEMORY_COLUMNS = (
@@ -99,11 +126,32 @@ class MemoryStore:
         for schema in (
             _MEMORIES_SCHEMA,
             _MEMORY_EVENTS_SCHEMA,
+            _MEMORY_EVIDENCE_SCHEMA,
             _MEMORIES_INDEX,
             _MEMORY_EVENTS_INDEX,
+            _MEMORY_EVIDENCE_INDEX,
+            _MEMORY_EVIDENCE_DEDUPE,
         ):
             self._connection.execute(schema)
+        # Backwards-compatible migration: pre-existing ``memories`` tables (e.g.
+        # the production database) were created before ``temporal_scope``
+        # existed. Adding the column is idempotent and safe for existing rows.
+        self._ensure_column(
+            "memories", "temporal_scope", "TEXT NOT NULL DEFAULT 'unknown'"
+        )
         self._connection.commit()
+
+    def _ensure_column(self, table: str, column: str, definition: str) -> None:
+        columns = {
+            row[1]
+            for row in self._connection.execute(
+                f"PRAGMA table_info({table})"
+            ).fetchall()
+        }
+        if column not in columns:
+            self._connection.execute(
+                f"ALTER TABLE {table} ADD COLUMN {column} {definition}"
+            )
 
     # ---- records ----
     def save(self, memory: Memory) -> Memory:
@@ -114,8 +162,8 @@ class MemoryStore:
             INSERT INTO memories (
                 memory_id, kind, content, summary, source_type, source_id,
                 scope, scope_id, confidence, importance, status, created_at,
-                updated_at, last_accessed_at, expires_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                updated_at, last_accessed_at, expires_at, temporal_scope
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(memory_id) DO UPDATE SET
                 kind=excluded.kind, content=excluded.content,
                 summary=excluded.summary, source_type=excluded.source_type,
@@ -124,7 +172,8 @@ class MemoryStore:
                 importance=excluded.importance, status=excluded.status,
                 updated_at=excluded.updated_at,
                 last_accessed_at=excluded.last_accessed_at,
-                expires_at=excluded.expires_at
+                expires_at=excluded.expires_at,
+                temporal_scope=excluded.temporal_scope
             """,
             _memory_to_row(memory),
         )
@@ -157,7 +206,13 @@ class MemoryStore:
         ``purged`` counts purge events in the safe audit trail — purged
         records themselves no longer exist.
         """
-        status_counts = {"active": 0, "archived": 0, "deleted": 0}
+        status_counts = {
+            "candidate": 0,
+            "active": 0,
+            "superseded": 0,
+            "archived": 0,
+            "deleted": 0,
+        }
         for status, count in self._connection.execute(
             "SELECT status, COUNT(*) FROM memories GROUP BY status"
         ):
@@ -172,6 +227,32 @@ class MemoryStore:
             **status_counts,
             "purged": purged,
             "memories": sum(status_counts.values()),
+        }
+
+    def statistics(self) -> dict[str, object]:
+        """Aggregate, content-free distributions for observability.
+
+        Counts by lifecycle status, memory kind, and temporal scope, plus the
+        total evidence-reference count. No statement content is read.
+        """
+        by_kind: dict[str, int] = {}
+        by_temporal: dict[str, int] = {}
+        for kind, count in self._connection.execute(
+            "SELECT kind, COUNT(*) FROM memories GROUP BY kind"
+        ):
+            by_kind[str(kind)] = int(count)
+        for temporal, count in self._connection.execute(
+            "SELECT temporal_scope, COUNT(*) FROM memories GROUP BY temporal_scope"
+        ):
+            by_temporal[str(temporal)] = int(count)
+        evidence = int(
+            self._connection.execute("SELECT COUNT(*) FROM memory_evidence").fetchone()[0]
+        )
+        return {
+            "by_kind": by_kind,
+            "by_status": self.counts(),
+            "by_temporal": by_temporal,
+            "evidence": evidence,
         }
 
     def record_access(self, memory_id: str) -> None:
@@ -227,6 +308,51 @@ class MemoryStore:
             )
         return tuple(out)
 
+    # ---- evidence ----
+    def add_evidence(self, memory_id: str, refs: Sequence[MemoryEvidenceRef]) -> int:
+        """Attach provenance references idempotently; returns rows inserted."""
+        if self.get(memory_id) is None:
+            raise MemoryNotFoundError(f"Unknown memory: {memory_id}")
+        inserted = 0
+        stamp = now_iso()
+        for ref in refs:
+            ref.validate()
+            cursor = self._connection.execute(
+                "INSERT OR IGNORE INTO memory_evidence ("
+                "memory_id, source_type, source_id, source_document_id, "
+                "source_timestamp, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    memory_id,
+                    ref.source_type,
+                    ref.source_id,
+                    ref.source_document_id,
+                    ref.source_timestamp,
+                    stamp,
+                ),
+            )
+            inserted += cursor.rowcount
+        self._connection.commit()
+        return inserted
+
+    def evidence_for(self, memory_id: str) -> tuple[dict[str, object], ...]:
+        """Provenance references for one memory, oldest first."""
+        rows = self._connection.execute(
+            "SELECT source_type, source_id, source_document_id, "
+            "source_timestamp, created_at FROM memory_evidence "
+            "WHERE memory_id = ? ORDER BY seq ASC",
+            (memory_id,),
+        ).fetchall()
+        return tuple(
+            {
+                "source_type": row[0],
+                "source_id": row[1],
+                "source_document_id": row[2],
+                "source_timestamp": row[3],
+                "created_at": row[4],
+            }
+            for row in rows
+        )
+
 
 def _memory_to_row(memory: Memory) -> tuple[object, ...]:
     return (
@@ -245,6 +371,7 @@ def _memory_to_row(memory: Memory) -> tuple[object, ...]:
         memory.updated_at,
         memory.last_accessed_at,
         memory.expires_at,
+        memory.temporal_scope.value,
     )
 
 
@@ -266,7 +393,17 @@ def _row_to_memory(row: sqlite3.Row | tuple[object, ...]) -> Memory:
         updated_at=values[12],
         last_accessed_at=values[13],
         expires_at=values[14],
+        temporal_scope=_temporal_scope(values[15])
+        if len(values) > 15 and values[15]
+        else TemporalScope.UNKNOWN,
     )
+
+
+def _temporal_scope(raw: object) -> TemporalScope:
+    try:
+        return TemporalScope(raw)  # type: ignore[arg-type]
+    except ValueError:
+        return TemporalScope.UNKNOWN
 
 
 def open_memory_store(

@@ -307,15 +307,21 @@ image-heavy / mixed) → structured extraction | vision extraction
 - **Memory is data, never policy.** Stored memories can inform context, but
   can never grant permissions, relax approvals, or alter the `PolicyEngine`.
 - **Explicit creation only.** Memories are written via an explicit
-  `MemoryDraft`; there is **no autonomous/unrestricted memory writing**. The
-  HTTP gateway exposes memory as **read-only** (`/api/memory/*`).
+  `MemoryDraft` (`MemoryService.create_user_memory`); the HTTP gateway exposes
+  memory as **read-only** (`/api/memory/*`). The only agent-initiated route is
+  the **approval-gated** `propose_memory` chat tool (PolicyEngine
+  `memory.write` in the curator's `approval_required`): the model proposes,
+  the human approves on the terminal — no approver wired means default-deny.
 - **Scoped retrieval.** `global | agent | project | execution` scopes; a
   missing scope never means "search everything".
 - **Safe audit events.** Event payloads carry ids, kinds, scopes and
   statuses — never private memory text. Physical `purge` is available for
   privacy-sensitive records and survives as an event only.
 - **Automatic chat recall** (Phase 42) labels injected context as UNTRUSTED
-  reference data: hostile passages are data, never instructions.
+  reference data: hostile passages are data, never instructions. A bounded,
+  deterministic salient-context fallback surfaces explicit high-importance
+  memories (e.g. an identity "preferred name") when a question shares no
+  tokens with their content.
 - See [`docs/MEMORY.md`](docs/MEMORY.md) and
   [`docs/AGENT_ORCHESTRATION.md`](docs/AGENT_ORCHESTRATION.md).
 
@@ -390,7 +396,8 @@ See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the phased implementation status.
   classification, extraction, chunking, embeddings (2–7) · retrieval + tools
   (8–9) · 8+ source adapters · unified corpus search (33) · vision extraction
   (34a) · financial exports (37) · control plane + orchestration (39–39B) ·
-  memory layer + chat recall (40–42) · workouts (43) · HTTP gateway (44) ·
+  memory layer + chat recall (40–42) · approval-gated memory proposals + CLI
+  identity recall (43) · workouts (43) · HTTP gateway (44) ·
   Dockerized deploy on the Open WebUI network (45).
 - **Next (not yet implemented):** richer embedding-backed semantic retrieval
   as a configurable provider, multi-agent chat surfaces above the approval

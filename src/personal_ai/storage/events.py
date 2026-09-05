@@ -316,10 +316,13 @@ class EventStore:
         source: str | None = None,
         event_type: str | None = None,
         limit: int = 100,
+        offset: int = 0,
     ) -> tuple[Event, ...]:
         """Return stored events in deterministic (time, id) order.
 
         Optionally filtered by exact ``source`` and/or ``event_type``.
+        ``offset`` skips rows for deterministic paging through a source in
+        bounded batches.
         """
         clauses: list[str] = []
         params: list[object] = []
@@ -330,12 +333,16 @@ class EventStore:
             clauses.append("event_type = ?")
             params.append(event_type)
         where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
-        rows = self._connection.execute(
+        params.append(limit)
+        sql = (
             f"SELECT {', '.join(_COLUMNS)} FROM events{where} "
             "ORDER BY event_time, id "
-            "LIMIT ?",
-            (*params, limit),
-        ).fetchall()
+            "LIMIT ?"
+        )
+        if offset:
+            sql += " OFFSET ?"
+            params.append(offset)
+        rows = self._connection.execute(sql, params).fetchall()
         return tuple(_row_to_event(r) for r in rows)
 
     def search(self, query: EventQuery) -> tuple[Event, ...]:

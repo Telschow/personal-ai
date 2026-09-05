@@ -121,6 +121,81 @@ Status legend: **done** · **current** · **planned**.
   `docker exec open-webui curl http://personal-ai:8000/v1/models`, real chat
   from the Open WebUI container) and manually tested through Open WebUI.
 
+## Phase 46 — Conversation exports + conversation-layer memory (done)
+
+- `--ingest chatgpt|gemini <dir> --database <db>` routes to the typed
+  `ConversationStore` (idempotent, model-free, aggregate-only reporting); the
+  document-pipeline adapters become library API only.
+- Optional `--memory` runs bounded deterministic conversation extraction
+  (user-authored, active-branch, first-person self-assertions only) through
+  the same policy-gated `propose_memory` write path as corpus extraction;
+  provenance-only evidence, aggregate-only reports, idempotent reruns.
+- `ConversationStore.list_conversations` gained `limit`/`offset` + source
+  filters for bounded reads.
+
+## Phase 47 — LLM-assisted memory candidate proposals (done)
+
+- Bounded LLM candidate proposals (`memory/proposals.py`) on top of Slice 4:
+  one bounded conversation window per model call, strict JSON output contract,
+  validated/never-repaired, deterministic conversion guards (provenance,
+  user-assertion, sensitive-form/negation/question skips), application-set
+  scores and deterministic temporal/kind overrides.
+- The LLM is a proposal generator only: every proposal still flows through
+  `MemoryPolicy` → `AutomaticMemoryCurator` → `propose_memory` gate →
+  `MemoryService.apply_candidate`. Policy remains authoritative; secrets are
+  hard-rejected, salary-style content stays `require_approval`, and a denied
+  `memory.write` gate raises and writes nothing.
+- Bounded I/O (messages/prompt chars/proposals/evidence/retries), count-only
+  failures, provenance-only evidence, idempotent reruns, aggregate-only
+  reporting. Library API only — not wired into the CLI or
+  `create_default_registry`.
+
+## Phase 48 — Durable, resumable full-corpus memory curation (done)
+
+- `memory/curation.py` turns already-ingested conversations into memories
+  through the exact same policy-gated write path (`MemoryPolicy` →
+  `AutomaticMemoryCurator` → `propose_memory` gate →
+  `MemoryService.apply_candidate`); no second write route, and a denied
+  `memory.write` gate raises `ApprovalRequiredError` and writes nothing.
+- Durable `CurationStore` checkpoints (runs/units/review, content-free except
+  the explicit review queue), idempotent reruns, resumable runs (`--resume`
+  completes exactly the unfinished units; stale `running` units recovered,
+  `failed` units retried), and dry runs that create no rows and no writes.
+  A run with failed units is recorded `failed` (`unit_failures`) and remains
+  resumable; a successful run is `completed` (terminal).
+- Bounded I/O everywhere (`limit`/`offset` paging on
+  `ConversationStore.list_conversations`/`list_messages`, `max_messages`,
+  `max_prompt_chars`, `max_candidates_per_unit`, `max_retries`,
+  `max_model_calls` (0 = unlimited), per-unit `unit_timeout_seconds`).
+- CLI surface: `personal-ai memory curate|runs|review` (separate from the
+  `--ingest --memory` flag and from `personal_ai.execution.cli`); `review` is
+  the only statement-printing surface. Not wired into
+  `create_default_registry`.
+
+## Phase 49 — Unified full-corpus memory curation (done)
+
+Curation is source-independent; no new write route exists.
+
+- Source adapters (`memory/adapters.py`) discover bounded `CurationUnit`
+  objects and derive `MemoryCandidate` instances routed through the exact same
+  policy-gated write path as conversations (`MemoryPolicy` →
+  `AutomaticMemoryCurator` → `propose_memory` gate → `MemoryService`).
+  Adapters never write SQLite or touch memory tables.
+- Sources: **email** (one unit per recurring non-webmail sender domain;
+  deterministic mode is metadata-only with id-only monthly evidence; LLM mode
+  adds bounded representative-email windows), **financial** (counted only, zero
+  candidates and zero model calls in both modes), **document** (deterministic
+  proposes nothing; LLM mode shows bounded chunk windows gated on
+  `allowed_document_ids`), **workout/activity** (deterministic-only, reusing
+  the conserved corpus extractors). chatgpt/gemini unchanged.
+- `CurationAdapterRegistry` resolves the single adapter per source; units carry
+  `source_id`/`source_version`/`signal`; checkpoints record `source_version`.
+- Adaptive LLM gating: `--min-signal` and `--sample` downgrade low-signal /
+  over-budget LLM units to deterministic processing, never calling the model
+  for a downgraded unit.
+- All step/run/report checkpoints stay aggregate-only; review-queue rows are
+  the only statement-bearing table. Not part of `create_default_registry`.
+
 ## Planned (not yet implemented)
 
 These are explicitly **not** shipped — do not claim them as working:

@@ -47,9 +47,30 @@ def test_enum_values_are_stable_json_contract() -> None:
         "entity",
         "summary",
         "instruction",
+        "identity",
+        "biography",
+        "relationship",
+        "goal",
+        "habit",
+        "routine",
+        "interest",
+        "skill",
+        "work",
+        "education",
+        "location_context",
+        "important_event",
+        "long_term_context",
+        "communication_preference",
+        "personal_fact",
     ]
     assert [s.value for s in MemoryScope] == ["global", "agent", "project", "execution"]
-    assert [s.value for s in MemoryStatus] == ["active", "archived", "deleted"]
+    assert [s.value for s in MemoryStatus] == [
+        "candidate",
+        "active",
+        "superseded",
+        "archived",
+        "deleted",
+    ]
     assert [t.value for t in MemorySourceType] == [
         "user",
         "execution",
@@ -57,8 +78,10 @@ def test_enum_values_are_stable_json_contract() -> None:
         "evidence",
         "imported",
         "system",
+        "corpus",
     ]
     assert MemoryEventType.CREATED == "memory.created"
+    assert MemoryEventType.SUPERSEDED == "memory.superseded"
 
 
 def _draft(**overrides):

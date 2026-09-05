@@ -177,6 +177,33 @@ class TestEventStoreQueries:
         results = self.store.list_events(source="chrome_history", limit=100)
         assert len(results) == 4
 
+    def test_list_events_pages_with_offset(self) -> None:
+        page_one = self.store.list_events(
+            source="chrome_history", event_type=EVENT_TYPE_URL_VISIT, limit=2
+        )
+        page_two = self.store.list_events(
+            source="chrome_history",
+            event_type=EVENT_TYPE_URL_VISIT,
+            limit=2,
+            offset=2,
+        )
+        all_events = self.store.list_events(
+            source="chrome_history", event_type=EVENT_TYPE_URL_VISIT, limit=100
+        )
+
+        assert len(page_one) == 2
+        assert len(page_two) == 1
+        assert page_one + page_two == all_events
+        assert (
+            self.store.list_events(
+                source="chrome_history",
+                event_type=EVENT_TYPE_URL_VISIT,
+                limit=2,
+                offset=4,
+            )
+            == ()
+        )
+
     def test_count_by_type(self) -> None:
         assert self.store.count_events(event_type=EVENT_TYPE_SEARCH_QUERY) == 1
         assert self.store.count_events(event_type=EVENT_TYPE_URL_VISIT) == 3

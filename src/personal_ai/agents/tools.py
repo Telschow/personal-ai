@@ -17,8 +17,13 @@ from pathlib import Path
 
 from personal_ai.agents.models import AgentTool, Permission, RiskLevel
 from personal_ai.agents.registry import AgentToolRegistry
-from personal_ai.memory.models import MemoryScope
+from personal_ai.memory.models import (
+    MemoryCandidate,
+    MemoryScope,
+    MemoryValidationError,
+)
 from personal_ai.memory.retriever import MemoryHit, ScopeFilter
+from personal_ai.memory.service import MemoryConflictError
 
 
 def _take(arguments: dict[str, object], key: str, default: object) -> object:
@@ -132,6 +137,86 @@ def _memory_scopes(
             raise ValueError("agent scope requires the current agent context")
         return (ScopeFilter(MemoryScope.AGENT, str(scope_id)),)
     raise ValueError(f"scope {scope!r} is not permitted for agent retrieval")
+
+
+def _memory_write_handler(
+    memory_service: object,
+) -> Callable[[dict[str, object]], object]:
+    """Write an explicitly approved durable memory through ``MemoryService``.
+
+    This handler is reached only after the policy engine has granted the
+    ``memory.write`` approval gate for the curator agent, so the write is
+    always user-authorized. It accepts only the bounded draft surface a model
+    may propose (content, kind, optional summary/confidence/importance),
+    writes global-scope, user-sourced memory, and returns identifiers plus
+    status — never unrelated private content.
+    """
+
+    def handle(arguments: dict[str, object]) -> object:
+        content = arguments.get("content")
+        if not isinstance(content, str) or not content.strip():
+            raise TypeError("content must be a non-empty string")
+        summary = _take(arguments, "summary", "")
+        if not isinstance(summary, str):
+            raise TypeError("summary must be a string")
+        kind = str(_take(arguments, "kind", "preference"))
+        confidence = float(_take(arguments, "confidence", 0.5))
+        importance = float(_take(arguments, "importance", 0.5))
+        if not (0.0 <= confidence <= 1.0):
+            raise ValueError("confidence must be in [0.0, 1.0]")
+        if not (0.0 <= importance <= 1.0):
+            raise ValueError("importance must be in [0.0, 1.0]")
+        memory = memory_service.create_user_memory(  # type: ignore[attr-defined]
+            content,
+            kind=kind,
+            summary=summary,
+            confidence=confidence,
+            importance=importance,
+        )
+        return {
+            "status": "created",
+            "memory_id": memory.memory_id,
+            "kind": memory.kind.value,
+            "scope": memory.scope.value,
+            "note": (
+                "Memory created after explicit user approval as untrusted "
+                "durable reference data."
+            ),
+        }
+
+    return handle
+
+
+def _memory_candidate_handler(
+    memory_service: object,
+) -> Callable[[dict[str, object]], object]:
+    """Apply a policy-accepted memory candidate through ``MemoryService``.
+
+    This handler is reached only through the automatic memory curator, after
+    the deterministic memory policy accepted the candidate *and* the policy
+    engine granted the ``memory.write`` approval gate. The candidate arrives
+    as tool arguments and is reconstructed and re-validated at this boundary
+    (model metadata stays untrusted input). Reconciliation decides whether the
+    write creates, updates-evidence, supersedes, or conflicts; a conflict is
+    surfaced for human review, never silently written.
+    """
+
+    def handle(arguments: dict[str, object]) -> object:
+        try:
+            candidate = MemoryCandidate.from_dict(arguments)
+        except MemoryValidationError as exc:
+            return {"status": "invalid_candidate", "applied": False, "reason": str(exc)}
+        try:
+            return memory_service.apply_candidate(candidate)  # type: ignore[attr-defined]
+        except MemoryConflictError as exc:
+            return {
+                "status": "conflict",
+                "applied": False,
+                "reason": exc.reason,
+                "related_memory_id": exc.memory_id,
+            }
+
+    return handle
 
 
 def _memory_tool_result(hit: MemoryHit) -> dict[str, object]:
@@ -318,6 +403,26 @@ SEARCH_MEMORY = AgentTool(
     permissions=(Permission.MEMORY_READ,),
     risk=RiskLevel.READ,
     reads_private_data=True,
+    deterministic=True,
+)
+
+PROPOSE_MEMORY = AgentTool(
+    name="propose_memory",
+    description=(
+        "Write a durable personal memory entry for the user, but only after "
+        "explicit user approval is granted through the policy engine. Use "
+        "this only when the user explicitly asked you to remember something "
+        "about themselves (a name, preference, decision, or goal). Never "
+        "infer or auto-record information the user did not state. The "
+        "approval gate is user-controlled: if the request is declined, do "
+        "not retry; instead tell the user the write was declined and that "
+        "they can create the memory directly with the memory CLI "
+        "(personal-ai memory add)."
+    ),
+    permissions=(Permission.MEMORY_WRITE,),
+    risk=RiskLevel.WRITE,
+    mutates_state=True,
+    reads_private_data=False,
     deterministic=True,
 )
 

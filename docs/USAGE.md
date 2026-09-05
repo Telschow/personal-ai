@@ -103,6 +103,116 @@ Behavior:
 - Brokerage PDF statements need no special handling: they flow through the
   existing `file` / PDF ingestion path.
 
+## Conversation exports — ChatGPT / Gemini (Phase 45 conversation layer)
+
+ChatGPT and Gemini exports are ingested as **conversations**, not documents —
+they live in the `ConversationStore`, never in the document pipeline. The
+ingest is fully local and model-free:
+
+```
+uv run python -m personal_ai.cli \
+  --ingest chatgpt /path/to/ChatGPT_export \
+  --database /path/to/knowledge.db
+
+uv run python -m personal_ai.cli \
+  --ingest gemini /path/to/Gemini_export \
+  --database /path/to/knowledge.db
+```
+
+Behavior:
+
+- **Idempotent**: deterministic (SHA-256) conversation/message identities mean
+  re-running on unchanged exports inserts nothing (a re-run reports
+  `conversations: 0`).
+- **Aggregate-only output**: the summary prints `conversations`, `messages`,
+  and loader-level counts (`shards`/`attachments` for ChatGPT,
+  `md_files_skipped`/`aggregate_files_skipped` for Gemini). Message content is
+  never printed.
+- **Searchable immediately** after ingestion via `ConversationStore.search`
+  (available to the agent).
+
+### Optional: deterministic memory extraction (`--memory`)
+
+Passing `--memory` additionally runs bounded, deterministic extraction over
+the stored conversations of that source and prints an aggregate report under
+`memory:`:
+
+```
+uv run python -m personal_ai.cli \
+  --ingest gemini /path/to/Gemini_export \
+  --database /path/to/knowledge.db \
+  --memory
+```
+
+What it does and does not do:
+
+- Only the **user's own words** (user-role, active-branch, first-person
+  self-assertions) can become memory; assistant/system/tool claims never do.
+- Negation, questions, requests, quoted material, and sensitive content
+  (emails, URLs, currency, credentials, `salary`/`password`-style keywords)
+  are skipped. "I want to do X" becomes a `goal`, never an achieved fact.
+- Extraction is deterministic — no LLM call whatsoever.
+- Every accepted candidate is a durable memory written through the same
+  policy-gated write path used elsewhere (approval-gated `propose_memory`);
+  a denied/absent gate writes nothing and errors.
+- Evidence is provenance-only (conversation id, message id, ISO timestamp) —
+  never message content. Repeats accumulate evidence on one memory; reruns are
+  idempotent.
+- The report is aggregate-only (candidates/accepted/writes/…). It never prints
+  statement content.
+
+Without `--memory`, memory is never touched.
+
+## Full-corpus memory curation (`memory curate`)
+
+`personal-ai memory curate` turns already-ingested material into memories
+without a model for the deterministic paths, and with strictly bounded LLM
+proposals when you opt in. It is source-independent — the same durable,
+resumable pipeline handles conversation exports, email, financial exports,
+generic documents, workouts, and activity (chrome history):
+
+```
+uv run python -m personal_ai.cli memory curate \
+  --database /path/to/knowledge.db --source email
+
+uv run python -m personal_ai.cli memory curate \
+  --database /path/to/knowledge.db --source document --mode llm
+```
+
+Flags:
+
+- `--source chatgpt|gemini|email|financial|document|workout|activity`
+  (default `chatgpt`). The registry is built conditionally, so only the
+  requested source's tables are created.
+- `--mode` / `--extraction deterministic|llm` (default `deterministic`).
+- `--limit` / `--max-units` (default 100) and `--offset`, `--max-messages`,
+  `--max-model-calls` (0 = unlimited), `--max-retries`, `--unit-timeout`.
+- `--min-signal N` and `--sample N` downgrade low-signal / over-budget LLM
+  units to deterministic processing (never calling the model for them).
+- `--dry-run` analyzes the window and writes nothing; `--resume` completes
+  exactly the unfinished units of the latest run for this source/mode.
+- `--json` prints an aggregate-only report instead of the human summary.
+
+Per-source behavior:
+
+- **chatgpt/gemini** — conversation extraction (active-branch user
+  self-assertions; LLM mode uses the bounded proposal layer).
+- **email** — one unit per recurring non-webmail sender domain (≥5 emails,
+  ≥2 distinct months). Deterministic mode reads metadata only (never subject
+  or body) and proposes a recurring `interest`; LLM mode additionally shows a
+  bounded representative-email window.
+- **financial** — counted only. Zero candidates and **zero model calls in
+  both modes**: financial content is never sent to a model.
+- **document** — deterministic mode proposes nothing; LLM mode shows bounded
+  document windows and gates every proposal on the allowed document ids.
+- **workout / activity** — deterministic only (LLM mode is rejected); single
+  bounded aggregate units reusing the workout-routine/domain-aggregate rules.
+
+Every auto-write flows through the same policy-gated `propose_memory` path;
+`require_approval` candidates are parked in the review queue (see
+`memory review`) and never auto-written. Curation stays separate from the
+`--ingest --memory` flag and from the chat agent.
+
 ## Unified corpus search, provenance, and filtering (Phase 33)
 
 Ingested files and email share one searchable corpus, regardless of which

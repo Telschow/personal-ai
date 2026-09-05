@@ -18,11 +18,17 @@ from collections.abc import Callable, Sequence
 
 from personal_ai.memory.models import (
     Memory,
+    MemoryCandidate,
     MemoryDraft,
     MemoryEventType,
+    MemoryEvidenceRef,
+    MemoryScope,
+    MemorySourceType,
     MemoryStatus,
+    MemoryValidationError,
     now_iso,
 )
+from personal_ai.memory.reconcile import MemoryReconciler, ReconcileAction
 from personal_ai.memory.retriever import (
     MemoryHit,
     MemoryRetriever,
@@ -35,6 +41,19 @@ class MemoryNotConfiguredError(Exception):
     """Raised when an operation needs a memory service that is not wired up."""
 
 
+class MemoryConflictError(Exception):
+    """Raised when reconciliation finds an ambiguous related fact.
+
+    The candidate must not be silently written; the caller surfaces the
+    conflict for human review instead.
+    """
+
+    def __init__(self, memory_id: str | None, reason: str) -> None:
+        super().__init__(reason)
+        self.memory_id = memory_id
+        self.reason = reason
+
+
 class MemoryService:
     """Owns memory persistence, lifecycle, retrieval, and its safe event log."""
 
@@ -44,9 +63,11 @@ class MemoryService:
         retriever: MemoryRetriever | None = None,
         *,
         now: Callable[[], str] | None = None,
+        reconciler: MemoryReconciler | None = None,
     ) -> None:
         self._store = store
         self._retriever = retriever or MemoryRetriever(store, now=now)
+        self._reconciler = reconciler or MemoryReconciler(self)
         self._now = now or now_iso
 
     # ---- creation ----
@@ -129,6 +150,85 @@ class MemoryService:
         self.get(memory_id)
         return self._store.memory_events(memory_id)
 
+    # ---- provenance ----
+    def add_evidence(
+        self, memory_id: str, evidence: tuple[MemoryEvidenceRef, ...]
+    ) -> int:
+        """Attach provenance references idempotently; returns rows inserted."""
+        self.get(memory_id)
+        if not all(isinstance(ref, MemoryEvidenceRef) for ref in evidence):
+            raise MemoryValidationError(
+                "evidence entries must be MemoryEvidenceRef instances"
+            )
+        return self._store.add_evidence(memory_id, evidence)
+
+    def evidence_for(self, memory_id: str) -> tuple[dict[str, object], ...]:
+        """Provenance references for one memory (identifiers, never content)."""
+        self.get(memory_id)
+        return self._store.evidence_for(memory_id)
+
+    # ---- reconciliation ----
+    def apply_candidate(self, candidate: MemoryCandidate) -> dict[str, object]:
+        """Persist a validated candidate per the deterministic reconciliation.
+
+        The candidate must already have passed the automatic memory policy; the
+        service itself never consults policy (that separation keeps policy
+        authoritative and auditable).
+        """
+        plan = self._reconciler.plan(candidate)
+        if plan.action is ReconcileAction.ADD_EVIDENCE:
+            added = self.add_evidence(plan.target_id or "", candidate.evidence)
+            return {
+                "status": "updated",
+                "memory_id": plan.target_id,
+                "kind": candidate.kind.value,
+                "evidence_added": added,
+            }
+        if plan.action is ReconcileAction.SUPERSEDE:
+            memory = self.create_candidate_memory(candidate)
+            superseded = self.supersede(plan.target_id or "", memory.memory_id)
+            added = self.add_evidence(memory.memory_id, candidate.evidence)
+            return {
+                "status": "created",
+                "memory_id": memory.memory_id,
+                "superseded_id": superseded.memory_id,
+                "kind": candidate.kind.value,
+                "evidence_added": added,
+            }
+        if plan.action is ReconcileAction.CONFLICT:
+            raise MemoryConflictError(plan.target_id, plan.reason)
+        memory = self.create_candidate_memory(candidate)
+        added = self.add_evidence(memory.memory_id, candidate.evidence)
+        return {
+            "status": "created",
+            "memory_id": memory.memory_id,
+            "kind": candidate.kind.value,
+            "evidence_added": added,
+        }
+
+    def create_candidate_memory(self, candidate: MemoryCandidate) -> Memory:
+        """Create an active memory from a validated candidate.
+
+        Provenance lives in the evidence rows attached afterwards; the record
+        itself is sourced as ``corpus`` so it is distinguishable from
+        explicitly user-entered memories.
+        """
+        return self.create(
+            MemoryDraft(
+                kind=candidate.kind,
+                content=candidate.statement.strip(),
+                summary=candidate.summary,
+                source_type=MemorySourceType.CORPUS,
+                source_id="",
+                scope=MemoryScope.GLOBAL,
+                scope_id=None,
+                confidence=candidate.confidence,
+                importance=candidate.utility,
+                expires_at=None,
+                temporal_scope=candidate.temporal_scope,
+            )
+        )
+
     # ---- lifecycle ----
     def update(
         self,
@@ -154,6 +254,7 @@ class MemoryService:
             confidence=current.confidence if confidence is None else float(confidence),
             importance=current.importance if importance is None else float(importance),
             status=current.status,
+            temporal_scope=current.temporal_scope,
             created_at=current.created_at,
             updated_at=self._now(),
             last_accessed_at=current.last_accessed_at,
@@ -172,6 +273,51 @@ class MemoryService:
         return self._set_status(
             memory_id, MemoryStatus.ARCHIVED, MemoryEventType.ARCHIVED
         )
+
+    def supersede(self, old_id: str, new_id: str) -> Memory:
+        """Mark an active memory as replaced by a newer record.
+
+        The old record keeps its content and provenance for auditability but
+        is removed from active retrieval; only active memories may be
+        superseded.
+        """
+        old = self.get(old_id)
+        self.get(new_id)
+        if old.status is not MemoryStatus.ACTIVE:
+            raise MemoryValidationError(
+                f"cannot supersede {old.status.value!r} memory {old_id}"
+            )
+        superseded = Memory(
+            memory_id=old.memory_id,
+            kind=old.kind,
+            content=old.content,
+            summary=old.summary,
+            source_type=old.source_type,
+            source_id=old.source_id,
+            scope=old.scope,
+            scope_id=old.scope_id,
+            confidence=old.confidence,
+            importance=old.importance,
+            status=MemoryStatus.SUPERSEDED,
+            temporal_scope=old.temporal_scope,
+            created_at=old.created_at,
+            updated_at=self._now(),
+            last_accessed_at=old.last_accessed_at,
+            expires_at=old.expires_at,
+        )
+        self._store.save(superseded)
+        self._store.append_event(
+            MemoryEventType.SUPERSEDED,
+            old_id,
+            {
+                "memory_id": old_id,
+                "replaced_by": new_id,
+                "kind": old.kind.value,
+                "scope": old.scope.value,
+                "status": MemoryStatus.SUPERSEDED.value,
+            },
+        )
+        return superseded
 
     def delete(self, memory_id: str) -> Memory:
         """Logically delete a memory (record and provenance are kept)."""
@@ -204,6 +350,10 @@ class MemoryService:
     def counts(self) -> dict[str, int]:
         return self._store.counts()
 
+    def statistics(self) -> dict[str, object]:
+        """Aggregate, content-free memory statistics for observability."""
+        return self._store.statistics()
+
     def _set_status(
         self, memory_id: str, status: MemoryStatus, event_type: str
     ) -> Memory:
@@ -220,6 +370,7 @@ class MemoryService:
             confidence=current.confidence,
             importance=current.importance,
             status=status,
+            temporal_scope=current.temporal_scope,
             created_at=current.created_at,
             updated_at=self._now(),
             last_accessed_at=current.last_accessed_at,

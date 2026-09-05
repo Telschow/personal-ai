@@ -193,13 +193,20 @@ def test_bounded_query_truncates_at_200_chars() -> None:
 
 
 def test_recall_uses_bounded_query_not_full_message(service: MemoryService) -> None:
-    zebra = _add(service, "zebra migration plans")
-    # The only matching token ('zebra') lies beyond the 200-char bound.
+    # The only matching token ('zebra') lies beyond the 200-char bound, so
+    # lexical recall cannot match it; the salient-context fallback still
+    # ranks explicit high-importance memories above this low-importance one.
+    zebra = _add(service, "zebra migration plans", importance=0.1)
+    salient = [
+        _add(service, f"salient context note {i}", importance=0.9) for i in range(3)
+    ]
     message = "a " * 200 + "zebra"
     context = _chat(service).recall(message)
     assert context.query == _bounded_query(message)  # truncated, deterministic
     assert len(context.query) <= MAX_QUERY_CHARS
-    assert all(hit.memory.memory_id != zebra.memory_id for hit in context.memories)
+    ids = {hit.memory.memory_id for hit in context.memories}
+    assert all(item.memory_id in ids for item in salient)
+    assert zebra.memory_id not in ids
 
 
 def test_tokenless_message_returns_empty_context(service: MemoryService) -> None:

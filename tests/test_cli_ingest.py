@@ -9,24 +9,14 @@ import pymupdf
 import pytest
 
 from personal_ai import cli
-from personal_ai.documents import Document, StructuredExtraction
+from personal_ai.documents import StructuredExtraction
+from personal_ai.documents.conversations import Conversation
 from personal_ai.retrieval import SearchDocumentsRequest, search_documents
-from personal_ai.storage import ChunkStore, DocumentStore, connect_database
-
-
-def make_document(**overrides: object) -> Document:
-    values: dict[str, object] = {
-        "id": "doc-seed",
-        "source": "seed",
-        "source_type": "keep",
-        "content_hash": "hash-seed",
-        "created_at": "2025-01-01T00:00:00+00:00",
-        "modified_at": "2025-01-01T00:00:00+00:00",
-        "metadata": {},
-    }
-    values.update(overrides)
-    return Document(**values)  # type: ignore[arg-type]
-
+from personal_ai.storage import (
+    ChunkStore,
+    ConversationStore,
+    connect_database,
+)
 
 LONG_ANSWER = (
     "Practice guitar in short daily sessions. Warm up with scales, then "
@@ -132,6 +122,23 @@ def table_counts(database: Path) -> tuple[int, int, int]:
     return int(documents), int(chunks), int(embeddings)
 
 
+def conversation_counts(database: Path) -> tuple[int, int, int]:
+    connection = connect_database(database)
+    try:
+        conversations = connection.execute(
+            "SELECT COUNT(*) FROM conversations"
+        ).fetchone()[0]
+        messages = connection.execute(
+            "SELECT COUNT(*) FROM conversation_messages"
+        ).fetchone()[0]
+        attachments = connection.execute(
+            "SELECT COUNT(*) FROM conversation_attachments"
+        ).fetchone()[0]
+    finally:
+        connection.close()
+    return int(conversations), int(messages), int(attachments)
+
+
 def ingest_argv(gemini_export: Path, database: Path) -> list[str]:
     return [
         "--ingest",
@@ -157,14 +164,13 @@ def test_ingest_creates_database_and_prints_summary(
     lines = capsys.readouterr().out.splitlines()
     assert lines == [
         "source_type: gemini",
-        "documents: 1",
-        "kind_counts:",
-        "  text_heavy: 1",
-        "chunks: 1",
+        "conversations: 1",
+        "messages: 2",
+        "md_files_skipped: 0",
+        "aggregate_files_skipped: 0",
     ]
-    documents, chunks, embeddings = table_counts(database)
-    assert (documents, chunks, embeddings) == (1, 1, 0)
-    assert len(faked_model.calls) == 1
+    assert conversation_counts(database) == (1, 2, 0)
+    assert len(faked_model.calls) == 0
 
 
 def test_second_invocation_is_idempotent(
@@ -179,13 +185,21 @@ def test_second_invocation_is_idempotent(
 
     run_cli(monkeypatch, *arguments)
     first_output = capsys.readouterr().out
-    first_calls = len(faked_model.calls)
+    assert first_output.splitlines()[-2:] == [
+        "md_files_skipped: 0",
+        "aggregate_files_skipped: 0",
+    ]
 
     run_cli(monkeypatch, *arguments)
+    second_output = capsys.readouterr().out
 
-    assert capsys.readouterr().out == first_output
-    assert len(faked_model.calls) == first_calls
-    assert table_counts(database) == (1, 1, 0)
+    assert second_output.splitlines()[:3] == [
+        "source_type: gemini",
+        "conversations: 0",  # nothing new stored on a re-run
+        "messages: 0",
+    ]
+    assert len(faked_model.calls) == 0
+    assert conversation_counts(database) == (1, 2, 0)
 
 
 def test_ingested_database_is_immediately_searchable(
@@ -200,16 +214,13 @@ def test_ingested_database_is_immediately_searchable(
 
     connection = connect_database(database)
     try:
-        hits = search_documents(
-            ChunkStore(connection),
-            SearchDocumentsRequest(query="guitar metronome"),
-        )
+        hits = ConversationStore(connection).search("metronome")
     finally:
         connection.close()
 
     assert len(hits) == 1
-    assert hits[0].document_id
-    assert "metronome" in hits[0].text
+    assert hits[0].conversation_id
+    assert "metronome" in hits[0].content_text
 
 
 def test_ingest_file_source_discovers_and_chunks_text_files(
@@ -417,8 +428,17 @@ def test_existing_database_is_reused_not_overwritten(
 ) -> None:
     database = tmp_path / "knowledge.db"
     seed_connection = connect_database(database)
-    documents_store = DocumentStore(seed_connection)
-    documents_store.add(make_document(id="doc-existing"))
+    seed_store = ConversationStore(seed_connection)
+    seed_store.save_conversation(
+        Conversation(
+            id="conv-seed",
+            title="Seeded conversation",
+            source_type="gemini",
+            created_at="2025-06-01T00:00:00+00:00",
+            modified_at="2025-06-01T00:00:00+00:00",
+            metadata={},
+        )
+    )
     seed_connection.close()
 
     run_cli(monkeypatch, *ingest_argv(gemini_export, database))
@@ -427,13 +447,13 @@ def test_existing_database_is_reused_not_overwritten(
     try:
         ids = {
             str(row[0])
-            for row in connection.execute("SELECT id FROM documents").fetchall()
+            for row in connection.execute("SELECT id FROM conversations").fetchall()
         }
     finally:
         connection.close()
 
-    # The seeded document survived and exactly one gemini document joined.
-    assert "doc-existing" in ids
+    # The seeded conversation survived and exactly one gemini conversation joined.
+    assert "conv-seed" in ids
     assert len(ids) == 2
 
 
