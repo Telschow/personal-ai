@@ -20,18 +20,26 @@ and never writes directly.
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Protocol
 
 from personal_ai.memory.models import MemoryCandidate, MemoryStatus
+from personal_ai.memory.tokenizer import normalize_text as _lexical_normalize_text
 
 RELATED_OVERLAP_MIN = 0.5
 SUPERSEDE_CONFIDENCE_GAP = 0.2
 
-_WORD_RE = re.compile(r"[a-zA-Z0-9]+")
+
+def _normalize_text(text: str) -> str:
+    """Normalize text for reconciliation: the shared Unicode lexical form.
+
+    The tokenizer/normalization semantics are shared with retrieval
+    (personal_ai.memory.tokenizer), so reconciliation and retrieval can never
+    drift into subtly different lexical results.
+    """
+    return _lexical_normalize_text(text)
 
 
 class ReconcileAction(Enum):
@@ -155,8 +163,8 @@ class MemoryReconciler:
 
 
 def normalize_text(text: str) -> str:
-    """Lowercase, alphanumeric-only normalized form for equality matching."""
-    return " ".join(_WORD_RE.findall(text.lower()))
+    """Normalize text for equality matching: NFKC + casefold + Unicode token join."""
+    return _normalize_text(text)
 
 
 def token_overlap(a: str, b: str) -> float:

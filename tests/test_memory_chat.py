@@ -212,14 +212,13 @@ def test_recall_uses_bounded_query_not_full_message(service: MemoryService) -> N
 def test_tokenless_message_returns_empty_context(service: MemoryService) -> None:
     _add(service, "financial planning notes")
     chat = _chat(service)
-    context = chat.recall("\u0645\u0631\u062d\u0628\u0627")  # no a-z0-9 tokens
+    # Use punctuation-only message which produces no tokens even with Unicode tokenization
+    context = chat.recall("!!! ??? ...")
     assert context.memories == ()
     result = chat.build_context_messages(
-        [ChatMessage(role="user", content="\u0645\u0631\u062d\u0628\u0627")]
+        [ChatMessage(role="user", content="!!! ??? ...")]
     )
-    assert result.messages == [
-        ChatMessage(role="user", content="\u0645\u0631\u062d\u0628\u0627")
-    ]
+    assert result.messages == [ChatMessage(role="user", content="!!! ??? ...")]
 
 
 def test_blank_message_returns_empty_context(service: MemoryService) -> None:

@@ -246,7 +246,9 @@ class MemoryStore:
         ):
             by_temporal[str(temporal)] = int(count)
         evidence = int(
-            self._connection.execute("SELECT COUNT(*) FROM memory_evidence").fetchone()[0]
+            self._connection.execute("SELECT COUNT(*) FROM memory_evidence").fetchone()[
+                0
+            ]
         )
         return {
             "by_kind": by_kind,

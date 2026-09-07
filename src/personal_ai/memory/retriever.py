@@ -28,7 +28,6 @@ domain model.
 
 from __future__ import annotations
 
-import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -41,8 +40,20 @@ from personal_ai.memory.models import (
     parse_iso,
 )
 from personal_ai.memory.store import MemoryStore
+from personal_ai.memory.tokenizer import (
+    LETTER_MARK_NUMBER_RE as _TOKEN_RE,
+)
+from personal_ai.memory.tokenizer import (
+    normalize_for_tokenize as _normalize_for_tokenize,
+)
+from personal_ai.memory.tokenizer import (
+    tokenize,
+)
 
-_TOKEN_RE = re.compile(r"[a-z0-9]+")
+# ``tokenize`` remains importable from ``personal_ai.memory.retriever`` for
+# historical callers; the implementation lives in ``personal_ai.memory.tokenizer``.
+__all__ = ["tokenize"]
+
 
 # Documented ranking weights (see module docstring).
 _RELEVANCE_WEIGHT = 0.5
@@ -130,7 +141,7 @@ class MemoryRetriever:
             raise MemorySearchError("limit must be >= 1")
         now_value = now or self._now()
         now_dt = _as_utc(parse_iso(now_value))
-        query_tokens = set(_TOKEN_RE.findall(query.lower()))
+        query_tokens = set(_TOKEN_RE.findall(_normalize_for_tokenize(query)))
 
         candidates: list[Memory] = []
         for memory in self._store.list(MemoryStatus.ACTIVE):
@@ -187,8 +198,8 @@ def _expired(memory: Memory, now_dt: datetime) -> bool:
 def _relevance(memory: Memory, query_tokens: set[str]) -> float:
     if not query_tokens:
         return 0.0
-    content_tokens = _TOKEN_RE.findall(memory.content.lower())
-    summary_tokens = _TOKEN_RE.findall(memory.summary.lower())
+    content_tokens = _TOKEN_RE.findall(_normalize_for_tokenize(memory.content))
+    summary_tokens = _TOKEN_RE.findall(_normalize_for_tokenize(memory.summary))
     haystack = set(content_tokens) | set(summary_tokens)
     overlap = len(query_tokens & haystack)
     return overlap / len(query_tokens)
@@ -209,8 +220,3 @@ def _as_utc(dt: datetime) -> datetime:
     if dt.tzinfo is None:
         return dt.replace(tzinfo=_UTC)
     return dt.astimezone(_UTC)
-
-
-def tokenize(text: str) -> tuple[str, ...]:
-    """Expose tokenization for tests and documentation."""
-    return tuple(_TOKEN_RE.findall(text.lower()))

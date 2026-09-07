@@ -9,6 +9,7 @@ superseded/archived/deleted/candidate memories never surface in retrieval.
 from __future__ import annotations
 
 import sqlite3
+import unicodedata
 
 import pytest
 
@@ -106,6 +107,105 @@ def test_duplicate_normalization_ignores_case_and_punctuation(
 ) -> None:
     _seed(service, "This is a fact.")
     result = service.apply_candidate(_candidate(statement="this is a fact!"))
+    assert result["status"] == "updated"
+    assert service.counts()["active"] == 1
+
+
+def test_nfkc_composed_and_decomposed_german_merge_onto_one_memory(
+    service: MemoryService,
+) -> None:
+    """München (composed ü) and Mu\\u0308nchen (decomposed u+diaeresis) are one fact."""
+    _seed(service, "Der nutzer wohnt in München.", kind="location_context")
+    result = service.apply_candidate(
+        _candidate(
+            statement="Der nutzer wohnt in Mu\u0308nchen",
+            kind="location_context",
+            evidence=(_evidence(source_type="chatgpt", source_id="convo-de"),),
+        )
+    )
+    assert result["status"] == "updated"
+    assert service.counts()["active"] == 1
+    memory = service.list()[0]
+    assert memory.content == "Der nutzer wohnt in München."
+    assert memory.content == unicodedata.normalize("NFKC", memory.content)
+
+
+def test_distinct_languages_create_separate_memories_without_false_merge(
+    service: MemoryService,
+) -> None:
+    """German and English renditions of the same fact stay separate records.
+
+    Reconciliation is lexical and conservative: below the overlap threshold the
+    fact is created, never silently merged or flagged as a conflict.
+    """
+    first = service.apply_candidate(
+        _candidate(
+            statement="Der nutzer wohnt in Berlin",
+            kind="location_context",
+            evidence=(_evidence(source_type="chatgpt", source_id="convo-de"),),
+        )
+    )
+    second = service.apply_candidate(
+        _candidate(
+            statement="The user lives in Berlin",
+            kind="location_context",
+            evidence=(_evidence(source_type="chatgpt", source_id="convo-en"),),
+        )
+    )
+    assert first["status"] == "created"
+    assert second["status"] == "created"
+    assert service.counts()["active"] == 2
+    contents = {m.content for m in service.list()}
+    assert contents == {"Der nutzer wohnt in Berlin", "The user lives in Berlin"}
+
+
+def test_nfkc_decomposed_spanish_merges_onto_existing_memory(
+    service: MemoryService,
+) -> None:
+    """Á (composed) and A+combining acute (decomposed) are one fact."""
+    _seed(service, "El usuario trabaja en Málaga.", kind="work")
+    result = service.apply_candidate(
+        _candidate(
+            statement="El usuario trabaja en Ma\u0301laga",
+            kind="work",
+            evidence=(_evidence(source_type="gemini", source_id="convo-es"),),
+        )
+    )
+    assert result["status"] == "updated"
+    assert service.counts()["active"] == 1
+    memory = service.list()[0]
+    assert memory.content == "El usuario trabaja en Málaga."
+
+
+def test_unicode_case_normalized_duplicate_merges_on_shared_normalization(
+    service: MemoryService,
+) -> None:
+    """MÜNCHEN (case + accent normalized) reconciles onto München (Phase 23)."""
+    _seed(service, "Der Nutzer wohnt in München.", kind="location_context")
+    result = service.apply_candidate(
+        _candidate(
+            statement="Der Nutzer wohnt in MÜNCHEN",
+            kind="location_context",
+            evidence=(_evidence(source_type="chatgpt", source_id="convo-de"),),
+        )
+    )
+    assert result["status"] == "updated"
+    assert service.counts()["active"] == 1
+    # The merge added the candidate as the first/only evidence row.
+    assert len(service.evidence_for(result["memory_id"])) == 1  # type: ignore[arg-type]
+
+
+def test_emoji_in_statement_does_not_break_lexical_merge(
+    service: MemoryService,
+) -> None:
+    """Emoji tokenizes to nothing; the surrounding lexical words still merge."""
+    _seed(service, "Der Nutzer liebt Berlin.", kind="preference")
+    result = service.apply_candidate(
+        _candidate(
+            statement="Der Nutzer liebt Berlin ❤️",
+            evidence=(_evidence(source_type="gemini", source_id="convo-e"),),
+        )
+    )
     assert result["status"] == "updated"
     assert service.counts()["active"] == 1
 

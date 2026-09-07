@@ -74,6 +74,46 @@ def test_tokenize_normalizes_and_splits() -> None:
     )
 
 
+def test_tokenize_unicode_matrix() -> None:
+    """Unicode tokens tokenize via Unicode property classes, never ASCII
+    transliteration (Phase 20 P0-2).
+
+    ``ß`` casefolds to ``ss``, ``Ü`` to ``ü``, decomposed accents recompose
+    under NFKC, CJK letters are kept as a single token, punctuation separates,
+    and accents are preserved (``München`` stays ``münchen``).
+    """
+    assert tokenize("münchen") == ("münchen",)
+    assert tokenize("MÜNCHEN") == ("münchen",)
+    assert tokenize("España") == ("españa",)
+    assert tokenize("ESPAÑA") == ("españa",)
+    assert tokenize("café") == ("café",)
+    assert tokenize("mañana") == ("mañana",)
+    assert tokenize("größer für Über") == ("grösser", "für", "über")
+    assert tokenize("Straße 12, München!") == ("strasse", "12", "münchen")
+    assert tokenize("e\u0301tude") == ("étude",)
+    assert tokenize("élève déjà") == ("élève", "déjà")
+    assert tokenize("Über-arbeit") == ("über", "arbeit")
+    assert tokenize("Watson\u2013Crick (DNA)") == ("watson", "crick", "dna")
+    assert tokenize("\u5357") == ("\u5357",)
+    assert tokenize("Diego vive en España y toma café.") == (
+        "diego",
+        "vive",
+        "en",
+        "españa",
+        "y",
+        "toma",
+        "café",
+    )
+
+
+def test_tokenize_no_ascii_transliteration() -> None:
+    """Accented letters are never reduced to ASCII -- München != munich."""
+    assert tokenize("München") != tokenize("Munchen")
+    assert tokenize("München") != tokenize("Munich")
+    assert tokenize("café") != tokenize("cafe")
+    assert tokenize("España") != tokenize("Espana")
+
+
 def test_search_does_not_mutate_store() -> None:
     memory = _prefer("Prefers concise explanations.")
     store, retriever = _store_with(memory)
