@@ -52,7 +52,7 @@ from typing import Protocol
 
 from personal_ai.documents.models import Document
 from personal_ai.events.models import EVENT_TYPE_URL_VISIT, Event
-from personal_ai.memory.conversations import _NEGATION, _SENSITIVE_FORM
+from personal_ai.memory.conversations import _SENSITIVE_FORM
 from personal_ai.memory.corpus import (
     ACTIVITY,
     DEFAULT_MAX_RECORDS,
@@ -81,6 +81,7 @@ from personal_ai.memory.proposals import (
     MAX_PROPOSALS_PER_BATCH,
     _apply_deterministic_overrides,
     _canonicalize_statement,
+    _statement_is_negated,
 )
 from personal_ai.memory.reconcile import normalize_text
 from personal_ai.storage.chunks import ChunkStore
@@ -610,7 +611,7 @@ def to_document_candidate(
         return None, "sensitive_form"
     if statement.endswith("?"):
         return None, "question"
-    if _NEGATION.search(statement):
+    if _statement_is_negated(statement):
         return None, "negated"
 
     try:

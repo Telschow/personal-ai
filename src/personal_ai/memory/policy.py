@@ -100,6 +100,7 @@ class MemoryPolicyDecision:
 # Secret detection. Matches actual credential-looking content — not prose that
 # merely mentions the words — so the checks are keyword- and regex-driven and
 # never depend on model judgment.
+# Structural patterns (language-independent)
 _SECRET_PATTERNS = (
     re.compile(r"-----BEGIN[^-]*PRIVATE KEY-----"),
     re.compile(r"\bsk_(?:live|test)_[A-Za-z0-9]{16,}\b"),
@@ -109,8 +110,10 @@ _SECRET_PATTERNS = (
     re.compile(r"\bgithub_pat_[A-Za-z0-9_]{22,}\b"),
     re.compile(r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{4,}\b"),
 )
+# Multilingual secret keywords (English, German, Spanish)
 _SECRET_KEYWORDS = frozenset(
     {
+        # English
         "password",
         "passphrase",
         "credentials",
@@ -122,10 +125,33 @@ _SECRET_KEYWORDS = frozenset(
         "session token",
         "security answer",
         "seed phrase",
+        # German
+        "passwort",
+        "passwörter",
+        "kennwort",
+        "api-schlüssel",
+        "api schlüssel",
+        "zugangstoken",
+        "geheimnis",
+        "sicherheitsantwort",
+        "seed-phrase",
+        # Spanish
+        "contraseña",
+        "contraseñas",
+        "clave",
+        "clave api",
+        "clave de acceso",
+        "secreto",
+        "llave secreta",
+        "llave privada",
+        "token de acceso",
+        "respuesta de seguridad",
+        "frase semilla",
     }
 )
 
 # Highly sensitive content that at minimum must never auto-accept.
+# Structural patterns (language-independent)
 _HIGHLY_SENSITIVE_PATTERNS = (
     re.compile(r"\b\d{3}-\d{2}-\d{4}\b"),  # US SSN
     re.compile(r"\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b"),  # IBAN
@@ -134,8 +160,10 @@ _HIGHLY_SENSITIVE_PATTERNS = (
         r"\b\d{5,}(?:[- ][0-9]\d{3})?\b(?=[\s,]*(?:ssn|passport))", re.IGNORECASE
     ),
 )
+# Multilingual highly sensitive keywords (English, German, Spanish)
 _HIGHLY_SENSITIVE_KEYWORDS = frozenset(
     {
+        # English
         "social security",
         "passport number",
         "national insurance",
@@ -144,12 +172,40 @@ _HIGHLY_SENSITIVE_KEYWORDS = frozenset(
         "medical treatment",
         "medication",
         "health record",
+        # German
+        "sozialversicherungsnummer",
+        "reisepassnummer",
+        "krankenversicherungsnummer",
+        "krankheit",
+        "krankheiten",
+        "medizinische diagnose",
+        "diagnosen",
+        "medizinische behandlung",
+        "medikament",
+        "medikamente",
+        "gesundheitsakte",
+        "patientenakte",
+        # Spanish
+        "número de seguridad social",
+        "seguridad social",
+        "número de pasaporte",
+        "enfermedad",
+        "enfermedades",
+        "diagnóstico médico",
+        "diagnósticos",
+        "tratamiento médico",
+        "medicamento",
+        "medicamentos",
+        "historial médico",
+        "historial de salud",
     }
 )
 
 # Sensitive content that requires human approval before becoming durable.
+# Multilingual sensitive keywords (English, German, Spanish)
 _SENSITIVE_KEYWORDS = frozenset(
     {
+        # English
         "salary",
         "bank account",
         "account number",
@@ -161,6 +217,43 @@ _SENSITIVE_KEYWORDS = frozenset(
         "phone number",
         "date of birth",
         "financial situation",
+        # German
+        "gehalt",
+        "gehälter",
+        "bankkonto",
+        "kontonummer",
+        "iban",
+        "blz",
+        "kreditkarte",
+        "kreditkarten",
+        "vermögen",
+        "steuererklärung",
+        "steuerdaten",
+        "wohnadresse",
+        "privatadresse",
+        "telefonnummer",
+        "handynummer",
+        "geburtsdatum",
+        "finanzielle situation",
+        "finanziell",
+        # Spanish
+        "salario",
+        "sueldo",
+        "cuenta bancaria",
+        "número de cuenta",
+        "tarjeta de crédito",
+        "tarjetas de crédito",
+        "patrimonio neto",
+        "declaración de impuestos",
+        "registro fiscal",
+        "dirección de casa",
+        "dirección del hogar",
+        "domicilio",
+        "teléfono",
+        "número de teléfono",
+        "fecha de nacimiento",
+        "situación financiera",
+        "situación económica",
     }
 )
 

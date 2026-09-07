@@ -46,14 +46,19 @@ from personal_ai.documents.conversations import (
     ConversationMessage,
 )
 from personal_ai.memory.conversations import (
-    _MODEL_DIRECT,
-    _NEGATION,
-    _REQUEST_STARTER,
+    _MODEL_DIRECT_PATTERNS,
+    _NEGATION_PATTERNS,
+    _RECURRING_PATTERNS,
+    _REQUEST_STARTER_PATTERNS,
     _SENSITIVE_FORM,
+    _YOU_TOWARD_PATTERNS,
     CONVERSATION_SOURCE_TYPES,
     MAX_STATEMENT_CHARS,
+    ConversationLanguage,
     ConversationSourceError,
     _canonical_statement,
+    _contains_quotation,
+    _detect_language,
 )
 from personal_ai.memory.corpus import OutcomeTally
 from personal_ai.memory.models import (
@@ -119,6 +124,53 @@ _PAST_TRIGGER = re.compile(
     r"graduated|lived|moved|was|were|had|learned|learnt)\b",
     re.IGNORECASE,
 )
+
+# Per-language trigger tables. The English (EN) entries ARE the original
+# single-language regexes above — English behavior is byte-identical; DE/ES
+# cover the same deterministic semantics for third-person canonical forms.
+_LANG_GOAL_TRIGGERS: dict[ConversationLanguage, re.Pattern[str]] = {
+    ConversationLanguage.EN: _GOAL_TRIGGER,
+    ConversationLanguage.DE: re.compile(
+        r"\bder nutzer (?:möchte|will|plane|plant|beabsichtigt|hat vor|"
+        r"würde gerne|würde gern)\b"
+        r"|\b(?:ziel|traum|plan|vorsatz|ambition|wunsch) (?:ist|war)\b",
+        re.IGNORECASE,
+    ),
+    ConversationLanguage.ES: re.compile(
+        r"\bel usuario (?:quiere|espera|planea|tiene la intención de|"
+        r"tiene el objetivo de|le gustaría|está planeando)\b"
+        r"|\b(?:meta|sueño|plan|objetivo|ambición) (?:es|era)\b",
+        re.IGNORECASE,
+    ),
+}
+_LANG_RECURRING_TRIGGERS: dict[ConversationLanguage, re.Pattern[str]] = {
+    ConversationLanguage.EN: _RECURRING_TRIGGER,
+    ConversationLanguage.DE: _RECURRING_PATTERNS[ConversationLanguage.DE],
+    ConversationLanguage.ES: _RECURRING_PATTERNS[ConversationLanguage.ES],
+}
+_LANG_PAST_TRIGGERS: dict[ConversationLanguage, re.Pattern[str]] = {
+    ConversationLanguage.EN: _PAST_TRIGGER,
+    ConversationLanguage.DE: re.compile(
+        r"\bder nutzer (?:wohnte|lebte|arbeitete|studierte|lernte|sprach|"
+        r"hatte|war|zog|lief|joggte|trainierte|schwamm|hat (?:früher|damals))"
+        r"\b|\b(?:früher|damals|ehemals|vor jahren|in der vergangenheit)\b",
+        re.IGNORECASE,
+    ),
+    ConversationLanguage.ES: re.compile(
+        r"\bel usuario (?:vivía|trabajaba|estudiaba|era|tenía|hablaba|"
+        r"aprendía|estudió|trabajó|vivió|nació|solía|empezó)\b"
+        r"|\b(?:antes|en el pasado|hace años|anteriormente)\b",
+        re.IGNORECASE,
+    ),
+}
+
+# Third-person user-reference markers per language, used to reject statements
+# about arbitrary third parties (the model may never invent user facts).
+_LANGUAGE_USER_MARKERS: dict[ConversationLanguage, str] = {
+    ConversationLanguage.DE: "der nutzer",
+    ConversationLanguage.ES: "el usuario",
+    ConversationLanguage.EN: "the user",
+}
 
 # --- errors ------------------------------------------------------------------
 
@@ -388,16 +440,48 @@ _SCORES: dict[MemoryKind, tuple[float, float, float, float]] = {
 _FIRST_USER_REGEX = re.compile(r"(?i)\bthe user(?:\b|'s)")
 
 
+def _statement_language(text: str) -> ConversationLanguage:
+    """Detect the language of a proposed statement or evidence message.
+
+    Marker-first: a third-person user reference ("der nutzer", "el usuario",
+    "the user") pins the language unambiguously. Otherwise the deterministic
+    conversation-layer detector scores first-person trigger words, with an
+    English fallback on UNKNOWN (both detectors are case- and accent-insensitive).
+    """
+    lowered = text.casefold()
+    for lang, marker in _LANGUAGE_USER_MARKERS.items():
+        if marker in lowered:
+            return lang
+    detected = _detect_language(text)
+    if detected is ConversationLanguage.UNKNOWN:
+        return ConversationLanguage.EN
+    return detected
+
+
+def _statement_is_negated(statement: str) -> bool:
+    """True when a canonical statement is negated in its own language."""
+    lang = _statement_language(statement)
+    patterns = _NEGATION_PATTERNS.get(lang, _NEGATION_PATTERNS[ConversationLanguage.EN])
+    return bool(patterns.search(statement))
+
+
 def _canonicalize_statement(statement: str) -> str | None:
     """Normalize a proposed statement to the durable "The user ..." form.
 
-    Statements already framed as "The user ..." are kept; first-person forms
-    are rewritten with the deterministic Slice 4 canonicalizer; anything that
-    does not ultimately reference the user is rejected (the model may not
-    propose facts about arbitrary third parties as if they were user facts).
+    Statements already framed as "The user ..." (or the German/Spanish
+    equivalents, since the LLM works in the source language) are kept;
+    first-person forms are rewritten with the deterministic Slice 4
+    canonicalizer; anything that does not ultimately reference the user is
+    rejected (the model may not propose facts about arbitrary third parties as
+    if they were user facts).
     """
-    candidate = _canonical_statement(statement.strip()) or ""
-    if not _FIRST_USER_REGEX.search(candidate):
+    stripped = statement.strip()
+    lang = _statement_language(stripped)
+    candidate = _canonical_statement(stripped, lang) or ""
+    if lang is ConversationLanguage.EN:
+        if not _FIRST_USER_REGEX.search(candidate):
+            return None
+    elif _LANGUAGE_USER_MARKERS[lang] not in candidate.casefold():
         return None
     if candidate[:1].islower():
         return candidate[:1].upper() + candidate[1:]
@@ -411,13 +495,15 @@ def _apply_deterministic_overrides(
 
     Deterministic trigger phrases win over the model's labels: future plans
     are always ``goal``/``current``, recurring timeframes are ``recurring``,
-    and past-tense declarations are ``historical``.
+    and past-tense declarations are ``historical``. Triggers are per-language;
+    the English tables are identical to the original single-language ones.
     """
-    if _GOAL_TRIGGER.search(statement):
+    lang = _statement_language(statement)
+    if _LANG_GOAL_TRIGGERS[lang].search(statement):
         return statement, MemoryKind.GOAL, TemporalScope.CURRENT
-    if _RECURRING_TRIGGER.search(statement):
+    if _LANG_RECURRING_TRIGGERS[lang].search(statement):
         return statement, kind, TemporalScope.RECURRING
-    if _PAST_TRIGGER.search(statement):
+    if _LANG_PAST_TRIGGERS[lang].search(statement):
         return statement, kind, TemporalScope.HISTORICAL
     return statement, kind, temporal_scope
 
@@ -442,13 +528,24 @@ def _is_user_assertion(message: ConversationMessage) -> bool:
     Questions, requests directed at the model, and model-directed wishes are
     never durable user facts on their own; a proposal whose only evidence is
     such text is not a user self-assertion.
+
+    The gate is a conservative union across every supported language: a
+    message that starts with a request imperative ("Erstelle ...", "Crea ...",
+    "Please ...") or addresses the model ("du", "tú", "you", "ich will, dass
+    du ...") is excluded regardless of which language the detector assigned
+    to the message.
     """
     text = message.content_text.strip()
     if text.endswith("?"):
         return False
-    if _REQUEST_STARTER.search(text):
-        return False
-    return not _MODEL_DIRECT.search(text)
+    for table in (
+        _REQUEST_STARTER_PATTERNS,
+        _MODEL_DIRECT_PATTERNS,
+        _YOU_TOWARD_PATTERNS,
+    ):
+        if any(pattern.search(text) for pattern in table.values()):
+            return False
+    return True
 
 
 def to_memory_candidate(
@@ -480,11 +577,13 @@ def to_memory_candidate(
     statement = _canonicalize_statement(proposal.statement)
     if statement is None:
         return None, "not_user_statement"
+    if _contains_quotation(statement):
+        return None, "quoted"
     if _SENSITIVE_FORM.search(statement):
         return None, "sensitive_form"
     if statement.endswith("?"):
         return None, "question"
-    if _NEGATION.search(statement):
+    if _statement_is_negated(statement):
         return None, "negated"
 
     kind, temporal_scope = proposal.kind, proposal.temporal_scope

@@ -192,3 +192,69 @@ def test_summary_never_contains_statement() -> None:
 def test_policy_rejects_malformed_numeric_inputs() -> None:
     with pytest.raises(MemoryValidationError):
         _candidate(confidence="high")
+
+
+@pytest.mark.parametrize(
+    "statement",
+    ["Der nutzer arbeitet bei Siemens", "El usuario trabaja en Google"],
+)
+def test_policy_language_never_authorizes_or_blocks_storage(statement: str) -> None:
+    """Language recognition is not a policy input.
+
+    A German/Spanish ordinary self-assertion accepts exactly like the English
+    equivalent, and the multilingual secret/sensitive keywords carry full
+    weight — a non-English sentence can never sidestep rejection or escalation.
+    """
+    decision = MemoryPolicy().evaluate(
+        _candidate(
+            statement=statement,
+            evidence=(_evidence(source_type="chatgpt", source_id="c1"),),
+        )
+    )
+    assert decision.decision is MemoryDecision.ACCEPT, statement
+    assert decision.sensitivity is Sensitivity.ORDINARY, statement
+
+
+@pytest.mark.parametrize(
+    "statement",
+    [
+        "Das Gehalt des Nutzers liegt in der Personalakte.",
+        "El salario del usuario está en archivo.",
+    ],
+)
+def test_policy_multilingual_sensitive_keywords_require_approval(
+    statement: str,
+) -> None:
+    """German/Spanish salary and similar material escalates, never auto-writes."""
+    decision = MemoryPolicy().evaluate(_candidate(statement=statement))
+    assert decision.decision is MemoryDecision.REQUIRE_APPROVAL, statement
+    assert decision.reason == "sensitive_content", statement
+
+
+@pytest.mark.parametrize(
+    "statement",
+    [
+        "Die Sozialversicherungsnummer wurde geändert.",
+        "El número de la seguridad social es privado.",
+    ],
+)
+def test_policy_multilingual_highly_sensitive_requires_approval(statement: str) -> None:
+    """German/Spanish identity-number material escalates to human review."""
+    decision = MemoryPolicy().evaluate(_candidate(statement=statement))
+    assert decision.decision is MemoryDecision.REQUIRE_APPROVAL, statement
+    assert decision.sensitivity is Sensitivity.HIGHLY_SENSITIVE, statement
+
+
+@pytest.mark.parametrize(
+    "statement",
+    [
+        "Das Passwort steht im Passwort-Manager.",
+        "La contraseña está en el gestor de contraseñas.",
+    ],
+)
+def test_policy_multilingual_secret_keywords_always_reject(statement: str) -> None:
+    """German/Spanish secrets are hard-rejected, never deferred or stored."""
+    decision = MemoryPolicy().evaluate(_candidate(statement=statement))
+    assert decision.decision is MemoryDecision.REJECT, statement
+    assert decision.reason == "secret_content", statement
+    assert decision.sensitivity is Sensitivity.SECRET, statement
