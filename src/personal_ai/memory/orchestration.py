@@ -15,8 +15,10 @@ Guarantees:
   memory or into one prompt;
 * **per-source checkpoints** — every source writes its own durable
   run/unit rows (``source_type + extraction + run_id``), so ``resume``
-  completes exactly the unfinished units of the latest run *per source* and a
-  completed unit is never reprocessed;
+  completes exactly the unfinished units of the newest *incomplete* run
+  (``running`` or ``failed``) per source; a completed unit is never
+  reprocessed and a completed run is never resumed, even when a newer run
+  finished first;
 * **source isolation** — a failure in one source (including a denied
   ``memory.write`` approval gate) is recorded count-only and never aborts the
   remaining sources, never invalidates their checkpoints;
@@ -64,9 +66,7 @@ DEFAULT_CORPUS_SOURCES: tuple[str, ...] = (
 )
 
 # Sources eligible for bounded LLM proposal windows in adaptive mode.
-_LLM_SOURCES = frozenset(
-    (*CONVERSATION_SOURCE_TYPES, EMAIL, GENERIC_DOCUMENT_SOURCE)
-)
+_LLM_SOURCES = frozenset((*CONVERSATION_SOURCE_TYPES, EMAIL, GENERIC_DOCUMENT_SOURCE))
 
 DEFAULT_ORCHESTRATION_LIMIT = 25
 DEFAULT_ORCHESTRATION_MAX_MODEL_CALLS = 25
@@ -158,6 +158,7 @@ class SourceOutcome:
     units_skipped: int
     model_calls: int
     review_queued: int
+    review_deduplicated: int
     evidence_added: int
     errors: dict[str, int]
     tally: dict[str, int]
@@ -177,6 +178,7 @@ class SourceOutcome:
             units_skipped=report.counters.units_skipped,
             model_calls=report.counters.model_calls,
             review_queued=report.counters.review_queued,
+            review_deduplicated=report.counters.review_deduplicated,
             evidence_added=report.counters.evidence_added,
             errors=dict(report.counters.errors),
             tally=report.counters.tally.to_dict(),
@@ -197,6 +199,7 @@ class SourceOutcome:
             },
             "model_calls": self.model_calls,
             "review_queued": self.review_queued,
+            "review_deduplicated": self.review_deduplicated,
             "evidence_added": self.evidence_added,
             "errors": dict(self.errors),
             "tally": dict(self.tally),
@@ -236,6 +239,10 @@ class CorpusCurationReport:
     evidence_added: int = 0
     model_calls: int = 0
     review_queued: int = 0
+    review_deduplicated: int = 0
+    review_approved: int = 0
+    review_rejected: int = 0
+    review_expired: int = 0
     superseded: int = 0
     messages_scanned: int = 0
 
@@ -263,6 +270,10 @@ class CorpusCurationReport:
             "model_calls": self.model_calls,
             "messages_scanned": self.messages_scanned,
             "review_queued": self.review_queued,
+            "review_deduplicated": self.review_deduplicated,
+            "review_approved": self.review_approved,
+            "review_rejected": self.review_rejected,
+            "review_expired": self.review_expired,
             "memory": self.memory.to_dict(),
         }
 
@@ -297,6 +308,7 @@ class CorpusCurationOrchestrator:
         evidence_added = 0
         model_calls = 0
         review_queued = 0
+        review_deduplicated = 0
         superseded = 0
         messages_scanned = 0
         for source in config.sources:
@@ -336,10 +348,18 @@ class CorpusCurationOrchestrator:
             evidence_added += report.counters.evidence_added
             model_calls += report.counters.model_calls
             review_queued += report.counters.review_queued
+            review_deduplicated += report.counters.review_deduplicated
             superseded += report.counters.superseded
             messages_scanned += report.counters.messages_scanned
             outcomes.append(outcome)
         status = _orchestration_status(outcomes, failures)
+        # Terminal adjudication snapshot, derived from the authoritative audit
+        # table (not from queue counts). Pending obligations and terminal
+        # outcomes are kept distinct: ``review_queued`` reflects queue growth
+        # this run, while ``review_approved/rejected/expired`` reflect the
+        # durable audit history at run end.
+        audit_counts = self._store.review_audit_counts()
+        audit_outcomes = dict(audit_counts.get("outcomes", {}) or {})
         return CorpusCurationReport(
             mode=config.mode,
             dry_run=config.dry_run,
@@ -353,6 +373,10 @@ class CorpusCurationOrchestrator:
             evidence_added=evidence_added,
             model_calls=model_calls,
             review_queued=review_queued,
+            review_deduplicated=review_deduplicated,
+            review_approved=int(audit_outcomes.get("approved", 0)),
+            review_rejected=int(audit_outcomes.get("rejected", 0)),
+            review_expired=int(audit_outcomes.get("expired", 0)),
             superseded=superseded,
             messages_scanned=messages_scanned,
         )

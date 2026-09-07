@@ -21,7 +21,12 @@ from personal_ai.documents.conversations import (
     Conversation,
     ConversationMessage,
 )
-from personal_ai.memory import EMAIL, FINANCIAL, GENERIC_DOCUMENT_SOURCE
+from personal_ai.memory import (
+    EMAIL,
+    FINANCIAL,
+    GENERIC_DOCUMENT_SOURCE,
+    CurationStore,
+)
 from personal_ai.ollama_client import ChatResponse
 from personal_ai.storage import (
     ChunkStore,
@@ -387,7 +392,7 @@ def test_cli_memory_review_lists_escalated_candidates(
     assert report["review_queued"] == 1
     assert report["tally"]["require_approval"] == 1
 
-    cli.main(["memory", "review", "--database", str(db)])
+    cli.main(["memory", "review", "--database", str(db), "--show"])
     out = capsys.readouterr().out
     assert out.startswith("1:")
     assert "kind=personal_fact" in out
@@ -584,4 +589,232 @@ def test_cli_memory_review_empty(
     cli.main(["memory", "curate", "--database", str(db)])
     capsys.readouterr()
     cli.main(["memory", "review", "--database", str(db)])
-    assert "No pending memory reviews." in capsys.readouterr().out
+    assert "Pending reviews: 0 total" in capsys.readouterr().out
+
+
+# ---------------------------------------------------------------------------
+# Phase 25: CLI-level coverage for review dedupe + resume selection
+# ---------------------------------------------------------------------------
+
+
+def _plant_cli_run(
+    db: Path,
+    *,
+    run_id: str,
+    status: str,
+    started_at: str,
+) -> None:
+    connection = connect_database(db)
+    try:
+        curation = CurationStore(connection)
+        curation.create_run(
+            run_id=run_id,
+            source_type="chatgpt",
+            extraction="deterministic",
+            status=status,
+            dry_run=False,
+            extractor_version="conversation-deterministic-v1",
+            policy_version="memory-policy-v1",
+            prompt_version="",
+            model_name=None,
+            started_at=started_at,
+            config_json=json.dumps({"limit": 10, "offset": 0, "batch_size": 500}),
+        )
+        curation.save_unit(
+            run_id=run_id,
+            unit_id="conv-1",
+            unit_index=1,
+            source_type="chatgpt",
+            extraction="deterministic",
+            model_name=None,
+            status="running" if status == "running" else "completed",
+            attempts=1,
+            started_at=started_at,
+        )
+    finally:
+        connection.close()
+
+
+def test_cli_resume_selects_older_incomplete_over_newer_completed(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    db = tmp_path / "curation.db"
+    _seed(db, (_conv("conv-1"), (_msg("m1", "conv-1"),)))
+    _plant_cli_run(
+        db,
+        run_id="cur-newer-completed",
+        status="completed",
+        started_at="2026-02-01T00:00:00+00:00",
+    )
+    _plant_cli_run(
+        db,
+        run_id="cur-older-running",
+        status="running",
+        started_at="2026-01-02T00:00:00+00:00",
+    )
+
+    cli.main(["memory", "curate", "--database", str(db), "--resume", "--json"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert data["run_id"] == "cur-older-running"
+    assert data["status"] == "completed"
+    assert data["units"]["recovered_stale"] == 1
+
+
+def test_cli_resume_with_only_completed_runs_errors(tmp_path: Path) -> None:
+    db = tmp_path / "curation.db"
+    _seed(db, (_conv("conv-1"), (_msg("m1", "conv-1"),)))
+    cli.main(["memory", "curate", "--database", str(db)])
+
+    with pytest.raises(SystemExit, match="no resumable run"):
+        cli.main(["memory", "curate", "--database", str(db), "--resume", "--json"])
+
+
+def test_cli_review_dedupe_conflict_reruns_single_pending_row(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    db = tmp_path / "curation.db"
+    _seed(
+        db,
+        (_conv("conv-a"), (_msg("m-a", "conv-a", "I work at BCG"),)),
+        (
+            _conv("conv-b", created_at="2026-01-02T00:00:00+00:00"),
+            (_msg("m-b", "conv-b", "I'm a software engineer at BCG"),),
+        ),
+    )
+
+    cli.main(["memory", "curate", "--database", str(db), "--json"])
+    first = json.loads(capsys.readouterr().out)
+    assert first["review_queued"] == 1
+    assert first["review_deduplicated"] == 0
+
+    cli.main(["memory", "curate", "--database", str(db), "--json"])
+    second = json.loads(capsys.readouterr().out)
+    assert second["review_queued"] == 0
+    assert second["review_deduplicated"] == 1
+
+    cli.main(["memory", "review", "--database", str(db), "--show"])
+    out = capsys.readouterr().out
+    review_lines = [line for line in out.splitlines() if line.startswith("1:")]
+    assert len(review_lines) == 1
+    assert "kind=work" in out
+    assert "status=pending" in out
+
+
+# ---------------------------------------------------------------------------
+# Phase 26: CLI-level approval / rejection adjudication
+# ---------------------------------------------------------------------------
+
+
+def test_cli_review_approve_writes_once_then_not_pending(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(cli, "OllamaClient", _SalaryClient)
+    db = tmp_path / "curation.db"
+    _seed(db, (_conv("conv-1"), (_msg("m1", "conv-1"),)))
+
+    cli.main(
+        ["memory", "curate", "--database", str(db), "--extraction", "llm", "--json"]
+    )
+    report = json.loads(capsys.readouterr().out)
+    assert report["review_queued"] == 1
+
+    # First approval writes through the single policy-gated path.
+    cli.main(["memory", "review", "--database", str(db), "--approve", "1"])
+    out = capsys.readouterr().out
+    assert "outcome=approved" in out
+    assert "memory_id=mem-" in out
+
+    connection = connect_database(db)
+    try:
+        active = connection.execute(
+            "SELECT COUNT(*) FROM memories WHERE status = 'active'"
+        ).fetchone()[0]
+        status = connection.execute(
+            "SELECT status FROM memory_curation_review WHERE id = 1"
+        ).fetchone()[0]
+    finally:
+        connection.close()
+    assert active == 1
+    assert status == "approved"
+
+    # A second decision on the same row is a harmless no-op, no duplicate write.
+    cli.main(["memory", "review", "--database", str(db), "--approve", "1"])
+    assert "outcome=not_pending" in capsys.readouterr().out
+    connection = connect_database(db)
+    try:
+        active = connection.execute(
+            "SELECT COUNT(*) FROM memories WHERE status = 'active'"
+        ).fetchone()[0]
+    finally:
+        connection.close()
+    assert active == 1
+
+    # Rerunning curation neither re-queues nor grows memory.
+    cli.main(
+        ["memory", "curate", "--database", str(db), "--extraction", "llm", "--json"]
+    )
+    rerun = json.loads(capsys.readouterr().out)
+    assert rerun["review_queued"] == 0
+    assert rerun["review_deduplicated"] == 1
+    connection = connect_database(db)
+    try:
+        active = connection.execute(
+            "SELECT COUNT(*) FROM memories WHERE status = 'active'"
+        ).fetchone()[0]
+    finally:
+        connection.close()
+    assert active == 1
+
+
+def test_cli_review_reject_writes_nothing_and_rerun_does_not_reopen(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(cli, "OllamaClient", _SalaryClient)
+    db = tmp_path / "curation.db"
+    _seed(db, (_conv("conv-1"), (_msg("m1", "conv-1"),)))
+
+    cli.main(
+        ["memory", "curate", "--database", str(db), "--extraction", "llm", "--json"]
+    )
+    assert json.loads(capsys.readouterr().out)["review_queued"] == 1
+
+    cli.main(["memory", "review", "--database", str(db), "--reject", "1"])
+    assert "outcome=rejected" in capsys.readouterr().out
+
+    connection = connect_database(db)
+    try:
+        active = connection.execute(
+            "SELECT COUNT(*) FROM memories WHERE status = 'active'"
+        ).fetchone()[0]
+        status = connection.execute(
+            "SELECT status FROM memory_curation_review WHERE id = 1"
+        ).fetchone()[0]
+    finally:
+        connection.close()
+    assert active == 0
+    assert status == "rejected"
+
+    # Rejecting again is a no-op.
+    cli.main(["memory", "review", "--database", str(db), "--reject", "1"])
+    assert "outcome=not_pending" in capsys.readouterr().out
+
+    # Rerunning curation never re-opens a rejected obligation.
+    cli.main(
+        ["memory", "curate", "--database", str(db), "--extraction", "llm", "--json"]
+    )
+    rerun = json.loads(capsys.readouterr().out)
+    assert rerun["review_queued"] == 0
+    assert rerun["review_deduplicated"] == 1
+    connection = connect_database(db)
+    try:
+        active = connection.execute(
+            "SELECT COUNT(*) FROM memories WHERE status = 'active'"
+        ).fetchone()[0]
+    finally:
+        connection.close()
+    assert active == 0

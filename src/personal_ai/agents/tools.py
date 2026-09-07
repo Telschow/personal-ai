@@ -285,6 +285,125 @@ def _personal_context_handler(
     return handle
 
 
+def _review_audit_handler(
+    review_service: object,
+) -> Callable[[dict[str, object]], object]:
+    """Read-only operational view of memory-review audit metadata.
+
+    Bound to a ``MemoryReviewService``-like object exposing ``audit()`` and
+    ``audit_counts()`` (both aggregate/metadata-only). This handler is a
+    security boundary, not merely a wrapper: it validates every input
+    deterministically, dispatches only the two read-only operations
+    (``counts`` / ``recent``), ignores unknown/attempted-mutation parameters,
+    and re-projects the output to the strictly-safe operational field set so a
+    malformed or pathologically-returned service result can never leak
+    statements, evidence, candidate content, prompts, model output, the
+    ``statement_hash`` digest, or any secret/sensitive value.
+
+    Supports optional time-window filtering:
+    - ``since``: inclusive lower bound on ``created_at`` (ISO-8601, normalized to UTC)
+    - ``until``: inclusive upper bound on ``created_at`` (ISO-8601, normalized to UTC)
+    """
+    from datetime import UTC, datetime
+
+    _DEFAULT_LIMIT = 20
+    _MAX_LIMIT = 200
+    _OPERATIONS = ("counts", "recent")
+    _RECENT_FIELDS = (
+        "review_id",
+        "action",
+        "outcome",
+        "actor",
+        "policy_category",
+        "memory_id",
+        "created_at",
+    )
+
+    def _parse_and_validate_timestamp(value: object, param_name: str) -> str:
+        """Parse and validate an ISO-8601 timestamp, return UTC-normalized string."""
+        if not isinstance(value, str):
+            raise TypeError(f"{param_name} must be a string")
+        try:
+            parsed = datetime.fromisoformat(value)
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=UTC)
+            else:
+                parsed = parsed.astimezone(UTC)
+            # Return normalized UTC string for consistent comparison
+            return parsed.strftime("%Y-%m-%dT%H:%M:%S.%f") + "+00:00"
+        except ValueError as e:
+            raise ValueError(f"invalid {param_name} timestamp: {value}") from e
+
+    def _project_counts(counts: dict[str, object]) -> dict[str, object]:
+        return {
+            "events": int(counts.get("events", 0) or 0),
+            "actions": _safe_counter(counts.get("actions")),
+            "outcomes": _safe_counter(counts.get("outcomes")),
+            "policy_categories": _safe_counter(counts.get("policy_categories")),
+            "actors": _safe_counter(counts.get("actors")),
+        }
+
+    def _safe_counter(value: object) -> dict[str, int]:
+        if not isinstance(value, dict):
+            return {}
+        return {
+            str(k): int(v)
+            for k, v in value.items()
+            if isinstance(v, (int, float)) and not isinstance(v, bool)
+        }
+
+    def _project_recent(rows: object) -> list[dict[str, object]]:
+        if not isinstance(rows, (tuple, list)):
+            return []
+        projection = []
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            projection.append({field: row.get(field) for field in _RECENT_FIELDS})
+        return projection
+
+    def handle(arguments: dict[str, object]) -> object:
+        operation = arguments.get("operation")
+        if operation not in _OPERATIONS:
+            raise ValueError(
+                f"operation must be one of {list(_OPERATIONS)!r}; got {operation!r}"
+            )
+
+        # Parse and validate since/until if provided
+        since = arguments.get("since")
+        until = arguments.get("until")
+        since_norm = None
+        until_norm = None
+        if since is not None:
+            since_norm = _parse_and_validate_timestamp(since, "since")
+        if until is not None:
+            until_norm = _parse_and_validate_timestamp(until, "until")
+        if (
+            since_norm is not None
+            and until_norm is not None
+            and since_norm > until_norm
+        ):
+            raise ValueError("since must not be after until")
+
+        if operation == "counts":
+            return _project_counts(
+                review_service.audit_counts(since=since_norm, until=until_norm)  # type: ignore[attr-defined]
+            )
+
+        limit = arguments.get("limit", _DEFAULT_LIMIT)
+        if isinstance(limit, bool) or not isinstance(limit, int):
+            raise TypeError("limit must be an integer")
+        if limit <= 0:
+            raise ValueError("limit must be >= 1")
+        effective = min(limit, _MAX_LIMIT)
+        rows = review_service.audit(
+            limit=effective, recent=True, since=since_norm, until=until_norm
+        )  # type: ignore[attr-defined]
+        return {"events": _project_recent(rows)}
+
+    return handle
+
+
 def _document_search_handler(
     chunk_store: object,
 ) -> Callable[[dict[str, object]], object]:
@@ -456,6 +575,25 @@ PERSONAL_CONTEXT = AgentTool(
     deterministic=True,
 )
 
+MEMORY_REVIEW_AUDIT = AgentTool(
+    name="memory_review_audit",
+    description=(
+        "Read-only operational view of memory-review adjudication audit "
+        "metadata. Supports two operations: 'counts' (aggregate totals of "
+        "events/actions/outcomes/policy categories/actors) and 'recent' "
+        "(bounded newest-first decision metadata: review_id, action, outcome, "
+        "actor, policy_category, memory_id, created_at). Never exposes "
+        "statements, evidence, candidate content, prompts, model output, or "
+        "secrets. It is strictly read-only: it CANNOT approve, reject, expire, "
+        "reopen, or otherwise modify reviews or memories. Do not use it as an "
+        "adjudication mechanism."
+    ),
+    permissions=(Permission.REVIEW_AUDIT_READ,),
+    risk=RiskLevel.READ,
+    reads_private_data=True,
+    deterministic=True,
+)
+
 SEARCH_DOCUMENTS = AgentTool(
     name="search_documents",
     description=(
@@ -522,6 +660,7 @@ def build_default_agent_tools(
     workout_service: object | None = None,
     personal_context_service: object | None = None,
     chunk_store: object | None = None,
+    review_service: object | None = None,
 ) -> AgentToolRegistry:
     """Build the default :class:`AgentToolRegistry`.
 
@@ -534,8 +673,10 @@ def build_default_agent_tools(
     :class:`WorkoutQueryService`) enables the read-only ``search_workouts``
     tool; ``personal_context_service`` (the existing
     :class:`PersonalContextService`) enables the read-only
-    ``personal_context`` overview tool. When a dependency is absent its tools
-    are simply not registered, so a read-only research build stays minimal.
+    ``personal_context`` overview tool; ``review_service`` (the existing
+    :class:`MemoryReviewService`) enables the read-only ``memory_review_audit``
+    operational tool. When a dependency is absent its tools are simply not
+    registered, so a read-only research build stays minimal.
     """
     registry = AgentToolRegistry()
     if retrieval_service is not None:
@@ -556,6 +697,8 @@ def build_default_agent_tools(
         registry.register(
             PERSONAL_CONTEXT, _personal_context_handler(personal_context_service)
         )
+    if review_service is not None:
+        registry.register(MEMORY_REVIEW_AUDIT, _review_audit_handler(review_service))
     if chunk_store is not None:
         registry.register(SEARCH_DOCUMENTS, _document_search_handler(chunk_store))
     return registry

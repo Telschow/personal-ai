@@ -61,6 +61,8 @@ class Permission(Enum):
     MEMORY_READ = "memory.read"
     # durable-memory writing (gated on explicit user approval)
     MEMORY_WRITE = "memory.write"
+    # read-only operational view of memory-review adjudication audit metadata
+    REVIEW_AUDIT_READ = "review.audit.read"
     # read-only workout activity retrieval
     WORKOUT_READ = "workout.read"
     # read-only personal-context overview retrieval (aggregate metadata)

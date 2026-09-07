@@ -54,7 +54,12 @@ from personal_ai.memory.conversations import (
     ConversationMemoryExtractor,
 )
 from personal_ai.memory.corpus import OutcomeTally
-from personal_ai.memory.models import MemoryCandidate, now_iso
+from personal_ai.memory.models import (
+    MemoryCandidate,
+    format_utc_timestamp,
+    now_iso,
+    parse_iso_timestamp,
+)
 from personal_ai.memory.policy import MemoryDecision, MemoryPolicy
 from personal_ai.memory.proposals import (
     DEFAULT_MAX_CANDIDATES_PER_UNIT,
@@ -591,6 +596,19 @@ class CurationStore:
             );
             CREATE INDEX IF NOT EXISTS idx_curation_review_status
                 ON memory_curation_review (status, run_id);
+            CREATE TABLE IF NOT EXISTS memory_review_audit (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                review_id INTEGER NOT NULL,
+                action TEXT NOT NULL,
+                outcome TEXT NOT NULL,
+                actor TEXT NOT NULL DEFAULT 'human',
+                policy_category TEXT NOT NULL DEFAULT '',
+                memory_id TEXT,
+                statement_hash TEXT,
+                created_at TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_review_audit_review
+                ON memory_review_audit (review_id);
             """
         )
         # Backward-compatible migration: databases created before Slice 7
@@ -689,6 +707,28 @@ class CurationStore:
             "WHERE source_type = ? AND extraction = ? "
             "ORDER BY started_at DESC, run_id DESC LIMIT 1",
             (source_type, extraction),
+        ).fetchone()
+        return _run_to_dict(row) if row is not None else None
+
+    def resumable_run(
+        self, *, source_type: str, extraction: str
+    ) -> dict[str, object] | None:
+        """Return the newest run that still has work left for ``--resume``.
+
+        Resume targets run rows that are *incomplete*, i.e. whose status is
+        ``running`` (interrupted mid-flight, possibly with stale ``running``
+        units) or ``failed`` (it finished with unit failures and was therefore
+        left resumable). A ``completed`` run is terminal and is never chosen,
+        even when a completed run happens to be the ``latest_run`` by
+        ``started_at`` — otherwise an older interrupted run that was later
+        superseded by a newer completed run could never be recovered.
+        """
+        row = self._connection.execute(
+            f"SELECT {', '.join(_RUN_COLUMNS)} FROM memory_curation_runs "
+            "WHERE source_type = ? AND extraction = ? "
+            "AND status IN (?, ?) "
+            "ORDER BY started_at DESC, run_id DESC LIMIT 1",
+            (source_type, extraction, STATUS_RUNNING, STATUS_FAILED),
         ).fetchone()
         return _run_to_dict(row) if row is not None else None
 
@@ -855,30 +895,119 @@ class CurationStore:
         category: str = REVIEW_CATEGORY_APPROVAL,
         reason: str = "",
     ) -> int:
-        cursor = self._connection.execute(
-            "INSERT INTO memory_curation_review "
-            "(run_id, unit_id, source_type, kind, temporal_scope, confidence, "
-            " importance, statement, candidate_json, evidence_json, category, "
-            " reason, status, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)",
-            (
-                run_id,
-                unit_id,
-                source_type,
-                kind,
-                temporal_scope,
-                confidence,
-                importance,
-                statement,
-                candidate_json,
-                evidence_json,
-                category,
-                reason,
-                created_at,
-            ),
+        """Queue a review row, returning its (possibly pre-existing) id.
+
+        Idempotent: an equivalent unresolved review obligation is never queued
+        twice (see :meth:`enqueue_review_if_missing`).
+        """
+        _created, review_id = self.enqueue_review_if_missing(
+            run_id=run_id,
+            unit_id=unit_id,
+            source_type=source_type,
+            kind=kind,
+            temporal_scope=temporal_scope,
+            confidence=confidence,
+            importance=importance,
+            statement=statement,
+            evidence_json=evidence_json,
+            candidate_json=candidate_json,
+            created_at=created_at,
+            category=category,
+            reason=reason,
         )
-        self._connection.commit()
-        return int(cursor.lastrowid)
+        return review_id
+
+    def enqueue_review_if_missing(
+        self,
+        *,
+        run_id: str,
+        unit_id: str,
+        source_type: str,
+        kind: str,
+        temporal_scope: str,
+        confidence: float,
+        importance: float,
+        statement: str,
+        evidence_json: str,
+        candidate_json: str = "{}",
+        created_at: str,
+        category: str = REVIEW_CATEGORY_APPROVAL,
+        reason: str = "",
+    ) -> tuple[bool, int]:
+        """Create a review row unless an equivalent obligation already exists.
+
+        An *equivalent review obligation* is the stable tuple ``(source_type,
+        category, reason, kind, temporal_scope, statement, evidence_json)`` —
+        the candidate's provenance (evidence refs) plus its escalation category
+        and the deterministic reason. Run/unit identity, confidence, and
+        importance are deliberately excluded: the same unresolved conflict
+        detected again by another run is one review obligation, not two, so a
+        rerun never grows the queue with duplicate rows. Two genuinely
+        different obligations (different fact, evidence, category, or reason)
+        never collapse: provenance participates, and the key is never just the
+        category.
+
+        A resolved (approved/rejected/expired) row for the same obligation is
+        not resurrected either: the queue stays idempotent across the whole
+        review lifecycle, and a human decision is never silently reopened here.
+
+        The check-and-insert runs under ``BEGIN IMMEDIATE`` so two concurrent
+        curators cannot both pass the existence check and enqueue duplicates.
+
+        Returns ``(created, review_id)`` where ``review_id`` is the new row's
+        id when ``created`` is True, else the id of the pre-existing row.
+        """
+        match_clauses = (
+            "source_type = ? AND category = ? AND reason = ? "
+            "AND kind = ? AND temporal_scope = ? "
+            "AND statement = ? AND evidence_json = ?"
+        )
+        match_params = (
+            source_type,
+            category,
+            reason,
+            kind,
+            temporal_scope,
+            statement,
+            evidence_json,
+        )
+        self._connection.execute("BEGIN IMMEDIATE")
+        try:
+            existing = self._connection.execute(
+                f"SELECT id FROM memory_curation_review WHERE {match_clauses} "
+                "ORDER BY created_at, id LIMIT 1",
+                match_params,
+            ).fetchone()
+            if existing is not None:
+                self._connection.rollback()
+                return False, int(existing[0])
+            cursor = self._connection.execute(
+                "INSERT INTO memory_curation_review "
+                "(run_id, unit_id, source_type, kind, temporal_scope, confidence, "
+                " importance, statement, candidate_json, evidence_json, category, "
+                " reason, status, created_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)",
+                (
+                    run_id,
+                    unit_id,
+                    source_type,
+                    kind,
+                    temporal_scope,
+                    confidence,
+                    importance,
+                    statement,
+                    candidate_json,
+                    evidence_json,
+                    category,
+                    reason,
+                    created_at,
+                ),
+            )
+            self._connection.commit()
+            return True, int(cursor.lastrowid)
+        except BaseException:
+            self._connection.rollback()
+            raise
 
     def get_review(self, review_id: int) -> dict[str, object] | None:
         row = self._connection.execute(
@@ -894,7 +1023,7 @@ class CurationStore:
         where = " WHERE run_id = ?" if run_id is not None else ""
         params: list[object] = [run_id] if run_id is not None else []
         rows = self._connection.execute(
-            f"SELECT {', '.join(_REVIEW_COLUMNS)} FROM memory_curation_review"
+            f"SELECT {', '.join(_REVIEW_COLUMNS)} FROM memory_curation_review "
             f"{where} ORDER BY created_at, id LIMIT ?",
             (*params, limit),
         ).fetchall()
@@ -916,8 +1045,8 @@ class CurationStore:
             where.append(" category = ?")
             params.append(category)
         rows = self._connection.execute(
-            f"SELECT {', '.join(_REVIEW_COLUMNS)} FROM memory_curation_review"
-            f"WHERE {' AND'.join(where)} ORDER BY created_at, id LIMIT ?",
+            f"SELECT {', '.join(_REVIEW_COLUMNS)} FROM memory_curation_review "
+            f"WHERE {' AND '.join(where)} ORDER BY created_at, id LIMIT ?",
             (*params, limit),
         ).fetchall()
         return tuple(_review_to_dict(row) for row in rows)
@@ -977,6 +1106,182 @@ class CurationStore:
         self._connection.commit()
         return cursor.rowcount == 1
 
+    def append_review_audit(
+        self,
+        *,
+        review_id: int,
+        action: str,
+        outcome: str,
+        actor: str,
+        policy_category: str,
+        memory_id: str | None,
+        statement_hash: str,
+        created_at: str,
+    ) -> None:
+        """Append one durable, content-free adjudication audit event.
+
+        ``statement_hash`` is a deterministic SHA-256 digest of the reviewed
+        statement (never the statement text itself), preserving audit integrity
+        without storing personal content. Exactly one terminal event per review
+        obligation is written by :mod:`personal_ai.memory.review`; this method
+        is shared with the transaction wrapping the decision so the event commits
+        atomically with the memory write and the review transition.
+        """
+        self._connection.execute(
+            "INSERT INTO memory_review_audit "
+            "(review_id, action, outcome, actor, policy_category, memory_id, "
+            "statement_hash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                review_id,
+                action,
+                outcome,
+                actor,
+                policy_category,
+                memory_id,
+                statement_hash,
+                created_at,
+            ),
+        )
+        self._connection.commit()
+
+    def review_audit(
+        self,
+        *,
+        review_id: int | None = None,
+        limit: int = 200,
+        recent: bool = True,
+        since: str | None = None,
+        until: str | None = None,
+    ) -> tuple[dict[str, object], ...]:
+        """Content-free audit trail (never statements or evidence).
+
+        Events are privacy-safe metadata only. Ordering is deterministic:
+        ``created_at`` then ``id`` as a tie-breaker. ``recent`` returns newest
+        first (for "recent activity" views); otherwise oldest first.
+
+        Optional time-window filtering:
+        - ``since``: inclusive lower bound on ``created_at`` (ISO-8601, normalized to UTC)
+        - ``until``: inclusive upper bound on ``created_at`` (ISO-8601, normalized to UTC)
+        """
+        if since is not None and until is not None:
+            since_dt = parse_iso_timestamp(since)
+            until_dt = parse_iso_timestamp(until)
+            if since_dt > until_dt:
+                raise ValueError("since must not be after until")
+
+        order = "created_at DESC, id DESC" if recent else "created_at, id"
+        where_parts = []
+        params: list[object] = []
+
+        if review_id is not None:
+            where_parts.append("review_id = ?")
+            params.append(review_id)
+
+        if since is not None:
+            where_parts.append("created_at >= ?")
+            params.append(format_utc_timestamp(parse_iso_timestamp(since)))
+
+        if until is not None:
+            where_parts.append("created_at <= ?")
+            params.append(format_utc_timestamp(parse_iso_timestamp(until)))
+
+        where = f"WHERE {' AND '.join(where_parts)}" if where_parts else ""
+        params.append(limit)
+
+        rows = self._connection.execute(
+            f"SELECT id, review_id, action, outcome, actor, policy_category, "
+            f"memory_id, statement_hash, created_at FROM memory_review_audit "
+            f"{where} ORDER BY {order} LIMIT ?",
+            params,
+        ).fetchall()
+        cols = (
+            "id",
+            "review_id",
+            "action",
+            "outcome",
+            "actor",
+            "policy_category",
+            "memory_id",
+            "statement_hash",
+            "created_at",
+        )
+        return tuple(dict(zip(cols, row)) for row in rows)
+
+    def review_audit_counts(
+        self,
+        *,
+        since: str | None = None,
+        until: str | None = None,
+    ) -> dict[str, object]:
+        """Aggregate-only audit event counts (terminal events per outcome).
+
+        Returns a stable, deterministic, machine-readable aggregate that the
+        audit surfaces render. ``by_outcome`` is a legacy alias for
+        ``outcomes`` kept for backward compatibility. No statement, evidence,
+        or candidate content is ever included.
+
+        Optional time-window filtering:
+        - ``since``: inclusive lower bound on ``created_at`` (ISO-8601, normalized to UTC)
+        - ``until``: inclusive upper bound on ``created_at`` (ISO-8601, normalized to UTC)
+        """
+        if since is not None and until is not None:
+            since_dt = parse_iso_timestamp(since)
+            until_dt = parse_iso_timestamp(until)
+            if since_dt > until_dt:
+                raise ValueError("since must not be after until")
+
+        where_parts = []
+        params: list[object] = []
+
+        if since is not None:
+            where_parts.append("created_at >= ?")
+            params.append(format_utc_timestamp(parse_iso_timestamp(since)))
+
+        if until is not None:
+            where_parts.append("created_at <= ?")
+            params.append(format_utc_timestamp(parse_iso_timestamp(until)))
+
+        where = f"WHERE {' AND '.join(where_parts)}" if where_parts else ""
+
+        total = int(
+            self._connection.execute(
+                f"SELECT COUNT(*) FROM memory_review_audit {where}", params
+            ).fetchone()[0]
+        )
+        return {
+            "events": total,
+            "actions": self._audit_group_counts(
+                column="action", where=where, params=params
+            ),
+            "outcomes": self._audit_group_counts(
+                column="outcome", where=where, params=params
+            ),
+            "policy_categories": self._audit_group_counts(
+                column="policy_category", where=where, params=params
+            ),
+            "actors": self._audit_group_counts(
+                column="actor", where=where, params=params
+            ),
+            "by_outcome": self._audit_group_counts(
+                column="outcome", where=where, params=params
+            ),
+            "total": total,
+        }
+
+    def _audit_group_counts(
+        self, column: str, where: str = "", params: list[object] | None = None
+    ) -> dict[str, int]:
+        """Group audit events by one metadata column (aggregate-only)."""
+        if params is None:
+            params = []
+        return {
+            str(value): int(count)
+            for value, count in self._connection.execute(
+                f"SELECT {column}, COUNT(*) FROM memory_review_audit {where} GROUP BY {column}",
+                params,
+            ).fetchall()
+        }
+
 
 def _run_to_dict(row: sqlite3.Row | tuple[object, ...]) -> dict[str, object]:
     raw = dict(zip(_RUN_COLUMNS, row))
@@ -1029,7 +1334,9 @@ def _review_to_dict(row: sqlite3.Row | tuple[object, ...]) -> dict[str, object]:
         "confidence": raw["confidence"],
         "importance": raw["importance"],
         "statement": raw["statement"],
-        "candidate_json": _json_load(raw["candidate_json"]) if raw["candidate_json"] else {},
+        "candidate_json": _json_load(raw["candidate_json"])
+        if raw["candidate_json"]
+        else {},
         "evidence_json": _json_load(raw["evidence_json"]),
         "category": str(raw["category"] or REVIEW_CATEGORY_APPROVAL),
         "reason": str(raw["reason"] or ""),
@@ -1074,6 +1381,7 @@ class RunCounters:
     evidence_added: int = 0
     superseded: int = 0
     review_queued: int = 0
+    review_deduplicated: int = 0
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -1093,6 +1401,7 @@ class RunCounters:
             "evidence_added": self.evidence_added,
             "superseded": self.superseded,
             "review_queued": self.review_queued,
+            "review_deduplicated": self.review_deduplicated,
             "errors": dict(self.errors),
             "tally": self.tally.to_dict(),
         }
@@ -1172,7 +1481,11 @@ class MemoryStats:
     ) -> MemoryStats:
         if memory_service is None:
             return cls(
-                total=0, by_kind={}, by_status={}, by_temporal={}, evidence=0,
+                total=0,
+                by_kind={},
+                by_status={},
+                by_temporal={},
+                evidence=0,
                 review={},
             )
         stats = memory_service.statistics()
@@ -1238,6 +1551,7 @@ class CurationReport:
             "evidence_added": self.counters.evidence_added,
             "superseded": self.counters.superseded,
             "review_queued": self.counters.review_queued,
+            "review_deduplicated": self.counters.review_deduplicated,
             "errors": dict(self.counters.errors),
             "tally": self.counters.tally.to_dict(),
             "dry_tally": self.dry_tally.to_dict() if self.dry_tally else None,
@@ -1281,8 +1595,9 @@ class MemoryCurationRunner:
         """Execute one curation run, returning an aggregate-only report.
 
         * dry run  -> analyses but writes nothing and creates no rows;
-        * resume   -> completes exactly the unfinished units of the latest
-          failed/interrupted run for this source and extraction mode;
+        * resume   -> completes exactly the unfinished units of the newest
+          incomplete (running/failed) run for this source and extraction
+          mode; a completed run is never resumed;
         * otherwise -> a fresh, idempotent run over the configured window.
         """
         config.validate()
@@ -1359,13 +1674,14 @@ class MemoryCurationRunner:
     def _run_resume(self, config: CurationConfig) -> CurationReport:
         if self._curator is None:
             raise CurationConfigError("a memory service is required to resume curation")
-        row = self._store.latest_run(
+        row = self._store.resumable_run(
             source_type=config.source_type, extraction=config.extraction.value
         )
         if row is None:
             raise CurationResumeError(
                 f"no resumable run for source {config.source_type!r} "
-                f"(extraction {config.extraction.value!r})"
+                f"(extraction {config.extraction.value!r}); new runs are only "
+                f"created when a run is still incomplete (running/failed)"
             )
         run_id = str(row["run_id"])
         units = self._store.list_units(run_id)
@@ -1614,25 +1930,31 @@ class MemoryCurationRunner:
             # counted, never silently written, and parked in the exception
             # review queue so a human can adjudicate the contradiction.
             counters.tally.conflicts += 1
-            self._enqueue_review(
+            created = self._enqueue_review(
                 unit,
                 candidate,
                 run_id,
                 category=REVIEW_CATEGORY_CONFLICT,
                 reason=str(result.get("reason") or "ambiguous_related_fact"),
             )
-            counters.review_queued += 1
+            if created:
+                counters.review_queued += 1
+            else:
+                counters.review_deduplicated += 1
             return
         decision = str(result.get("decision", ""))
         if decision == MemoryDecision.REQUIRE_APPROVAL.value:
-            self._enqueue_review(
+            created = self._enqueue_review(
                 unit,
                 candidate,
                 run_id,
                 category=REVIEW_CATEGORY_APPROVAL,
                 reason=str(result.get("reason") or "sensitive_content"),
             )
-            counters.review_queued += 1
+            if created:
+                counters.review_queued += 1
+            else:
+                counters.review_deduplicated += 1
             return
         if not result.get("applied"):
             return
@@ -1648,15 +1970,21 @@ class MemoryCurationRunner:
         *,
         category: str,
         reason: str,
-    ) -> None:
+    ) -> bool:
         """Park one escalated candidate in the explicit review queue.
 
         The review queue is the *only* content-bearing table in this module;
         evidence stays id-only. The candidate is never written here — approval
         flows through the same policy-gated write path in
         :class:`~personal_ai.memory.review.MemoryReviewService`.
+
+        Returns True when a new review row was created, False when an
+        equivalent review obligation already exists (deduplicated). The
+        deduplication never changes the underlying policy decision: a
+        duplicate row is suppressed because it is the *same unresolved
+        obligation*, not because the underlying candidate was reclassified.
         """
-        self._store.enqueue_review(
+        created, _review_id = self._store.enqueue_review_if_missing(
             run_id=run_id,
             unit_id=unit.unit_id,
             source_type=unit.source_type,
@@ -1674,6 +2002,7 @@ class MemoryCurationRunner:
             category=category,
             reason=reason,
         )
+        return created
 
     def _accumulate(self, result: UnitExtraction, counters: RunCounters) -> None:
         counters.messages_scanned += result.messages_scanned

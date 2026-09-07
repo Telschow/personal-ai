@@ -33,6 +33,42 @@ def now_iso() -> str:
     return datetime.now(UTC).isoformat()
 
 
+def parse_iso_timestamp(value: str) -> datetime:
+    """Parse an ISO-8601 timestamp string to a UTC datetime.
+
+    Accepts the same forms that ``datetime.fromisoformat`` handles, including:
+    - date-only: ``YYYY-MM-DD`` (treated as midnight UTC)
+    - full precision: ``YYYY-MM-DDTHH:MM:SS`` or ``YYYY-MM-DDTHH:MM:SS.ssssss``
+    - with timezone: ``YYYY-MM-DDTHH:MM:SS+00:00``, ``YYYY-MM-DDTHH:MM:SSZ``
+
+    Naive datetimes are interpreted as UTC. Timezone-aware datetimes are
+    converted to UTC. The result is always an aware datetime with UTC timezone.
+
+    Raises:
+        ValueError: if the string is not a valid ISO-8601 timestamp.
+    """
+    parsed = datetime.fromisoformat(value)
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    else:
+        parsed = parsed.astimezone(UTC)
+    return parsed
+
+
+def format_utc_timestamp(dt: datetime) -> str:
+    """Format a datetime as a UTC ISO-8601 string for storage/comparison.
+
+    The result is always timezone-aware UTC (``+00:00`` suffix). This matches
+    the canonical representation used by ``now_iso`` and the audit table.
+    """
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
+    else:
+        dt = dt.astimezone(UTC)
+    # Normalize to fixed 6-digit microsecond precision for consistent comparison
+    return dt.strftime("%Y-%m-%dT%H:%M:%S.%f") + "+00:00"
+
+
 def new_memory_id() -> str:
     """Generate a fresh, stable memory identifier.
 

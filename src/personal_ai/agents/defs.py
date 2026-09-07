@@ -24,6 +24,7 @@ def _read_only(
     memory: bool = False,
     workout: bool = False,
     personal_context: bool = False,
+    review_audit: bool = False,
 ) -> AccessPolicy:
     allowed = {
         Permission.CORPUS_SEARCH,
@@ -37,6 +38,8 @@ def _read_only(
         allowed.add(Permission.WORKOUT_READ)
     if personal_context:
         allowed.add(Permission.PERSONAL_CONTEXT_READ)
+    if review_audit:
+        allowed.add(Permission.REVIEW_AUDIT_READ)
     return AccessPolicy(
         name=name,
         allowed=frozenset(allowed),
@@ -102,6 +105,7 @@ RESEARCHER = Agent(
             "search_documents",
             "search_knowledge",
             "personal_context",
+            "memory_review_audit",
         }
     ),
     permissions=frozenset(
@@ -111,9 +115,16 @@ RESEARCHER = Agent(
             Permission.MEMORY_READ,
             Permission.WORKOUT_READ,
             Permission.PERSONAL_CONTEXT_READ,
+            Permission.REVIEW_AUDIT_READ,
         }
     ),
-    policy=_read_only("researcher", memory=True, workout=True, personal_context=True),
+    policy=_read_only(
+        "researcher",
+        memory=True,
+        workout=True,
+        personal_context=True,
+        review_audit=True,
+    ),
     model=None,
     max_retries=2,
 )

@@ -1066,8 +1066,482 @@ Existing invariants: memory is data never policy; event payloads never carry
 content; count/provenance-only diagnostics; tests hermetic (pytest/ruff clean).
 
 ==================================================
-IMPORTANT IMPLEMENTATION WORKFLOW
+PHASE 18 — EXCEPTION-ONLY MEMORY REVIEW + CURATE-ALL (IMPLEMENTED)
 ==================================================
+
+Added explicit human review surface for escalated memory candidates and
+corpus-wide bounded curation orchestration.
+
+- Review queue schema extended: `category` (require_approval/conflict),
+  `reason`, and `candidate_json` columns with guarded ALTER TABLE migrations.
+- `MemoryReviewService`: approve/reject through the SAME policy-gated
+  `propose_memory` path (no second writer). Approve re-runs deterministic
+  policy, then routes through `AutomaticMemoryCurator` with interactive
+  approver bound to the specific review row. Reject writes nothing.
+- Conflicts now queue for review (category `conflict`) in addition to being
+  counted — never silently written.
+- `curate-all` command: `CorpusCurationOrchestrator` sequences all 7 source
+  adapters with per-source checkpoints, source isolation, adaptive/deterministic
+  modes, aggregate-only reports (memory stats, evidence accumulation, review
+  counts).
+- CLI: `memory review --show --category --approve --reject --note` (default
+  aggregate-only); `memory curate-all --mode adaptive|deterministic --sources --max-model-calls --resume --dry-run`.
+
+PHASE 20 — MULTILINGUAL SECURITY + UNICODE RETRIEVAL FOUNDATION (IMPLEMENTED)
+==================================================
+
+Security and Unicode foundation for processing the user's English/German/Spanish
+corpus. No new write paths; LLM remains proposal-only.
+
+P0-1 Multilingual Secret/PII Detection:
+- Extended `MemoryPolicy._SECRET_KEYWORDS`, `_HIGHLY_SENSITIVE_KEYWORDS`,
+  `_SENSITIVE_KEYWORDS` with German and Spanish equivalents.
+- Structural detectors (language-independent): IBAN, JWT, API keys, AWS keys,
+  GitHub tokens, credit-card sequences, private-key headers remain unchanged.
+- Keywords cover: password/Passwort/contraseña, bank account/Bankkonto/cuenta
+  bancaria, credit card/Kreditkarte/tarjeta de crédito, medical/medizinische
+  diagnosis/diagnóstico médico, SSN/Sozialversicherungsnummer/seguridad social,
+  passport/Reisepassnummer/pasaporte, salary/Gehalt/salario, etc.
+- Case/accent-insensitive matching via NFKC + casefold.
+
+P0-2 Unicode-Safe Tokenization:
+- Replaced ASCII-only `[a-z0-9]+` with Unicode-aware `[\p{L}\p{M}\p{N}]+`
+  using the `regex` package (stdlib `re` lacks Unicode property escapes).
+- Centralized `_normalize_for_tokenize()` (NFKC + casefold) used by
+  `MemoryRetriever`, `tokenize()`, and `MemoryReconciler.normalize_text()`.
+- FTS5 uses default unicode61 tokenizer (no schema migration needed;
+  existing data compatible).
+- Reconstruction uses original Unicode forms; no transliteration (München
+  stays München).
+
+P0-3 Review CLI Fixes:
+- Fixed SQLite syntax error in `list_pending_review` / `list_review`
+  (missing space before WHERE clause).
+- Tests updated for aggregate-only default + `--show` flag behavior.
+
+Tests: 2202 passing. Ruff clean. Format clean. No production DB modified.
+==================================================
+
+PHASE 21 — MULTILINGUAL DETERMINISTIC CONVERSATION EXTRACTION (IMPLEMENTED)
+==================================================
+
+Deterministic conversation-memory extraction now fully covers English, German,
+and Spanish user messages. Phase 11–20 invariants (single policy-gated write
+path, LLM proposal-only, content-free diagnostics) are unchanged.
+
+- `_detect_language` (`memory/conversations.py`) scores single words AND word
+  pairs against per-language trigger sets (DE/ES/EN); the English baseline
+  skew is removed — good short-sentence detection without biasing toward
+  English. Unmatched text returns UNKNOWN (English rule fallback).
+- Spanish pro-drop support: `_spanish_is_first_person` accepts explicit
+  `yo|mi|mis|me` OR a curated first-person verb form (present/preterite/
+  imperfect) when not preceded by a determiner/possessive (handles noun
+  homographs like "el trabajo en Google"). German/English still require an
+  explicit first-person pronoun.
+- `_canonical_statement` gained Catalan-free pro-drop rewriting: sentences
+  beginning with a first-person verb become "El usuario {3rd-person verb}
+  ...", e.g. "Trabajo en Google" → "El usuario trabaja en Google",
+  "Quiero mudarme a España" → "El usuario quiere mudarse a España".
+  German "Mein Name ist/heißt" → "Der nutzer heißt ...".
+- `_RECURRING_PATTERNS[ES]` accepts plural forms ("todos los días",
+  "cada semana", ...); DE education rule fixed to "studiere"; DE/ES trigger
+  sets extended with conjugated past forms and phrase triggers.
+- Weekday recurring constructs recognized per language and mapped to
+  `habit`/recurring only for clearly-recurring forms: EN "every Monday"/"on
+  Wednesdays"/"sundays", DE "jeden Montag"/"montags", ES "cada lunes"/"los
+  domingos". One-off single-day references (EN "on Monday", DE "am Montag",
+  ES "el lunes" — meetings, birthdays, appointments) never map to a recurring
+  habit.
+- `_candidate_for` routes ES through `_is_first_person` (pro-drop gate) via
+  `_is_first_person(raw, lang)`; all other gates are unchanged.
+- `_canonical_statement` gained a default `lang=EN` so the LLM-proposal layer
+  (`memory/proposals.py`) keeps working unchanged.
+
+Tests: ~66 multilingual conversation tests (German/Spanish identity, work,
+location, goal, skill, habit, education; negation/question/request exclusions;
+sensitive rejection; mixed-language conversations) plus weekday-recurring
+coverage and a Unicode tokenization matrix (`tokenize()` keeps `München` as
+`münchen`, never transliterates to ASCII). Full suite: 2475 passing. Ruff
+clean. Format clean.
+==================================================
+
+PHASE 22 — BOUNDED, AGGREGATE-ONLY REAL-CORPUS AUDIT + DRY-RUN INGESTION
+VALIDATION (IMPLEMENTED)
+==================================================
+(Note: the project chronology jumps from Phase 21 to Phase 25 in this file;
+Phase 22's production-memory audit/validation tooling is documented here for
+completeness. Phase 11–21 and 25–30 invariants are unchanged.)
+
+A read-only, bounded, aggregate-only audit validates the Phase 20/21
+multilingual (EN/DE/ES) deterministic memory stack against a deterministic
+sample of raw conversation exports (ChatGPT + Gemini). **No new write path,
+no ingestion into production, no LLM proposal call.**
+
+- `personal-ai memory corpus-audit --source chatgpt|gemini --path <export-dir>
+  [--limit N] [--max-messages N] [--scratch-db PATH] [--json]` (lib:
+  `memory/corpus_audit.py`, `run_corpus_audit`) reads ONLY raw export files
+  through the existing loaders/extractor/policy. It has NO `--database` flag,
+  so a production database is structurally unreachable; a production-style
+  `--database` argument is rejected by argparse (exit 2).
+- Sample boundary: `MAX_CONVERSATIONS_PER_SOURCE = 25` conversations/source
+  default, discovery is deterministic (sorted), messages capped via
+  `--max-messages` (default 1000). The full corpus count is reported
+  (`conversations_available`) without materializing per-message rows.
+- `extract()` / `_candidate_for()` accept an optional `skip_reasons`
+  content-free counter (message-level: `unsupported_source_type`,
+  `inactive_branch`, `non_user_role`, `duplicate_candidate`; sentence-level:
+  `too_long`, `question`, `not_first_person`, `negation`, `you_toward`,
+  `quotation`, `sensitive_form`, `sensitive_keyword`, `request`, `model_direct`,
+  `statement_too_long`, `no_rule_match`). Default-off, backward compatible.
+- Aggregate-only report shape (§): source_type, conversations available/sampled,
+  messages sampled, user messages, `languages` (en/de/es/unknown/mixed),
+  `candidates` + by_kind + by_language + `recurring` + temporal, `skip_reasons`,
+  `policy_decisions` + `sensitivity` + `secret_rejected` + `require_approval`
+  (via `MemoryPolicy().evaluate`, pure, no writes), `evidence_valid/invalid`
+  provenance counts (every evidence ref must point at a sampled user message),
+  Unicode/tokenization health (non-ASCII, umlaut/accent messages, token totals,
+  zero-token gaps), Phase 21A ES verb-gap occurrence counts (`hago|juego|corro|
+  nado|cocino` — measured only, NEVER implemented), and a `model_calls: 0` /
+  `llm_proposal_layer: not_exercised` note. `CorpusAuditReport.summary()` is
+  count-only and JSON-serializable; content/identifiers/statements/evidence/
+  prompts/secrets/sensitive values are never printed or returned.
+- Optional scratch SQLite file (`--scratch-db`, or a disposable tempfile by
+  default): seeds the sampled conversations/messages and runs the EXACT
+  production write path (`ConversationMemoryIngestor` →
+  `AutomaticMemoryCurator` policy gate → `MemoryStore`) twice, then compares
+  `MemoryStore.statistics()` counts. Idempotency means zero memory/evidence
+  growth on the second pass. A production database is never opened; with no
+  scratch path the audit performs zero writes and creates zero files.
+- Real-corpus pilot (bounded): ChatGPT 469 available → 25 sampled, 131 user
+  messages → 1 goal candidate; Gemini 170 available → 25 sampled, 122 user
+  messages → 7 candidates (6 goal, 1 relationship), 5 distinct memories. Both
+  idempotent (pass1 == pass2), `secret_rejected: 0`, `require_approval: 0`,
+  `evidence_invalid: 0`, model_calls 0. Phase 21A ES verbs measured at 0
+  occurrences in the sample. Production DB hashes unchanged after the audit.
+- Do NOT wire corpus-audit into `create_default_registry`, do not run LLM
+  proposals, and do not make the audit write to any live corpus store.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff clean).
+
+==================================================
+PHASE 23 — UNICODE TOKENIZATION CLOSURE: VARIATION-SELECTOR LEAK FIX +
+ZERO-TOKEN AUDIT METRIC CORRECTION (IMPLEMENTED)
+==================================================
+
+Phase 23 root-causes the Phase 22 zero-token Unicode finding and corrects the
+audit metric. Phase 11–22 and 25–30 invariants (single policy-gated write
+path, LLM proposal-only, security, provenance) are unchanged.
+
+- **Tokenization is NOT the security authority.** `MemoryPolicy` still scans
+  the raw statement text; `TokenPolicy` is a pure, deterministic extractor
+  that *never* accepts/rejects or writes memory. All PHASE 1–22 policy tests
+  unchanged and passing.
+
+- **Tokenizer refactor (`memory/tokenizer.py`)** — single shared Unicode
+  lexical primitive used by `MemoryRetriever` (`_TOKEN_RE`,
+  `_normalize_for_tokenize`) and `MemoryReconciler` (`_normalize_text`, via
+  `_lexical_normalize_text`): NFKC + casefold + **variation-selector strip**
+  then `regex` tokenization with `[\p{L}\p{M}\p{N}]+`. Fixes the only genuine
+  tokenization leakage: variation selectors (U+FE00–U+FE0F, U+E0100–U+E01EF),
+  which are `Mn`-category combining marks matching `\p{M}`, no longer leak junk
+  tokens (e.g. `"❤️"` -> `("️",)` became `()`; `"España ❤️"` is
+  `("españa",)`). `tokenize()` remains importable from
+  `personal_ai.memory.retriever` (historical callers) via `__all__`.
+
+- **Zero-token semantics corrected (`memory/corpus_audit.py`).** Phase 22's
+  `zero_token_messages` metric conflated two distinct phenomena:
+  (1) messages that tokenize to **zero tokens** (lexically empty input:
+  emoji/symbol/punctuation/whitespace/format — expected) and
+  (2) messages whose non-ASCII letters are NFKC/casefold-**folded to ASCII**
+  (fullwidth/alphanumeric-symbol letters, `ß`->`ss`, ...) which tokenize *fine*
+  to ASCII tokens. The latter are now counted separately as
+  `ascii_folded_messages` and are NOT an error. `zero_token_messages` now
+  counts true zero-token gaps only, classified into the fixed vocabulary
+  (`emoji_only`, `symbol_only`, `punctuation_only`, `symbol_punctuation`,
+  `whitespace_only`, `format_or_other`, `lexical_unicode`, `unknown`);
+  `lexical_unicode > 0` is the only `unicode_errors` entry (genuine defect).
+
+- **Real-corpus result (reproduced, aggregate-only):** ChatGPT (25 sampled,
+  131 user msgs) and Gemini (25 sampled, 122 user msgs) now report
+  `zero_token_messages: 0`, `zero_token_by_category: {}`,
+  `ascii_folded_messages: 2` each, `unicode_errors: []`. The four Phase 22
+  "zero-token" messages were all ASCII-folded lexical messages (fullwidth/
+  mathematical letters), not empty tokenization — the prior metric was the
+  defect, not the tokenizer. The VS-leak fix is confirmed live: ChatGPT
+  `tokens_total` 2919→2917 and `unicode_tokens` 28→26 (2 junk `️` tokens
+  removed); Gemini unchanged at 5196/128.
+
+- **Idempotency/security/production safety unchanged:** scratch-DB two-pass
+  idempotency holds (pass1 == pass2, memories/evidence growth 0, ChatGPT
+  candidates 1, policy `accept` 1). Production DB hashes unchanged after all
+  audit runs. Corpus-audit is still read-only with NO `--database` flag; do
+  not wire it into `create_default_registry`; do not run LLM proposals.
+
+- **Tokenization is lexical-preservation, not segmentation.** A Han run like
+  `東京に行きたい` tokenizes as one contiguous token (no Jieba/MeCab/spaCy/
+  segmentation); multilingual *semantic* retrieval, embeddings, translation,
+  and transliteration remain explicitly out of scope. `München` stays
+  `münchen` (never transliterated); `España`/`München`/`café` stay distinct
+  from `Espana`/`Munich`/`cafe`; `Straße`/`STRASSE` unify via casefold (`ß`->
+  `ss`); `café` == `cafe` never (accent distinction preserved).
+
+- Tests: `tests/test_memory_unicode_tokenization.py` (44 tests: German/Spanish
+  lexemes, combining sequences, no-transliteration guarantees, CJK/Japanese/
+  Korean non-zero, emoji/symbol-only zero-token, variation-selector no-leak,
+  fullwidth/alphanumeric-symbol ASCII-folding, numbers fullwidth + Arabic-
+  Indic, reconciliation round-trips, accent distinction, secret-rejection
+  independence, classifier buckets, audit folded/zero-token semantics) plus
+  `tests/test_memory_reconcile.py` and existing retrieval/audit suites. Full
+  suite: 2553 passing. Ruff clean. Format clean.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff clean).
+
+PHASE 25 — REVIEW-QUEUE DEDUPLICATION + RESUME SELECTION (IMPLEMENTED)
+==================================================
+
+Two P3 reliability fixes lay on top of Phase 24's pilot findings. Phase 11–24
+invariants (single policy-gated write path, LLM proposal-only, security,
+provenance) are unchanged.
+
+- Review queue is idempotent: `CurationStore.enqueue_review_if_missing` uses
+  an atomic `BEGIN IMMEDIATE` check-and-insert on the stable obligation tuple
+  `(source_type, category, reason, kind, temporal_scope, statement,
+  evidence_json)`. Reruns never grow the queue; a resolved
+  (approved/rejected/expired) row is never silently re-opened; the same
+  statement backed by different messages stays distinct obligations.
+- Deduplication is mechanical, never a security classifier: secret candidates
+  stay hard-rejected before the queue is consulted (zero review rows, zero
+  writes); keyword-sensitive candidates park in the approval queue exactly
+  once per obligation.
+- `--resume` targets the newest run with `status IN ('running','failed')` per
+  source/extraction (`CurationStore.resumable_run`), so an older interrupted
+  run is recoverable even when a newer completed run exists; completed runs
+  are terminal and never resumed. No run-id CLI flag.
+- `review_deduplicated` is counted in run/per-source/`curate-all` reports
+  (aggregate-only). Tests cover the dedupe matrix, resume matrix, combined
+  resume+conflict, security/multilingual/provenance regressions, and CLI
+  surfaces; all hermetic.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
+clean).
+
+==================================================
+PHASE 26 — REVIEW-QUEUE ADJUDICATION (EXCEPTION-ONLY HUMAN APPROVAL) (IMPLEMENTED)
+==================================================
+
+The durable review queue is a validated, exception-only human adjudication
+boundary. Phase 11–25 invariants (single policy-gated write path, LLM
+proposal-only, security, provenance) are unchanged; **no new write route
+exists**.
+
+- Review rows transition `pending -> approved|rejected|expired`; all three are
+  terminal, and a repeated decision on the same row is a `not_pending` no-op
+  that never writes. A resolved obligation is never silently re-opened on rerun
+  (Phase 25 dedup).
+- Approval does NOT trust the stored escalation: `MemoryReviewService.approve`
+  reconstructs the candidate from the row, re-evaluates `MemoryPolicy`
+  deterministically, and routes through `AutomaticMemoryCurator` (row-pending
+  approver bound for EVERY policy outcome, `auto_approver=approver` alongside
+  `interactive_approver=approver`) → `propose_memory` gate →
+  `MemoryService.apply_candidate`. A `DEFER`/`REJECT` at decision time (e.g.
+  the stored `candidate_json` was tampered into secret content) expires the row
+  with a count-only reason and writes ZERO memories. Reject writes nothing and
+  is terminal.
+- Concurrent adjudication is serialized per service instance
+  (`threading.RLock`) plus a guarded pending→terminal UPDATE
+  (`WHERE id=? AND status='pending'`), so two approvers on the same row yield
+  exactly one write and one `not_pending`. Reconciliation remains idempotent.
+- CLI wiring uses `MemoryService(MemoryStore(connection))` on the shared
+  connection (`_run_memory_review`); `memory review --approve N|--reject N`
+  are the only decision surfaces and operate one row at a time (no batch
+  mode).
+- Secret content stays hard-rejected before the queue is consulted (zero
+  review rows); tampering a pending row into secret content expires it with no
+  write; EN/DE/ES candidates take the identical authorization path; evidence is
+  preserved id-only and merged (never duplicated/fabricated/translated).
+- Tests: `tests/test_memory_review_service.py` (35 adjudication tests, the
+  source of truth for the state machine/adversarial matrix) and CLI
+  approve/reject end-to-end in `tests/test_cli_memory_curation.py`. Synthetic
+  pilot lives at `/tmp/opencode/phase26_pilot/pilot.py` (scratch DB, deleted;
+  aggregate-only `phase26_summary.json` kept).
+- Known limitations (deferred, invariants unchanged): memory-write and row
+  transition are not one cross-connection transaction (a crash leaves a
+  recoverable memory-written/review-pending state that re-approve fixes via the
+  reconciler); the per-instance lock does not serialize across processes
+  (cross-process order relies on the guarded UPDATE + reconciler merge); no
+  audit log of decisions beyond `reviewed_at`/`review_note`.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
+clean).
+
+==================================================
+PHASE 27 — REVIEW ADJUDICATION TRANSACTION + AUDIT-LOG HARDENING (IMPLEMENTED)
+==================================================
+
+The human adjudication boundary is now crash-safe and durably auditable.
+Phase 11–26 invariants (single policy-gated write path, LLM proposal-only,
+security, provenance, exception-only approval) are unchanged; **no new write
+route exists**.
+
+- **Atomic adjudication (one transaction):** `CurationStore` and `MemoryStore`
+  share a single SQLite connection, so the whole decision (pending-row
+  validation, deterministic policy re-evaluation, the policy-gated memory
+  write + reconciliation, the audit event, and the pending → terminal review
+  transition) runs inside one explicit `BEGIN IMMEDIATE` ... `COMMIT`. The
+  stores' internal auto-commits are deferred while the transaction is open by
+  `_AdjudicationConnection` (a transparent connection proxy), so the unit is
+  all-or-nothing. A crash/kill before `COMMIT` rolls everything back (no
+  `approved`/no-memory, no pending/duplicate-memory states); after `COMMIT` it
+  is fully durable. A failed `COMMIT` returns a conservative
+  `{"outcome":"error"}` and writes nothing. `_Component_connection` is passed
+  to both stores and to `MemoryReviewService`.
+- **Durable adjudication audit trail:** every terminal decision (approved /
+  rejected / expired) appends exactly one content-free event to
+  `memory_review_audit` (review_id, action, outcome, actor, policy_category,
+  memory_id, statement_hash = SHA-256 digest of the statement, created_at) —
+  never statements/evidence. A repeated decision is `not_pending` and writes
+  no further event; `not_found` writes none. Read by `review_audit` /
+  `review_audit_counts` (aggregate-only).
+- **Concurrency/crash guarantees:** per-instance RLock + guarded
+  pending→terminal UPDATE + SQLite `BEGIN IMMEDIATE` make two concurrent
+  approvers on the same row (same or separate connections) yield exactly one
+  approval, one memory, one audit event, one `not_pending`. Because the memory
+  write and row transition are one durable transaction, the Phase 26
+  "memory-written/review-pending recoverable state" known limitation is
+  **fully fixed**: there is no window where a committed decision splits the
+  write from the transition.
+- Do not regress atomicity by opening separate connections for the memory write
+  and row transition; keep the single shared transaction boundary.
+- Tests: `tests/test_memory_review_transaction.py` (audit exactly-one,
+  crash-rollback, durable-commit-across-connection, commit-failure
+conservative error, raw SQLite crash atomicity, two-connection concurrency)
+   plus the Phase 26 adjudication suite with the harness moved onto the proxy
+   connection (all existing decisions now exercise the atomic path).
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
+clean).
+
+PHASE 28 — DURABLE REVIEW AUDIT OBSERVABILITY (IMPLEMENTED)
+===========================================================
+
+The Phase 27 audit trail now has a read-only, privacy-safe observability surface
+(`memory review --audit` / `--audit-counts`) plus aggregate adjudication counts
+in `curate-all`. Phase 11–27 invariants (single policy-gated write path, LLM
+proposal-only, security, provenance, exception-only approval, atomic
+adjudication) are unchanged; **no new write route exists**.
+
+- The audit CLI is **read-only and never approves**: no `--approve-all` /
+  `--reject-all` / `--auto-approve` / `--approve-safe`, no automatic
+  adjudication, single-row-decisions only. It only ever *reads* the
+  `memory_review_audit` table.
+- The audit surface emits **operational metadata only** (`review_id`, `action`,
+  `outcome`, `actor`, `policy_category`, `memory_id`, `created_at`). The
+  `statement_hash` digest and the internal audit row `id` are NOT exposed;
+  statements, evidence, `candidate_json`, prompts, model output, secret and
+  sensitive values are never printed by any audit surface (JSON or human).
+  Empty DB renders `events: 0`, never fabricated rows.
+- Adjudication history aggregates (`review_approved/rejected/expired`) come
+  ONLY from the authoritative audit table (a global snapshot, distinct from
+  pending `review_queued`/`review_deduplicated`); do not fabricate them from
+  queue counts and do not add them per-source (the audit trail has no run id).
+- Approve/reject results carry `audit_recorded=true|false`; repeated terminal
+  decisions stay `not_pending` with `audit_recorded=false` and create no
+  additional audit event (exactly-one invariant).
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
+clean).
+
+PHASE 29 — READ-ONLY MEMORY REVIEW AUDIT TOOL (IMPLEMENTED)
+===========================================================
+
+The durable Phase 27 audit trail is now observable to the agent/tool layer
+through a strictly read-only tool. Phase 11–28 invariants (single policy-gated
+write path, LLM proposal-only, security, provenance, exception-only approval,
+atomic adjudication, Phase 28 CLI observability) are unchanged; **no new write
+or adjudication route exists**.
+
+- The tool (`memory_review_audit`, `agents/tools.py`) is a read-only
+  operational view registered behind a distinct `review.audit.read` permission
+  (`risk=READ`, `mutates_state=False`, `deterministic=True`), consumed by the
+  researcher agent's least-privilege policy. It is registered only when a
+  `MemoryReviewService` is wired into `build_default_agent_tools`.
+- Two operations only: `counts` (aggregate-only `events`/`actions`/`outcomes`/
+  `policy_categories`/`actors`) and `recent` (bounded, newest-first operational
+  metadata: `review_id`, `action`, `outcome`, `actor`, `policy_category`,
+  `memory_id`, `created_at`, default limit 20, hard max 200). Both consume the
+  existing `MemoryReviewService.audit()`/`audit_counts()` → `CurationStore`
+  surface; there is **no second audit implementation** and **no SQL in the
+  tool**.
+- The tool is mechanically read-only and cannot approve/reject/expire/reopen,
+  cannot mutate memories/reviews/audit rows, cannot invoke
+  `MemoryService.apply_candidate()`, cannot bypass `MemoryPolicy`, and cannot
+  execute arbitrary SQL. Unknown operations are rejected; invalid/bool/float
+  limits are rejected and `limit` is hard-capped; unknown or mutation-looking
+  parameters (`approve`/`reject`/`review_id`/`include_*`/`debug`/`raw`/`sql`)
+  are ignored, never honored.
+- Privacy contract equals Phase 28: statements, evidence, `candidate_json`,
+  prompts, model output, `statement_hash`, `review_note`, secrets, and
+  sensitive values are never returned, logged, or raised in error text. The
+  handler defensively re-projects every result to the safe field set.
+- Do NOT add any agent-facing adjudication tool or parameter
+  (`memory_review_approve`/`reject`/`expire`/`resolve`, `approve=`/`reject=` on
+  the audit tool, auto-approval by policy_category/confidence/language/actor).
+  The human review boundary stays intact; the agent layer observes, never
+  decides.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
+clean).
+
+PHASE 30 — DETERMINISTIC REVIEW-AUDIT TIME-WINDOW FILTERING (IMPLEMENTED)
+=========================================================================
+
+Time-window filtering is now available over the durable review audit trail.
+Phase 11–29 invariants (single policy-gated write path, LLM proposal-only,
+security, provenance, exception-only approval, atomic adjudication, read-only
+agent audit tool) are unchanged; **no new write, adjudication, policy,
+curation, or transaction route exists**.
+
+- The authoritative timestamp is `memory_review_audit.created_at`; `since` is
+  inclusive (`created_at >= since`) and `until` is inclusive
+  (`created_at <= until`); neither → all events with the existing limits;
+  `since > until` is rejected deterministically before any query (no silent
+  swap, no empty-result fallback). No migration/rewrite of historical rows.
+- Accepted bound forms: `YYYY-MM-DD` (midnight UTC), `YYYY-MM-DDTHH:MM:SS`,
+  `YYYY-MM-DDTHH:MM:SSZ`, and ISO offsets; naive timestamps are interpreted as
+  UTC; every bound is normalized to a canonical UTC string
+  (`format_utc_timestamp`) so equivalent instants filter identically
+  (`parse_iso_timestamp`/`format_utc_timestamp` in `memory/models.py`).
+- CLI: `memory review --audit` and `--audit-counts` accept `--since`/`--until`;
+  invalid or reversed bounds yield a non-zero exit code. `recent` keeps its
+  default limit 20 and hard max 200 clamp; counts preserve the Phase 28
+  aggregate schema (events/actions/outcomes/policy_categories/actors/
+  by_outcome/total) computed over the same filtered window.
+- Agent tool (`memory_review_audit`, `agents/tools.py`): `counts` and `recent`
+  accept `since`/`until` validated by `_parse_and_validate_timestamp`; bounds
+  are normalized to UTC and passed to `MemoryReviewService.audit()`/
+  `audit_counts()` (no SQL in the tool, no second audit implementation).
+  Permission/risk/determinism and privacy posture are unchanged; `recent`
+  still exposes only review_id/action/outcome/actor/policy_category/memory_id/
+  created_at.
+- Stores/services filter in SQL (`_audit_group_counts(column, where, params)`)
+  with parameterized `>=`/`<=`; bounds never appear in error text; privacy
+  sentinels (`candidate_json`, statements, evidence, prompts, model output,
+  `statement_hash`) never leak under any filtered call; empty windows return
+  `events: 0`/`[]`, never fabricated rows.
+- Do NOT add a migration, a second timestamp column, or a Python-side filter;
+  do NOT extend `--since`/`--until` to other flags (curation runs/reports);
+  the audit trail remains content-free and time-filtering stays read-only.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
+clean).
 
 Before changing code:
 

@@ -26,6 +26,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+from pathlib import Path
 
 import pytest
 
@@ -44,6 +45,10 @@ from personal_ai.memory import (
     MemoryCurationRunner,
     MemoryService,
     MemoryStore,
+)
+from personal_ai.memory.models import (
+    MemoryCandidate,
+    MemoryEvidenceRef,
 )
 from personal_ai.ollama_client import ChatResponse
 from personal_ai.storage import ConversationStore, connect_database
@@ -570,3 +575,620 @@ def test_report_summary_is_aggregate_only() -> None:
     assert report.versions["policy"] == "memory-policy-v1"
     assert report.versions["extractor"] == "conversation-llm-proposals-v1"
     connection.close()
+
+
+# ---------------------------------------------------------------------------
+# Phase 25 (P3-1): review-queue deduplication
+# ---------------------------------------------------------------------------
+
+
+def _evidence_refs(*document_ids: str) -> str:
+    refs = [
+        {
+            "source_type": "chatgpt",
+            "source_id": f"conv-{doc_id}",
+            "source_document_id": doc_id,
+        }
+        for doc_id in document_ids
+    ]
+    return json.dumps(list(refs), sort_keys=True)
+
+
+def _review_kwargs(
+    *,
+    statement: str = "The user works at BCG",
+    category: str = "conflict",
+    reason: str = "ambiguous_related_fact",
+    kind: str = "work",
+    temporal_scope: str = "current",
+    document_id: str = "m-conv-a",
+    run_id: str = "cur-test",
+    unit_id: str = "conv-a",
+) -> dict[str, object]:
+    return {
+        "run_id": run_id,
+        "unit_id": unit_id,
+        "source_type": "chatgpt",
+        "kind": kind,
+        "temporal_scope": temporal_scope,
+        "confidence": 0.9,
+        "importance": 3.0,
+        "statement": statement,
+        "evidence_json": _evidence_refs(document_id),
+        "candidate_json": "{}",
+        "created_at": "2026-01-01T00:00:00+00:00",
+        "category": category,
+        "reason": reason,
+    }
+
+
+def test_review_dedupe_same_obligation_single_row() -> None:
+    connection = connect_database(":memory:")
+    curation = CurationStore(connection)
+    try:
+        created, review_id = curation.enqueue_review_if_missing(**_review_kwargs())
+        assert created is True
+        again, same_review_id = curation.enqueue_review_if_missing(**_review_kwargs())
+        assert again is False
+        assert same_review_id == review_id
+        assert len(curation.list_review()) == 1
+        # The public enqueue_review surface stays idempotent too.
+        assert curation.enqueue_review(**_review_kwargs()) == review_id
+        assert len(curation.list_review()) == 1
+    finally:
+        connection.close()
+
+
+def test_review_dedupe_categories_are_distinct_obligations() -> None:
+    # Same fact and evidence, but an approval escalation and a reconciliation
+    # conflict are different review obligations: the key is never just the
+    # category, and never just the statement either.
+    connection = connect_database(":memory:")
+    curation = CurationStore(connection)
+    try:
+        conflict_id = curation.enqueue_review(**_review_kwargs(category="conflict"))
+        approval_id = curation.enqueue_review(
+            **_review_kwargs(category="require_approval")
+        )
+        assert conflict_id != approval_id
+        assert len(curation.list_review()) == 2
+        # Both are individually idempotent.
+        assert (
+            curation.enqueue_review(**_review_kwargs(category="conflict"))
+            == conflict_id
+        )
+        assert (
+            curation.enqueue_review(**_review_kwargs(category="require_approval"))
+            == approval_id
+        )
+        assert len(curation.list_review()) == 2
+    finally:
+        connection.close()
+
+
+def test_review_dedupe_identical_statement_distinct_evidence_stays_distinct() -> None:
+    # Provenance participates in the obligation identity: the same statement
+    # supported by two different messages is two review obligations.
+    connection = connect_database(":memory:")
+    curation = CurationStore(connection)
+    try:
+        first = curation.enqueue_review(
+            **_review_kwargs(document_id="m-conv-a", unit_id="conv-a")
+        )
+        second = curation.enqueue_review(
+            **_review_kwargs(document_id="m-conv-b", unit_id="conv-b")
+        )
+        assert first != second
+        rows = curation.list_review()
+        assert len(rows) == 2
+        assert {row["evidence_json"][0]["source_document_id"] for row in rows} == {
+            "m-conv-a",
+            "m-conv-b",
+        }
+        assert {row["evidence_json"][0]["source_type"] for row in rows} == {"chatgpt"}
+    finally:
+        connection.close()
+
+
+def test_review_dedupe_resolved_row_is_not_resurrected() -> None:
+    # A rejected (or approved) obligation is never silently re-opened by a
+    # later run: the queue stays idempotent across the whole review lifecycle.
+    connection = connect_database(":memory:")
+    curation = CurationStore(connection)
+    try:
+        created, review_id = curation.enqueue_review_if_missing(**_review_kwargs())
+        assert created is True
+        assert curation.set_review_status(
+            review_id, "rejected", reviewed_at="2026-01-02T00:00:00+00:00"
+        )
+        again, same_id = curation.enqueue_review_if_missing(**_review_kwargs())
+        assert again is False
+        assert same_id == review_id
+        assert len(curation.list_review()) == 1
+        assert curation.list_pending_review() == ()
+        assert curation.get_review(review_id)["status"] == "rejected"
+    finally:
+        connection.close()
+
+
+def test_review_dedupe_is_language_agnostic() -> None:
+    # Phase 21-23 multilingual behavior is untouched by deduplication:
+    # German and Spanish obligations dedupe exactly like English ones.
+    connection = connect_database(":memory:")
+    curation = CurationStore(connection)
+    try:
+        de = _review_kwargs(statement="Der Nutzer arbeitet bei BCG")
+        created, de_id = curation.enqueue_review_if_missing(**de)
+        again, de_id2 = curation.enqueue_review_if_missing(**de)
+        assert created and not again
+        assert de_id2 == de_id
+
+        es = _review_kwargs(
+            statement="El usuario trabaja en BCG", category="require_approval"
+        )
+        created, es_id = curation.enqueue_review_if_missing(**es)
+        again, es_id2 = curation.enqueue_review_if_missing(**es)
+        assert created and not again
+        assert es_id2 == es_id
+
+        assert len(curation.list_review()) == 2
+    finally:
+        connection.close()
+
+
+def test_review_dedupe_concurrent_enqueue_is_atomic(tmp_path: Path) -> None:
+    # Two curators racing on the same file database cannot both pass the
+    # existence check and enqueue duplicates (BEGIN IMMEDIATE check-and-insert).
+    import threading
+
+    db = tmp_path / "dedupe.db"
+    barrier = threading.Barrier(3)
+    ids: list[tuple[bool, int]] = []
+    lock = threading.Lock()
+
+    def worker() -> None:
+        connection = connect_database(db)
+        try:
+            curation = CurationStore(connection)
+            barrier.wait()
+            result = curation.enqueue_review_if_missing(**_review_kwargs())
+            with lock:
+                ids.append(result)
+        finally:
+            connection.close()
+
+    threads = [threading.Thread(target=worker) for _ in range(2)]
+    for thread in threads:
+        thread.start()
+    barrier.wait()
+    for thread in threads:
+        thread.join()
+
+    connection = connect_database(db)
+    try:
+        curation = CurationStore(connection)
+        assert [created for created, _ in ids].count(True) == 1
+        assert [created for created, _ in ids].count(False) == 1
+        assert len(curation.list_review()) == 1
+    finally:
+        connection.close()
+
+
+def test_review_dedupe_reruns_share_single_conflict_review_row() -> None:
+    # The exact Phase 24 defect: the same reconciliation conflict detected by
+    # three successive runs now yields exactly one review row.
+    connection, _ = _seed(
+        _work_pair(created_at="2026-01-01T00:00:00+00:00", conv_id="conv-a"),
+        (
+            _conv("conv-b", created_at="2026-01-02T00:00:00+00:00"),
+            (_msg("m-conv-b", "I'm a software engineer at BCG", conv_id="conv-b"),),
+        ),
+    )
+    service = _service()
+    curation = CurationStore(connection)
+    runner = _runner(connection, service)
+    try:
+        first = runner.run(_cfg(limit=10))
+        assert first.counters.tally.conflicts == 1
+        assert first.counters.review_queued == 1
+        assert first.counters.review_deduplicated == 0
+        second = runner.run(_cfg(limit=10))
+        assert second.counters.review_queued == 0
+        assert second.counters.review_deduplicated == 1
+        third = runner.run(_cfg(limit=10))
+        assert third.counters.review_queued == 0
+        assert third.counters.review_deduplicated == 1
+        rows = curation.list_review()
+        assert len(rows) == 1
+        assert rows[0]["category"] == "conflict"
+        assert rows[0]["status"] == "pending"
+        assert service.counts()["active"] == 1
+    finally:
+        connection.close()
+
+
+def test_review_dedupe_distinct_conflicts_stay_distinct() -> None:
+    # Three genuinely different conflicting facts keep three review rows
+    # across reruns; deduplication never collapses distinct obligations.
+    connection, _ = _seed(
+        _work_pair(created_at="2026-01-01T00:00:00+00:00", conv_id="conv-a"),
+        (
+            _conv("conv-b", created_at="2026-01-02T00:00:00+00:00"),
+            (_msg("m-conv-b", "I'm a software engineer at BCG", conv_id="conv-b"),),
+        ),
+        (
+            _conv("conv-c", created_at="2026-01-03T00:00:00+00:00"),
+            (_msg("m-conv-c", "I work as a manager at BCG", conv_id="conv-c"),),
+        ),
+    )
+    service = _service()
+    curation = CurationStore(connection)
+    runner = _runner(connection, service)
+    try:
+        first = runner.run(_cfg(limit=10))
+        assert first.counters.tally.conflicts == 2
+        assert first.counters.review_queued == 2
+        second = runner.run(_cfg(limit=10))
+        assert second.counters.review_queued == 0
+        assert second.counters.review_deduplicated == 2
+        assert len(curation.list_review()) == 2
+    finally:
+        connection.close()
+
+
+def test_review_dedupe_require_approval_rerun_single_row() -> None:
+    # The approval category dedupes as well: the same escalated salary
+    # candidate proposed again queues nothing new.
+    connection, _ = _seed(_require_approval_conv())
+    service = _service()
+    curation = CurationStore(connection)
+    salary_proposal = _prop(statement="The user's salary is 120k", kind="personal_fact")
+    llm = _FakeModelClient(_batch_json(salary_proposal))
+    try:
+        first = _runner(connection, service, llm=llm).run(_cfg(extraction="llm"))
+        assert first.counters.review_queued == 1
+        second = _runner(connection, service, llm=llm).run(_cfg(extraction="llm"))
+        assert second.counters.review_queued == 0
+        assert second.counters.review_deduplicated == 1
+        assert len(curation.list_review()) == 1
+    finally:
+        connection.close()
+
+
+def test_provenance_participates_in_review_obligation_identity() -> None:
+    # Two conversations each escalate the *same statement* (a salary fact)
+    # backed by different messages -> two distinct review obligations.
+    connection, _ = _seed(
+        (
+            _conv("conv-salary-1", created_at="2026-01-01T00:00:00+00:00"),
+            (_msg("m-salary-1", "My salary is 120k", conv_id="conv-salary-1"),),
+        ),
+        (
+            _conv("conv-salary-2", created_at="2026-01-02T00:00:00+00:00"),
+            (_msg("m-salary-2", "My salary is 120k", conv_id="conv-salary-2"),),
+        ),
+    )
+    service = _service()
+    curation = CurationStore(connection)
+
+    class _SalaryEchoClient:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def chat(
+            self, messages: object, *, think: bool, format: object
+        ) -> ChatResponse:
+            self.calls += 1
+            prompt = messages[-1].content  # type: ignore[union-attr,index]
+            match = re.search(r"\[(m-[a-z0-9-]+)\] USER:", str(prompt))
+            message_id = match.group(1) if match else "m1"
+            return ChatResponse(
+                content=_batch_json(
+                    _prop(
+                        statement="The user's salary is 120k",
+                        kind="personal_fact",
+                        evidence=(message_id,),
+                    )
+                ),
+                model="fake",
+                done=True,
+            )
+
+    llm = _SalaryEchoClient()
+    try:
+        report = _runner(connection, service, llm=llm).run(_cfg(extraction="llm"))
+        assert report.counters.model_calls == 2
+        assert report.counters.review_queued == 2
+        rows = curation.list_review()
+        assert len(rows) == 2
+        assert {row["statement"] for row in rows} == {"The user's salary is 120k"}
+        assert {row["evidence_json"][0]["source_document_id"] for row in rows} == {
+            "m-salary-1",
+            "m-salary-2",
+        }
+    finally:
+        connection.close()
+
+
+def test_review_dedupe_is_not_a_security_classifier() -> None:
+    # Deduplication is mechanical bookkeeping, never a security boundary:
+    # secret content is rejected by the policy (never deferred, never
+    # escalated) before the queue is consulted, so a secret candidate that
+    # somehow reaches the runner leaves zero review rows and zero writes.
+    connection, _ = _seed(
+        (
+            _conv("conv-secret"),
+            (_msg("m-secret", "My password is hunter2", conv_id="conv-secret"),),
+        )
+    )
+    service = _service()
+    curation = CurationStore(connection)
+    secret_proposal = _prop(
+        statement="The user's password is a long random string",
+        kind="preference",
+        evidence=("m-secret",),
+    )
+    llm = _FakeModelClient(_batch_json(secret_proposal))
+    try:
+        report = _runner(connection, service, llm=llm).run(_cfg(extraction="llm"))
+        assert report.counters.tally.candidates == 1
+        assert report.counters.tally.rejected == 1
+        assert report.counters.review_queued == 0
+        assert report.counters.tally.writes == 0
+        assert curation.list_review() == ()
+        assert service.counts()["memories"] == 0
+    finally:
+        connection.close()
+
+    # The deterministic policy itself hard-rejects the same statement.
+    from personal_ai.memory.policy import MemoryDecision, MemoryPolicy
+
+    candidate = _policy_candidate("The user's password is a long random string")
+    assert MemoryPolicy().evaluate(candidate).decision is MemoryDecision.REJECT
+
+
+def _policy_candidate(statement: str):
+    return MemoryCandidate(
+        statement=statement,
+        kind="preference",
+        confidence=0.9,
+        durability=0.8,
+        relevance=0.8,
+        specificity=0.7,
+        recurrence=1,
+        utility=0.7,
+        temporal_scope="current",
+        assertion_status="asserted",
+        summary="credential",
+        evidence=(
+            MemoryEvidenceRef(
+                source_type="chatgpt",
+                source_id="conv-secret",
+                source_document_id="m-secret",
+                source_timestamp="2026-01-01T00:00:00+00:00",
+            ),
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Phase 25 (P3-2): --resume picks the newest *incomplete* run
+# ---------------------------------------------------------------------------
+
+
+def _plant_run(
+    curation: CurationStore,
+    *,
+    run_id: str,
+    status: str,
+    started_at: str,
+    unit_id: str = "conv-a",
+    unit_status: str = "running",
+) -> None:
+    curation.create_run(
+        run_id=run_id,
+        source_type="chatgpt",
+        extraction="deterministic",
+        status=status,
+        dry_run=False,
+        extractor_version="conversation-deterministic-v1",
+        policy_version="memory-policy-v1",
+        prompt_version="",
+        model_name=None,
+        started_at=started_at,
+        config_json=json.dumps({"limit": 10, "offset": 0, "batch_size": 500}),
+    )
+    curation.save_unit(
+        run_id=run_id,
+        unit_id=unit_id,
+        unit_index=1,
+        source_type="chatgpt",
+        extraction="deterministic",
+        model_name=None,
+        status=unit_status,
+        attempts=1,
+        started_at=started_at,
+    )
+
+
+def test_resume_selects_older_incomplete_over_newer_completed() -> None:
+    # The Phase 24 defect: a newer completed run masked an older interrupted
+    # one. Resume must select the interrupted run and leave the completed one
+    # untouched.
+    connection, _ = _seed(_work_pair(conv_id="conv-a"))
+    service = _service()
+    curation = CurationStore(connection)
+    try:
+        _plant_run(
+            curation,
+            run_id="cur-newer-completed",
+            status="completed",
+            started_at="2026-02-01T00:00:00+00:00",
+            unit_status="completed",
+        )
+        _plant_run(
+            curation,
+            run_id="cur-older-running",
+            status="running",
+            started_at="2026-01-02T00:00:00+00:00",
+        )
+        resumed = _runner(connection, service).run(_cfg(resume=True))
+        assert resumed.run_id == "cur-older-running"
+        assert resumed.status == "completed"
+        assert resumed.counters.units_recovered_stale == 1
+        assert curation.get_run("cur-newer-completed")["status"] == "completed"
+        assert service.counts()["active"] == 1
+    finally:
+        connection.close()
+
+
+def test_resume_selects_newest_incomplete_when_multiple() -> None:
+    connection, _ = _seed(_work_pair(conv_id="conv-a"))
+    service = _service()
+    curation = CurationStore(connection)
+    try:
+        _plant_run(
+            curation,
+            run_id="cur-a-older",
+            status="failed",
+            started_at="2026-01-02T00:00:00+00:00",
+            unit_status="failed",
+        )
+        _plant_run(
+            curation,
+            run_id="cur-b-newer",
+            status="running",
+            started_at="2026-01-03T00:00:00+00:00",
+        )
+        resumed = _runner(connection, service).run(_cfg(resume=True))
+        assert resumed.run_id == "cur-b-newer"
+        assert resumed.counters.units_retried == 0
+        assert resumed.counters.units_recovered_stale == 1
+        # The older failed run was not touched.
+        assert curation.get_run("cur-a-older")["status"] == "failed"
+    finally:
+        connection.close()
+
+
+def test_resume_with_only_completed_runs_raises() -> None:
+    # A completed run is terminal: there is nothing incomplete to resume and
+    # --resume must not silently re-run it (or a newer completed run).
+    connection, _ = _seed(_work_pair(conv_id="conv-a"))
+    service = _service()
+    curation = CurationStore(connection)
+    try:
+        _plant_run(
+            curation,
+            run_id="cur-completed",
+            status="completed",
+            started_at="2026-01-02T00:00:00+00:00",
+            unit_status="completed",
+        )
+        with pytest.raises(CurationResumeError):
+            _runner(connection, service).run(_cfg(resume=True))
+        assert curation.get_run("cur-completed")["status"] == "completed"
+    finally:
+        connection.close()
+
+
+def test_resume_after_a_completed_resume_is_an_error_not_a_silent_rerun() -> None:
+    # Once a resume finishes, the run is terminal and a further --resume is an
+    # explicit error mirroring the "only completed runs" case.
+    connection, _ = _seed(_work_pair(conv_id="conv-a"))
+    service = _service()
+    try:
+        _runner(connection, service).run(_cfg())
+        with pytest.raises(CurationResumeError):
+            _runner(connection, service).run(_cfg(resume=True))
+    finally:
+        connection.close()
+
+
+def test_resume_after_conflict_deduplicates_review_and_memory() -> None:
+    # Combined regression (Phase 24 findings): a newer completed run rewrote a
+    # memory and queued one conflict review; the older interrupted run is then
+    # resumed and re-encounters the same conflict. The resume must not
+    # duplicate the memory, and must not grow the review queue.
+    connection, _ = _seed(
+        _work_pair(created_at="2026-01-01T00:00:00+00:00", conv_id="conv-a"),
+        (
+            _conv("conv-b", created_at="2026-01-02T00:00:00+00:00"),
+            (_msg("m-conv-b", "I'm a software engineer at BCG", conv_id="conv-b"),),
+        ),
+    )
+    service = _service()
+    curation = CurationStore(connection)
+    try:
+        # Run B completes first: one memory written, one conflict review row.
+        fresh = _runner(connection, service).run(_cfg(limit=10))
+        assert fresh.counters.tally.conflicts == 1
+        assert fresh.counters.review_queued == 1
+        assert fresh.status == "completed"
+
+        # Run A was interrupted mid-flight *before* B finished; it stays the
+        # only incomplete run, so the (newer) completed run B cannot mask it.
+        _plant_run(
+            curation,
+            run_id="cur-a-interrupted",
+            status="running",
+            started_at="2026-01-03T00:00:00+00:00",
+            unit_id="conv-b",
+        )
+
+        resumed = _runner(connection, service).run(_cfg(resume=True))
+        assert resumed.run_id == "cur-a-interrupted"
+        assert resumed.counters.units_recovered_stale == 1
+        assert resumed.counters.review_queued == 0
+        assert resumed.counters.review_deduplicated == 1
+        assert resumed.counters.tally.conflicts == 1
+        rows = curation.list_review()
+        assert len(rows) == 1
+        assert rows[0]["category"] == "conflict"
+        # No duplicate memory was created by the resume.
+        assert service.counts()["active"] == 1
+    finally:
+        connection.close()
+
+
+def test_orchestration_aggregates_review_queued_and_deduplicated() -> None:
+    # Phase 25: the curate-all orchestration path must carry the per-source
+    # review_queued/review_deduplicated counters up into the
+    # CorpusCurationReport without altering the values.
+    from personal_ai.memory.curation import CurationAdapterRegistry
+    from personal_ai.memory.orchestration import (
+        CorpusCurationConfig,
+        CorpusCurationOrchestrator,
+    )
+
+    connection, _ = _seed(
+        _work_pair(created_at="2026-01-01T00:00:00+00:00", conv_id="conv-a"),
+        (
+            _conv("conv-b", created_at="2026-01-02T00:00:00+00:00"),
+            (_msg("m-conv-b", "I'm a software engineer at BCG", conv_id="conv-b"),),
+        ),
+    )
+    service = _service()
+    store = ConversationStore(connection)
+    curation = CurationStore(connection)
+    orchestrator = CorpusCurationOrchestrator(
+        curation_store=curation,
+        registry=CurationAdapterRegistry(
+            ConversationCurationAdapter(store, client=None)
+        ),
+        memory_service=service,
+    )
+    config = CorpusCurationConfig(sources=("chatgpt",), mode="deterministic", limit=10)
+    try:
+        first = orchestrator.run(config)
+        assert first.review_queued == 1
+        assert first.review_deduplicated == 0
+        assert first.sources[0].review_queued == 1
+
+        second = orchestrator.run(config)
+        assert second.review_queued == 0
+        assert second.review_deduplicated == 1
+        assert second.sources[0].review_deduplicated == 1
+        assert second.summary()["review_deduplicated"] == 1
+        assert len(curation.list_review()) == 1
+    finally:
+        connection.close()

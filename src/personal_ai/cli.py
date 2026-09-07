@@ -43,6 +43,10 @@ from personal_ai.memory import (
     WorkoutCurationAdapter,
     open_memory_store,
 )
+from personal_ai.memory.corpus_audit import (
+    DEFAULT_AUDIT_LIMIT,
+    DEFAULT_AUDIT_MAX_MESSAGES,
+)
 from personal_ai.memory.curation import (
     DEFAULT_MAX_MODEL_CALLS,
     DEFAULT_UNIT_TIMEOUT_SECONDS,
@@ -54,6 +58,7 @@ from personal_ai.memory.orchestration import (
     DEFAULT_ORCHESTRATION_SAMPLE,
 )
 from personal_ai.memory.proposals import DEFAULT_MAX_MESSAGES, DEFAULT_MAX_RETRIES
+from personal_ai.memory.store import MemoryStore
 from personal_ai.ollama_client import ChatMessage, OllamaClient
 from personal_ai.ollama_structured import OllamaStructuredExtractor
 from personal_ai.ollama_vision import OllamaVisionExtractor
@@ -503,7 +508,9 @@ def _build_memory_parser() -> argparse.ArgumentParser:
         description="Durable, resumable memory curation (local, offline).",
     )
     sub = parser.add_subparsers(
-        dest="verb", required=True, metavar="{curate,curate-all,runs,review}"
+        dest="verb",
+        required=True,
+        metavar="{curate,curate-all,runs,review,corpus-audit}",
     )
 
     curate = sub.add_parser(
@@ -588,7 +595,8 @@ def _build_memory_parser() -> argparse.ArgumentParser:
     curate.add_argument(
         "--resume",
         action="store_true",
-        help="Resume the latest unfinished run for the requested source/mode.",
+        help="Resume the newest incomplete (running/failed) run for the requested "
+        "source/mode; completed runs are never resumed.",
     )
 
     # --- curate-all ----------------------------------------------------------
@@ -625,7 +633,9 @@ def _build_memory_parser() -> argparse.ArgumentParser:
         default=DEFAULT_ORCHESTRATION_LIMIT,
         help=f"Max units per source (default: {DEFAULT_ORCHESTRATION_LIMIT}).",
     )
-    curate_all.add_argument("--offset", type=int, default=0, help="Skip first N units per source.")
+    curate_all.add_argument(
+        "--offset", type=int, default=0, help="Skip first N units per source."
+    )
     curate_all.add_argument(
         "--max-messages",
         type=int,
@@ -671,7 +681,8 @@ def _build_memory_parser() -> argparse.ArgumentParser:
     curate_all.add_argument(
         "--resume",
         action="store_true",
-        help="Resume latest unfinished runs for ALL requested sources.",
+        help="Resume the newest incomplete (running/failed) runs for ALL "
+        "requested sources; completed runs are never resumed.",
     )
 
     runs = sub.add_parser(
@@ -683,7 +694,9 @@ def _build_memory_parser() -> argparse.ArgumentParser:
     )
 
     review = sub.add_parser(
-        "review", parents=[common], help="Exception-only review of escalated candidates."
+        "review",
+        parents=[common],
+        help="Exception-only review of escalated candidates.",
     )
     review.add_argument("--run", dest="run_id", help="Restrict to one run_id.")
     review.add_argument(
@@ -716,12 +729,92 @@ def _build_memory_parser() -> argparse.ArgumentParser:
         default="",
         help="Optional note to attach to the approve/reject decision.",
     )
+    review.add_argument(
+        "--audit",
+        action="store_true",
+        help=(
+            "Show a privacy-safe recent view of the durable review audit trail "
+            "(metadata only; no statements or evidence)."
+        ),
+    )
+    review.add_argument(
+        "--audit-counts",
+        action="store_true",
+        help="Show aggregate-only review audit counts (never content).",
+    )
+    review.add_argument(
+        "--since",
+        metavar="TIMESTAMP",
+        help=(
+            "Inclusive lower bound for audit time window (ISO-8601, UTC). "
+            "Examples: 2026-09-01, 2026-09-01T00:00:00Z, 2026-09-01T00:00:00+00:00"
+        ),
+    )
+    review.add_argument(
+        "--until",
+        metavar="TIMESTAMP",
+        help=(
+            "Inclusive upper bound for audit time window (ISO-8601, UTC). "
+            "Examples: 2026-09-06, 2026-09-06T23:59:59Z, 2026-09-06T23:59:59+00:00"
+        ),
+    )
+
+    # --- corpus-audit --------------------------------------------------------
+    # Read-only, bounded, aggregate-only audit over RAW conversation exports.
+    # Deliberately has NO --database flag: it never touches any SQLite database
+    # other than an optional disposable scratch file for the idempotency check.
+    corpus_audit = sub.add_parser(
+        "corpus-audit",
+        help="Bounded aggregate-only audit of raw conversation exports.",
+    )
+    corpus_audit.add_argument(
+        "--source",
+        choices=tuple(CONVERSATION_SOURCE_TYPES),
+        default="chatgpt",
+        help="Conversation source to audit (default: chatgpt).",
+    )
+    corpus_audit.add_argument(
+        "--path",
+        type=Path,
+        required=True,
+        metavar="EXPORT_DIR",
+        help="Directory containing the raw conversation export files.",
+    )
+    corpus_audit.add_argument(
+        "--limit",
+        type=int,
+        default=DEFAULT_AUDIT_LIMIT,
+        help=f"Max conversations to sample per source (default: {DEFAULT_AUDIT_LIMIT}).",
+    )
+    corpus_audit.add_argument(
+        "--max-messages",
+        type=int,
+        default=DEFAULT_AUDIT_MAX_MESSAGES,
+        help=f"Max messages per conversation to audit (default: {DEFAULT_AUDIT_MAX_MESSAGES}).",
+    )
+    corpus_audit.add_argument(
+        "--scratch-db",
+        type=Path,
+        metavar="PATH",
+        help=(
+            "Optional disposable SQLite file for the two-pass idempotency "
+            "check on a temporary copy of the sampled conversations. Never "
+            "a production database."
+        ),
+    )
+    corpus_audit.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit machine-consumable JSON instead of human text.",
+    )
     return parser
 
 
 def run_memory(args: argparse.Namespace) -> int:
     """Dispatch a ``memory`` subcommand and return a process exit code."""
     verb = args.verb
+    if verb == "corpus-audit":
+        return _run_memory_corpus_audit(args)
     database = args.database
     if verb == "curate":
         return _run_memory_curate(database, args)
@@ -734,13 +827,101 @@ def run_memory(args: argparse.Namespace) -> int:
     raise SystemExit(f"Unknown memory verb: {verb}")
 
 
+def _run_memory_corpus_audit(args: argparse.Namespace) -> int:
+    """Run a bounded, aggregate-only audit over raw conversation exports.
+
+    Reads only the raw export files. Nothing is written except, optionally, a
+    disposable scratch SQLite file used to prove two-pass idempotency. The
+    output is aggregate-only: counts and category tallies, never content.
+    """
+    import tempfile
+
+    from personal_ai.memory.corpus_audit import run_corpus_audit
+
+    scratch: Path | None = getattr(args, "scratch_db", None)
+    cleanup: Path | None = None
+    try:
+        if scratch is None:
+            fd, scratch_name = tempfile.mkstemp(prefix="corpus-audit-", suffix=".db")
+            import os
+
+            os.close(fd)
+            scratch = Path(scratch_name)
+            cleanup = scratch
+        report = run_corpus_audit(
+            args.source,
+            args.path,
+            limit=args.limit,
+            max_messages=args.max_messages,
+            scratch_database=scratch,
+        )
+    finally:
+        if cleanup is not None:
+            cleanup.unlink(missing_ok=True)
+
+    summary = report.summary()
+    if args.json:
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0
+    print(f"source_type: {summary['source_type']}")
+    print(f"export_path: {summary['export_path']}")
+    print(f"conversations_available: {summary['conversations_available']}")
+    print(f"conversations_sampled: {summary['conversations_sampled']}")
+    print(f"messages_sampled: {summary['messages_sampled']}")
+    print(f"user_messages: {summary['user_messages']}")
+    print(f"languages: {summary['languages']}")
+    print(f"mixed_language_messages: {summary['mixed_language_messages']}")
+    print(f"unknown_messages: {summary['unknown_messages']}")
+    print(f"candidates: {summary['candidates']}")
+    print(f"candidates_by_kind: {summary['candidates_by_kind']}")
+    print(f"candidates_by_language: {summary['candidates_by_language']}")
+    print(f"recurring_candidates: {summary['recurring_candidates']}")
+    print(f"temporal: {summary['temporal']}")
+    print(f"skip_reasons: {summary['skip_reasons']}")
+    print(f"policy_decisions: {summary['policy_decisions']}")
+    print(f"sensitivity: {summary['sensitivity']}")
+    print(f"secret_rejected: {summary['secret_rejected']}")
+    print(f"require_approval: {summary['require_approval']}")
+    print(f"evidence_valid: {summary['evidence_valid']}")
+    print(f"evidence_invalid: {summary['evidence_invalid']}")
+    print(f"non_ascii_messages: {summary['non_ascii_messages']}")
+    print(f"umlaut_or_accent_messages: {summary['umlaut_or_accent_messages']}")
+    print(f"tokens_total: {summary['tokens_total']}")
+    print(f"unicode_tokens: {summary['unicode_tokens']}")
+    print(f"zero_token_messages: {summary['zero_token_messages']}")
+    print(f"zero_token_by_category: {summary['zero_token_by_category']}")
+    print(f"ascii_folded_messages: {summary['ascii_folded_messages']}")
+    print(f"phase21a_verb_sentences: {summary['phase21a_verb_sentences']}")
+    print(f"phase21a_detected_es: {summary['phase21a_detected_es']}")
+    print(f"phase21a_language_unknown: {summary['phase21a_language_unknown']}")
+    print(f"unicode_errors: {summary['unicode_errors']}")
+    print(f"model_calls: {summary['model_calls']}")
+    print(f"llm_proposal_layer: {summary['llm_proposal_layer']}")
+    idempotency = summary["idempotency"]
+    if idempotency is None:
+        print("idempotency: not_checked")
+    else:
+        print(
+            "idempotency: "
+            f"seeded={idempotency['conversations_seeded']} convs, "
+            f"memories_p1={idempotency['memories_pass1']} "
+            f"p2={idempotency['memories_pass2']} "
+            f"evidence_p1={idempotency['evidence_pass1']} "
+            f"p2={idempotency['evidence_pass2']}"
+        )
+        print(f"idempotent: {idempotency['idempotent']}")
+    return 0
+
+
 def _run_memory_curate(database: Path, args: argparse.Namespace) -> int:
     """Run bounded, resumable memory curation; print an aggregate-only report.
 
     Every write goes through the policy-gated ``propose_memory`` path; the
     report is content-free. ``--dry-run`` analyzes the window without writing
     or creating any rows. ``--resume`` completes exactly the unfinished units
-    of the latest run for the requested source and extraction mode.
+    of the newest run that is still incomplete (status ``running`` or
+    ``failed``) for the requested source and extraction mode — a completed
+    run is never resumed, even when a newer run finished first.
     """
     config = CurationConfig(
         source_type=args.source,
@@ -866,13 +1047,43 @@ def _run_memory_review(database: Path, args: argparse.Namespace) -> int:
     Use ``--show`` to display the stored statement per row.
     Use ``--approve N`` / ``--reject N`` to decide a pending review item.
     """
-    from personal_ai.memory.review import MemoryReviewService
+    from personal_ai.memory.review import (
+        MemoryReviewService,
+        _AdjudicationConnection,
+    )
 
     connection = connect_database(database)
+    # Wrap the shared connection so the approval/rejection decision commits the
+    # memory write, audit event, and review transition in one atomic unit
+    # (Phase 27).
+    review_connection = _AdjudicationConnection(connection)
     try:
-        store = CurationStore(connection)
-        service = MemoryService(store)
-        review = MemoryReviewService(store, service)
+        store = CurationStore(review_connection)
+        service = MemoryService(MemoryStore(review_connection))
+        review = MemoryReviewService(store, service, connection=review_connection)
+
+        # Audit observability (Phase 28/30): privacy-safe, read-only views of the
+        # durable review audit trail. Handled first so they never touch the
+        # pending queue or write anything.
+        if args.audit:
+            try:
+                return _emit_review_audit(
+                    review,
+                    args.limit,
+                    json_mode=args.json,
+                    since=args.since,
+                    until=args.until,
+                )
+            except ValueError as exc:
+                raise SystemExit(f"review audit: {exc}") from exc
+
+        if args.audit_counts:
+            try:
+                return _emit_review_audit_counts(
+                    review, json_mode=args.json, since=args.since, until=args.until
+                )
+            except ValueError as exc:
+                raise SystemExit(f"review audit: {exc}") from exc
 
         # Approve / reject first (mutually exclusive)
         if args.approve is not None:
@@ -882,6 +1093,7 @@ def _run_memory_review(database: Path, args: argparse.Namespace) -> int:
             sr = result.get("superseded_id", "")
             ea = result.get("evidence_added", 0)
             status = result.get("status", "")
+            recorded = result.get("audit_recorded", None)
             print(f"review approve {args.approve}: outcome={outcome}", end="")
             if sid:
                 print(f", memory_id={sid}", end="")
@@ -891,20 +1103,24 @@ def _run_memory_review(database: Path, args: argparse.Namespace) -> int:
                 print(f", evidence_added={ea}", end="")
             if status:
                 print(f", status={status}", end="")
+            if recorded is not None:
+                print(f", audit_recorded={str(recorded).lower()}", end="")
             print()
             return 0
 
         if args.reject is not None:
             result = review.reject(args.reject, note=args.note)
             outcome = result.get("outcome", "unknown")
-            print(f"review reject {args.reject}: outcome={outcome}")
+            recorded = result.get("audit_recorded", None)
+            print(f"review reject {args.reject}: outcome={outcome}", end="")
+            if recorded is not None:
+                print(f", audit_recorded={str(recorded).lower()}", end="")
+            print()
             return 0
 
         # List rows — respect --show, --category
         category_filter = args.category
-        rows = review.list_pending(
-            category=category_filter, limit=args.limit
-        )
+        rows = review.list_pending(category=category_filter, limit=args.limit)
 
         if args.show:
             # content-bearing mode
@@ -924,9 +1140,7 @@ def _run_memory_review(database: Path, args: argparse.Namespace) -> int:
                     f"  run={row['run_id']} unit={row['unit_id']} "
                     f"created_at={row['created_at']}"
                 )
-                print(
-                    f"  category={row['category']} reason={row['reason']}"
-                )
+                print(f"  category={row['category']} reason={row['reason']}")
             return 0
 
         # aggregate-only default
@@ -936,7 +1150,9 @@ def _run_memory_review(database: Path, args: argparse.Namespace) -> int:
                     "pending": len(rows),
                     "by_category": {
                         c: n
-                        for c, n in review.pending_counts().get("by_category", {}).items()
+                        for c, n in review.pending_counts()
+                        .get("by_category", {})
+                        .items()
                     }
                     if hasattr(review.pending_counts(), "get")
                     else {},
@@ -946,9 +1162,7 @@ def _run_memory_review(database: Path, args: argparse.Namespace) -> int:
             return 0
 
         pending = review.pending_counts()
-        print(
-            f"Pending reviews: {pending.get('pending', 0)} total"
-        )
+        print(f"Pending reviews: {pending.get('pending', 0)} total")
         by_cat = pending.get("by_category", {})
         if by_cat:
             for cat, cnt in sorted(by_cat.items()):
@@ -959,13 +1173,133 @@ def _run_memory_review(database: Path, args: argparse.Namespace) -> int:
         connection.close()
 
 
+def _emit_review_audit(
+    review: object,
+    limit: int,
+    *,
+    json_mode: bool,
+    since: str | None = None,
+    until: str | None = None,
+) -> int:
+    """Print a privacy-safe recent view of the durable review audit trail.
+
+    ``review`` exposes ``audit_counts()`` and ``audit(limit=...)``. Only
+    operational metadata is emitted (review_id, action, outcome, actor,
+    policy_category, memory_id, created_at) — never statements, evidence, the
+    internal row id, or the statement digest.
+
+    Optional time-window filtering:
+    - ``since``: inclusive lower bound on ``created_at`` (ISO-8601, normalized to UTC)
+    - ``until``: inclusive upper bound on ``created_at`` (ISO-8601, normalized to UTC)
+    """
+    counts = review.audit_counts(since=since, until=until)  # type: ignore[attr-defined]
+    events = int(counts.get("events", 0))
+    if json_mode:
+        _print_json(
+            {
+                "events": events,
+                "recent_events": [
+                    _audit_public_row(row)
+                    for row in review.audit(limit=limit, since=since, until=until)  # type: ignore[attr-defined]
+                ],
+                "actions": counts.get("actions", {}),
+                "outcomes": counts.get("outcomes", {}),
+                "policy_categories": counts.get("policy_categories", {}),
+                "actors": counts.get("actors", {}),
+            }
+        )
+        return 0
+
+    print("Review audit")
+    print("============")
+    print(f"events: {events}")
+    print("recent events (metadata only, newest first):")
+    recent = review.audit(limit=limit, since=since, until=until)  # type: ignore[attr-defined]
+    if not recent:
+        print("  (none)")
+    for row in recent:
+        print(
+            f"  {row['created_at']}  {row['action']:<8} {row['outcome']:<10} "
+            f"{row['policy_category']:<16} actor={row['actor']} "
+            f"review_id={row['review_id']} "
+            + (f"memory_id={row['memory_id']}" if row.get("memory_id") else "")
+        )
+    return 0
+
+
+def _emit_review_audit_counts(
+    review: object,
+    *,
+    json_mode: bool,
+    since: str | None = None,
+    until: str | None = None,
+) -> int:
+    """Print aggregate-only review audit counts (never content).
+
+    Optional time-window filtering:
+    - ``since``: inclusive lower bound on ``created_at`` (ISO-8601, normalized to UTC)
+    - ``until``: inclusive upper bound on ``created_at`` (ISO-8601, normalized to UTC)
+    """
+    counts = review.audit_counts(since=since, until=until)  # type: ignore[attr-defined]
+    if json_mode:
+        _print_json(
+            {
+                "events": counts.get("events", 0),
+                "actions": counts.get("actions", {}),
+                "outcomes": counts.get("outcomes", {}),
+                "policy_categories": counts.get("policy_categories", {}),
+                "actors": counts.get("actors", {}),
+            }
+        )
+        return 0
+
+    events = int(counts.get("events", 0))
+    print("Review audit counts")
+    print("===================")
+    print(f"events: {events}")
+    outcomes = counts.get("outcomes", {}) or {}
+    print(f"approved: {outcomes.get('approved', 0)}")
+    print(f"rejected: {outcomes.get('rejected', 0)}")
+    print(f"expired: {outcomes.get('expired', 0)}")
+    actions = counts.get("actions", {}) or {}
+    if actions:
+        print("actions:")
+        for key in sorted(actions):
+            print(f"  {key}: {actions[key]}")
+    categories = counts.get("policy_categories", {}) or {}
+    if categories:
+        print("policy categories:")
+        for key in sorted(categories):
+            print(f"  {key}: {categories[key]}")
+    actors = counts.get("actors", {}) or {}
+    if actors:
+        print("actors:")
+        for key in sorted(actors):
+            print(f"  {key}: {actors[key]}")
+    return 0
+
+
+def _audit_public_row(row: dict[str, object]) -> dict[str, object]:
+    """Mapper that exposes only safe operational audit metadata."""
+    return {
+        "review_id": row.get("review_id"),
+        "action": row.get("action"),
+        "outcome": row.get("outcome"),
+        "actor": row.get("actor"),
+        "policy_category": row.get("policy_category"),
+        "memory_id": row.get("memory_id"),
+        "created_at": row.get("created_at"),
+    }
+
+
 def _run_memory_curate_all(database: Path, args: argparse.Namespace) -> int:
     """Run bounded curation over all corpus sources sequentially (Phase 18).
 
     All writes flow through the same policy-gated write path as per-source curation.
     The report is aggregate-only (totals, decision counts, versions, memory stats,
     review queue counts). ``--dry-run`` analyzes without writing. ``--resume``
-    completes unfinished units from the latest run per source.
+    completes unfinished units from the newest incomplete run (``running`` or
+    ``failed``) per source; completed runs are never resumed.
     """
     from personal_ai.memory.orchestration import (
         CorpusCurationConfig,
@@ -987,10 +1321,8 @@ def _run_memory_curate_all(database: Path, args: argparse.Namespace) -> int:
         resume=args.resume,
         model_name=args.model,
     )
-    try:
-        config.validate()
-    except CurationError as exc:
-        raise SystemExit(str(exc)) from exc
+    # CorpusCurationConfig.__post_init__ validates modes and the
+    # dry_run/resume exclusivity at construction (no separate validate()).
 
     connection = connect_database(database)
     memory_connection, memory_store = open_memory_store(database)
@@ -1022,10 +1354,10 @@ def _build_curation_registry_generic(
     # runner will handle graceful degradation per-unit.
     from personal_ai.memory.adapters import (
         EventCurationAdapter,
-        EventStore,
         WorkoutCurationAdapter,
-        WorkoutStore,
     )
+    from personal_ai.storage.events import EventStore
+    from personal_ai.workouts.store import WorkoutStore
 
     # Email and document adapters need a client only for LLM mode; orchestration
     # will create one on demand per source. For now pass None.
