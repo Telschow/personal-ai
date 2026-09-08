@@ -1543,6 +1543,88 @@ Existing invariants: memory is data never policy; event payloads never carry
 content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
 clean).
 
+==================================================
+PHASE 31 — READ-ONLY AGENT RETRIEVAL TOOLS: get_document + get_memory (IMPLEMENTED)
+==================================================
+
+The agent/tool layer gains read-only, policy-gated fetch tools for documents
+and durable memories. Phase 11–30 invariants (single policy-gated write path,
+LLM proposal-only, security, provenance, exception-only approval, atomic
+adjudication, read-only audit) are unchanged; **no new write or adjudication
+route exists**.
+
+- `get_document` and `get_memory` are registered in `agents/tools.py` via
+  `build_default_agent_tools` (`AgentToolRegistry`) and consumed by the
+  researcher/corpus agent policies. Both are non-mutating, deterministic, and
+  read-only; GET_DOCUMENT gates on the existing `corpus.search` permission,
+  GET_MEMORY on the existing `memory.read` permission — NO new permissions
+  were introduced. Policy decisions remain observable through the same shared
+  audit trail; denials (`CURATOR`, permission-less agents) surface via
+  `PolicyDenialError` with no store/service access.
+- `get_document(document_id, chunk_limit=20, capped at 100)` returns the
+  document metadata plus a bounded, deterministically ordered chunk window
+  (`chunk_index, chunk_id`), or `{"status":"not_found","document_id"}` for an
+  unknown id. `get_memory(memory_id)` returns the canonical memory plus
+  content-free provenance aggregation (evidence count/kinds, first/last
+  evidence timestamps — never evidence ids/bodies/prompts/model output/
+  candidate JSON/statement hashes), or `not_found`. Tool parameters are
+  validated: a missing/invalid `document_id`/`memory_id` raises
+  TypeError/ValueError; unknown and mutation-looking parameters (`approve`,
+  `apply_candidate`, `review_id`, `sql`, `curate`, ...) are ignored, never
+  honored.
+- No SQL anywhere in the tool layer: document/chunk reads go through
+  `DocumentStore`/`ChunkStore`, memory reads through `MemoryService`, and the
+  handlers never call `MemoryService.apply_candidate`, `create_user_memory`,
+  or any curation/adjudication surface. No schema change, no new dependency,
+  no network, no LLM/Ollama calls, no automatic curation or ingestion.
+- Tools are privacy-preserving: aggregate/operational fields only; document
+  statements, memory content, prompts, model output, secrets, and sensitive
+  values never appear in results, logs, or error text.
+
+Tests: `tests/test_agent_get_document_get_memory.py` (31 tests).
+
+==================================================
+PHASE 32 — CHAT EXPOSURE OF READ-ONLY RETRIEVAL TOOLS (IMPLEMENTED)
+==================================================
+
+The Phase 31 read-only fetch tools are now directly addressable from the
+interactive chat `ToolRegistry` (`create_default_registry`). Phase 11–31
+invariants unchanged; **no new write or adjudication route exists**.
+
+- New `tools/fetch.py` provides `PolicyGatedGetter` (+
+  `build_policy_gated_get_handler`): it builds ONE `PolicyEngine` over the
+  Phase 31 `AgentToolRegistry` and runs `get_document`/`get_memory` via
+  `PolicyEngine.execute(RESEARCHER, ...)` — the researcher is the only agent
+  the chat path may impersonate (same pattern as `tools/corpus.py`,
+  `tools/workouts.py`, `tools/personal_context.py`), so chat enforcement and
+  audit are identical to the execution runtime and Phase 31 differentiated
+  access is preserved (no permission bypass; curator/engineers still denied).
+- `create_default_registry` gained a trailing `document_store` parameter
+  (default None). `get_document` (requires BOTH `document_store` and
+  `chunk_store`) and `get_memory` (requires `memory_service`) ToolDefinitions
+  are registered only when their dependencies are wired; their handlers run
+  entirely inside the policy engine — no direct store/service access from the
+  registry layer, no SQL, no write surface. `propose_memory` remains
+  approver-gated and is unaffected.
+- `cli._connect_agent_registry` now passes `document_store` to
+  `create_default_registry`.
+- Tool contracts, permissions (`corpus.search` / `memory.read`, no new
+  permission), risk/determinism flags, privacy posture, unknown-parameter
+  rejection, and not_found semantics are all unchanged from Phase 31.
+
+Tests: `tests/test_chat_get_document_get_memory.py` (20 tests: registration
+matrices, RESEARCHER authorization + CURATOR/engineer denials that never touch
+stores/services, end-to-end via `create_default_registry`, chunk-limit
+passthrough/clamp, deterministic ordering, unknown params ignored,
+byte-identical no-write regression, privacy key-set assertions);
+`tests/test_cli_wiring.py` updated for the wired chat set (get_document
+present, get_memory absent without a memory service). Full suite: 2604 passed;
+ruff clean; format clean.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
+clean).
+
 Before changing code:
 
 1. Inspect the existing implementation.

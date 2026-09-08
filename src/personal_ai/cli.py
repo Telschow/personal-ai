@@ -1676,7 +1676,10 @@ def _connect_agent_registry(
     registered as well. When a memory service is provided, the read-only
     ``personal_context`` overview reports durable-memory availability and,
     when a ``memory_proposal_approver`` is given, the policy-gated
-    ``propose_memory`` chat tool is registered too.
+    ``propose_memory`` chat tool is registered too. The read-only
+    ``get_document`` (needs the document store alongside the chunk store) and
+    ``get_memory`` (needs the memory service) fetch tools are registered
+    through the same policy-gated chat path.
 
     Returns the registry together with the underlying connection so the caller
     can keep the stores alive for the whole agent session and close it
@@ -1710,6 +1713,7 @@ def _connect_agent_registry(
             personal_context_service=personal_context_service,
             memory_service=memory_service,
             memory_proposal_approver=memory_proposal_approver,
+            document_store=document_store,
         )
         return registry, connection
     except BaseException:

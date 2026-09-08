@@ -44,7 +44,9 @@ dataset — all backed by local SQLite and a local vision/chat model.
 - **An agent, not just a search engine.** A synchronous agent loop lets the
   model choose from an explicit allow-listed set of tools
   (`search_knowledge`, `search_documents`, `query_events`,
-  `search_workouts`, ...) to answer from your stored records.
+  `search_workouts`, ...) to answer from your stored records, plus read-only
+  fetch-by-id tools (`get_document`, `get_memory`) to pull one document or one
+  durable memory in full, gated on the same `PolicyEngine`.
 - **Structured by design.** Documents, chunks, extractions, embeddings,
   memories, workouts and executions are distinct typed models with stable
   (content-hash / deterministic) identities — re-ingestion never duplicates.
@@ -78,6 +80,11 @@ A running, single-user system validated end to end against the live stack:
 - **Real Ollama tool calling** on the local `qwen3.5:9b` model through an
   allow-listed `ToolRegistry` (`search_documents`, `search_knowledge`,
   `query_events`, `search_workouts`, ...).
+- **Read-only fetch-by-id tools** (`get_document`, `get_memory`) wired into
+  the agent layer *and* the interactive chat registry (Phases 31–32): they
+  run only through the `PolicyEngine` impersonating the researcher
+  (`corpus.search` / `memory.read`), return `not_found` instead of fallbacks,
+  and never expose a write surface (memory write stays approver-gated).
 - **Activity event ingestion** (`--ingest chrome_history` / `--ingest youtube`)
   is fully local and model-free; events go to the event store, separate from
   the document pipeline.
@@ -299,6 +306,11 @@ image-heavy / mixed) → structured extraction | vision extraction
 - Exposed to the agent as explicit tools (`search_documents`,
   `search_knowledge`, `query_events`, ...) through `ToolRegistry` — the agent
   never touches storage internals.
+- Fetch-by-id is a separate, read-only path: `get_document`/`get_memory`
+  return one document (metadata + bounded chunk window) or one durable memory
+  (canonical statement + content-free provenance) deterministically in
+  `chunk_index, chunk_id` order, or `not_found` for unknown ids — never a
+  fallback. See [`docs/RETRIEVAL.md`](docs/RETRIEVAL.md).
 
 ---
 
@@ -398,7 +410,13 @@ See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the phased implementation status.
   (34a) · financial exports (37) · control plane + orchestration (39–39B) ·
   memory layer + chat recall (40–42) · approval-gated memory proposals + CLI
   identity recall (43) · workouts (43) · HTTP gateway (44) ·
-  Dockerized deploy on the Open WebUI network (45).
+  Dockerized deploy on the Open WebUI network (45) · read-only
+  document/memory fetch tools in the agent layer and chat (31–32) ·
+  bilingual-security + Unicode retrieval foundation (20–21) · corpus audit +
+  Unicode tokenization closure (22–23) · review-queue dedup + resume
+  selection (25) · exception-only human review adjudication with atomic
+  transaction + audit trail (26–27) · durable review-audit observability and
+  time-window filtering (28–30).
 - **Next (not yet implemented):** richer embedding-backed semantic retrieval
   as a configurable provider, multi-agent chat surfaces above the approval
   plane, and additional workout/memory consumer surfaces. Nothing beyond the
@@ -424,6 +442,8 @@ and the HTTP gateway (ASGI, in-process).
 
 - [`docs/USAGE.md`](docs/USAGE.md) — user guide: ingestion, email, financial,
   search, limitations.
+- [`docs/RETRIEVAL.md`](docs/RETRIEVAL.md) — agent-facing retrieval contract:
+  search result envelopes, determinism, fetch-by-id tools.
 - [`docs/AGENT_ORCHESTRATION.md`](docs/AGENT_ORCHESTRATION.md) — agents,
   skills, tools, policy, orchestration.
 - [`docs/CONTROL_PLANE.md`](docs/CONTROL_PLANE.md) — executions, events,

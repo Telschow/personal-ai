@@ -143,6 +143,32 @@ Registration: `build_default_agent_tools(memory_service=...)` registers the
 tool; `ControlPlane` registers it automatically whenever a `MemoryService` is
 wired (default builds and injected registries), otherwise the tool is absent.
 
+## Fetch-by-id (Phases 31–32, `get_memory`)
+
+Search answers "which memories match"; **`get_memory`** answers "show me that
+one memory in full". It is a read-only sibling of `search_memory`:
+
+- **Contract** — `get_memory(memory_id)` returns the canonical memory
+  (statement + metadata) plus **content-free provenance aggregation**: evidence
+  count, evidence kinds, and first/last evidence timestamps — never evidence
+  ids/bodies, prompts, model output, references, or `candidate_json`. An
+  unknown id returns `{"status": "not_found", "memory_id": ...}`, never a
+  fallback.
+- **Authorization** — same `memory.read` permission as `search_memory`
+  (`RiskLevel.READ`, `deterministic=True`, `mutates_state=False`); only
+  researcher/corpus agents declare it. Registered via
+  `build_default_agent_tools(memory_service=...)` and (Phase 32) exposed to the
+  interactive chat registry through `tools/fetch.py` running
+  `PolicyEngine.execute(RESEARCHER, "get_memory", ...)` — chat enforcement and
+  audit are identical to the execution runtime. Malformed/missing ids raise
+  `TypeError`/`ValueError`; mutation-looking parameters
+  (`approve`/`apply_candidate`/`review_id`/`sql`/`curate`) are ignored, never
+  honored.
+- **No write surface** — the fetch handler never calls
+  `MemoryService.apply_candidate`, `create_user_memory`, or any
+  curation/adjudication surface; the single policy-gated write path is
+  unchanged.
+
 ## Agent memory proposals (Phase 43, `personal_ai/tools/memory.py`)
 
 Memory writing from a model is **user-approval-gated**, not free. The model

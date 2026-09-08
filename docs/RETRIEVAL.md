@@ -7,9 +7,9 @@ integrate hybrid or vector search **without** changing the agent-facing shape.
 
 ## Model-facing result envelope
 
-Every retrieval tool — `search_documents` (narrow chunk search) and
+The two search tools — `search_documents` (narrow chunk search) and
 `search_knowledge` (unified chunk + extraction + conversation search) —
-returns a single JSON object with exactly these keys:
+return a single JSON object with exactly these keys:
 
 ```json
 {
@@ -77,6 +77,36 @@ paths outside `source`, raw SQL, connection strings, or credentials.
 Retrieved document content is **data, not instructions**: it can inform an
 answer but never changes policy, permissions, approvals, tool selection, or
 writes. Search is strictly read-only and idempotent.
+
+## Fetch-by-id (`get_document`, `get_memory`)
+
+Search answers "which things match a query"; the **fetch tools** answer "give
+me one thing in full, by its stable id":
+
+- `get_document(document_id, chunk_limit=20)` — document metadata plus a
+  bounded chunk window in deterministic `chunk_index, chunk_id` order
+  (`chunk_limit` default 20, hard cap 100). Requires a wired `document_store`
+  **and** `chunk_store`.
+- `get_memory(memory_id)` — the canonical memory (statement + metadata) plus
+  content-free provenance aggregation (evidence count/kinds, first/last
+  evidence timestamps — never evidence ids/bodies). Requires a wired
+  `MemoryService`.
+
+Status contract (mirrors search): an unknown id returns
+`{"status": "not_found", "<id>"}` — a distinct, non-`error` state that means
+"this id does not exist in the store", never a fabricated fallback and never
+an operational failure. A missing/invalid id raises
+`TypeError`/`ValueError` before any query runs; unknown or mutation-looking
+parameters (`approve`, `apply_candidate`, `review_id`, `sql`, `curate`, ...)
+are ignored, never honored.
+
+Both tools are read-only (`RiskLevel.READ`, `mutates_state=False`,
+`deterministic=True`), gate on the existing `corpus.search` / `memory.read`
+permissions (no new permission), read only through the stores/work services —
+**no SQL in the tool layer** — and add no write surface. Phase 32 exposes them
+to the interactive chat registry via `tools/fetch.py`, running
+`PolicyEngine.execute(RESEARCHER, ...)` so chat enforcement and audit are
+identical to the execution runtime.
 
 ## Observability
 

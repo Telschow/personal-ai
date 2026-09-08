@@ -234,6 +234,23 @@ source type). The `mime_types` filter reads the document metadata recorded at
 ingestion (`text/plain`, `application/pdf`, `message/rfc822`, ...).
 Documents with no MIME metadata never match a MIME filter.
 
+### Fetch-by-id tools (`get_document`, `get_memory`)
+
+Search returns a *ranked window*; **fetch** returns *one thing in full*.
+When the agent has an id (from a search result or a prior turn), it can pull:
+
+- `get_document` — the document's metadata plus a bounded chunk window in
+  deterministic `chunk_index, chunk_id` order (`chunk_limit` defaults to 20,
+  capped at 100).
+- `get_memory` — a durable memory's canonical statement plus content-free
+  provenance (evidence count/kinds, first/last evidence timestamps — never
+  evidence ids or bodies).
+
+Both are read-only and policy-gated (`corpus.search` / `memory.read`),
+registered only when their stores are wired, and return a `not_found` status
+for unknown ids — never a fabricated fallback. They add no write surface:
+memory writes stay behind the approval-gated `propose_memory` chat tool.
+
 ## Vision extraction for image-heavy PDFs (Phase 34a)
 
 Image-only and scanned PDFs are stored at ingestion but contain no readable

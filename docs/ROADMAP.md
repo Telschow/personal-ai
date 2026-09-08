@@ -498,6 +498,66 @@ Tests: 2467 passing (68 new in `tests/test_memory_audit_time_filtering.py`).
 Ruff clean. Format clean. `git diff --check` clean. No production DB touched
 (production hashes unchanged).
 
+## Phase 31 — Read-only agent retrieval tools: get_document + get_memory (done)
+
+The agent/tool layer gains read-only, policy-gated fetch tools for documents
+and durable memories. Phase 11–30 invariants unchanged; **no new write or
+adjudication route exists**.
+
+- `get_document` and `get_memory` are registered in `agents/tools.py` via
+  `build_default_agent_tools` (`AgentToolRegistry`) and consumed by the
+  researcher/corpus agent policies. Both are non-mutating, deterministic, and
+  read-only; GET_DOCUMENT gates on the existing `corpus.search` permission,
+  GET_MEMORY on the existing `memory.read` permission — **no new permissions**.
+  Denials (`CURATOR`, permission-less agents) surface via `PolicyDenialError`
+  with no store/service access, and decisions stay observable through the
+  shared audit trail.
+- `get_document(document_id, chunk_limit=20, capped at 100)` returns the
+  document metadata plus a bounded, deterministically ordered chunk window
+  (`chunk_index, chunk_id`), or `{"status":"not_found","document_id"}` for an
+  unknown id. `get_memory(memory_id)` returns the canonical memory plus
+  content-free provenance aggregation (evidence count/kinds, first/last
+  evidence timestamps — never evidence ids/bodies), or `not_found`.
+- Malformed/missing ids raise `TypeError`/`ValueError`; unknown and
+  mutation-looking parameters (`approve`, `apply_candidate`, `review_id`,
+  `sql`, `curate`, ...) are ignored, never honored. No SQL in the tool layer
+  (reads go through `DocumentStore`/`ChunkStore`/`MemoryService`); no schema
+  change, no new dependency, no network, no LLM calls, no automatic curation.
+- Privacy: aggregate/operational fields only; document statements, memory
+  content, prompts, model output, secrets, and sensitive values never appear in
+  results, logs, or error text.
+
+Tests: `tests/test_agent_get_document_get_memory.py` (31 tests).
+
+## Phase 32 — Chat exposure of read-only retrieval tools (done)
+
+The Phase 31 fetch tools are now directly addressable from the interactive chat
+`ToolRegistry` (`create_default_registry`). Phase 11–31 invariants unchanged;
+**no new write or adjudication route exists**.
+
+- New `tools/fetch.py` provides `PolicyGatedGetter` (+
+  `build_policy_gated_get_handler`): one `PolicyEngine` over the Phase 31
+  `AgentToolRegistry` runs `get_document`/`get_memory` via
+  `PolicyEngine.execute(RESEARCHER, ...)` — the researcher is the only agent
+  the chat path may impersonate (same pattern as `tools/corpus.py` /
+  `workouts.py` / `personal_context.py`), so chat enforcement and audit are
+  identical to the execution runtime and Phase 31 differentiated access is
+  preserved (no permission bypass).
+- `create_default_registry` gained a trailing `document_store` parameter
+  (default None). `get_document` registers only when BOTH `document_store` and
+  `chunk_store` are wired; `get_memory` registers only when a `memory_service`
+  is wired. Handlers run entirely inside the policy engine — no direct
+  store/service access from the registry layer, no SQL, no write surface.
+  `propose_memory` remains approver-gated and is unaffected.
+- `cli._connect_agent_registry` passes `document_store` through.
+- Tool contracts, permissions, risk/determinism flags, privacy posture,
+  unknown-parameter rejection, and `not_found` semantics are all unchanged
+  from Phase 31.
+
+Tests: 2604 passing (20 new in `tests/test_chat_get_document_get_memory.py`;
+`tests/test_cli_wiring.py` updated for the wired chat set). Ruff clean. Format
+clean.
+
 ## Planned (not yet implemented)
 
 These are explicitly **not** shipped — do not claim them as working:
@@ -508,8 +568,6 @@ These are explicitly **not** shipped — do not claim them as working:
 - **Vision-first source pipelines** and denser multimodal extraction
   (whiteboards, mind maps, vision boards) as a first-class source class
   rather than an opt-in model.
-- **Agent-facing retrieval tools** beyond the current allowlist (e.g.,
-  `get_document`, `get_memory`), through `ToolRegistry` only.
 - **Durable memories as first-class execution outputs** (memory producer
   surfaces) — currently memories are explicit-only.
 - **Multi-agent chat** above the approval plane; richer Open WebUI chat

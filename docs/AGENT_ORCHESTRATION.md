@@ -127,6 +127,36 @@ layer:
 scope escape, no-mutation, event safety, restart persistence, and the full
 `research → search_memory → evidence → verify` execution).
 
+## Read-only fetch tools (Phases 31–32)
+
+Bulk search is complemented by deterministic **fetch-by-id** — pull one thing
+in full instead of reranking a result window:
+
+- `get_document` (`corpus.search`) requires a wired `document_store` **and**
+  `chunk_store`. It returns the document metadata plus a bounded, determinis�
+  tically ordered chunk window (`chunk_index, chunk_id`; `chunk_limit` defaults
+  to 20, hard-capped at 100), or `{"status": "not_found", "document_id": ...}`
+  for an unknown id — never a fallback.
+- `get_memory` (`memory.read`) requires a wired `MemoryService`. It returns
+  the canonical memory plus **content-free** provenance aggregation (evidence
+  count/kinds, first/last evidence timestamps — never evidence ids/bodies,
+  prompts, or model output), or `not_found`.
+- Both are non-mutating, deterministic `AgentTool`s (`RiskLevel.READ`,
+  `mutates_state=False`), read through `DocumentStore`/`ChunkStore`/
+  `MemoryService` — **no SQL in the tool layer** — and validate their ids.
+  Unknown or mutation-looking parameters (`approve`, `apply_candidate`,
+  `review_id`, `sql`, `curate`, ...) are ignored, never honored. Privacy
+  contract: aggregate/operational fields only; statements, secrets, and
+  sensitive values never appear in results, logs, or error text.
+- **Phase 32 (chat):** the interactive chat registry exposes the same tools
+  through `tools/fetch.py` (`PolicyGatedGetter` /
+  `build_policy_gated_get_handler`) running `PolicyEngine.execute(RESEARCHER,
+  ...)`. The researcher is the only identity the chat path may impersonate, so
+  chat enforcement and the audit trail are identical to the execution runtime —
+  no permission bypass (`CURATOR`/engineers still denied before any store or
+  service is touched). Tools register only when their dependencies are wired;
+  they add no write surface (`propose_memory` stays approver-gated).
+
 ## Automatic chat recall (Phase 42)
 
 Durable memory also reaches the *conversational* chat path as **application-

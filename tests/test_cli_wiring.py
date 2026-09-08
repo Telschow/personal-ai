@@ -103,12 +103,20 @@ class TestConnectAgentRegistry:
             # The empty corpus has no indexed documents, so the narrow
             # chunk-only search tool is intentionally hidden (Phase 23).
             assert "search_documents" not in names
+            # get_document is a fetch-by-id tool, not a search: it is wired as
+            # soon as document + chunk stores exist and reports not_found on an
+            # unindexed id rather than being hidden on an empty corpus (Phase
+            # 32). get_memory stays out entirely: no MemoryService is wired in
+            # this construction path.
+            assert "get_document" in names
+            assert "get_memory" not in names
             # Exactly the expected tools; no accidental duplication/re-design.
             assert names == {
                 "list_directory",
                 "search_knowledge",
                 "query_events",
                 "personal_context",
+                "get_document",
             }
 
             # Populate knowledge rows through the real ingest path on the same
