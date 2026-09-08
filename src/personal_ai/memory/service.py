@@ -167,6 +167,35 @@ class MemoryService:
         self.get(memory_id)
         return self._store.evidence_for(memory_id)
 
+    def provenance_for(self, memory_id: str) -> dict[str, object]:
+        """Content-free provenance aggregation for one memory.
+
+        Read-only: never exposes evidence identifiers, evidence content,
+        statements, prompts, or model output. Returns the evidence count, the
+        distinct evidence ``source_type`` kinds (sorted, the repository's
+        evidence provenance taxonomy), and the earliest/latest evidence
+        timestamps (falling back to the evidence attach timestamp when a
+        source timestamp is absent). A memory without evidence reports
+        ``evidence_count == 0``, empty kinds, and ``None`` timestamps.
+        """
+        self.get(memory_id)
+        rows = self._store.evidence_for(memory_id)
+        kinds: set[str] = set()
+        stamps: list[str] = []
+        for row in rows:
+            source_type = row.get("source_type")
+            if isinstance(source_type, str) and source_type:
+                kinds.add(source_type)
+            stamp = row.get("source_timestamp") or row.get("created_at")
+            if isinstance(stamp, str) and stamp:
+                stamps.append(stamp)
+        return {
+            "evidence_count": len(rows),
+            "evidence_kinds": sorted(kinds),
+            "first_evidence_at": min(stamps) if stamps else None,
+            "last_evidence_at": max(stamps) if stamps else None,
+        }
+
     # ---- reconciliation ----
     def apply_candidate(self, candidate: MemoryCandidate) -> dict[str, object]:
         """Persist a validated candidate per the deterministic reconciliation.

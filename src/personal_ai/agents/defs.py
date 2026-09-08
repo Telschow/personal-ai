@@ -106,6 +106,8 @@ RESEARCHER = Agent(
             "search_knowledge",
             "personal_context",
             "memory_review_audit",
+            "get_document",
+            "get_memory",
         }
     ),
     permissions=frozenset(

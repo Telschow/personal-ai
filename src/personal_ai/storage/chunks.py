@@ -398,12 +398,21 @@ class ChunkStore:
         ).fetchone()
         return _row_to_chunk(row) if row is not None else None
 
-    def list_for_document(self, document_id: str) -> tuple[DocumentChunk, ...]:
-        """Return one document's chunks in deterministic chunk_index order."""
-        rows = self._connection.execute(
-            f"{_SELECT_SQL} WHERE document_id = ? ORDER BY chunk_index, chunk_id",
-            (document_id,),
-        ).fetchall()
+    def list_for_document(
+        self, document_id: str, limit: int | None = None
+    ) -> tuple[DocumentChunk, ...]:
+        """Return one document's chunks in deterministic chunk_index order.
+
+        ``limit`` bounds the number of rows returned (``None`` fetches all),
+        letting read-only callers retrieve a bounded window without pulling
+        an entire document into memory at once.
+        """
+        sql = f"{_SELECT_SQL} WHERE document_id = ? ORDER BY chunk_index, chunk_id"
+        parameters: list[object] = [document_id]
+        if limit is not None:
+            sql += " LIMIT ?"
+            parameters.append(limit)
+        rows = self._connection.execute(sql, tuple(parameters)).fetchall()
         return tuple(_row_to_chunk(row) for row in rows)
 
     def delete_for_document(self, document_id: str) -> int:
