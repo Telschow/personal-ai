@@ -4,6 +4,7 @@ from personal_ai.storage.chunks import (
     ChunkSearchResult,
     ChunkStore,
     DocumentFilter,
+    SQLiteChunkIndex,
 )
 from personal_ai.storage.conversations import (
     ConversationSearchResult,
@@ -27,6 +28,7 @@ __all__ = [
     "EventStore",
     "ExtractionSearchResult",
     "ExtractionStore",
+    "SQLiteChunkIndex",
     "StoredVisionPage",
     "VisionStore",
     "connect_database",

@@ -14,7 +14,7 @@ Two phase-numbering schemes coexist in this repository's history:
 
 - **Canonical** — the current development track. Defined by
   [`AGENTS.md`](../AGENTS.md) (the single authoritative roadmap) and summarized
-  on this page. Covers Phases 1–18, 20–23, and 25–32.
+  on this page. Covers Phases 1–18, 20–23, 25–32, and 33.
 - **Legacy** — the pre-renumbering chronological plan (numbered 1–49) that
   describes how the project actually evolved. Preserved at the bottom of this
   page as historical context and in a few module docstrings and test filenames
@@ -507,15 +507,49 @@ clean.
 
 ---
 
+### Phase 33 — Typed chunk retrieval / SQLite FTS5 retrieval boundary (done)
+
+The search surface now runs behind a typed, keyword-only retrieval seam.
+Phase 11–32 invariants unchanged; **semantic/hybrid/vector retrieval is NOT
+implemented** — this is the stable boundary that future work lands behind.
+
+- `ChunkIndex` (`retrieval.py`) is a `@runtime_checkable` Protocol with one
+  `search(query, limit, filters)` surface returning typed `ChunkSearchResult`
+  hits, best-ranked first. No FTS5/SQLite vocabulary leaks into the public
+  contract — no `FTSQuery`, `BM25Result`, or SQLite-specific parameters.
+- `SQLiteChunkIndex` (`storage/chunks.py`) is the concrete backend: it owns
+  the FTS5 MATCH query, BM25 ranking, deterministic ordering, query
+  sanitization, and document-metadata filtering, sharing the caller's
+  connection and requiring the tables `ChunkStore` creates. `ChunkStore`
+  satisfies the contract and delegates its search to it, so behavior (empty/
+  whitespace → no hits, non-negative limits, literal punctuation, BM25
+  lower-is-better, `(rank, chunk_id)` tie-break) is unchanged. No schema
+  migration and no rebuild; existing data and FTS indexes are untouched.
+- `search_documents`, `RetrievalService`, and `SearchTool` now depend on the
+  `ChunkIndex` abstraction; all existing wiring (`create_default_registry`,
+  `build_default_agent_tools`, CLI, policy-gated chat tools) passes the
+  `ChunkStore`, which satisfies the protocol structurally. No new permission,
+  tool, write path, dependency, or model call; security/privacy boundaries are
+  unchanged (keyword-only, read-only, no SQL in the tool layer).
+- Future work (deferred, not shipped): `HybridChunkIndex` combining
+  `ChunkIndex` (FTS5) with a `SemanticIndex` (embeddings) and ranking fusion.
+
+Tests: 2621 passing (17 new in `tests/test_retrieval_chunk_index.py`: protocol
+checks, correctness/ranking, Unicode, query boundaries, provenance/filters,
+and dependency-seam fakes). Ruff clean. Format clean.
+
+---
+
 ## Deferred / future work (not yet implemented)
 
 These are explicitly **not** shipped — do not claim them as working:
 
 - **Semantic / hybrid retrieval first-class:** on by default with a pluggable
   vector backend; keyword + semantic + metadata filtering with ranking
-  fusion. This is the next major engineering direction and must preserve the
-  existing policy/security boundary; embeddings stay optional rather than
-  making a hosted/vector service mandatory.
+  fusion. The typed `ChunkIndex` boundary (Phase 33) is the stable seam for
+  this; the embedding/vector backend and hybrid ranking are still future
+  work. Embeddings stay optional rather than making a hosted/vector service
+  mandatory.
 - **Vision-first source pipelines** and denser multimodal extraction
   (whiteboards, mind maps, vision boards) as a first-class source class
   rather than an opt-in model.

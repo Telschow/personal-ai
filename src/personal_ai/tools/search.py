@@ -12,11 +12,12 @@ from personal_ai.retrieval import (
     DEFAULT_SEARCH_LIMIT,
     MAX_SEARCH_LIMIT,
     MAX_SEARCH_QUERY_CHARS,
+    ChunkIndex,
     SearchDocumentsRequest,
     build_retrieval_outcome,
     search_documents,
 )
-from personal_ai.storage.chunks import ChunkStore, DocumentFilter
+from personal_ai.storage.chunks import DocumentFilter
 
 _ALLOWED_ARGUMENT_KEYS = frozenset({"query", "limit", "filter"})
 _ALLOWED_FILTER_KEYS = frozenset(
@@ -100,8 +101,8 @@ class SearchTool:
     and validated document filters.
     """
 
-    def __init__(self, chunk_store: ChunkStore) -> None:
-        self._chunk_store = chunk_store
+    def __init__(self, chunk_index: ChunkIndex) -> None:
+        self._chunk_index = chunk_index
 
     def search_documents(self, arguments: dict[str, object]) -> dict[str, object]:
         """Run one search request from model-supplied JSON arguments.
@@ -109,7 +110,7 @@ class SearchTool:
         Returns the canonical retrieval envelope. Argument validation errors
         (unknown keys, non-string query, out-of-bounds limit) still raise and
         are surfaced as tool execution errors; only a failure to *execute* the
-        query against the store is converted into a safe ``error`` outcome.
+        query against the index is converted into a safe ``error`` outcome.
         """
         unknown_keys = sorted(set(arguments) - _ALLOWED_ARGUMENT_KEYS)
         if unknown_keys:
@@ -122,7 +123,7 @@ class SearchTool:
             document_filter=_parse_document_filter(arguments),
         )
         try:
-            results = search_documents(self._chunk_store, request)
+            results = search_documents(self._chunk_index, request)
             hits = tuple(
                 {
                     "chunk_id": hit.chunk_id,

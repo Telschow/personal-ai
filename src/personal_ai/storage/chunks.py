@@ -325,6 +325,73 @@ def _row_to_chunk(row: tuple[object, ...]) -> DocumentChunk:
     )
 
 
+class SQLiteChunkIndex:
+    """Concrete SQLite FTS5 implementation of the keyword chunk-search contract.
+
+    This is the retrieval boundary's SQLite backend: it owns the FTS5 MATCH
+    query, BM25 ranking, deterministic ordering, query sanitization, and
+    document-metadata filtering, returning typed :class:`ChunkSearchResult`
+    hits. It exposes no FTS5-specific vocabulary to callers — the agent, tool,
+    service, and storage layers depend only on the ``search`` surface, so a
+    future semantic/embedding backend can satisfy the same contract.
+
+    The chunk and derived-FTS tables must already exist (they are created and
+    kept consistent by :class:`ChunkStore`); this class is read-only and
+    shares the caller's connection. Search remains keyword-first and literal:
+    terms are quoted so punctuation never becomes FTS5 syntax. Ranking uses
+    FTS5's native BM25 (smaller ``rank`` = better), and equal ranks are ordered
+    by chunk id for determinism.
+    """
+
+    def __init__(self, connection: sqlite3.Connection) -> None:
+        self._connection = connection
+
+    def search(
+        self,
+        query: str,
+        limit: int = _SEARCH_DEFAULT_LIMIT,
+        filters: DocumentFilter | None = None,
+    ) -> tuple[ChunkSearchResult, ...]:
+        """Return keyword-search hits over stored chunks, best-ranked first.
+
+        Identical semantics to :meth:`ChunkStore.search`, which delegates
+        here. Queries are treated as literal keyword terms, never as FTS5
+        query syntax. Empty or whitespace-only queries return no results.
+
+        ``filters`` optionally constrains hits by authoritative document
+        metadata (see :class:`DocumentFilter`); the limit applies after
+        filtering. Passing None or an empty filter is exactly equivalent to
+        unfiltered search.
+        """
+        if limit < 0:
+            msg = f"Search limit must be non-negative, got {limit}"
+            raise ValueError(msg)
+        expression = _match_expression(query)
+        if expression is None:
+            return ()
+        if filters is None or filters.is_empty:
+            rows = self._connection.execute(_SEARCH_SQL, (expression, limit)).fetchall()
+        else:
+            constraints, parameters = _document_constraints(filters)
+            sql = _FILTERED_SEARCH_SQL_TEMPLATE.format(constraints=constraints)
+            rows = self._connection.execute(
+                sql, (expression, *parameters, limit)
+            ).fetchall()
+        provenance = _document_provenance(self._connection, rows)
+        return tuple(
+            ChunkSearchResult(
+                chunk_id=str(row[0]),
+                document_id=str(row[1]),
+                chunk_index=row[2] if row[2] is None else int(row[2]),
+                text=str(row[3]),
+                rank=float(row[4]),
+                source_type=provenance[index][0],
+                source=provenance[index][1],
+            )
+            for index, row in enumerate(rows)
+        )
+
+
 class ChunkStore:
     """Durable searchable chunks keyed by their content-addressed chunk id.
 
@@ -338,7 +405,10 @@ class ChunkStore:
     Keyword search runs over a derived SQLite FTS5 index that this store
     keeps consistent with ``document_chunks`` inside the same transactions
     as every mutation. The index is rebuildable at any time via
-    :meth:`rebuild_search_index`.
+    :meth:`rebuild_search_index`. Search itself is delegated to
+    :class:`SQLiteChunkIndex` on the same connection, so the FTS5 details
+    live behind the retrieval boundary while the store remains the authority
+    for chunk persistence.
     """
 
     def __init__(self, connection: sqlite3.Connection) -> None:
@@ -347,6 +417,7 @@ class ChunkStore:
         self._connection.execute(_CHUNKS_DOCUMENT_ORDER_INDEX)
         self._connection.execute(_CHUNKS_FTS_SCHEMA)
         self._connection.commit()
+        self._chunk_index = SQLiteChunkIndex(connection)
 
     def _insert_or_update(self, chunk: DocumentChunk) -> bool:
         """Insert the chunk, or overwrite it when its id already exists."""
@@ -448,34 +519,11 @@ class ChunkStore:
         metadata (see :class:`DocumentFilter`); the limit applies after
         filtering. Passing None or an empty filter is exactly equivalent to
         unfiltered search.
+
+        The query is executed by :class:`SQLiteChunkIndex` on the shared
+        connection; the store exposes the same retrieval contract.
         """
-        if limit < 0:
-            msg = f"Search limit must be non-negative, got {limit}"
-            raise ValueError(msg)
-        expression = _match_expression(query)
-        if expression is None:
-            return ()
-        if filters is None or filters.is_empty:
-            rows = self._connection.execute(_SEARCH_SQL, (expression, limit)).fetchall()
-        else:
-            constraints, parameters = _document_constraints(filters)
-            sql = _FILTERED_SEARCH_SQL_TEMPLATE.format(constraints=constraints)
-            rows = self._connection.execute(
-                sql, (expression, *parameters, limit)
-            ).fetchall()
-        provenance = _document_provenance(self._connection, rows)
-        return tuple(
-            ChunkSearchResult(
-                chunk_id=str(row[0]),
-                document_id=str(row[1]),
-                chunk_index=row[2] if row[2] is None else int(row[2]),
-                text=str(row[3]),
-                rank=float(row[4]),
-                source_type=provenance[index][0],
-                source=provenance[index][1],
-            )
-            for index, row in enumerate(rows)
-        )
+        return self._chunk_index.search(query, limit=limit, filters=filters)
 
     def rebuild_search_index(self) -> int:
         """Rebuild the derived full-text index from authoritative chunks.

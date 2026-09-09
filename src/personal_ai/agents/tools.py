@@ -408,9 +408,11 @@ def _review_audit_handler(
 def _document_search_handler(
     chunk_store: object,
 ) -> Callable[[dict[str, object]], object]:
-    """Read-only narrow document/chunk search bound to a ``ChunkStore``-like.
+    """Read-only narrow document/chunk search bound to a chunk index.
 
-    Delegates to the existing read-only keyword search tool
+    ``chunk_store`` is any :class:`~personal_ai.retrieval.ChunkIndex`
+    implementation — today the SQLite FTS5-backed ``ChunkStore``. Delegates
+    to the existing read-only keyword search tool
     (:class:`~personal_ai.tools.search.SearchTool`), which validates the
     argument surface (allow-listed keys, bounded query, typed limit,
     validated metadata filters) and bounds + ranks results through the

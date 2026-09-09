@@ -64,8 +64,40 @@ Argument-validation failures raise as tool-execution errors; only a failure to
 Results are ordered by score descending with an explicit tie-breaker
 (`document_id` then `chunk_id` / `result_type`), so repeated identical queries
 return identical ordering. Ranking today is FTS5 BM25 over the persisted chunk
-store (`ChunkStore.search`); extractions and conversations are merged and
-re-sorted by the `RetrievalService`.
+store; extractions and conversations are merged and re-sorted by the
+`RetrievalService`.
+
+## Retrieval boundary (`ChunkIndex`)
+
+The search surface depends on a typed, keyword-only retrieval contract instead
+of a concrete backend. This is **not** vector or hybrid retrieval yet — it is
+the stable seam those land behind later.
+
+```
+Agent / Chat / Tool
+        │
+        ▼
+  Document-search service   (retrieval.py: search_documents, RetrievalService)
+        │
+        ▼
+      ChunkIndex            (runtime-checkable Protocol; one `search` surface)
+        │
+        ▼
+    SQLiteChunkIndex        (SQLite FTS5 owner: MATCH, BM25, sanitization, filters)
+```
+
+- `ChunkIndex.search(query, limit, filters)` returns typed `ChunkSearchResult`
+  hits, best-ranked first. No FTS5/SQLite vocabulary leaks into the contract:
+  queries are free text, interpreted as literal keyword terms with explicit,
+  deterministic semantics.
+- `SQLiteChunkIndex` (in `storage/chunks.py`) owns the FTS5 MATCH query, BM25
+  ranking, query sanitization, and document-metadata filtering. It shares the
+  caller's connection and requires the chunk/FTS tables created by `ChunkStore`
+  (the store remains the persistence authority and satisfies the same contract).
+- Consumers (`search_documents`, `RetrievalService`, `SearchTool`) depend only
+  on the `ChunkIndex` surface, so a future `HybridChunkIndex` over
+  `ChunkIndex` (FTS5) + a `SemanticIndex` (embeddings) can be introduced
+  without touching the agent, tools, or this contract.
 
 ## Provenance and safety
 

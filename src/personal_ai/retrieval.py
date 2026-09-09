@@ -2,8 +2,13 @@
 
 This module is the stable entry point for searching ingested documents.
 It owns no retrieval logic of its own: every query, including all
-sanitization, ranking, and filtering semantics, is delegated to
-:class:`~personal_ai.storage.chunks.ChunkStore.search`.
+sanitization, ranking, and filtering semantics, is delegated to a
+:class:`ChunkIndex` implementation. The current implementation is
+:class:`~personal_ai.storage.chunks.SQLiteChunkIndex` (FTS5 keyword search);
+:class:`~personal_ai.storage.chunks.ChunkStore` satisfies the contract on
+the same connection. A future semantic/embedding backend can implement the
+same :class:`ChunkIndex` boundary without changing this module, the tools,
+or the agent.
 
 The :class:`RetrievalService` provides a unified search across document
 chunks, structured extractions, and conversation messages, returning a
@@ -12,6 +17,7 @@ single ranked result set.
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Protocol, runtime_checkable
 
 from personal_ai.documents.models import Document
 from personal_ai.events.models import (
@@ -23,7 +29,6 @@ from personal_ai.events.models import (
 from personal_ai.storage.chunks import (
     DEFAULT_SEARCH_LIMIT,
     ChunkSearchResult,
-    ChunkStore,
     DocumentFilter,
 )
 from personal_ai.storage.conversations import (
@@ -73,6 +78,40 @@ RETRIEVAL_ERROR_UNAVAILABLE = "retrieval_unavailable"
 MAX_SEARCH_QUERY_CHARS = 500
 MAX_SEARCH_LIMIT = 50
 
+
+@runtime_checkable
+class ChunkIndex(Protocol):
+    """Typed retrieval boundary over the document/chunk corpus.
+
+    Search consumers depend on this interface instead of a concrete
+    backend, so the agent, tool, service, and storage layers never see how a
+    query is executed. The only current implementation is SQLite FTS5
+    (:class:`~personal_ai.storage.chunks.SQLiteChunkIndex`, exposed through
+    the same connection by :class:`~personal_ai.storage.chunks.ChunkStore`);
+    future semantic/embedding or hybrid backends satisfy this same contract.
+
+    ``search`` returns typed :class:`ChunkSearchResult` hits, best-ranked
+    first. Today that means FTS5 BM25 (smaller rank = better) with a
+    deterministic chunk-id tie-break. Queries are validated and interpreted
+    by the implementation; callers never write or influence FTS5 syntax.
+    """
+
+    def search(
+        self,
+        query: str,
+        limit: int = DEFAULT_SEARCH_LIMIT,
+        filters: DocumentFilter | None = None,
+    ) -> tuple[ChunkSearchResult, ...]:
+        """Return keyword-search hits, best-ranked first.
+
+        ``query`` is free text; implementations treat it as literal keyword
+        terms with explicit, deterministic semantics. ``limit`` bounds the
+        results returned; ``filters`` optionally constrains hits by owning
+        document metadata.
+        """
+        ...
+
+
 __all__ = [
     "DEFAULT_SEARCH_EVENT_TYPES",
     "DEFAULT_SEARCH_LIMIT",
@@ -86,6 +125,7 @@ __all__ = [
     "ActivityBucketsRequest",
     "ActivitySummaryRequest",
     "ChannelTrendsRequest",
+    "ChunkIndex",
     "EventQueryRequest",
     "RetrievalOutcome",
     "RetrievalService",
@@ -156,10 +196,14 @@ class SearchDocumentsRequest:
 
 
 def search_documents(
-    chunk_store: ChunkStore, request: SearchDocumentsRequest
+    chunk_index: ChunkIndex, request: SearchDocumentsRequest
 ) -> tuple[ChunkSearchResult, ...]:
-    """Run one search request and return deterministic ranked hits."""
-    return chunk_store.search(
+    """Run one search request and return deterministic ranked hits.
+
+    ``chunk_index`` is any :class:`ChunkIndex` implementation; today that is
+    the SQLite FTS5-backed store/index shared by the document pipeline.
+    """
+    return chunk_index.search(
         request.query, limit=request.limit, filters=request.document_filter
     )
 
@@ -361,7 +405,8 @@ class RetrievalService:
 
     Combines results from:
 
-    - :class:`~personal_ai.storage.chunks.ChunkStore` (BM25 over document text)
+    - :class:`ChunkIndex` (keyword search over document chunks; today the
+      SQLite FTS5-backed ``SQLiteChunkIndex`` via ``ChunkStore``)
     - :class:`~personal_ai.storage.extractions.ExtractionStore` (structured knowledge)
     - :class:`~personal_ai.storage.conversations.ConversationStore` (conversation messages)
 
@@ -370,12 +415,12 @@ class RetrievalService:
 
     def __init__(
         self,
-        chunk_store: ChunkStore,
+        chunk_index: ChunkIndex,
         extraction_store: ExtractionStore,
         document_store: DocumentStore,
         conversation_store: ConversationStore | None = None,
     ) -> None:
-        self._chunk_store = chunk_store
+        self._chunk_index = chunk_index
         self._extraction_store = extraction_store
         self._document_store = document_store
         self._conversation_store = conversation_store
@@ -394,7 +439,7 @@ class RetrievalService:
         if not isinstance(query, str) or not query.strip():
             return ()
 
-        chunk_hits = self._chunk_store.search(query, limit=limit, filters=filters)
+        chunk_hits = self._chunk_index.search(query, limit=limit, filters=filters)
         extraction_hits = self._extraction_store.search(query, limit=limit)
         conversation_hits: tuple[ConversationSearchResult, ...] = ()
         if self._conversation_store is not None:
