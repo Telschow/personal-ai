@@ -1,14 +1,14 @@
-# Execution Control Plane (Phase 39)
+# Execution Control Plane (legacy Phase 39)
 
 A local-first control plane for the agent-orchestration runtime: durable
 executions, cursor-based event streams, task-/permission-scoped approvals, and
 a Kanban read projection. Everything is single-user, offline, and SQLite-backed
 — there is no distributed stack and no dedicated control-plane UI yet (the
-Phase 44 HTTP gateway serves the `/api/*` contract to clients such as a
+legacy Phase 44 HTTP gateway serves the `/api/*` contract to clients such as a
 future UI).
 
 ```
-CLI (personal_ai.execution.cli)   HTTP gateway (Phase 44: /api/executions/*)
+CLI (personal_ai.execution.cli)   HTTP gateway (legacy Phase 44: /api/executions/*)
    │  --database orch.db                     │
    └───────────────┬─────────────────────────┘
                    ▼
@@ -136,7 +136,7 @@ tool calls) so a UI never needs to read task internals.
 ## Service boundary
 
 `ControlPlane` is the **only** client entry point (the CLI and, as of
-Phase 44, the HTTP gateway at `/api/executions/*`). It owns construction of
+Phase 44 (legacy), the HTTP gateway at `/api/executions/*`). It owns construction of
 the policy engine with the durable
 approver, the router, planner, executor, and board. No client touches SQLite
 store internals. Lifecycle: `create_research_execution`, `run/resume`,
@@ -160,7 +160,7 @@ builds and injected registries alike — so the researcher can collect durable
 memory as untrusted evidence. Without memory the tool is absent, and the rest
 of the runtime is unchanged.
 
-Automatic chat recall (Phase 42) is a *separate* application-layer path that
+Automatic chat recall (legacy Phase 42) is a *separate* application-layer path that
 shares the same `MemoryService → MemoryRetriever → MemoryStore` source of
 truth but never runs through the control plane:
 
@@ -320,19 +320,19 @@ client — there is no reverse dependency:
   permissions, or alter the static `PolicyEngine` (regression test
   `test_prompt_injection_cannot_change_policy_or_request_approvals`).
 - No network, no Ollama, no shell, no eval.
-- Chat memory (Phase 42) is wired at the application layer only — the server
+- Chat memory (legacy Phase 42) is wired at the application layer only — the server
   never touches SQLite; it consumes a pre-built `ChatMemory` and stays behind
   `application → MemoryService → MemoryRetriever → MemoryStore`.
 
-## Roadmap (after Phase 39)
+## Roadmap (after legacy Phase 39)
 
-Phase 39 is implemented and shipped, and the `/api/executions/*` HTTP
-gateway (Phase 44) now serves the durable contract described above. Remaining
+Legacy Phase 39 is implemented and shipped, and the `/api/executions/*` HTTP
+gateway (legacy Phase 44) now serves the durable contract described above. Remaining
 planned work:
 
 - A dedicated control-plane UI (Kanban + approvals) consuming the `/api/...`
   contract — this does **not** exist yet.
 - Multi-agent task graphs beyond the researcher → verifier workflow.
-- Agent memory tools are live (`search_memory`, Phase 41); further
+- Agent memory tools are live (`search_memory`, legacy Phase 41); further
   document-retrieval and memory producer surfaces beyond the current
   allowlist are future work (see `docs/ROADMAP.md`).

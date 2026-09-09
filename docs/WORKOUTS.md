@@ -1,4 +1,4 @@
-# Workout dataset (Phase 43)
+# Workout dataset (legacy Phase 43)
 
 A local-first, normalized activity dataset that lives **beside** the control
 plane (like memories): parsed from raw exports into a SQLite store with
@@ -127,7 +127,7 @@ or a single `.csv`. Plain output is human-readable summaries; `--json` emits
 the structured contract (`WorkoutImportResult.to_dict()`, workout/exercise/
 set dicts).
 
-## Agent tool and HTTP gateway (Phase 44)
+## Agent tool and HTTP gateway (legacy Phase 44)
 
 The `search_workouts` chat tool is registered only when the default tool
 registry is built with a `WorkoutQueryService`:
@@ -165,11 +165,11 @@ The full real export was also smoke-tested against a throwaway `/tmp` database
 (412/412 workouts parsed with zero warnings or errors; re-import skipped the
 unchanged file).
 
-## Deliberately out of scope (Phase 43)
+## Deliberately out of scope (legacy Phase 43)
 
 - **Workouts are not memories or documents** — no automatic memory creation,
   no embeddings, no retrieval index. The read-only `search_workouts` agent tool
-  exists (Phase 44), enters through `ToolRegistry`/policy like every other
+  exists (legacy Phase 44), enters through `ToolRegistry`/policy like every other
   tool, and is fully optional: no data becomes model-visible unless the agent
   is explicitly given the tool.
 - Semantic/trend analytics (PR curves, program comparisons) — the normalized

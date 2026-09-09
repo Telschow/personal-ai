@@ -1,4 +1,4 @@
-# Dockerized Personal AI gateway (Phase 45)
+# Dockerized Personal AI gateway (legacy Phase 45)
 
 This repo ships a production compose setup that runs the existing
 `personal_ai` HTTP gateway (`python -m personal_ai.server`) as a Docker

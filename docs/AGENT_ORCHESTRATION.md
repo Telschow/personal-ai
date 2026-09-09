@@ -1,4 +1,4 @@
-# Agent Orchestration (Phase 39A/39B)
+# Agent Orchestration (legacy Phase 39A/39B)
 
 A local-first, policy-enforced orchestration foundation that lets the personal
 AI decompose an objective into tasks, delegate them to agents, verify results,
@@ -72,7 +72,7 @@ These are enforced in code, and never inferred from natural language:
    registries, not from retrieved text. `TaskSpec.from_llm` discards any
    unknown field and anything not flowing through a registered, policy-checked
    tool is rejected. The same invariant holds for automatic chat recall
-   (Phase 42): injected memory is labeled UNTRUSTED reference data sitting
+   (legacy Phase 42): injected memory is labeled UNTRUSTED reference data sitting
    *below* system policy and the user's request, and its presence or absence
    never changes permissions, approvals, model routing, or agent selection.
 5. **Bounded autonomy.** Plans are finite, tasks carry a lifecycle state
@@ -94,14 +94,14 @@ Planner  ──►  Plan (planned)  ──►  Task[researcher] ──► Task[r
 
 - The researcher task runs `corpus.search` through the policy engine, collects
   ranked passages with provenance into `Evidence`, and writes a research
-  artifact + summary. It can also run the `search_memory` tool (Phase 41) to
+  artifact + summary. It can also run the `search_memory` tool (legacy Phase 41) to
   collect **durable memory** as evidence through the exact same policy path.
 - The reviewer task runs the deterministic verifier against the research
   result (passing evidence + summary as JSON-safe inputs).
 - The plan completes when research and verification both pass; otherwise it is
   marked `failed` with a recorded reason.
 
-## Agent memory retrieval (Phase 41)
+## Agent memory retrieval (legacy Phase 41)
 
 Memory is an additional read-only evidence source for the researcher, plugged
 through the *existing* runtime — no second policy, storage, or execution
@@ -133,7 +133,7 @@ Bulk search is complemented by deterministic **fetch-by-id** — pull one thing
 in full instead of reranking a result window:
 
 - `get_document` (`corpus.search`) requires a wired `document_store` **and**
-  `chunk_store`. It returns the document metadata plus a bounded, determinis�
+  `chunk_store`. It returns the document metadata plus a bounded, determinis�
   tically ordered chunk window (`chunk_index, chunk_id`; `chunk_limit` defaults
   to 20, hard-capped at 100), or `{"status": "not_found", "document_id": ...}`
   for an unknown id — never a fallback.
@@ -157,7 +157,7 @@ in full instead of reranking a result window:
   service is touched). Tools register only when their dependencies are wired;
   they add no write surface (`propose_memory` stays approver-gated).
 
-## Automatic chat recall (Phase 42)
+## Automatic chat recall (legacy Phase 42)
 
 Durable memory also reaches the *conversational* chat path as **application-
 controlled bounded context** — deliberately separate from the `search_memory`
@@ -187,7 +187,7 @@ Properties (all pinned by `tests/test_memory_chat.py`):
 - **Scoped from trusted context only** — `derive_chat_scopes` yields an empty
   set (global-only) unless the application supplies a matching
   `execution_id`/`agent_id`; `project` scope is never usable, exactly as in
-  Phase 41. A missing trusted context never means "search everything".
+  Phase 41 (legacy). A missing trusted context never means "search everything".
 - **Read-only** — recall never writes, never records access, never creates
   memory events or approvals, and never consults policy. Archived/deleted/
   expired memories are never resurrected.
@@ -226,7 +226,7 @@ suite — it reads real personal data.
 ## Control plane and durable approvals
 
 `personal_ai/execution/control_plane.py` is the single service boundary every
-client (the CLI and, as of Phase 44, the HTTP gateway that Open WebUI-facing
+client (the CLI and, as of legacy Phase 44, the HTTP gateway that Open WebUI-facing
 chat and control-plane `/api/*` endpoints build on) talks to. It owns the
 runtime components — and crucially wires an `ApprovalContext` approver into the
 `PolicyEngine` so approvals are **durable** (SQLite), **execution-scoped**,

@@ -107,14 +107,14 @@ excluded from the repo (`.gitignore`) and from Docker images (`.dockerignore`).
                     └──────┬────────┘        └───────────┬────────────┘
                            │                            │ OpenAI-compatible
                            └──────────── May run inside ┤  (Open WebUI / curl)
-                                        a Docker (Phase 45) │
+                                        a Docker (legacy 45)│
                                                             ▼
                                                     Agent + ToolRegistry
                                                             │
                     ┌───────────────┬──────────────────────┼─────────────────┐
                     ▼               ▼                      ▼                 ▼
               Filesystem      Retrieval                Memory           Control plane
-              (sandboxed       services                (Phase 40-42)   (Phase 39)
+              (sandboxed       services                (legacy 40-42) (legacy 39)
                workspace)      └── search_documents     └── explicit     └── executions,
                                └── search_knowledge         memories,        approvals,
                                └── query_events             chat recall      events, board
@@ -129,7 +129,7 @@ excluded from the repo (`.gitignore`) and from Docker images (`.dockerignore`).
                                     ┌───────────────┴───────────────┐
                                     ▼                               ▼
                               Text model (Ollama)            Vision model (Ollama,
-                              + local parser/classifier       optional, Phase 34a)
+                              + local parser/classifier       optional, legacy Phase 34a)
 ```
 
 Three ways to drive the same Agent + ToolRegistry:
@@ -139,7 +139,7 @@ Three ways to drive the same Agent + ToolRegistry:
   search and `--ingest SOURCE PATH` for ingestion.
 - **OpenAI-compatible gateway** — `python -m personal_ai.server
   --workspace DIR --database FILE`, served as model id `personal-ai`.
-- **Dockerized gateway** (Phase 45) — the same server, containerized, on the
+- **Dockerized gateway** — the same server, containerized, on the
   Open WebUI Docker network (no host port).
 
 ### Data model
@@ -257,7 +257,7 @@ See [`docs/OPEN_WEBUI.md`](docs/OPEN_WEBUI.md) for background and the streaming
 - **Gateway:** `http://<host>:8000/v1` with served model id `personal-ai`;
   non-streaming and SSE streaming chat, plus `/v1/models`.
 - **Vision model:** optional, disabled unless `PERSONAL_AI_VISION_MODEL` is
-  set (image-heavy ingestion only, Phase 34a).
+  set (image-heavy ingestion only).
 - **Embedding model:** optional, configured via
   `personal_ai.config.embedding` env (used when embeddings are enabled);
   retrieval does not require it.
@@ -272,14 +272,14 @@ See [`docs/OPEN_WEBUI.md`](docs/OPEN_WEBUI.md) for background and the streaming
 | --- | --- | --- |
 | Local files | `file` | `.txt`, `.md`, `.pdf`, `.png`, `.jpg`, `.jpeg` (recursive, sandboxed) |
 | Google Takeout email | `email` | mbox structure; also Thunderbird mailboxes; fully local, model-free |
-| Financial exports | `financial` | deterministic, structured, model-free (Phase 37) |
+| Financial exports | `financial` | deterministic, structured, model-free |
 | ChatGPT exports | `chatgpt` | conversation export adapter |
 | Gemini exports | `gemini` | conversation export adapter |
 | Google Keep | `google_keep` | notes |
 | NotebookLM | `notebooklm` | article/source exports |
 | Chrome history | `chrome_history` | browsing activity |
 | YouTube history | `youtube` | watched-video activity |
-| Workouts | `workouts` | Boostcamp CSV export → normalized dataset (Phase 43) |
+| Workouts | `workouts` | Boostcamp CSV export → normalized dataset |
 
 ### Ingestion pipeline
 
@@ -297,7 +297,7 @@ image-heavy / mixed) → structured extraction | vision extraction
   are routed to the vision model — when configured — instead of being blindly
   pushed through OCR-like text extraction.
 - **Email and financial** sources are model-free: pure deterministic parsing.
-- **Unified corpus search** (Phase 33) with metadata filtering and provenance.
+- **Unified corpus search** with metadata filtering and provenance.
 
 ### Retrieval
 
@@ -329,7 +329,7 @@ image-heavy / mixed) → structured extraction | vision extraction
 - **Safe audit events.** Event payloads carry ids, kinds, scopes and
   statuses — never private memory text. Physical `purge` is available for
   privacy-sensitive records and survives as an event only.
-- **Automatic chat recall** (Phase 42) labels injected context as UNTRUSTED
+- **Automatic chat recall** labels injected context as UNTRUSTED
   reference data: hostile passages are data, never instructions. A bounded,
   deterministic salient-context fallback surfaces explicit high-importance
   memories (e.g. an identity "preferred name") when a question shares no
@@ -370,7 +370,7 @@ A local-first, normalized activity dataset parsed from a Boostcamp export
 - **Least privilege:** every agent tool runs only through the `PolicyEngine`;
   denied permissions always win, and approval-gated tools never execute until
   a human approves (durable, scope-exact `(execution, task, permission)`).
-- **No model-generated code** is ever executed (Phase 39/39A/39B invariants).
+- **No model-generated code** is ever executed.
 - **Safe logs:** event payloads carry ids/counts/summaries — never full
   document content, conversations, tool arguments, or secrets.
 
@@ -402,25 +402,37 @@ A local-first, normalized activity dataset parsed from a Boostcamp export
 
 ## Roadmap
 
-See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the phased implementation status.
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the phased implementation status;
+[`AGENTS.md`](AGENTS.md) is the source of truth for the canonical phase list.
+All canonical phases below are **implemented**:
 
-- **Completed:** core agent + tools (Phase 1) · document model, loading,
-  classification, extraction, chunking, embeddings (2–7) · retrieval + tools
-  (8–9) · 8+ source adapters · unified corpus search (33) · vision extraction
-  (34a) · financial exports (37) · control plane + orchestration (39–39B) ·
-  memory layer + chat recall (40–42) · approval-gated memory proposals + CLI
-  identity recall (43) · workouts (43) · HTTP gateway (44) ·
-  Dockerized deploy on the Open WebUI network (45) · read-only
-  document/memory fetch tools in the agent layer and chat (31–32) ·
-  bilingual-security + Unicode retrieval foundation (20–21) · corpus audit +
-  Unicode tokenization closure (22–23) · review-queue dedup + resume
-  selection (25) · exception-only human review adjudication with atomic
-  transaction + audit trail (26–27) · durable review-audit observability and
-  time-window filtering (28–30).
-- **Next (not yet implemented):** richer embedding-backed semantic retrieval
-  as a configurable provider, multi-agent chat surfaces above the approval
-  plane, and additional workout/memory consumer surfaces. Nothing beyond the
-  implemented state is claimed to work.
+- **Phases 1–10** — initial core; document model, SQLite stores, file
+  discovery, text extraction, classification, model extraction,
+  chunking/embeddings, retrieval, retrieval tools.
+- **Phases 11–18** — the memory track: policy-gated writes, deterministic
+  automatic policy, corpus + conversation ingestion, LLM-assisted proposals,
+  durable resumable curation, unified curation, exception-only review +
+  curate-all.
+- **Phases 20–23** — multilingual security/PII + Unicode retrieval
+  foundation, multilingual deterministic extraction, bounded aggregate-only
+  real-corpus audit, Unicode tokenization closure.
+- **Phases 25–30** — review-queue dedup + resume, exception-only
+  adjudication, atomic transaction + audit log, audit observability, read-only
+  audit tool, `--since/--until` time-window filtering.
+- **Phases 31–32** — read-only `get_document`/`get_memory` agent tools and
+  their exposure to the interactive chat registry.
+
+Canonical numbers **19** and **24** are reserved (never assigned / historical
+measurement-only pilot). Source adapters, the HTTP gateway, executions,
+workouts and the Dockerized deployment predate the canonical renumbering and
+are kept as clearly-marked legacy phases in `docs/ROADMAP.md`.
+
+- **Next (not yet implemented):** semantic/hybrid retrieval with a pluggable
+  vector backend (keyword + semantic + metadata ranking fusion; embeddings
+  stay optional, policy/security boundary preserved), vision-first source
+  pipelines, durable memories as first-class execution outputs, multi-agent
+  chat above the approval plane, and additional workout/health import
+  formats. Nothing beyond the implemented state is claimed to work.
 
 ---
 

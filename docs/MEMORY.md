@@ -1,7 +1,7 @@
-# Memory Layer (Phase 40)
+# Memory Layer (legacy Phase 40)
 
 Durable, local-first memory that sits **beside execution** under the control
-plane. Phase 40 is deliberately small: a typed domain, SQLite persistence in
+plane. Built under legacy Phase 40, it is deliberately small: a typed domain, SQLite persistence in
 the same database as orchestration, deterministic retrieval — **no vector
 database, no embeddings, no model this phase**.
 
@@ -30,7 +30,7 @@ permissions, change approval requirements, or alter the PolicyEngine.
   user-sourced creation route. **Creation is always explicit**: a draft names
   a `source_type`, and there is no automatic/unrestricted memory writing —
   the only agent-initiated route is the approval-gated `propose_memory`
-  proposal flow (Phase 43), never a background/inferred memorizer.
+  proposal flow (legacy Phase 43), never a background/inferred memorizer.
 - Validation: non-empty content, typed enums, [0,1] bounds, non-global scope
   requires `scope_id`, global scope forbids `scope_id`, ISO timestamps.
 
@@ -92,7 +92,7 @@ execution runtime is unchanged and every `memory_*` call raises
 `memory_create*`, `memory_get/update/search/list/archive/delete/purge/events`.
 The CLI wires memory automatically from the same `--database` file.
 
-## Agent retrieval (Phase 41)
+## Agent retrieval (legacy Phase 41)
 
 Researchers can retrieve durable memory as **read-only, policy-gated context**
 through the existing orchestration stack:
@@ -117,7 +117,7 @@ Key properties:
   `mutates_state=False`. Granting `memory.read` authorizes **only** reads and
   is orthogonal to every writer permission (`filesystem.write`, `shell.run`,
   `memory.write`, ...); granting `memory.read` can never authorize a write.
-  `memory.write` (Phase 43) is a separate, approval-gated permission that only
+  `memory.write` (legacy Phase 43) is a separate, approval-gated permission that only
   the curator's approval flow may exercise — no agent inherits it, and the
   search tool never carries it.
 - **Allowlist** — only the `researcher` profile declares the tool, the skill,
@@ -169,10 +169,10 @@ one memory in full". It is a read-only sibling of `search_memory`:
   curation/adjudication surface; the single policy-gated write path is
   unchanged.
 
-## Agent memory proposals (Phase 43, `personal_ai/tools/memory.py`)
+## Agent memory proposals (legacy Phase 43, `personal_ai/tools/memory.py`)
 
 Memory writing from a model is **user-approval-gated**, not free. The model
-proposes; the *human* disposes. This preserves the Phase 40/41 invariant
+proposes; the *human* disposes. This preserves the legacy Phase 40/41 invariant
 (creation is explicit) while still letting chat request a durable write.
 
     CLI chat (stdin tty)  /  future embedding of the builder
@@ -239,13 +239,13 @@ adapter between a `MemoryContext` and LLM input: every block opens with an
 authorization."* The block has no action surface (no permissions, callbacks,
 approvals, or model configuration).
 
-## Automatic chat recall (Phase 42, `personal_ai/memory/chat.py`)
+## Automatic chat recall (legacy Phase 42, `personal_ai/memory/chat.py`)
 
 The conversational/chat path uses durable memory as **bounded, automatic,
 application-controlled context** through `ChatMemory` — the application-side
 complement to the explicit `search_memory` agent tool:
 
-| | Explicit `search_memory` (Phase 41) | Automatic `ChatMemory` (Phase 42) |
+| | Explicit `search_memory` (legacy Phase 41) | Automatic `ChatMemory` (legacy Phase 42) |
 |---|---|---|
 | Who triggers | Agent (orchestrated researcher) | Application layer before a chat model call |
 | Authorization | `PolicyEngine`, permission `memory.read` | Trusted application context (no policy needed) |
@@ -699,13 +699,13 @@ New suites: `test_memory_domain.py` (validation/contracts),
 `test_memory_security.py` (data-never-policy invariants + real gated
 execution), `test_memory_control_plane.py` (wiring + memory-optional plane),
 `test_cli_memory.py` (subcommands + `--json`), `test_memory_tool.py`
-(Phase 41: tool registration/allowlist, scope escape, no-mutation, event
+(legacy Phase 41: tool registration/allowlist, scope escape, no-mutation, event
 safety, restart persistence, full `research → search_memory → evidence`
-execution), `test_memory_chat.py` (Phase 42: bounded query, scope derivation,
+execution), `test_memory_chat.py` (legacy Phase 42: bounded query, scope derivation,
 deterministic ordering, untrusted rendering, chat integration via the server
 with a fake agent, malicious-memory regression matrix, no-mutation,
 restart persistence, end-to-end HTTP route),
-`test_memory_proposal.py` (Phase 43: permission separation, policy gate
+`test_memory_proposal.py` (legacy Phase 43: permission separation, policy gate
 grant/deny/no-approver, bounded draft surface validation, user-scoped writes,
 read-only researchers still denied, agent-loop end-to-end proposal,
 default-registry registration matrix, `personal_context` privacy, identity
@@ -738,13 +738,13 @@ email/financial/document sources.
 All offline: `:memory:` / `tmp_path` SQLite, no network, no Ollama, no vector
 DB.
 
-## Deliberately out of scope (Phase 40)
+## Deliberately out of scope (legacy Phase 40)
 
 - Embeddings / vector semantic search (retrieval is lexical + operational
   signals; a future `EmbeddingStore` can slot behind `MemoryStore` →
   `MemoryRetriever` without touching the domain).
 - Agent memory **modification** / consolidation: append/update/archive/delete/
-  purge remain exclusive to human/control-plane calls; the Phase 43
+  purge remain exclusive to human/control-plane calls; the legacy Phase 43
   `propose_memory` flow covers *creating* new user-approved memory only, and
   consolidation/proposal-into-memory at the application layer is future work.
 - Memory-triggered actions, memory as capability, embeddings in agent
@@ -767,6 +767,16 @@ DB.
   today.)
 
 ## Phase 20 — Multilingual Security + Unicode Retrieval Foundation
+
+Numbering note: the sections from here use the **canonical** phase numbering
+(the authoritative list is `AGENTS.md`; see the numbering policy in
+`docs/ROADMAP.md`). Labels such as "Phase 21A" and the "Multilingual LLM
+proposal compatibility" slice (historically called "Phase 23" in some docs)
+are **intermediate, non-canonical** sub-work of the canonical 20–23
+multilingual window. Canonical Phase 22 (real-corpus audit) and canonical
+Phase 23 (Unicode tokenization closure) appear together further down this
+file. Phase 24 is a reserved canonical number — the section below is a
+historical, measurement-only pilot.
 
 Security and Unicode foundation for processing the user's English/German/Spanish
 corpus. No new write paths; LLM remains proposal-only.
@@ -888,7 +898,10 @@ Known Phase 21A limitations (documented, not fixed here):
 - Deterministic email adapters emit an app-generated English template (not
   user content) — untouched.
 
-## Phase 23 — Multilingual LLM proposal compatibility
+## Intermediate slice — Multilingual LLM proposal compatibility
+
+This slice is historically numbered "Phase 23" in some docs, but it is
+**not** the canonical Phase 23 (Unicode tokenization closure).
 
 The bounded LLM *proposal* layer now speaks the source language instead of
 dropping non-English candidates. Phase 11–21 invariants are unchanged: the LLM
@@ -918,7 +931,7 @@ write path (deterministic `MemoryPolicy` → `AutomaticMemoryCurator` →
 Bounded real-Ollama pilot (synthetic only, 15 model calls): EN 7 / DE 5 / ES 4
 candidates, zero failed windows, no production database touched.
 
-## Phase 24 — Bounded production-corpus curation readiness pilot
+## Phase 24 (historical — reserved canonical number) — Bounded production-corpus curation readiness pilot
 
 A controlled, measurement-only pilot over a bounded real-corpus sample, run
 entirely in a scratch SQLite database. **Zero repository code changed**; the
@@ -1406,7 +1419,34 @@ and Phase 28/29 regression (no-bounds calls behave exactly as before).
 Full suite: 2467 passing. Ruff clean. Format clean. `git diff --check` clean.
 No production DB was opened writable (production hashes unchanged).
 
-## Phase 23 — Unicode tokenization closure (VS-leak fix + audit metric correction)
+## Canonical Phase 22 — Bounded, aggregate-only real-corpus audit (read-only validation)
+
+`personal-ai memory corpus-audit --source chatgpt|gemini --path <export-dir>
+[--limit N] [--max-messages N] [--scratch-db PATH] [--json]` validates the
+multilingual deterministic memory stack against a bounded, deterministic sample
+of raw conversation exports. It has **no `--database` flag**, so a production
+database is structurally unreachable (`--database` is rejected with exit 2).
+
+- **Reads only raw export files** via the existing loaders/extractor/policy.
+- Sample: `MAX_CONVERSATIONS_PER_SOURCE = 25` conversations/source (sorted
+  discovery), `--max-messages` per conversation (default 1000); full corpus
+  count reported without materializing rows.
+- **Aggregate-only report** (`memory/corpus_audit.py`, `CorpusAuditReport`):
+  languages (en/de/es/unknown/mixed), candidates by kind/language/recurrence/
+  temporal, skip-reason taxonomy (extractor `skip_reasons` counters), policy
+  decisions/sensitivity/secret_rejected/require_approval (via `MemoryPolicy`,
+  pure), evidence provenance valid/invalid (every ref points into the sample),
+  Unicode/tokenization health, Phase 21A ES verb occurrences (measured only,
+  never implemented), `model_calls: 0` / `llm_proposal_layer: not_exercised`.
+- **Dry-run ingestion validation:** optional `--scratch-db` (or a disposable
+  tempfile) seeds the sampled conversations and runs the exact production write
+  path (`ConversationMemoryIngestor` → `AutomaticMemoryCurator` gate →
+  `MemoryStore`) twice; idempotency = zero memory/evidence growth on pass 2.
+  With no scratch path the audit performs zero writes and creates zero files.
+- Privacy: counts/tallies only; content, identifiers, statements, evidence,
+  prompts, secrets never printed or returned. Production DB never opened.
+
+## Canonical Phase 23 — Unicode tokenization closure (VS-leak fix + audit metric correction)
 
 Phase 23 root-causes the Phase 22 zero-token Unicode finding and corrects the
 audit metric. Security invariants unchanged: `MemoryPolicy` scans raw text;
@@ -1443,30 +1483,3 @@ tokenization is lexical-preservation only, never a security/decision authority.
 
 Tests: `tests/test_memory_unicode_tokenization.py` (44 tests) plus reconcile/
 retrieval/audit suites. Full suite: 2553 passing. Ruff clean. Format clean.
-
-## Phase 22 — Bounded, aggregate-only real-corpus audit (read-only validation)
-
-`personal-ai memory corpus-audit --source chatgpt|gemini --path <export-dir>
-[--limit N] [--max-messages N] [--scratch-db PATH] [--json]` validates the
-multilingual deterministic memory stack against a bounded, deterministic sample
-of raw conversation exports. It has **no `--database` flag**, so a production
-database is structurally unreachable (`--database` is rejected with exit 2).
-
-- **Reads only raw export files** via the existing loaders/extractor/policy.
-- Sample: `MAX_CONVERSATIONS_PER_SOURCE = 25` conversations/source (sorted
-  discovery), `--max-messages` per conversation (default 1000); full corpus
-  count reported without materializing rows.
-- **Aggregate-only report** (`memory/corpus_audit.py`, `CorpusAuditReport`):
-  languages (en/de/es/unknown/mixed), candidates by kind/language/recurrence/
-  temporal, skip-reason taxonomy (extractor `skip_reasons` counters), policy
-  decisions/sensitivity/secret_rejected/require_approval (via `MemoryPolicy`,
-  pure), evidence provenance valid/invalid (every ref points into the sample),
-  Unicode/tokenization health, Phase 21A ES verb occurrences (measured only,
-  never implemented), `model_calls: 0` / `llm_proposal_layer: not_exercised`.
-- **Dry-run ingestion validation:** optional `--scratch-db` (or a disposable
-  tempfile) seeds the sampled conversations and runs the exact production write
-  path (`ConversationMemoryIngestor` → `AutomaticMemoryCurator` gate →
-  `MemoryStore`) twice; idempotency = zero memory/evidence growth on pass 2.
-  With no scratch path the audit performs zero writes and creates zero files.
-- Privacy: counts/tallies only; content, identifiers, statements, evidence,
-  prompts, secrets never printed or returned. Production DB never opened.

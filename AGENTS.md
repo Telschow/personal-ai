@@ -675,6 +675,85 @@ CURRENT ROADMAP
 
 Implement in approximately these phases.
 
+==================================================
+ROADMAP NUMBERING POLICY
+==================================================
+
+This section is the SINGLE authoritative roadmap for the current development
+track. The numbers listed below are canonical. Any phase number not listed
+here is historical (a previous numbering scheme) or reserved — do not treat
+it as current canon.
+
+CANONICAL PHASES (all implemented):
+
+    1      Initial core (Ollama client, tool calls, registry, agent, CLI)
+    2–10   Document foundation, file discovery, text extraction, document
+           classification, model extraction, chunking + embeddings,
+           retrieval, retrieval tools, memory plan
+    11–18  Memory track: policy-gated memory writes (11), deterministic
+           automatic policy (12), corpus-layer ingestion (13),
+           conversation-layer ingestion (14), LLM-assisted proposals (15),
+           durable/resumable full-corpus curation (16), unified curation
+           (17), exception-only review + curate-all (18)
+    20–23  Multilingual security/PII + Unicode retrieval foundation (20),
+           multilingual deterministic conversation extraction (21),
+           bounded aggregate-only real-corpus audit (22), Unicode
+           tokenization closure (23)
+    25–30  Review-queue dedup + resume selection (25), exception-only
+           review adjudication (26), atomic adjudication transaction +
+           audit log (27), durable review-audit observability (28),
+           read-only memory_review_audit agent tool (29), deterministic
+           --since/--until time-window filtering (30)
+    31–32  Read-only get_document/get_memory agent tools (31) and their
+           exposure to the interactive chat registry (32)
+
+RESERVED / NOT ASSIGNED:
+
+    19     Never assigned anywhere in this repository's history (no commit,
+           doc, or source reference exists). Do not invent a phase merely
+           to fill the gap.
+    24     Historical only. A measurement-only curation-readiness pilot run
+           with an external /tmp harness (zero repository code changed; see
+           docs/ROADMAP.md). It is not a canonical development phase and
+           never had an AGENTS.md section; its findings motivated the Phase
+           25 P3 fixes.
+
+DEFERRED / FUTURE WORK (no phase number assigned yet):
+
+    Semantic / hybrid retrieval (pluggable vector backend, keyword +
+    semantic + metadata with ranking fusion; embeddings stay optional)
+    Vision-first source pipelines
+    Durable memories as first-class execution outputs
+    Multi-agent chat above the approval plane
+    Additional workout/health import formats
+    Scaling / multi-user / cloud orchestration
+
+INTERPRETING LEGACY PHASE NUMBERS:
+
+- A parallel LEGACY numbering (chronological) exists in historical docs and
+  in some module docstrings/test filenames — e.g. execution/orchestrator
+  "Phase 39/39B", memory/retriever "Phase 40", memory/chat "Phase 42",
+  tools/personal_context "Phase 46", tests named test_phase47/48/49,
+  docs/RETRIEVAL.md "Phase 49". Those references describe the plan under
+  which the code was originally written and are preserved as historical
+  markers; they are NOT canonical. Rough mapping:
+
+      legacy 40–45   ->  pre-renumbering memory layer / agent retrieval /
+                         chat recall / workouts / gateways / Docker —
+                         superseded by canonical 10–18 + unnumbered tracks
+      legacy 46–49   ->  canonical 14–17 (conversation memory ingestion,
+                         LLM proposals, durable curation, unified curation)
+      "46–49" in the
+      2026-09-02
+      retrieval-tool
+      work (tests)   ->  canonical 31–32 (read-only retrieval tools)
+
+- Intermediate labels such as "Phase 21A" (multilingual candidate handoff
+  audit) and the "Multilingual LLM proposal compatibility" slice are
+  supporting sub-work of the canonical 20–23 multilingual window. They are
+  not canonical phases; docs that use them (MEMORY.md, ROADMAP.md) mark them
+  explicitly.
+
 PHASE 1 — CURRENT
 
 DONE:

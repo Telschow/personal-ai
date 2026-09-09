@@ -1,6 +1,6 @@
 # Open WebUI integration (Personal AI as an OpenAI-compatible backend)
 
-Phase 30 turns the accepted CLI POC into a small local HTTP service that Open
+Phase 30 (legacy numbering — the HTTP API track) turns the accepted CLI POC into a small local HTTP service that Open
 WebUI can sit on top of. It does **not** replace the Agent/retrieval layer and
 it does **not** talk to Ollama directly for personal questions.
 
@@ -240,7 +240,7 @@ Subsequent warm requests run at the normal 13–65 s lookup latency.
 
 ---
 
-## 6. Hybrid surface (Phase 39 decision)
+## 6. Hybrid surface (legacy Phase 39 decision)
 
 Open WebUI **is the chat surface only**. The execution control plane (Kanban
 board, durable approvals, execution history) is deliberately **not** exposed

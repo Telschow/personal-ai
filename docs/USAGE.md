@@ -4,7 +4,7 @@ This is a local-first personal assistant backed by a single local chat model
 (`qwen3.5:9b`). It answers questions from your stored personal records
 (conversation notes, watched-video and search history, URL visits).
 
-## Ingesting your files (Phase 31)
+## Ingesting your files (legacy Phase 31)
 
 Bring supported files (`.txt`, `.md`, `.pdf`, `.png`, `.jpg`, `.jpeg`) into a
 knowledge database before (or after) asking questions. Discovery stays inside
@@ -29,7 +29,7 @@ duplicates documents or chunks. Document content is keyed by content hash.
 Knowledge-database-backed agent queries and `--search` then include the ingested
 documents automatically.
 
-## Ingesting your email (Phase 32)
+## Ingesting your email (legacy Phase 32)
 
 Ingest a Google Takeout email export (the `<Folder>.mbox/mbox` structure) into
 the same knowledge database:
@@ -68,7 +68,7 @@ Behavior:
   new documents or chunks. Messages only usable via empty or image-only bodies
   are skipped.
 
-## Financial exports (Phase 37)
+## Financial exports (legacy Phase 37)
 
 Financial CSV exports are canonicalized into a deterministic, privacy-reduced
 searchable form and flow through the same corpus pipeline as any other source.
@@ -103,7 +103,7 @@ Behavior:
 - Brokerage PDF statements need no special handling: they flow through the
   existing `file` / PDF ingestion path.
 
-## Conversation exports — ChatGPT / Gemini (Phase 45 conversation layer)
+## Conversation exports — ChatGPT / Gemini
 
 ChatGPT and Gemini exports are ingested as **conversations**, not documents —
 they live in the `ConversationStore`, never in the document pipeline. The
@@ -213,7 +213,7 @@ Every auto-write flows through the same policy-gated `propose_memory` path;
 `memory review`) and never auto-written. Curation stays separate from the
 `--ingest --memory` flag and from the chat agent.
 
-## Unified corpus search, provenance, and filtering (Phase 33)
+## Unified corpus search, provenance, and filtering (legacy Phase 33)
 
 Ingested files and email share one searchable corpus, regardless of which
 `--ingest` command added them. Search results expose their **source identity**:
@@ -251,7 +251,7 @@ registered only when their stores are wired, and return a `not_found` status
 for unknown ids — never a fabricated fallback. They add no write surface:
 memory writes stay behind the approval-gated `propose_memory` chat tool.
 
-## Vision extraction for image-heavy PDFs (Phase 34a)
+## Vision extraction for image-heavy PDFs (legacy Phase 34a)
 
 Image-only and scanned PDFs are stored at ingestion but contain no readable
 text, so they stay unsearchable unless a vision model is configured. Page-level
@@ -289,7 +289,7 @@ uv run python -m personal_ai.cli \
   "Your question here"
 ```
 
-**HTTP API (Phase 30)** — an OpenAI-compatible service that uses the exact same
+**HTTP API (legacy Phase 30)** — an OpenAI-compatible service that uses the exact same
 Agent, for Open WebUI or any OpenAI-compatible client:
 
 ```

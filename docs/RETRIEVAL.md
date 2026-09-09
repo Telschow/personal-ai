@@ -1,7 +1,7 @@
 # Retrieval Contract
 
 This document describes the canonical contract between the retrieval layer and
-the agent (Phase 49). It is deliberately small and stable: the goal is an
+the agent. It is deliberately small and stable: the goal is an
 explicit, measurable, bounded, and explainable retrieval surface that can later
 integrate hybrid or vector search **without** changing the agent-facing shape.
 

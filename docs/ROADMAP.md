@@ -8,195 +8,78 @@ Status legend: **done** · **current** · **planned**.
 
 ---
 
-## Phase 1 — Core agent (done)
+## Numbering policy
 
-- Typed Ollama HTTP client, local-first (`qwen3.5:9b`).
-- Native Ollama tool-call parsing.
-- Synchronous Agent loop (`max_tool_rounds=8`).
-- Typed `ToolRegistry`; sandboxed filesystem tools (workspace boundary,
-  no shell/exec/subprocess).
-- Default tool registry; CLI agent entrypoint.
-- Requirements: no cloud, no eval/exec, no dynamic imports.
+Two phase-numbering schemes coexist in this repository's history:
 
-## Phases 2–9 — Document foundation, ingestion, retrieval (done)
+- **Canonical** — the current development track. Defined by
+  [`AGENTS.md`](../AGENTS.md) (the single authoritative roadmap) and summarized
+  on this page. Covers Phases 1–18, 20–23, and 25–32.
+- **Legacy** — the pre-renumbering chronological plan (numbered 1–49) that
+  describes how the project actually evolved. Preserved at the bottom of this
+  page as historical context and in a few module docstrings and test filenames
+  as historical markers.
 
-- `Document` / `DocumentChunk` models, stable ids, content hashes.
-- SQLite document/chunk/extraction stores; idempotent re-ingestion.
-- Filesystem loader (`.txt` `.md` `.pdf` `.png` `.jpg` `.jpeg`), sandboxed.
-- Provider-independent text extraction; PDF loading separated from page text.
-- Document classifier: `text-heavy / image-heavy / mixed` (measurable,
-  encapsulated heuristics).
-- Structured extraction through an abstraction (summary, people, projects,
-  goals, tags); text model for text-heavy docs.
-- Chunking; provider-independent embeddings with an Ollama implementation
-  (optional backend).
-- Retrieval: SQLite FTS5 keyword search + metadata-filtered chunk search;
-  `search_documents` tool gated on indexed content.
+The two schemes are independent tracks that overlap only partially. Rough
+mapping of the implemented areas:
 
-## Phases 11–23 — Sources and retrieval hardening (done)
+| Legacy | Canonical | Meaning |
+| --- | --- | --- |
+| 1–9 | 1–10 | Initial core + document foundation |
+| 11–23 | — | Chronological source adapters + retrieval hardening (no canonical number) |
+| 30, 31–37 | — | OpenAI-compatible HTTP API + broader ingestion (no canonical number) |
+| 39–39B, 40–45 | — | Control plane, memory layer, chat recall, workouts, gateways, Docker (no canonical number) |
+| 46–49 | 14–17 | Conversation memory ingestion, LLM proposals, durable curation, unified curation |
 
-- Chrome history and YouTube history event sources.
-- Conversational export adapters: ChatGPT, Gemini, Google Keep, NotebookLM.
-- Google Takeout email (mbox) + Thunderbird mailbox support — model-free.
-- Generic source ingestion orchestration; idempotent embedding backfill.
-- Multi-term conversation ranking and tool-description guidance (Phase 23),
-  temporal bounds on conversation search.
+Legacy numbers still appear in some module docstrings and test filenames
+(e.g. `memory/retriever.py` "Phase 40", `memory/chat.py` "Phase 42",
+`tools/personal_context.py` "Phase 46", tests named `test_phase47/48/49_*`,
+`docs/RETRIEVAL.md` "Phase 49", `execution/` "Phase 39/39B"). These are
+**historical markers** describing the plan under which the code was written —
+not canonical phase numbers.
 
-## Phase 30 — OpenAI-compatible HTTP API (done)
+Intermediate labels that are **not** canonical phases: **Phase 21A**
+(multilingual candidate handoff audit — see `docs/MEMORY.md`) and the
+**Multilingual LLM proposal compatibility** slice (sometimes numbered "Phase
+23" in historical docs). Both are supporting sub-work of the canonical 20–23
+multilingual window and are labeled explicitly below.
 
-- `python -m personal_ai.server` gateway: `/v1/chat/completions`,
-  `/v1/models`, SSE streaming; `PERSONAL_AI_CHAT_MODEL`,
-  `PERSONAL_AI_API_HOST/PORT/TOKEN`, `PERSONAL_AI_WORKSPACE/DATABASE`.
+**Reserved / not assigned canonical numbers:**
 
-## Phases 31–37 — Broader ingestion and search (done)
+- **19** — never assigned anywhere in this repository's history (no commit,
+  doc, or source reference exists). Do not invent a phase merely to fill the
+  gap.
+- **24** — historical only. A measurement-only curation-readiness pilot run
+  with an external `/tmp` harness (zero repository code changed; see the
+  Phase 24 section below). It is not a canonical development phase.
 
-- Phase 31: file ingestion (`.txt/.md/.pdf/images`) with classifier-driven
-  vision routing.
-- Phase 32: email ingestion (Google Takeout / Thunderbird), fully local,
-  model-free.
-- Phase 33: unified corpus search with provenance and metadata filtering.
-- Phase 34a: vision extraction for image-heavy/scanned documents (optional
-  `PERSONAL_AI_VISION_MODEL`).
-- Phase 37: financial exports — deterministic, structured, model-free.
+---
 
-## Phases 39–39B — Execution control plane & orchestration (done)
+## Canonical roadmap
 
-- Durable plans/tasks/events/evidence/approvals in SQLite; cursor-based event
-  streams; Kanban projection.
-- Agents/Skills/Tools/Policy model; `ModelRouter` + `OllamaProvider`
-  (capability routing, model-agnostic).
-- `PolicyEngine` software-policy gate: no tool runs un-checked; approval
-  gates; least privilege; unverified corpus/memory treated as data.
-- Researcher → verifier → synthesis workflow; deterministic verifier;
-  bounded retries, no unrestricted autonomous loop.
-- HTTP gateway surface `/api/executions/*` (Phase 44 brings it over HTTP).
+Every canonical phase is **done**:
 
-## Phase 40 — Memory layer (done)
+- **Phases 1–10** — initial core; document model and SQLite stores; file
+  discovery; text extraction; document classification; model extraction;
+  chunking + embeddings; retrieval; retrieval tools; memory plan.
+- **Phases 11–18** — memory track: policy-gated writes, deterministic
+  automatic policy, corpus and conversation ingestion, LLM-assisted
+  proposals, durable/resumable curation, unified source-independent curation,
+  exception-only review + curate-all.
+- **Phases 20–23** — multilingual security/Unicode retrieval foundation,
+  multilingual deterministic conversation extraction, bounded aggregate-only
+  real-corpus audit, Unicode tokenization closure.
+- **Phases 25–30** — review-queue dedup + resume selection, exception-only
+  review adjudication, atomic adjudication transaction + audit log, durable
+  review-audit observability, read-only `memory_review_audit` agent tool,
+  deterministic `--since/--until` time-window filtering.
+- **Phases 31–32** — read-only `get_document`/`get_memory` agent tools and
+  their exposure to the interactive chat registry.
 
-- Typed memory domain: kinds, scopes, confidence/importance, lifecycle;
-  `MemoryDraft` explicit creation.
-- SQLite persistence in the same DB as orchestration; idempotent upserts;
-  audit-safe events; physical purge.
-- Deterministic weighted lexical retrieval (relevance/importance/confidence/
-  recency), scope-enforced; search never mutates state.
+Detailed per-phase specifications live in `AGENTS.md`. The sections below
+record implementation notes for the most recent canonical work.
 
-## Phase 41 — Agent memory retrieval (done)
-
-- `search_memory` tool for agents (allowlisted, scope-safe, no-mutation),
-  wired through registry + policy; injected as UNTRUSTED reference data.
-
-## Phase 42 — Automatic chat recall (done)
-
-- Application-level `ChatMemory` bounded query + scope derivation for chat
-  contexts; missing trusted context never means "search everything"; distinct
-  from explicit `search_memory`.
-
-## Phase 43 — Workouts (done)
-
-- Boostcamp CSV export parser → normalized `Workout`/exercises/sets with
-  deterministic ids and content hashes; idempotent transactional import;
-  read-only query service; CLI (`import/list/show/exercises`).
-
-## Phase 44 — Control-plane HTTP gateway (done)
-
-- OpenAI-compatible `/v1` (model id `personal-ai`, SSE streaming) plus
-  read-only `/api/memory/*`, `/api/workouts/*`, `/api/executions/*`
-  (list/show/events/board/approve/reject/resume/pause/cancel/retry).
-- Approvals over HTTP are real durable, scope-exact decisions; tightened body
-  validation; unified JSON error mapping; 503 when services are unconfigured.
-
-## Phase 45 — Dockerized gateway on the Open WebUI network (current / shipped)
-
-- `docker/Dockerfile` (Python ≥ 3.14 via uv, `uv lock`-pinned, non-editable
-  install, existing entrypoint) + repo-root `.dockerignore` (private data and
-  dev artifacts excluded) + `docker/docker-compose.yml`.
-- The `personal-ai` service joins external `open-webui_default` and
-  `ollama_default` networks; **no host ports**; `OLLAMA_BASE_URL` env support
-  (`config.load_ollama_settings`, `build_agent(base_url=...)`).
-- Open WebUI reaches the gateway at `http://personal-ai:8000/v1`
-  (model id `personal-ai`); healthcheck via `/v1/models`.
-- Docs: `docs/DOCKER.md`; offline config tests (`test_docker_config.py`,
-  `test_ollama_configuration.py`) keep the suite hermetic.
-- **Status:** implemented, validated (`docker compose config/build/up`,
-  `docker exec open-webui curl http://personal-ai:8000/v1/models`, real chat
-  from the Open WebUI container) and manually tested through Open WebUI.
-
-## Phase 46 — Conversation exports + conversation-layer memory (done)
-
-- `--ingest chatgpt|gemini <dir> --database <db>` routes to the typed
-  `ConversationStore` (idempotent, model-free, aggregate-only reporting); the
-  document-pipeline adapters become library API only.
-- Optional `--memory` runs bounded deterministic conversation extraction
-  (user-authored, active-branch, first-person self-assertions only) through
-  the same policy-gated `propose_memory` write path as corpus extraction;
-  provenance-only evidence, aggregate-only reports, idempotent reruns.
-- `ConversationStore.list_conversations` gained `limit`/`offset` + source
-  filters for bounded reads.
-
-## Phase 47 — LLM-assisted memory candidate proposals (done)
-
-- Bounded LLM candidate proposals (`memory/proposals.py`) on top of Slice 4:
-  one bounded conversation window per model call, strict JSON output contract,
-  validated/never-repaired, deterministic conversion guards (provenance,
-  user-assertion, sensitive-form/negation/question skips), application-set
-  scores and deterministic temporal/kind overrides.
-- The LLM is a proposal generator only: every proposal still flows through
-  `MemoryPolicy` → `AutomaticMemoryCurator` → `propose_memory` gate →
-  `MemoryService.apply_candidate`. Policy remains authoritative; secrets are
-  hard-rejected, salary-style content stays `require_approval`, and a denied
-  `memory.write` gate raises and writes nothing.
-- Bounded I/O (messages/prompt chars/proposals/evidence/retries), count-only
-  failures, provenance-only evidence, idempotent reruns, aggregate-only
-  reporting. Library API only — not wired into the CLI or
-  `create_default_registry`.
-
-## Phase 48 — Durable, resumable full-corpus memory curation (done)
-
-- `memory/curation.py` turns already-ingested conversations into memories
-  through the exact same policy-gated write path (`MemoryPolicy` →
-  `AutomaticMemoryCurator` → `propose_memory` gate →
-  `MemoryService.apply_candidate`); no second write route, and a denied
-  `memory.write` gate raises `ApprovalRequiredError` and writes nothing.
-- Durable `CurationStore` checkpoints (runs/units/review, content-free except
-  the explicit review queue), idempotent reruns, resumable runs (`--resume`
-  completes exactly the unfinished units; stale `running` units recovered,
-  `failed` units retried), and dry runs that create no rows and no writes.
-  A run with failed units is recorded `failed` (`unit_failures`) and remains
-  resumable; a successful run is `completed` (terminal).
-- Bounded I/O everywhere (`limit`/`offset` paging on
-  `ConversationStore.list_conversations`/`list_messages`, `max_messages`,
-  `max_prompt_chars`, `max_candidates_per_unit`, `max_retries`,
-  `max_model_calls` (0 = unlimited), per-unit `unit_timeout_seconds`).
-- CLI surface: `personal-ai memory curate|runs|review` (separate from the
-  `--ingest --memory` flag and from `personal_ai.execution.cli`); `review` is
-  the only statement-printing surface. Not wired into
-  `create_default_registry`.
-
-## Phase 49 — Unified full-corpus memory curation (done)
-
-Curation is source-independent; no new write route exists.
-
-- Source adapters (`memory/adapters.py`) discover bounded `CurationUnit`
-  objects and derive `MemoryCandidate` instances routed through the exact same
-  policy-gated write path as conversations (`MemoryPolicy` →
-  `AutomaticMemoryCurator` → `propose_memory` gate → `MemoryService`).
-  Adapters never write SQLite or touch memory tables.
-- Sources: **email** (one unit per recurring non-webmail sender domain;
-  deterministic mode is metadata-only with id-only monthly evidence; LLM mode
-  adds bounded representative-email windows), **financial** (counted only, zero
-  candidates and zero model calls in both modes), **document** (deterministic
-  proposes nothing; LLM mode shows bounded chunk windows gated on
-  `allowed_document_ids`), **workout/activity** (deterministic-only, reusing
-  the conserved corpus extractors). chatgpt/gemini unchanged.
-- `CurationAdapterRegistry` resolves the single adapter per source; units carry
-  `source_id`/`source_version`/`signal`; checkpoints record `source_version`.
-- Adaptive LLM gating: `--min-signal` and `--sample` downgrade low-signal /
-  over-budget LLM units to deterministic processing, never calling the model
-  for a downgraded unit.
-- All step/run/report checkpoints stay aggregate-only; review-queue rows are
-  the only statement-bearing table. Not part of `create_default_registry`.
-
-## Phase 20 — Multilingual Security + Unicode Retrieval Foundation (done)
+### Phase 20 — Multilingual Security + Unicode Retrieval Foundation (done)
 
 Security and Unicode foundation for processing the user's English/German/Spanish
 corpus. No new write paths; LLM remains proposal-only.
@@ -222,7 +105,7 @@ P0-3 Review CLI Fixes:
 - Fixed SQLite syntax error in `list_pending_review` / `list_review`.
 - Tests updated for aggregate-only default + `--show` flag behavior.
 
-## Phase 21 — Multilingual Deterministic Conversation Extraction (done)
+### Phase 21 — Multilingual Deterministic Conversation Extraction (done)
 
 Deterministic conversation-memory extraction now fully covers English, German,
 and Spanish user messages. Phase 11–20 invariants unchanged.
@@ -248,7 +131,20 @@ and Spanish user messages. Phase 11–20 invariants unchanged.
 Tests: 2475 passing (incl. Unicode tokenization matrix, no ASCII
 transliteration). Ruff clean. Format clean.
 
-## Phase 23 — Multilingual LLM Proposal Compatibility (done)
+### Phase 21A — Multilingual candidate handoff audit (intermediate slice)
+
+A non-canonical supporting slice of the canonical 20–23 multilingual window:
+end-to-end verification that German/Spanish candidates survive the full write
+path with original-language forms, original provenance, and idempotency, plus
+the typographic-quote fix in the deterministic extractor. Full detail and the
+"Phase 21A limitations" list live in `docs/MEMORY.md`.
+
+### Multilingual LLM proposal compatibility (intermediate slice)
+
+This slice is numbered "Phase 23" in some historical docs (`docs/MEMORY.md`,
+earlier editions of this page) but it is **not** the canonical Phase 23
+(Unicode tokenization closure). It is intermediate sub-work of the canonical
+20–23 multilingual window.
 
 The bounded LLM *proposal* layer now speaks the source language instead of
 dropping every non-English candidate. Phase 11–21 invariants unchanged; the
@@ -276,11 +172,62 @@ candidates, zero failed windows, no production database touched.
 
 Tests: 2299 passing. Ruff clean. Format clean. `git diff --check` clean.
 
-## Phase 24 — Bounded production-corpus curation readiness pilot (done)
+### Phase 22 — Real-corpus audit + dry-run ingestion validation (done)
 
-Measurement-only pilot over a bounded real-corpus sample in a scratch SQLite
-database; **zero repository code changed**. Existing `memory curate` runner
-used as-is behind an external `/tmp` harness (deleted afterwards).
+- **`memory corpus-audit`**: bounded, aggregate-only, read-only audit of raw
+  ChatGPT/Gemini exports through the existing loaders/extractor/policy. No
+  `--database` flag; production DB structurally unreachable.
+- **Sampling**: 25 conversations/source deterministic sorted sample;
+  `--max-messages` per-conversation cap.
+- **Metrics**: language distribution (en/de/es/unknown/mixed), candidates by
+  kind/language/temporal, skip-reason taxonomy, policy decisions/sensitivity,
+  evidence provenance validity, Unicode/tokenization health, Phase 21A ES
+  trigger-gap occurrence counts (measured only — never implemented),
+  `model_calls: 0`.
+- **Dry-run ingestion validation**: optional disposable scratch SQLite runs
+  the exact policy-gated production write path twice; zero memory/evidence
+  growth on pass 2 proves idempotency.
+
+Real-corpus pilot (bounded): ChatGPT 469→25 sampled (131 user messages, 1 goal
+candidate); Gemini 170→25 sampled (122 user messages, 7 candidates → 5 distinct
+memories). Both idempotent, `secret_rejected: 0`, `require_approval: 0`,
+`evidence_invalid: 0`, model calls 0, production DB hashes unchanged.
+
+Tests: 2507 passing (32 new: `tests/test_memory_corpus_audit.py` +
+`tests/test_cli_memory_corpus_audit.py`). Ruff clean. Format clean.
+
+### Phase 23 — Unicode tokenization closure (done)
+
+- **Shared Unicode primitive** (`memory/tokenizer.py`): NFKC + casefold +
+  variation-selector strip + `regex` tokenization (`[\p{L}\p{M}\p{N}]+`),
+  consumed by retriever and reconciler. `tokenize()` re-exported from retriever.
+- **VS-leak fix (real defect):** variation selectors (U+FE00–U+FE0F,
+  U+E0100–U+E01EF) no longer leak junk `Mn`-tokens (`❤️` -> no tokens; live:
+  ChatGPT `tokens_total` 2919→2917, `unicode_tokens` 28→26).
+- **Audit metric correction:** `zero_token_messages` now counts only true
+  zero-token gaps (bucketed via `zero_token_by_category`); messages whose
+  non-ASCII letters NFKC/casefold to ASCII (fullwidth/alphanumeric-symbol)
+  tokenize normally and are counted as `ascii_folded_messages` (expected, not
+  an error). `unicode_errors` non-empty only for `lexical_unicode > 0`.
+- **Real-corpus outcome:** ChatGPT + Gemini `zero_token_messages: 0`,
+  `ascii_folded_messages: 2` each, `unicode_errors: []`. The Phase 22
+  "4 zero-token messages" were ASCII-folded lexical messages — a metric
+  artifact, not a tokenization failure. Scratch-DB idempotency + prod DB
+  hashes unchanged.
+- **Explicitly out of scope:** segmentation, semantic retrieval, embeddings,
+  translation, transliteration. `München` stays `münchen`; `café` != `cafe`.
+
+Tests: 2553 passing (44 in `tests/test_memory_unicode_tokenization.py` plus
+reconcile/audit additions). Ruff clean. Format clean.
+
+### Phase 24 — Bounded production-corpus curation readiness pilot (historical)
+
+**This is a reserved canonical number.** The pilot ran outside the codebase:
+measurement-only over a bounded real-corpus sample in a scratch SQLite
+database; **zero repository code changed**. The existing `memory curate`
+runner was used as-is behind an external `/tmp` harness (deleted afterwards).
+It is documented here as history and is **not** a canonical development phase;
+its findings motivated the canonical Phase 25 fixes.
 
 - **Scope:** 50 conversations per source (chatgpt, gemini), deterministic
   order; 172 + 376 messages, 93 + 187 user messages, 219 + 610 user sentences.
@@ -304,7 +251,7 @@ used as-is behind an external `/tmp` harness (deleted afterwards).
 Tests: suite re-run green post-pilot (zero code change). Ruff clean. Format
 clean.
 
-## Phase 25 — Review-queue deduplication + resume selection fixes (done)
+### Phase 25 — Review-queue deduplication + resume selection fixes (done)
 
 Fixes the two P3 reliability defects Phase 24 observed without any memory
 architecture, policy, candidate, or write-path changes.
@@ -332,7 +279,7 @@ architecture, policy, candidate, or write-path changes.
 
 Tests: 2318 passing (19 new). Ruff clean. Format clean.
 
-## Phase 26 — Review-queue adjudication (exception-only human approval) (done)
+### Phase 26 — Review-queue adjudication (exception-only human approval) (done)
 
 Proves the durable review queue is safe and correct from candidate → policy →
 curator → pending obligation → human adjudication → canonical write, across the
@@ -367,7 +314,7 @@ multilingual), over synthetic fixtures and scratch DBs only.
 Tests: 2356 passing (37 new: 35 adjudication + 2 CLI approve/reject end-to-end).
 Ruff clean. Format clean. `git diff --check` clean. No production DB touched.
 
-## Phase 27 — Review adjudication transaction + audit-log hardening (done)
+### Phase 27 — Review adjudication transaction + audit-log hardening (done)
 
 Makes the human adjudication boundary crash-safe and durably auditable without
 adding any write route or changing the security model.
@@ -401,7 +348,7 @@ Tests: 2367 passing (11 new in `tests/test_memory_review_transaction.py` plus th
 Phase 26 adjudication suite now exercising the atomic path). Ruff clean. Format
 clean. `git diff --check` clean. No production DB touched.
 
-## Phase 28 — Durable review audit observability & aggregate adjudication reporting (done)
+### Phase 28 — Durable review audit observability & aggregate adjudication reporting (done)
 
 Read-only, privacy-safe observability over the Phase 27 audit trail plus
 aggregate adjudication in `curate-all`. **No new write route**; atomic
@@ -434,7 +381,7 @@ Tests: 2377 passing (12 new in `tests/test_memory_review_audit_cli.py`). Ruff
 clean. Format clean. `git diff --check` clean. No production DB touched
 (production hashes unchanged).
 
-## Phase 29 — Read-only memory review audit agent tool (done)
+### Phase 29 — Read-only memory review audit agent tool (done)
 
 A strictly read-only agent-facing surface for the Phase 27/28 audit trail.
 **No new write or adjudication route**; observability is separate from human
@@ -465,7 +412,7 @@ Tests: 2399 passing (20 new in `tests/test_memory_review_audit_tool.py`). Ruff
 clean. Format clean. `git diff --check` clean. No production DB touched
 (production hashes unchanged).
 
-## Phase 30 — Deterministic review-audit time-window filtering (done)
+### Phase 30 — Deterministic review-audit time-window filtering (done)
 
 Deterministic, inclusive `--since`/`--until` filtering over the durable review
 audit trail. **No new write, adjudication, policy, curation, or transaction
@@ -498,7 +445,7 @@ Tests: 2467 passing (68 new in `tests/test_memory_audit_time_filtering.py`).
 Ruff clean. Format clean. `git diff --check` clean. No production DB touched
 (production hashes unchanged).
 
-## Phase 31 — Read-only agent retrieval tools: get_document + get_memory (done)
+### Phase 31 — Read-only agent retrieval tools: get_document + get_memory (done)
 
 The agent/tool layer gains read-only, policy-gated fetch tools for documents
 and durable memories. Phase 11–30 invariants unchanged; **no new write or
@@ -529,7 +476,7 @@ adjudication route exists**.
 
 Tests: `tests/test_agent_get_document_get_memory.py` (31 tests).
 
-## Phase 32 — Chat exposure of read-only retrieval tools (done)
+### Phase 32 — Chat exposure of read-only retrieval tools (done)
 
 The Phase 31 fetch tools are now directly addressable from the interactive chat
 `ToolRegistry` (`create_default_registry`). Phase 11–31 invariants unchanged;
@@ -558,13 +505,17 @@ Tests: 2604 passing (20 new in `tests/test_chat_get_document_get_memory.py`;
 `tests/test_cli_wiring.py` updated for the wired chat set). Ruff clean. Format
 clean.
 
-## Planned (not yet implemented)
+---
+
+## Deferred / future work (not yet implemented)
 
 These are explicitly **not** shipped — do not claim them as working:
 
 - **Semantic / hybrid retrieval first-class:** on by default with a pluggable
   vector backend; keyword + semantic + metadata filtering with ranking
-  fusion.
+  fusion. This is the next major engineering direction and must preserve the
+  existing policy/security boundary; embeddings stay optional rather than
+  making a hosted/vector service mandatory.
 - **Vision-first source pipelines** and denser multimodal extraction
   (whiteboards, mind maps, vision boards) as a first-class source class
   rather than an opt-in model.
@@ -576,6 +527,218 @@ These are explicitly **not** shipped — do not claim them as working:
   beyond Boostcamp CSV.
 - Any scaling, multi-user, or cloud-level orchestration.
 
+---
+
+## Historical roadmap (legacy numbering)
+
+The sections below use the **pre-renumbering chronological numbering** and are
+kept verbatim as history. Inside these sections, references such as "Phase 30"
+(the HTTP API) or "Phase 23" (multi-term conversation ranking) use the legacy
+numbers and are **not** the canonical phases of the same number. Legacy
+46–49 describe the same memory-curation work as canonical 14–17.
+
+### Phase 1 — Core agent (done)
+
+- Typed Ollama HTTP client, local-first (`qwen3.5:9b`).
+- Native Ollama tool-call parsing.
+- Synchronous Agent loop (`max_tool_rounds=8`).
+- Typed `ToolRegistry`; sandboxed filesystem tools (workspace boundary,
+  no shell/exec/subprocess).
+- Default tool registry; CLI agent entrypoint.
+- Requirements: no cloud, no eval/exec, no dynamic imports.
+
+### Phases 2–9 — Document foundation, ingestion, retrieval (done)
+
+- `Document` / `DocumentChunk` models, stable ids, content hashes.
+- SQLite document/chunk/extraction stores; idempotent re-ingestion.
+- Filesystem loader (`.txt` `.md` `.pdf` `.png` `.jpg` `.jpeg`), sandboxed.
+- Provider-independent text extraction; PDF loading separated from page text.
+- Document classifier: `text-heavy / image-heavy / mixed` (measurable,
+  encapsulated heuristics).
+- Structured extraction through an abstraction (summary, people, projects,
+  goals, tags); text model for text-heavy docs.
+- Chunking; provider-independent embeddings with an Ollama implementation
+  (optional backend).
+- Retrieval: SQLite FTS5 keyword search + metadata-filtered chunk search;
+  `search_documents` tool gated on indexed content.
+
+### Phases 11–23 — Sources and retrieval hardening (done)
+
+- Chrome history and YouTube history event sources.
+- Conversational export adapters: ChatGPT, Gemini, Google Keep, NotebookLM.
+- Google Takeout email (mbox) + Thunderbird mailbox support — model-free.
+- Generic source ingestion orchestration; idempotent embedding backfill.
+- Multi-term conversation ranking and tool-description guidance (Phase 23),
+  temporal bounds on conversation search.
+
+### Phase 30 — OpenAI-compatible HTTP API (done)
+
+- `python -m personal_ai.server` gateway: `/v1/chat/completions`,
+  `/v1/models`, SSE streaming; `PERSONAL_AI_CHAT_MODEL`,
+  `PERSONAL_AI_API_HOST/PORT/TOKEN`, `PERSONAL_AI_WORKSPACE/DATABASE`.
+
+### Phases 31–37 — Broader ingestion and search (done)
+
+- Phase 31: file ingestion (`.txt/.md/.pdf/images`) with classifier-driven
+  vision routing.
+- Phase 32: email ingestion (Google Takeout / Thunderbird), fully local,
+  model-free.
+- Phase 33: unified corpus search with provenance and metadata filtering.
+- Phase 34a: vision extraction for image-heavy/scanned documents (optional
+  `PERSONAL_AI_VISION_MODEL`).
+- Phase 37: financial exports — deterministic, structured, model-free.
+
+### Phases 39–39B — Execution control plane & orchestration (done)
+
+- Durable plans/tasks/events/evidence/approvals in SQLite; cursor-based event
+  streams; Kanban projection.
+- Agents/Skills/Tools/Policy model; `ModelRouter` + `OllamaProvider`
+  (capability routing, model-agnostic).
+- `PolicyEngine` software-policy gate: no tool runs un-checked; approval
+  gates; least privilege; unverified corpus/memory treated as data.
+- Researcher → verifier → synthesis workflow; deterministic verifier;
+  bounded retries, no unrestricted autonomous loop.
+- HTTP gateway surface `/api/executions/*` (Phase 44 brings it over HTTP).
+
+### Phase 40 — Memory layer (done)
+
+- Typed memory domain: kinds, scopes, confidence/importance, lifecycle;
+  `MemoryDraft` explicit creation.
+- SQLite persistence in the same DB as orchestration; idempotent upserts;
+  audit-safe events; physical purge.
+- Deterministic weighted lexical retrieval (relevance/importance/confidence/
+  recency), scope-enforced; search never mutates state.
+
+### Phase 41 — Agent memory retrieval (done)
+
+- `search_memory` tool for agents (allowlisted, scope-safe, no-mutation),
+  wired through registry + policy; injected as UNTRUSTED reference data.
+
+### Phase 42 — Automatic chat recall (done)
+
+- Application-level `ChatMemory` bounded query + scope derivation for chat
+  contexts; missing trusted context never means "search everything"; distinct
+  from explicit `search_memory`.
+
+### Phase 43 — Workouts (done)
+
+- Boostcamp CSV export parser → normalized `Workout`/exercises/sets with
+  deterministic ids and content hashes; idempotent transactional import;
+  read-only query service; CLI (`import/list/show/exercises`).
+
+### Phase 44 — Control-plane HTTP gateway (done)
+
+- OpenAI-compatible `/v1` (model id `personal-ai`, SSE streaming) plus
+  read-only `/api/memory/*`, `/api/workouts/*`, `/api/executions/*`
+  (list/show/events/board/approve/reject/resume/pause/cancel/retry).
+- Approvals over HTTP are real durable, scope-exact decisions; tightened body
+  validation; unified JSON error mapping; 503 when services are unconfigured.
+
+### Phase 45 — Dockerized gateway on the Open WebUI network (current / shipped)
+
+- `docker/Dockerfile` (Python ≥ 3.14 via uv, `uv lock`-pinned, non-editable
+  install, existing entrypoint) + repo-root `.dockerignore` (private data and
+  dev artifacts excluded) + `docker/docker-compose.yml`.
+- The `personal-ai` service joins external `open-webui_default` and
+  `ollama_default` networks; **no host ports**; `OLLAMA_BASE_URL` env support
+  (`config.load_ollama_settings`, `build_agent(base_url=...)`).
+- Open WebUI reaches the gateway at `http://personal-ai:8000/v1`
+  (model id `personal-ai`); healthcheck via `/v1/models`.
+- Docs: `docs/DOCKER.md`; offline config tests (`test_docker_config.py`,
+  `test_ollama_configuration.py`) keep the suite hermetic.
+- **Status:** implemented, validated (`docker compose config/build/up`,
+  `docker exec open-webui curl http://personal-ai:8000/v1/models`, real chat
+  from the Open WebUI container) and manually tested through Open WebUI.
+
+### Phase 46 — Conversation exports + conversation-layer memory (done)
+
+- `--ingest chatgpt|gemini <dir> --database <db>` routes to the typed
+  `ConversationStore` (idempotent, model-free, aggregate-only reporting); the
+  document-pipeline adapters become library API only.
+- Optional `--memory` runs bounded deterministic conversation extraction
+  (user-authored, active-branch, first-person self-assertions only) through
+  the same policy-gated `propose_memory` write path as corpus extraction;
+  provenance-only evidence, aggregate-only reports, idempotent reruns.
+- `ConversationStore.list_conversations` gained `limit`/`offset` + source
+  filters for bounded reads.
+
+This legacy phase is canonical **Phase 14** (conversation-layer memory
+ingestion).
+
+### Phase 47 — LLM-assisted memory candidate proposals (done)
+
+- Bounded LLM candidate proposals (`memory/proposals.py`) on top of Slice 4:
+  one bounded conversation window per model call, strict JSON output contract,
+  validated/never-repaired, deterministic conversion guards (provenance,
+  user-assertion, sensitive-form/negation/question skips), application-set
+  scores and deterministic temporal/kind overrides.
+- The LLM is a proposal generator only: every proposal still flows through
+  `MemoryPolicy` → `AutomaticMemoryCurator` → `propose_memory` gate →
+  `MemoryService.apply_candidate`. Policy remains authoritative; secrets are
+  hard-rejected, salary-style content stays `require_approval`, and a denied
+  `memory.write` gate raises and writes nothing.
+- Bounded I/O (messages/prompt chars/proposals/evidence/retries), count-only
+  failures, provenance-only evidence, idempotent reruns, aggregate-only
+  reporting. Library API only — not wired into the CLI or
+  `create_default_registry`.
+
+This legacy phase is canonical **Phase 15** (LLM-assisted memory candidate
+proposals).
+
+### Phase 48 — Durable, resumable full-corpus memory curation (done)
+
+- `memory/curation.py` turns already-ingested conversations into memories
+  through the exact same policy-gated write path (`MemoryPolicy` →
+  `AutomaticMemoryCurator` → `propose_memory` gate →
+  `MemoryService.apply_candidate`); no second write route, and a denied
+  `memory.write` gate raises `ApprovalRequiredError` and writes nothing.
+- Durable `CurationStore` checkpoints (runs/units/review, content-free except
+  the explicit review queue), idempotent reruns, resumable runs (`--resume`
+  completes exactly the unfinished units; stale `running` units recovered,
+  `failed` units retried), and dry runs that create no rows and no writes.
+  A run with failed units is recorded `failed` (`unit_failures`) and remains
+  resumable; a successful run is `completed` (terminal).
+- Bounded I/O everywhere (`limit`/`offset` paging on
+  `ConversationStore.list_conversations`/`list_messages`, `max_messages`,
+  `max_prompt_chars`, `max_candidates_per_unit`, `max_retries`,
+  `max_model_calls` (0 = unlimited), per-unit `unit_timeout_seconds`).
+- CLI surface: `personal-ai memory curate|runs|review` (separate from the
+  `--ingest --memory` flag and from `personal_ai.execution.cli`); `review` is
+  the only statement-printing surface. Not wired into
+  `create_default_registry`.
+
+This legacy phase is canonical **Phase 16** (durable, resumable full-corpus
+memory curation).
+
+### Phase 49 — Unified full-corpus memory curation (done)
+
+Curation is source-independent; no new write route exists.
+
+- Source adapters (`memory/adapters.py`) discover bounded `CurationUnit`
+  objects and derive `MemoryCandidate` instances routed through the exact same
+  policy-gated write path as conversations (`MemoryPolicy` →
+  `AutomaticMemoryCurator` → `propose_memory` gate → `MemoryService`).
+  Adapters never write SQLite or touch memory tables.
+- Sources: **email** (one unit per recurring non-webmail sender domain;
+  deterministic mode is metadata-only with id-only monthly evidence; LLM mode
+  adds bounded representative-email windows), **financial** (counted only, zero
+  candidates and zero model calls in both modes), **document** (deterministic
+  proposes nothing; LLM mode shows bounded chunk windows gated on
+  `allowed_document_ids`), **workout/activity** (deterministic-only, reusing
+  the conserved corpus extractors). chatgpt/gemini unchanged.
+- `CurationAdapterRegistry` resolves the single adapter per source; units carry
+  `source_id`/`source_version`/`signal`; checkpoints record `source_version`.
+- Adaptive LLM gating: `--min-signal` and `--sample` downgrade low-signal /
+  over-budget LLM units to deterministic processing, never calling the model
+  for a downgraded unit.
+- All step/run/report checkpoints stay aggregate-only; review-queue rows are
+  the only statement-bearing table. Not part of `create_default_registry`.
+
+This legacy phase is canonical **Phase 17** (unified full-corpus memory
+curation).
+
+---
+
 ## Working principles
 
 - Every slice lands with tests; the full suite stays hermetic (no Ollama, no
@@ -585,50 +748,3 @@ These are explicitly **not** shipped — do not claim them as working:
   Chroma in the default path).
 - Private personal data, exports, and live databases never enter the repo or
   published images.
-## Phase 22 — Real-corpus audit (implemented)
-
-- **`memory corpus-audit`**: bounded, aggregate-only, read-only audit of raw
-  ChatGPT/Gemini exports through the existing loaders/extractor/policy. No
-  `--database` flag; production DB structurally unreachable.
-- **Sampling**: 25 conversations/source deterministic sorted sample;
-  `--max-messages` per-conversation cap.
-- **Metrics**: language distribution (en/de/es/unknown/mixed), candidates by
-  kind/language/temporal, skip-reason taxonomy, policy decisions/sensitivity,
-  evidence provenance validity, Unicode/tokenization health, Phase 21A ES
-  trigger-gap occurrence counts (measured only — never implemented),
-  `model_calls: 0`.
-- **Dry-run ingestion validation**: optional disposable scratch SQLite runs
-  the exact policy-gated production write path twice; zero memory/evidence
-  growth on pass 2 proves idempotency.
-
-Real-corpus pilot (bounded): ChatGPT 469→25 sampled (131 user messages, 1 goal
-candidate); Gemini 170→25 sampled (122 user messages, 7 candidates → 5 distinct
-memories). Both idempotent, `secret_rejected: 0`, `require_approval: 0`,
-`evidence_invalid: 0`, model calls 0, production DB hashes unchanged.
-
-Tests: 2507 passing (32 new: `tests/test_memory_corpus_audit.py` +
-`tests/test_cli_memory_corpus_audit.py`). Ruff clean. Format clean.
-
-## Phase 23 — Unicode tokenization closure (implemented)
-
-- **Shared Unicode primitive** (`memory/tokenizer.py`): NFKC + casefold +
-  variation-selector strip + `regex` tokenization (`[\p{L}\p{M}\p{N}]+`),
-  consumed by retriever and reconciler. `tokenize()` re-exported from retriever.
-- **VS-leak fix (real defect):** variation selectors (U+FE00–U+FE0F,
-  U+E0100–U+E01EF) no longer leak junk `Mn`-tokens (`❤️` -> no tokens; live:
-  ChatGPT `tokens_total` 2919→2917, `unicode_tokens` 28→26).
-- **Audit metric correction:** `zero_token_messages` now counts only true
-  zero-token gaps (bucketed via `zero_token_by_category`); messages whose
-  non-ASCII letters NFKC/casefold to ASCII (fullwidth/alphanumeric-symbol)
-  tokenize normally and are counted as `ascii_folded_messages` (expected, not
-  an error). `unicode_errors` non-empty only for `lexical_unicode > 0`.
-- **Real-corpus outcome:** ChatGPT + Gemini `zero_token_messages: 0`,
-  `ascii_folded_messages: 2` each, `unicode_errors: []`. The Phase 22
-  "4 zero-token messages" were ASCII-folded lexical messages — a metric
-  artifact, not a tokenization failure. Scratch-DB idempotency + prod DB
-  hashes unchanged.
-- **Explicitly out of scope:** segmentation, semantic retrieval, embeddings,
-  translation, transliteration. `München` stays `münchen`; `café` != `cafe`.
-
-Tests: 2553 passing (44 in `tests/test_memory_unicode_tokenization.py` plus
-reconcile/audit additions). Ruff clean. Format clean.
