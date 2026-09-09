@@ -14,7 +14,7 @@ Two phase-numbering schemes coexist in this repository's history:
 
 - **Canonical** — the current development track. Defined by
   [`AGENTS.md`](../AGENTS.md) (the single authoritative roadmap) and summarized
-  on this page. Covers Phases 1–18, 20–23, 25–32, 33, 34, and 35.
+  on this page. Covers Phases 1–18, 20–23, 25–32, 33, 34, 35, and 36.
 - **Legacy** — the pre-renumbering chronological plan (numbered 1–49) that
   describes how the project actually evolved. Preserved at the bottom of this
   page as historical context and in a few module docstrings and test filenames
@@ -630,17 +630,65 @@ clean. Format clean.
 
 ---
 
+### Phase 36 — Hybrid chunk index / deterministic RRF fusion (done)
+
+`HybridChunkIndex` (`hybrid_index.py`) now implements the Phase 35 contract
+unchanged. Phase 11–35 invariants unchanged; **keyword (FTS5) remains the
+production-default backend** — hybrid is a construction-injected, explicitly
+wired choice, never a silent mode switch.
+
+- `HybridChunkIndex(keyword_index: ChunkIndex, semantic_index: ChunkIndex)`
+  composes two `ChunkIndex` backends (slot 0 = keyword, slot 1 = semantic,
+  attributed by constructor position, never by type) and returns the same
+  typed `tuple[ChunkSearchResult, ...]`. No public contract expansion: no
+  `backend=`/`mode=`/weights/`k`/candidate-limit parameters on the search API.
+  `isinstance(hybrid, ChunkIndex)` holds; consumers are backend-agnostic.
+- Fusion = **Reciprocal Rank Fusion**, `k = 60`, equal weights, **0-based**
+  tuple positions: `RRF(c) = Σ 1/(60 + rank_i(c))`, absent backend → 0. Raw
+  BM25/cosine values are never combined, normalized, or compared; the exact
+  fused value becomes the public `rank` via `dataclasses.replace`.
+- Dedup keyed on `chunk_id` (never text/provenance/score); a duplicated chunk
+  merges both backends' contributions into one module-private frozen
+  `_HybridCandidate` and surfaces once with preserved provenance.
+- `candidate_limit = min(4 × final_limit, 200)` per backend; the public
+  `limit` caps only the final slice. Both backends receive the same query,
+  the same `DocumentFilter`, and the same candidate window, in fixed
+  keyword→semantic order.
+- Deterministic order: `fusion_score` descending, `chunk_id` ascending,
+  independent of merge/dict order; empty/whitespace queries and `limit == 0`
+  return `()` with zero backend calls; `limit < 0` raises `ValueError`.
+- Empty backends are empty contributions ("no compatible embeddings" =
+  semantic-empty, not error); a **raising** backend fails the whole search
+  closed — hybrid never returns partial results, and the existing `SearchTool`
+  envelope reports the canonical `error` / `retrieval_unavailable`.
+- Not shipped this phase (design exclusions): weighted/normalized fusion,
+  configurable `k`, ANN/vector DB, caching, parallelism, learned reranking,
+  the `PERSONAL_AI_RETRIEVAL_MODE` env knob, CLI flags, and any default-wiring
+  change. `RetrievalService`, `search_documents`, tools, policy, and memory
+  are unchanged.
+
+Tests: 43 new in `tests/test_hybrid_chunk_index.py` (hermetic,
+dependency-seam fakes: protocol, union, dedup, exact RRF/0-based formula,
+candidate windows, final cap, filter propagation, empty query/limits, empty
+backends, fail-closed + tool envelope, determinism, provenance, public-result
+shape, raw-score independence) plus integration through `search_documents` and
+`SearchTool`. Ruff clean. Format clean.
+
+---
+
 ## Deferred / future work (not yet implemented)
 
 These are explicitly **not** shipped — do not claim them as working:
 
-- **Hybrid retrieval on by default with ranking fusion:** implementing the
-  Phase 35 design (Reciprocal Rank Fusion over the Phase 33 FTS5 keyword +
-  Phase 34 semantic backends), with pluggable backend selection, the
-  `PERSONAL_AI_RETRIEVAL_MODE` knob, and — for large corpora — an ANN/vector
-  backend to replace the Phase 34 brute-force scan. Fusion weights/`k`/candidate
-  windows stay un-tuned until the Phase 37 evaluation set exists. Embeddings
-  stay optional rather than making a hosted/vector service mandatory.
+- **Hybrid retrieval enabled/selected in production + tuning:** the Phase 35
+  design is implemented (Phase 36 `HybridChunkIndex`, RRF `k=60`, candidate
+  window `min(4×limit, 200)`, fail-closed), but keyword remains the default
+  and nothing is wired to select hybrid. Future work: pluggable backend
+  selection / the `PERSONAL_AI_RETRIEVAL_MODE` operator knob, tuning of
+  `k`/weights/candidate windows against the Phase 37 synthetic evaluation set,
+  and — for large corpora — an ANN/vector backend to replace the Phase 34
+  brute-force scan. Embeddings stay optional rather than making a hosted/vector
+  service mandatory.
 - **Vision-first source pipelines** and denser multimodal extraction
   (whiteboards, mind maps, vision boards) as a first-class source class
   rather than an opt-in model.

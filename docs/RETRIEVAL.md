@@ -72,9 +72,9 @@ never mixed. Extractions and conversations are merged and re-sorted by the
 ## Retrieval boundary (`ChunkIndex`)
 
 The search surface depends on a typed retrieval contract instead of a concrete
-backend. Two implementations currently satisfy it. **Keyword (FTS5) retrieval is
-the default in every production wiring path** — semantic retrieval is an
-explicit, construction-injected choice, never a silent switch.
+backend. Three implementations satisfy it. **Keyword (FTS5) retrieval is
+the default in every production wiring path** — semantic and hybrid retrieval
+are explicit, construction-injected choices, never silent switches.
 
 ```
 Agent / Chat / Tool
@@ -85,11 +85,11 @@ Agent / Chat / Tool
         ▼
       ChunkIndex            (runtime-checkable Protocol; one `search` surface)
         │
-        ├──────────────┬─────────────────────────────┐
-        ▼              ▼                             ▼
-  SQLiteChunkIndex  SemanticChunkIndex      (future) HybridChunkIndex
-  (FTS5 keyword,    (stored-vector cosine,            (fusion —
-   default)          explicit provider)               not implemented)
+        ├──────────────┬────────────────────────────┐
+        ▼              ▼                            ▼
+  SQLiteChunkIndex  SemanticChunkIndex      HybridChunkIndex
+  (FTS5 keyword,    (stored-vector cosine,      (RRF fusion of
+   default)          explicit provider)          the two below)
 ```
 
 - `ChunkIndex.search(query, limit, filters)` returns typed `ChunkSearchResult`
@@ -117,18 +117,26 @@ Agent / Chat / Tool
   failure is an `error`, never a `no_matches`. Embeddings for a corpus remain
   optional: without a configured embedding model, the default keyword path is
   fully functional and never initializes an embedding provider.
+- `HybridChunkIndex` (in `hybrid_index.py`) composes a keyword and a semantic
+  backend behind the same contract and merges their candidate sets with
+  Reciprocal Rank Fusion (`k = 60`, equal weights, 0-based positions,
+  `candidate_limit = min(4 × limit, 200)`). It is implemented in Phase 36 and
+  detailed in the [hybrid section](#hybrid-retrieval) below.
 - Consumers (`search_documents`, `RetrievalService`, `SearchTool`) depend only
-  on the `ChunkIndex` surface, so a future `HybridChunkIndex` over these two
-  backends (score fusion + renormalization) can be introduced without touching
-  the agent, tools, or this contract.
+  on the `ChunkIndex` surface, so the keyword, semantic, and hybrid backends
+  are interchangeable without touching the agent, tools, or this contract.
 
 ---
 
-## Hybrid retrieval design (Phase 35 — design only, not implemented)
+## Hybrid retrieval design (Phase 35 — design; implemented in Phase 36)
 
-This section is the design contract for `HybridChunkIndex`. **Nothing here is
-implemented and no fusion code exists.** It exists so that Phase 36 can
-implement the hybrid layer without reopening the fundamental design questions.
+This section is the design contract for `HybridChunkIndex`. Phase 35 (design,
+commit `103dc2f`) produced it with **no fusion code**; Phase 36 (implementation,
+`hybrid_index.py`) encoded it unchanged. The binding decisions below are what
+Phase 36 implements exactly: RRF `k = 60`, equal weights, 0-based positions,
+`candidate_limit = min(4 × final_limit, 200)`, `chunk_id` dedup, identical
+filters, fail-closed backends, and the deterministic `(-score, chunk_id)`
+order.
 
 ### 35.0 Scope and non-goals
 
@@ -139,14 +147,13 @@ backends it is constructed with; it writes nothing; it never resolves
 provenance itself and never calls any memory API. Search results remain
 untrusted data that is never converted into memories or anything else.
 
-This phase explicitly does **not** implement:
+Phase 35 (design-only) implemented none of the fusion options. Phase 36
+implements exactly one — **Reciprocal Rank Fusion** — and still excludes:
 
 - weighted score fusion,
-- reciprocal rank fusion,
 - normalized score fusion,
 - learned ranking / cross-encoder reranking,
-- heuristic score blending,
-- any `HybridChunkIndex.search()` that combines results.
+- heuristic score blending.
 
 ### 35.1 Roles of the three indexes
 
@@ -494,6 +501,53 @@ the `ChunkSearchResult` type and its field set are unchanged.
   memory writes; provenance forwarded, never recomputed.
 - **Contract:** `isinstance(HybridChunkIndex, ChunkIndex)`; frozen
   `ChunkSearchResult` values; no backend-specific fields on public results.
+
+## Hybrid retrieval implementation (Phase 36)
+
+Implemented in `src/personal_ai/hybrid_index.py`. `HybridChunkIndex` composes
+two `ChunkIndex` backends (keyword = constructor slot 0, semantic = slot 1,
+never runtime-typed) and encodes the Phase 35 decisions verbatim:
+
+- **Algorithm and constants:** Reciprocal Rank Fusion with `RRF_K = 60.0`,
+  equal weights, **0-based** positions, and
+  `candidate_limit(final_limit) = min(4 * final_limit, 200)`.
+- **Dedup:** keyed on `chunk_id`. A chunk present in both windows merges both
+  rank contributions into one frozen, module-private `_HybridCandidate` and
+  surfaces exactly once; identical text in different `chunk_id`s stays two
+  results.
+- **Champion:** the content-identical `ChunkSearchResult` is forwarded from
+  the canonical hit (keyword evidence first); provenance is never recomputed.
+- **Ordering:** `fusion_score` descending, `chunk_id` ascending, independent
+  of dict/merge order; ties always resolve by `chunk_id`.
+- **Public rank:** each result's `rank` is replaced via
+  `dataclasses.replace(result, rank=fusion)` with the exact fused RRF value
+  (no rounding, no renormalization). Raw backend ranks/scores are never
+  combined, normalized, compared, or exposed on the public result.
+- **Backend calls:** fixed order (keyword, then semantic); both receive the
+  same query, the same `DocumentFilter`, and the same candidate window.
+- **Empty inputs:** empty/whitespace-only queries and `limit == 0` return `()`
+  with zero backend calls; `limit < 0` raises `ValueError` before any backend
+  call.
+- **Empty backends:** an empty backend is an empty contribution — keyword
+  empty → semantic results, semantic empty → keyword results, both empty →
+  `()`; "no compatible embeddings" is semantic-empty, never an error.
+- **Fail closed:** any backend raising propagates unchanged; the existing
+  `SearchTool` envelope converts it to the canonical
+  `error` / `retrieval_unavailable` outcome. `results` / `no_matches` /
+  `error` separation is preserved; no partial results are ever returned.
+
+Not implemented (Phase 36 scope exclusions): weighted/normalized fusion,
+configurable `k`, ANN/vector DB, caching, parallelism, learned reranking, and
+the `PERSONAL_AI_RETRIEVAL_MODE` env knob. **Keyword remains the production
+default**; configuring an embedding model never changes retrieval mode.
+Hybrid selection is wire-time construction injection only.
+
+Tests: `tests/test_hybrid_chunk_index.py` — dependency-seam fakes only
+(no SQLite/FTS5/embeddings/providers), covering the full §35.16 matrix:
+protocol, union, dedup, exact RRF formula + 0-based indexing, candidate
+windows, final cap, filter propagation, empty query/limits, empty backends,
+fail-closed failures (including the `SearchTool` envelope), determinism,
+provenance preservation, public-result shape, and raw-score independence.
 
 ## Provenance and safety
 

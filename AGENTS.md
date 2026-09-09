@@ -717,6 +717,15 @@ CANONICAL PHASES (all implemented):
             fusion_score-desc + chunk_id-asc ordering, chunk_id identity,
             candidate_limit = min(4*limit, 200), fail-closed backend policy;
             no fusion implementation shipped — see docs/RETRIEVAL.md)
+36     HybridChunkIndex / deterministic RRF fusion (composition over the
+            ChunkIndex abstraction: RRF k=60, equal weights, 0-based
+            positions, candidate_limit = min(4*limit, 200), chunk_id dedup,
+            same query/filters/candidate-window to both backends in fixed
+            keyword→semantic order, RRF-desc + chunk_id-asc ordering, empty
+            backend = empty contribution, backend raise = fail closed,
+            provenance forwarded; keyword remains the production default —
+            hybrid selection is wire-time construction only, no
+            retrieval-mode knob)
 
 RESERVED / NOT ASSIGNED:
 
@@ -731,12 +740,12 @@ RESERVED / NOT ASSIGNED:
 
 DEFERRED / FUTURE WORK (no phase number assigned yet):
 
-    Hybrid retrieval on by default with ranking fusion (pluggable backend
-    selection; implementing the Phase 35 RRF contract over the non-comparable
-    Phase 33 FTS5 and Phase 34 semantic scales — weights/k/candidate windows
-    stay un-tuned until the Phase 37 evaluation set exists; ANN/vector
-    backend for large corpora beyond the brute-force scan; embeddings stay
-    optional)
+    Hybrid retrieval enabled/selected in production + tuning (Phase 35
+    contract is implemented as Phase 36 HybridChunkIndex/RRF but keyword stays
+    the production default; future work: pluggable backend selection and the
+    PERSONAL_AI_RETRIEVAL_MODE operator knob, tuning k/weights/candidate
+    windows against the Phase 37 evaluation set, ANN/vector backend for large
+    corpora beyond the brute-force scan; embeddings stay optional)
     Vision-first source pipelines
     Durable memories as first-class execution outputs
     Multi-agent chat above the approval plane

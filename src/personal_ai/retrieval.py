@@ -3,15 +3,16 @@
 This module is the stable entry point for searching ingested documents.
 It owns no retrieval logic of its own: every query, including all
 sanitization, ranking, and filtering semantics, is delegated to a
-:class:`ChunkIndex` implementation. Two implementations exist today:
+:class:`ChunkIndex` implementation. Three implementations exist:
 :class:`~personal_ai.storage.chunks.SQLiteChunkIndex` (FTS5 keyword search,
-the production default) and
-:class:`~personal_ai.semantic_index.SemanticChunkIndex` (cosine-similarity
-retrieval over persisted embeddings). Both produce the same typed
+the production default), :class:`~personal_ai.semantic_index.SemanticChunkIndex`
+(cosine-similarity retrieval over persisted embeddings), and
+:class:`~personal_ai.hybrid_index.HybridChunkIndex` (both backends fused with
+Reciprocal Rank Fusion). All produce the same typed
 :class:`~personal_ai.storage.chunks.ChunkSearchResult` hits, and consumers —
-the tools and the agent — never know which backend is in use. Their ranking
-scales differ on purpose and are not directly comparable; a later hybrid
-fusion phase will merge and renormalize them.
+the tools and the agent — never know which backend is in use. The keyword and
+semantic ranking scales differ on purpose and are not directly comparable;
+the hybrid backend merges them by rank position (RRF), never by raw value.
 
 The :class:`RetrievalService` provides a unified search across document
 chunks, structured extractions, and conversation messages, returning a
@@ -92,7 +93,8 @@ class ChunkIndex(Protocol):
     (:class:`~personal_ai.storage.chunks.SQLiteChunkIndex`, exposed through
     the same connection by :class:`~personal_ai.storage.chunks.ChunkStore`)
     and the embedding-backed semantic index
-    (:class:`~personal_ai.semantic_index.SemanticChunkIndex`), selected by
+    (:class:`~personal_ai.semantic_index.SemanticChunkIndex`), or a hybrid of
+    the two (:class:`~personal_ai.hybrid_index.HybridChunkIndex`), selected by
     construction injection.
 
     ``search`` returns typed :class:`ChunkSearchResult` hits, best-ranked
