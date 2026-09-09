@@ -707,8 +707,11 @@ CANONICAL PHASES (all implemented):
     31–32  Read-only get_document/get_memory agent tools (31) and their
            exposure to the interactive chat registry (32)
 33     Typed chunk retrieval / SQLite FTS5 retrieval boundary (keyword-only
-           ChunkIndex seam; semantic/vector backend + hybrid ranking still
-           future work)
+            ChunkIndex seam; hybrid ranking fusion still future work)
+34     Semantic chunk retrieval / embedding-backed ChunkIndex (cosine
+            similarity over persisted embeddings behind the same ChunkIndex
+            boundary; keyword FTS5 remains the default; no vector DB/ANN,
+            no hybrid fusion yet)
 
 RESERVED / NOT ASSIGNED:
 
@@ -723,10 +726,10 @@ RESERVED / NOT ASSIGNED:
 
 DEFERRED / FUTURE WORK (no phase number assigned yet):
 
-    Semantic / hybrid retrieval (pluggable vector backend, keyword +
-    semantic + metadata with ranking fusion; embeddings stay optional —
-    the Phase 33 typed ChunkIndex seam is implemented, the vector backend
-    and hybrid ranking remain future work)
+    Hybrid retrieval on by default with ranking fusion (pluggable backend
+    selection; merging/renormalizing the non-comparable Phase 33 FTS5 and
+    Phase 34 semantic scales; ANN/vector backend for large corpora beyond the
+    brute-force scan; embeddings stay optional)
     Vision-first source pipelines
     Durable memories as first-class execution outputs
     Multi-agent chat above the approval plane

@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+from collections.abc import Iterable
 from types import TracebackType
 from typing import Self
 
@@ -111,6 +112,26 @@ class EmbeddingStore:
             (chunk_id,),
         ).fetchone()
         return _row_to_embedding(chunk_id, row) if row is not None else None
+
+    def list_for_chunks(self, chunk_ids: Iterable[str]) -> dict[str, Embedding]:
+        """Return stored embeddings for the given chunk ids in one batched read.
+
+        Chunk ids without a stored embedding are simply absent from the
+        result; the returned mapping preserves input order. Each row passes
+        the same strict validation as :meth:`get`, so corrupt or
+        self-inconsistent vectors raise instead of being silently reused.
+        """
+        ids = tuple(dict.fromkeys(chunk_ids))
+        if not ids:
+            return {}
+        placeholders = ", ".join("?" * len(ids))
+        rows = self._connection.execute(
+            f"SELECT {', '.join(_COLUMNS)} FROM chunk_embeddings "
+            f"WHERE chunk_id IN ({placeholders})",
+            ids,
+        ).fetchall()
+        found = {str(row[0]): _row_to_embedding(str(row[0]), row) for row in rows}
+        return {chunk_id: found[chunk_id] for chunk_id in ids if chunk_id in found}
 
     def delete(self, chunk_id: str) -> bool:
         """Remove one embedding; returns True if a row was deleted."""

@@ -3,7 +3,7 @@
 This document describes the canonical contract between the retrieval layer and
 the agent. It is deliberately small and stable: the goal is an
 explicit, measurable, bounded, and explainable retrieval surface that can later
-integrate hybrid or vector search **without** changing the agent-facing shape.
+integrate hybrid search **without** changing the agent-facing shape.
 
 ## Model-facing result envelope
 
@@ -63,15 +63,18 @@ Argument-validation failures raise as tool-execution errors; only a failure to
 
 Results are ordered by score descending with an explicit tie-breaker
 (`document_id` then `chunk_id` / `result_type`), so repeated identical queries
-return identical ordering. Ranking today is FTS5 BM25 over the persisted chunk
-store; extractions and conversations are merged and re-sorted by the
+return identical ordering. Per-backend ranking differs by design — keyword
+retrieval ranks by FTS5 BM25 over the persisted chunk store (smaller = better),
+semantic retrieval by cosine similarity (higher = better), and the two scales are
+never mixed. Extractions and conversations are merged and re-sorted by the
 `RetrievalService`.
 
 ## Retrieval boundary (`ChunkIndex`)
 
-The search surface depends on a typed, keyword-only retrieval contract instead
-of a concrete backend. This is **not** vector or hybrid retrieval yet — it is
-the stable seam those land behind later.
+The search surface depends on a typed retrieval contract instead of a concrete
+backend. Two implementations currently satisfy it. **Keyword (FTS5) retrieval is
+the default in every production wiring path** — semantic retrieval is an
+explicit, construction-injected choice, never a silent switch.
 
 ```
 Agent / Chat / Tool
@@ -82,22 +85,42 @@ Agent / Chat / Tool
         ▼
       ChunkIndex            (runtime-checkable Protocol; one `search` surface)
         │
-        ▼
-    SQLiteChunkIndex        (SQLite FTS5 owner: MATCH, BM25, sanitization, filters)
+        ├──────────────┬─────────────────────────────┐
+        ▼              ▼                             ▼
+  SQLiteChunkIndex  SemanticChunkIndex      (future) HybridChunkIndex
+  (FTS5 keyword,    (stored-vector cosine,            (fusion —
+   default)          explicit provider)               not implemented)
 ```
 
 - `ChunkIndex.search(query, limit, filters)` returns typed `ChunkSearchResult`
-  hits, best-ranked first. No FTS5/SQLite vocabulary leaks into the contract:
-  queries are free text, interpreted as literal keyword terms with explicit,
-  deterministic semantics.
+  hits, best-ranked first, with a deterministic chunk-id tie-break. Rank
+  semantics are backend-specific: the keyword index ranks lexically (FTS5
+  BM25, smaller rank = better), the semantic index ranks by cosine similarity
+  in `[0, 1]` (higher = better). The two scales are **not directly
+  comparable**; only an implementation interprets its own rank. No
+  FTS5/SQLite/embedding vocabulary leaks into the contract: queries are free
+  text with explicit, deterministic semantics per backend.
 - `SQLiteChunkIndex` (in `storage/chunks.py`) owns the FTS5 MATCH query, BM25
   ranking, query sanitization, and document-metadata filtering. It shares the
   caller's connection and requires the chunk/FTS tables created by `ChunkStore`
   (the store remains the persistence authority and satisfies the same contract).
+- `SemanticChunkIndex` (in `semantic_index.py`) is the embedding-backed
+  sibling: it loads stored vectors from the existing `chunk_embeddings` table
+  (`EmbeddingStore`) via a single batched read, embeds the query once through an
+  `EmbeddingProvider`, and ranks candidates by cosine similarity — nearest
+  neighbours first, brute-force by design (no vector database, no ANN).
+  Vectors are only comparable under the provider's current model, so stored
+  vectors from another model are excluded (run the existing `EmbeddingBackfiller`
+  to renew them); a same-model dimension mismatch fails deterministically
+  instead of producing a meaningless score. Search is observationally read-only
+  — it never backfills, writes, or re-embeds the corpus — and a provider/store
+  failure is an `error`, never a `no_matches`. Embeddings for a corpus remain
+  optional: without a configured embedding model, the default keyword path is
+  fully functional and never initializes an embedding provider.
 - Consumers (`search_documents`, `RetrievalService`, `SearchTool`) depend only
-  on the `ChunkIndex` surface, so a future `HybridChunkIndex` over
-  `ChunkIndex` (FTS5) + a `SemanticIndex` (embeddings) can be introduced
-  without touching the agent, tools, or this contract.
+  on the `ChunkIndex` surface, so a future `HybridChunkIndex` over these two
+  backends (score fusion + renormalization) can be introduced without touching
+  the agent, tools, or this contract.
 
 ## Provenance and safety
 

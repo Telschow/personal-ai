@@ -14,7 +14,7 @@ Two phase-numbering schemes coexist in this repository's history:
 
 - **Canonical** — the current development track. Defined by
   [`AGENTS.md`](../AGENTS.md) (the single authoritative roadmap) and summarized
-  on this page. Covers Phases 1–18, 20–23, 25–32, and 33.
+  on this page. Covers Phases 1–18, 20–23, 25–32, 33, and 34.
 - **Legacy** — the pre-renumbering chronological plan (numbered 1–49) that
   describes how the project actually evolved. Preserved at the bottom of this
   page as historical context and in a few module docstrings and test filenames
@@ -510,8 +510,10 @@ clean.
 ### Phase 33 — Typed chunk retrieval / SQLite FTS5 retrieval boundary (done)
 
 The search surface now runs behind a typed, keyword-only retrieval seam.
-Phase 11–32 invariants unchanged; **semantic/hybrid/vector retrieval is NOT
-implemented** — this is the stable boundary that future work lands behind.
+Phase 11–32 invariants unchanged; this phase shipped **keyword-only** —
+semantic/vector retrieval is NOT part of Phase 33 (it landed separately in
+Phase 34). This phase established the stable boundary that future work lands
+behind.
 
 - `ChunkIndex` (`retrieval.py`) is a `@runtime_checkable` Protocol with one
   `search(query, limit, filters)` surface returning typed `ChunkSearchResult`
@@ -540,16 +542,64 @@ and dependency-seam fakes). Ruff clean. Format clean.
 
 ---
 
+### Phase 34 — Semantic chunk retrieval / embedding-backed `ChunkIndex` (done)
+
+The `ChunkIndex` boundary now has a second, additive implementation: semantic
+retrieval over the repository's persisted embeddings. Phase 11–33 invariants
+unchanged; **keyword (FTS5) retrieval remains the default in every production
+wiring path**, and hybrid ranking fusion is still future work.
+
+- `SemanticChunkIndex` (`semantic_index.py`) consumes the exact `ChunkIndex`
+  protocol: `search(query, limit=DEFAULT_SEARCH_LIMIT, filters=None)` returns
+  the same typed `tuple[ChunkSearchResult, ...]`. No `search_semantic` /
+  `search_fts` variants and no second contract — consumers (`search_documents`,
+  `RetrievalService`, `SearchTool`) are backend-agnostic.
+- Ranking: `rank` is cosine similarity in `[0, 1]` (higher = better),
+  deterministic `(-score, chunk_id)` order, and candidates with negative
+  similarity are not matches. The keyword (BM25, smaller = better) and
+  semantic scales are **not** numerically comparable by design; merging them
+  belongs to the future hybrid-fusion phase (`_chunk_to_search_result` and the
+  unified `RetrievalService` merge are unchanged).
+- Vectors come from the existing `EmbeddingStore` (`chunk_embeddings` table,
+  no schema migration) via a new single batched read `list_for_chunks`.
+  The query is embedded once through the existing `EmbeddingProvider` seam —
+  no Ollama import here, no new provider. Backend selection is
+  construction-injection only; there is **no setting that silently switches
+  retrieval semantics**. Without a configured/allowed embedding model the
+  default keyword path is fully functional and never initializes an embedding
+  provider.
+- Model identity is a hard boundary: stored vectors whose `model` differs from
+  the provider's current model are excluded from candidates (never compared);
+  a same-model dimension mismatch fails deterministically. Embeddings are
+  refreshed explicitly via the existing `EmbeddingBackfiller` (unchanged);
+  search never backfills or writes — it is observationally read-only (verified
+  by regression test). Provider/storage failure propagates as an execution
+  error (`retrieval_unavailable` in the tool envelope), never as zero results.
+- Early returns: empty/whitespace query → `()` without provider contact; no
+  candidate vectors for the current model → `()` without provider contact.
+  Document-metadata filters (`DocumentFilter`) restrict candidates before any
+  similarity is computed. Nearest-neighbour scan is brute-force by design — no
+  vector database, no ANN/FAISS/Qdrant/Chroma, no cloud provider, no new
+  dependency.
+
+Tests: 30 new (26 in `tests/test_semantic_chunk_index.py` — protocol, cosine
+contract, ranking/tie-breaks, model identity, filters, Unicode, read-only
+regression, provider-failure propagation, `search_documents`/`SearchTool`
+integration — plus 4 `list_for_chunks` cases in `tests/test_storage_embeddings.py`).
+Ruff clean. Format clean.
+
+---
+
 ## Deferred / future work (not yet implemented)
 
 These are explicitly **not** shipped — do not claim them as working:
 
-- **Semantic / hybrid retrieval first-class:** on by default with a pluggable
-  vector backend; keyword + semantic + metadata filtering with ranking
-  fusion. The typed `ChunkIndex` boundary (Phase 33) is the stable seam for
-  this; the embedding/vector backend and hybrid ranking are still future
-  work. Embeddings stay optional rather than making a hosted/vector service
-  mandatory.
+- **Hybrid retrieval on by default with ranking fusion:** combining the two
+  `ChunkIndex` backends (Phase 33 FTS5 keyword + Phase 34 semantic) with
+  pluggable backend selection, a hybrid merge/renormalization of their
+  non-comparable scales, and — for large corpora — an ANN/vector backend to
+  replace the Phase 34 brute-force scan. Embeddings stay optional rather than
+  making a hosted/vector service mandatory.
 - **Vision-first source pipelines** and denser multimodal extraction
   (whiteboards, mind maps, vision boards) as a first-class source class
   rather than an opt-in model.

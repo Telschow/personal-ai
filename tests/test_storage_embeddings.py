@@ -151,6 +151,51 @@ def test_context_manager_closes_connection() -> None:
         store.get("chunk-1")
 
 
+def test_list_for_chunks_returns_stored_embeddings_in_request_order() -> None:
+    with make_store() as store:
+        first = make_embedding(vector=(1.0, 2.0, 3.0))
+        second = make_embedding(vector=(4.0, 5.0, 6.0))
+        third = make_embedding(model="mxbai-embed-large", vector=(7.0, 8.0))
+        store.add(first, "chunk-a")
+        store.add(second, "chunk-b")
+        store.add(third, "chunk-c")
+
+        result = store.list_for_chunks(["chunk-c", "chunk-a", "chunk-missing"])
+
+    assert list(result) == ["chunk-c", "chunk-a"]
+    assert result["chunk-a"] == first
+    assert result["chunk-c"] == third
+    assert "chunk-missing" not in result
+
+
+def test_list_for_chunks_empty_input_returns_empty_dict() -> None:
+    with make_store() as store:
+        store.add(make_embedding(), "chunk-1")
+
+        assert store.list_for_chunks([]) == {}
+
+
+def test_list_for_chunks_accepts_a_generator_of_ids() -> None:
+    with make_store() as store:
+        store.add(make_embedding(), "chunk-a")
+        store.add(make_embedding(), "chunk-b")
+
+        result = store.list_for_chunks(f"chunk-{index}" for index in ("a", "b"))
+
+    assert set(result) == {"chunk-a", "chunk-b"}
+
+
+def test_list_for_chunks_raises_on_corrupt_stored_json() -> None:
+    connection = connect_database(":memory:")
+    store = EmbeddingStore(connection)
+    write_raw_embedding_row(
+        connection, "chunk-1", vector_json="{not json", dimensions=2
+    )
+
+    with pytest.raises(ValueError, match="invalid JSON"):
+        store.list_for_chunks(["chunk-1"])
+
+
 def write_raw_embedding_row(
     connection: sqlite3.Connection,
     chunk_id: str,

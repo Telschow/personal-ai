@@ -1,14 +1,17 @@
-"""Application-facing keyword search over persisted knowledge.
+"""Application-facing search over persisted knowledge.
 
 This module is the stable entry point for searching ingested documents.
 It owns no retrieval logic of its own: every query, including all
 sanitization, ranking, and filtering semantics, is delegated to a
-:class:`ChunkIndex` implementation. The current implementation is
-:class:`~personal_ai.storage.chunks.SQLiteChunkIndex` (FTS5 keyword search);
-:class:`~personal_ai.storage.chunks.ChunkStore` satisfies the contract on
-the same connection. A future semantic/embedding backend can implement the
-same :class:`ChunkIndex` boundary without changing this module, the tools,
-or the agent.
+:class:`ChunkIndex` implementation. Two implementations exist today:
+:class:`~personal_ai.storage.chunks.SQLiteChunkIndex` (FTS5 keyword search,
+the production default) and
+:class:`~personal_ai.semantic_index.SemanticChunkIndex` (cosine-similarity
+retrieval over persisted embeddings). Both produce the same typed
+:class:`~personal_ai.storage.chunks.ChunkSearchResult` hits, and consumers —
+the tools and the agent — never know which backend is in use. Their ranking
+scales differ on purpose and are not directly comparable; a later hybrid
+fusion phase will merge and renormalize them.
 
 The :class:`RetrievalService` provides a unified search across document
 chunks, structured extractions, and conversation messages, returning a
@@ -85,15 +88,21 @@ class ChunkIndex(Protocol):
 
     Search consumers depend on this interface instead of a concrete
     backend, so the agent, tool, service, and storage layers never see how a
-    query is executed. The only current implementation is SQLite FTS5
+    query is executed. Implementations today are SQLite FTS5
     (:class:`~personal_ai.storage.chunks.SQLiteChunkIndex`, exposed through
-    the same connection by :class:`~personal_ai.storage.chunks.ChunkStore`);
-    future semantic/embedding or hybrid backends satisfy this same contract.
+    the same connection by :class:`~personal_ai.storage.chunks.ChunkStore`)
+    and the embedding-backed semantic index
+    (:class:`~personal_ai.semantic_index.SemanticChunkIndex`), selected by
+    construction injection.
 
     ``search`` returns typed :class:`ChunkSearchResult` hits, best-ranked
-    first. Today that means FTS5 BM25 (smaller rank = better) with a
-    deterministic chunk-id tie-break. Queries are validated and interpreted
-    by the implementation; callers never write or influence FTS5 syntax.
+    first, with a deterministic chunk-id tie-break. Rank semantics are
+    backend-specific: the keyword index ranks lexically (FTS5 BM25, where a
+    smaller rank is better), while the semantic index ranks by cosine
+    similarity in ``[0, 1]`` (higher is better). The two scales are not
+    directly comparable; only an implementation can interpret its own rank.
+    Queries are validated and interpreted by the implementation; callers
+    never write or influence FTS5 syntax.
     """
 
     def search(
@@ -102,12 +111,13 @@ class ChunkIndex(Protocol):
         limit: int = DEFAULT_SEARCH_LIMIT,
         filters: DocumentFilter | None = None,
     ) -> tuple[ChunkSearchResult, ...]:
-        """Return keyword-search hits, best-ranked first.
+        """Return hits for this query, best-ranked first.
 
-        ``query`` is free text; implementations treat it as literal keyword
-        terms with explicit, deterministic semantics. ``limit`` bounds the
-        results returned; ``filters`` optionally constrains hits by owning
-        document metadata.
+        ``query`` is free text; the implementation defines its exact
+        semantics (literal keyword terms for the keyword index, an embedded
+        query vector for the semantic index). ``limit`` bounds the results
+        returned; ``filters`` optionally constrains hits by owning document
+        metadata.
         """
         ...
 
