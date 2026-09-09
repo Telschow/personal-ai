@@ -14,7 +14,7 @@ Two phase-numbering schemes coexist in this repository's history:
 
 - **Canonical** — the current development track. Defined by
   [`AGENTS.md`](../AGENTS.md) (the single authoritative roadmap) and summarized
-  on this page. Covers Phases 1–18, 20–23, 25–32, 33, and 34.
+  on this page. Covers Phases 1–18, 20–23, 25–32, 33, 34, and 35.
 - **Legacy** — the pre-renumbering chronological plan (numbered 1–49) that
   describes how the project actually evolved. Preserved at the bottom of this
   page as historical context and in a few module docstrings and test filenames
@@ -590,16 +590,57 @@ Ruff clean. Format clean.
 
 ---
 
+### Phase 35 — Hybrid retrieval design / fusion contract (done — design only, not implemented)
+
+This phase produces the design contract for `HybridChunkIndex` and **no
+implementation**. No fusion code exists; `Phase 35` is explicitly *not*
+"hybrid retrieval implemented". Phase 11–34 invariants unchanged; keyword FTS5
+remains the only wired backend.
+
+- Canonical design lives in `docs/RETRIEVAL.md` (§35 "Hybrid retrieval design"):
+  the existing `ChunkIndex` contract and `ChunkSearchResult` are judged
+  sufficient and are preserved unchanged; backend-specific evidence stays
+  internal; provenance is forwarded (never recomputed); `candidate_limit =
+  min(4 × final_limit, 200)` is defined for per-backend over-fetching.
+- Recommended fusion algorithm: **Reciprocal Rank Fusion** with `k = 60` and
+  equal weights — scale-free over the non-comparable FTS5-BM25 vs cosine
+  spaces, deterministic, explainable, training-free. Naïve
+  `keyword_score + semantic_score` blending is explicitly rejected.
+- Duplicate identity is `chunk_id` (never text). Final ordering is
+  deterministic: `fusion_score` descending, `chunk_id` ascending; empty
+  backends contribute zero; both-empty → `()`; "no compatible embeddings"
+  behaves as semantic-empty, not error.
+- Backend failure policy: **fail closed** — any backend raising makes hybrid
+  raise, surfacing as the canonical `error`/`retrieval_unavailable` envelope,
+  never a partial `results` set (status separation is strict; degradation is
+  a documented future `partial`-state concept, not designed now).
+- Configuration is wiring-level (default `keyword`; an embedding model alone
+  never changes behavior); `PERSONAL_AI_RETRIEVAL_MODE=keyword|semantic|hybrid`
+  is documented as the future operator knob but not implemented. CLI, HTTP,
+  chat, tools, `search_documents`, `RetrievalService`, policy, and memory are
+  explicitly out of scope/unchanged.
+- A full Phase 36 test matrix + a Phase 37 synthetic evaluation plan (precision
+  at K, exact-keyword and paraphrase recall, ranking stability, filter
+  correctness, no-result behavior) are specified; `k`, the candidate window,
+  and weights are documented constants — tuning is deferred until the
+  evaluation set exists.
+
+Tests: unchanged (design-only; no repository tests added or modified). Ruff
+clean. Format clean.
+
+---
+
 ## Deferred / future work (not yet implemented)
 
 These are explicitly **not** shipped — do not claim them as working:
 
-- **Hybrid retrieval on by default with ranking fusion:** combining the two
-  `ChunkIndex` backends (Phase 33 FTS5 keyword + Phase 34 semantic) with
-  pluggable backend selection, a hybrid merge/renormalization of their
-  non-comparable scales, and — for large corpora — an ANN/vector backend to
-  replace the Phase 34 brute-force scan. Embeddings stay optional rather than
-  making a hosted/vector service mandatory.
+- **Hybrid retrieval on by default with ranking fusion:** implementing the
+  Phase 35 design (Reciprocal Rank Fusion over the Phase 33 FTS5 keyword +
+  Phase 34 semantic backends), with pluggable backend selection, the
+  `PERSONAL_AI_RETRIEVAL_MODE` knob, and — for large corpora — an ANN/vector
+  backend to replace the Phase 34 brute-force scan. Fusion weights/`k`/candidate
+  windows stay un-tuned until the Phase 37 evaluation set exists. Embeddings
+  stay optional rather than making a hosted/vector service mandatory.
 - **Vision-first source pipelines** and denser multimodal extraction
   (whiteboards, mind maps, vision boards) as a first-class source class
   rather than an opt-in model.

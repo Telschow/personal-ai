@@ -712,6 +712,11 @@ CANONICAL PHASES (all implemented):
             similarity over persisted embeddings behind the same ChunkIndex
             boundary; keyword FTS5 remains the default; no vector DB/ANN,
             no hybrid fusion yet)
+35     Hybrid retrieval design / hybrid fusion contract (design-only phase:
+            RECIPROCAL RANK FUSION k=60 over rank positions, deterministic
+            fusion_score-desc + chunk_id-asc ordering, chunk_id identity,
+            candidate_limit = min(4*limit, 200), fail-closed backend policy;
+            no fusion implementation shipped — see docs/RETRIEVAL.md)
 
 RESERVED / NOT ASSIGNED:
 
@@ -727,9 +732,11 @@ RESERVED / NOT ASSIGNED:
 DEFERRED / FUTURE WORK (no phase number assigned yet):
 
     Hybrid retrieval on by default with ranking fusion (pluggable backend
-    selection; merging/renormalizing the non-comparable Phase 33 FTS5 and
-    Phase 34 semantic scales; ANN/vector backend for large corpora beyond the
-    brute-force scan; embeddings stay optional)
+    selection; implementing the Phase 35 RRF contract over the non-comparable
+    Phase 33 FTS5 and Phase 34 semantic scales — weights/k/candidate windows
+    stay un-tuned until the Phase 37 evaluation set exists; ANN/vector
+    backend for large corpora beyond the brute-force scan; embeddings stay
+    optional)
     Vision-first source pipelines
     Durable memories as first-class execution outputs
     Multi-agent chat above the approval plane
