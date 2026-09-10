@@ -549,6 +549,67 @@ windows, final cap, filter propagation, empty query/limits, empty backends,
 fail-closed failures (including the `SearchTool` envelope), determinism,
 provenance preservation, public-result shape, and raw-score independence.
 
+## Deterministic retrieval evaluation (Phase 37)
+
+A hermetic, measurement-only evaluation harness
+(`src/personal_ai/retrieval_evaluation.py`) lets future retrieval changes be
+judged against explicit relevance judgments instead of vibes. It compares the
+three production backends head-to-head on a fixed synthetic corpus.
+
+- **Purpose:** a deterministic regression/comparison harness, not a claim
+  about real-world quality. It exercises the exact production query path
+  (FTS5 keyword, `SemanticChunkIndex` cosine, `HybridChunkIndex` RRF) with no
+  model calls, no network, no Ollama, and no vector DB/ANN.
+- **Corpus:** 21 deterministic chunks across 10 concept axes (backup,
+  retention, encryption, schedule, ticket, auth, archive, review, plan,
+  project) plus an embedding-free no-result corpus (semantic "no compatible
+  embeddings" early return). Document/provenance metadata is seeded for
+  source- and mime-filter evaluation.
+- **Judgments:** explicit per-case `relevant_chunk_ids`; a case carries
+  `query`, relevance set, and optional `DocumentFilter`. A case runs against
+  every backend with the same `k` (and optional `limit`) via `evaluate_case`;
+  `summarize` renders an aggregate-only comparison table (case + backend +
+  count + recall + precision + hit@k + reciprocal-rank) — never query text,
+  chunk ids, or provenance in reports.
+- **Metrics:** `recall@k` = |R∩S|/|R| (empty R = 1.0, vacuous);
+  `precision@k` = |R∩S|/k (fixed denominator, empty S = 0.0); `hit@k` ∈
+  {0,1} (empty R = 0); `reciprocal_rank` = 1/(position+1) with **0-based**
+  positions (0.0 if absent), deliberately independent of the internal RRF
+  `k=60`; `mean_reciprocal_rank` = mean; `k < 1` raises `ValueError`.
+- **Backends:** `ChunkStore`/`SQLiteChunkIndex` (keyword, BM25),
+  `SemanticChunkIndex`, and `HybridChunkIndex`; a local `ChunkSearcher`
+  protocol is the only eval-side seam. Backend failures **fail closed** and
+  propagate (the `SearchTool` envelope converts to `error` /
+  `retrieval_unavailable`, never empty success).
+- **Cases:** exact lexical, paraphrase (keyword-smothered → semantic/hybrid
+  rescue), mixed fusion, exact-identifier `EXA-2017`, lexical distractor
+  (`ticket` — set membership + two-run determinism for keyword/hybrid order,
+  exact order for semantic), duplicate text → two results, provenance
+  forwarding, and `EXA`, window candidate limits (limit=1→c0, 5→c0..c4,
+  8→c0..c7; keyword(25)=8, semantic(25)=21), hybrid prefix stability
+  (`results(25)[:5] == results(5)`), hybrid forwarding
+  `min(4*limit,200)` (4/20/200 observed), filter propagation (alpha/beta/
+  both/gamma = no provider call), no-result early return (provider never
+  called), and the independent-RRF expectation
+  keyword `[A,B,C]` + semantic `[B,A,D]` → `[A,B,C,D]` (A/B fusion
+  1/60+1/61, C/D tie 1/62, chunk_id ties).
+- **Known interpretation limits (not bugs):** `SemanticChunkIndex` includes
+  candidates with cosine score ≥ 0.0, so with non-negative concept vectors it
+  returns all embedded chunks (zero-similarity inclusion) on a populated
+  corpus — the no-result fixtures are therefore embedding-free corpora. The
+  keyword backend's BM25 order for near-tie text is not recomputed by hand in
+  tests; distractor/duplicate cases assert set membership plus determinism
+  instead. Larger per-backend windows (candidate_limit > 200) cannot be
+  observed through the public hybrid surface without the seam fakes.
+- **Production posture:** evaluator-only; zero production changes. No RRF
+  constant, weight, candidate-window, or ordering change; no tuning; keyword
+  remains the production default; no config knob, CLI, or env flag was added.
+
+Tests: `tests/test_retrieval_evaluation.py` (34 tests) — metric unit checks,
+harness contract, every case above, fail-closed envelope, and a
+`create_default_registry` regression asserting the chat `search_documents`
+tool remains keyword-only.
+
 ## Provenance and safety
 
 Each result item carries only bounded provenance keys — `chunk_id`,

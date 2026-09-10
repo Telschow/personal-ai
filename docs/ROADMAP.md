@@ -676,19 +676,62 @@ shape, raw-score independence) plus integration through `search_documents` and
 
 ---
 
+### Phase 37 — Synthetic-fixture retrieval evaluation suite (done)
+
+A deterministic, hermetic, measurement-only evaluation harness
+(`retrieval_evaluation.py`) judges the keyword/semantic/hybrid backends
+against explicit relevance judgments on a fixed synthetic corpus. Phase 11–36
+invariants unchanged; **zero production changes** — no RRF constant, weight,
+candidate-window, ordering, or wiring change; keyword remains the production
+default; no config knob, CLI flag, or env variable added.
+
+- `EvaluationCase(name, query, relevant_chunk_ids, filters)` + `evaluate_case`
+  run a case against every backend at the same `k`/`limit`; `EvaluationResult`
+  exposes `count`/`recall`/`precision`/`hit`/`reciprocal_rank`; `summarize`
+  renders an aggregate-only comparison table (never query text, chunk ids, or
+  provenance outside case names).
+- Metric conventions (documented + unit-tested): recall@k = |R∩S|/|R| (empty R
+  = 1.0 vacuous); precision@k = |R∩S|/k (fixed denominator, empty = 0.0);
+  hit@k ∈ {0,1} (empty R = 0); rank reciprocal is **0-based** and independent
+  of the internal RRF `k=60`; `k < 1` raises `ValueError`.
+- 21-chunk corpus across 10 concept axes with fixed embedding vectors (fake
+  provider) + an embedding-free no-result corpus; document/provenance metadata
+  seeded for source- and mime-filter evaluation. Backend failures fail closed
+  (`SearchTool` → `error` / `retrieval_unavailable`).
+- Cases cover exact lexical, paraphrase (keyword-smothered → semantic/hybrid
+  rescue), mixed fusion, exact-identifier, lexical distractor (set membership +
+  determinism), duplicate text, provenance forwarding, EXA, window candidate
+  limits, hybrid prefix stability, hybrid `min(4*limit,200)` forwarding
+  (4/20/200), filter propagation (gamma = no provider call), no-result early
+  return, independent-RRF expectation, and a `create_default_registry`
+  regression that chat `search_documents` stays keyword-only.
+- Known interpretation limits (documented, not bugs): `SemanticChunkIndex`
+  includes zero-similarity (score ≥ 0.0) candidates, so no-result fixtures are
+  embedding-free; keyword BM25 near-tie order is asserted as set-membership +
+  determinism, never hand-computed; windows > 200 observable only through the
+  seam fakes.
+
+Tests: 34 new in `tests/test_retrieval_evaluation.py`. Full suite: 2728
+passed. Ruff clean. Format clean.
+
+---
+
 ## Deferred / future work (not yet implemented)
 
 These are explicitly **not** shipped — do not claim them as working:
 
 - **Hybrid retrieval enabled/selected in production + tuning:** the Phase 35
   design is implemented (Phase 36 `HybridChunkIndex`, RRF `k=60`, candidate
-  window `min(4×limit, 200)`, fail-closed), but keyword remains the default
-  and nothing is wired to select hybrid. Future work: pluggable backend
-  selection / the `PERSONAL_AI_RETRIEVAL_MODE` operator knob, tuning of
-  `k`/weights/candidate windows against the Phase 37 synthetic evaluation set,
-  and — for large corpora — an ANN/vector backend to replace the Phase 34
-  brute-force scan. Embeddings stay optional rather than making a hosted/vector
-  service mandatory.
+  window `min(4×limit, 200)`, fail-closed), and the Phase 37 synthetic
+  evaluation suite (`retrieval_evaluation.py`) now provides the comparison
+  basis — but keyword remains the default and nothing is wired to select
+  hybrid. Future work: pluggable backend selection / the
+  `PERSONAL_AI_RETRIEVAL_MODE` operator knob, tuning of
+  `k`/weights/candidate windows against the Phase 37 evaluation set,
+  a real-corpus evaluation harness (would need ingestion + anonymized
+  judgments), and — for large corpora — an ANN/vector backend to replace the
+  Phase 34 brute-force scan. Embeddings stay optional rather than making a
+  hosted/vector service mandatory.
 - **Vision-first source pipelines** and denser multimodal extraction
   (whiteboards, mind maps, vision boards) as a first-class source class
   rather than an opt-in model.
