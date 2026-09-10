@@ -610,6 +610,32 @@ harness contract, every case above, fail-closed envelope, and a
 `create_default_registry` regression asserting the chat `search_documents`
 tool remains keyword-only.
 
+## Personal AI v1 daily-use readiness (Phase 38)
+
+Phase 38 bolts the acceptance picture onto the retrieval contract with one
+hermetic suite (`tests/test_personal_ai_v1_readiness.py`) that exercises the
+exact production path from file ingestion through the chat registry and CLI
+search. Zero production changes; keyword remains the production default; no
+retrieval-mode knob.
+
+- **Fixture corpus:** 7 documents / 13 chunks with stable ids, sha256 content
+  hashes, explicit `mime_type` metadata, and aware UTC timestamps —
+  deterministic, no randomness, no real personal data.
+- **What it pins down:** the FTS5 AND semantics as a deliberate regression
+  ("backup copies" → the decision chunk; "backup photos" → no matches because
+  the terms never co-occur in a chunk); the model-facing envelope shapes
+  (`search_documents` results carry `chunk_id`/`document_id`; `get_document`
+  returns `chunk_id`-keyed chunks in `chunk_index` order); `limit` clamping
+  and truncation; fail-closed error propagation mirrored from the Phase 37
+  harness; and a read-only invariant (byte-identical DB checksum across a
+  search + fetch battery — retrieval never writes).
+- **Paraphrase honesty:** queries with no lexical overlap return a truthful
+  `no_matches` ("data storage horizon" finds nothing). This is the intended
+  keyword-only behavior at v1; semantic/hybrid rescue is exercised only by the
+  Phase 37 evaluation harness, never by the production default.
+
+Tests: 39 new. Full suite: 2767 passed. Ruff clean. Format clean.
+
 ## Provenance and safety
 
 Each result item carries only bounded provenance keys — `chunk_id`,

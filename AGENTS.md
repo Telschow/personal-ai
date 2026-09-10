@@ -726,6 +726,18 @@ CANONICAL PHASES (all implemented):
             provenance forwarded; keyword remains the production default —
             hybrid selection is wire-time construction only, no
             retrieval-mode knob)
+ 37     Deterministic synthetic-fixture retrieval evaluation suite (hermetic
+            measurement-only harness judging keyword/semantic/hybrid backends
+            against explicit relevance judgments; zero production changes —
+            keyword stays the production default, no config knob, CLI flag, or
+            env variable)
+ 38     Personal AI v1 / daily-use readiness (end-to-end hermetic acceptance
+            suite: ingestion → SQLite persistence → FTS5 keyword search →
+            policy-gated chat registry → agent tool use → CLI search;
+            keyword-AND is the documented production default, semantic/hybrid
+            rescue stays behind the construction seam and is not default-wired;
+            no retrieval-mode configuration; decision: READY WITH DOCUMENTED
+            LIMITATIONS)
 
 RESERVED / NOT ASSIGNED:
 

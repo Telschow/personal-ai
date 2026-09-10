@@ -306,6 +306,26 @@ Add `--verbose` to the CLI to watch the agent pick evidence sources (tool calls,
 rounds, timing). The final answer goes to stdout; progress goes to stderr. The
 question-style guidance below applies to both the CLI and the API.
 
+## Smoke test (Phase 38)
+
+A quick manual check of the whole stack — ingest → store → search — without a
+model or a network. The Phase 38 readiness suite
+(`tests/test_personal_ai_v1_readiness.py`) automates the same path hermeticly;
+this is the hand-run equivalent.
+
+```
+WS=/tmp/ws-readiness && DB=/tmp/ws-readiness.db
+mkdir -p $WS
+printf 'Project Alpha decision: keep nightly backup copies for twelve months.\n' > $WS/decision.md
+uv run python -m personal_ai.cli --ingest file $WS --database $DB
+uv run python -m personal_ai.cli --search "backup copies" --database $DB
+```
+
+Expect: ingestion prints a summary (documents/chunks), and the search prints
+`1 hits` plus the decision chunk's id and a snippet of its text. Searching for
+a term that is not in the workspace prints `No matching documents.` — the
+system does not invent content when there is no record.
+
 ## How to ask good questions
 
 The assistant is most reliable when a question targets a single, well-scoped

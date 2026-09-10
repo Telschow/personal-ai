@@ -716,6 +716,72 @@ passed. Ruff clean. Format clean.
 
 ---
 
+### Phase 38 — Personal AI v1 / daily-use readiness audit (done)
+
+A hermetic, end-to-end acceptance-readiness suite
+(`tests/test_personal_ai_v1_readiness.py`) validates the whole personal-AI
+stack in one test module: file ingestion → stable document identity → SQLite
+persistence → FTS5 keyword search → policy-gated chat tools → agent tool use →
+CLI search. Zero production code changes; keyword remains the production
+default; no retrieval-mode knob, no ANN/vector DB, no network, no Ollama, no
+real personal data. Phase 11–37 invariants unchanged.
+
+- **Corpus (deterministic, stable ids):** 7 documents / 13 chunks
+  (`alpha-architecture`, `alpha-decision-backup`, `alpha-todo-sync`,
+  `beta-deployment`, `beta-timeline`, `reading-design`, `scratch-note`,
+  `journal-retro`, `health-sleep`, `health-fitness`, `travel-ideas`,
+  `travel-budget`) with sha256 content hashes, explicit `mime_type` metadata,
+  and aware `+00:00` timestamps across 2026-01/02. No UUIDs, no randomness.
+- **Acceptance scenarios:** exact decision ("backup retention decision" →
+  exactly the decision chunk), paraphrase ("keep the backup copies" still
+  finds it; "data storage horizon" honestly returns no matches),
+  project-scope filtering ("worker" → exactly the 3 sync/worker chunks;
+  January-2026 window → the 2 alpha chunks; `application/pdf` vs
+  `text/plain` MIME narrowing), restart/reopen (a file database closes and
+  reopens with the same 13 chunks and the same top hit), and retrieval
+  failure via a seam fake (fail closed → `error` / `retrieval_unavailable`,
+  never empty success).
+- **Read-only invariant:** a sha256 checksum of every table in the database
+  is byte-identical before and after a search + `get_document` battery;
+  searches never write; memory statistics are untouched by search tools.
+- **Consumer tool surface:** `search_documents` schema requires exactly
+  `query`; `limit` clamps and truncates; FTS5 AND semantics are the
+  regression boundary ("backup copies" hits the decision chunk, "backup
+  photos" matches nothing because the terms never co-occur);
+  `search_knowledge` unifies documents; `get_document` returns the bounded
+  chunk window in `chunk_index` order.
+- **Error/authorization surface:** bad search arguments surface as
+  `ToolExecutionError` wrapping `TypeError`/`ValueError` (non-string query,
+  boolean/negative limit, invalid date filter, unknown parameters); the
+  default chat registry exposes no memory tools without a memory service and
+  never registers `propose_memory` without an approver.
+- **End-to-end ingestion:** a temp workspace of `.md`/`.txt` files (well past
+  the 200 non-whitespace-character text-heavy threshold) flows through
+  `FilesystemSourceAdapter` → `DocumentIngestor` (no extractor, no embeddings)
+  into the same SQLite stores the chat tools read; re-running ingestion is
+  idempotent (document and chunk counts unchanged).
+- **Determinism/identity/CLI:** `compute_document_id` / `compute_content_hash`
+  are stable and collision-free for differing content; corpus-wide two-run
+  determinism; provenance filters resolve only the chunks that actually name
+  a source; `run_search` prints `1 hits` with chunk id + snippet and
+  `No matching documents.` when there is none.
+- **Acceptance queries (documented in the module):** "backup retention
+  decision" → exactly 1 (decision chunk); "keep the backup copies" → includes
+  it; "worker" → exactly 3; "back" → only the plain-text scratch note (FTS5
+  tokenizes "backup" separately); "backup photos" → no matches.
+- **Known limitations (documented, not bugs):** production keyword retrieval
+  is FTS5 keyword-AND (all terms must appear in a match); semantic/hybrid
+  rescue exists behind the Phase 36 construction seam but is not the default
+  production path; "most recent" ordering is not guaranteed to be top-1 across
+  runs; documents longer than a single chunk are only reachable through the
+  chunk window each keyword match lands in.
+
+Tests: 39 new in `tests/test_personal_ai_v1_readiness.py`. Full suite: 2767
+passed. Ruff clean. Format clean. Working tree clean (test + docs only; zero
+production changes).
+
+---
+
 ## Deferred / future work (not yet implemented)
 
 These are explicitly **not** shipped — do not claim them as working:
