@@ -51,9 +51,11 @@ from personal_ai.memory import (
     render_untrusted_memory_context,
 )
 from personal_ai.memory.chat import (
+    CLI_SYSTEM_PROMPT,
     DEFAULT_MEMORY_LIMIT,
     MAX_QUERY_CHARS,
     _bounded_query,
+    with_cli_system_prompt,
 )
 from personal_ai.memory.models import MemoryDraft
 from personal_ai.ollama_client import ChatMessage, OllamaConnectionError
@@ -723,3 +725,50 @@ def test_complete_chat_model_unavailable_still_respects_memory(
     assert ei.value.status_code == 502
     # Even on failure the memory block was built and handed to the agent.
     assert "UNTRUSTED" in agent.calls[0][-1].content
+
+
+class TestCliSystemPrompt:
+    def test_prepends_static_system_message_first(self) -> None:
+        messages = [ChatMessage(role="user", content="hello")]
+        result = with_cli_system_prompt(messages)
+        assert [m.role for m in result] == ["system", "user"]
+        assert result[0].content == CLI_SYSTEM_PROMPT
+        assert result[1].content == "hello"
+
+    def test_input_sequence_is_not_mutated(self) -> None:
+        messages = [ChatMessage(role="user", content="hello")]
+        with_cli_system_prompt(messages)
+        assert [m.role for m in messages] == ["user"]
+
+    def test_existing_system_message_is_never_duplicated(self) -> None:
+        messages = [
+            ChatMessage(role="system", content="own system prompt"),
+            ChatMessage(role="user", content="u1"),
+        ]
+        result = with_cli_system_prompt(messages)
+        assert [(m.role, m.content) for m in result] == [
+            ("system", "own system prompt"),
+            ("user", "u1"),
+        ]
+
+    def test_prompt_keeps_untrusted_reference_blocks_informational(self) -> None:
+        assert "untrusted" in CLI_SYSTEM_PROMPT
+        assert "policy" in CLI_SYSTEM_PROMPT
+
+    def test_prompt_directs_tool_use_and_honest_answers(self) -> None:
+        assert "tools" in CLI_SYSTEM_PROMPT
+        assert "local documents" in CLI_SYSTEM_PROMPT
+
+    def test_prepend_keeps_extra_messages_in_original_order(
+        self, service: MemoryService
+    ) -> None:
+        _add(service, "The user likes to run.")
+        messages = [ChatMessage(role="user", content="what are my habits?")]
+        messages = with_cli_system_prompt(messages)
+        result = _chat(service).build_context_messages(messages)
+        roles = [m.role for m in result.messages]
+        assert roles == ["system", "user", "user"]
+        assert result.messages[0].content == CLI_SYSTEM_PROMPT
+        assert result.messages[-1].content.startswith(
+            '<memory_context untrusted="true">'
+        )

@@ -51,9 +51,11 @@ from personal_ai.memory.adapters import (
     to_document_candidate,
 )
 from personal_ai.memory.chat import (
+    CLI_SYSTEM_PROMPT,
     ChatMemory,
     ChatMemoryResult,
     derive_chat_scopes,
+    with_cli_system_prompt,
 )
 from personal_ai.memory.context import (
     MemoryContext,
@@ -148,6 +150,7 @@ __all__ = [
     "ACTIVITY",
     "ACTIVITY_EXTRACTOR_VERSION",
     "CHROME_HISTORY_EVENT_SOURCE",
+    "CLI_SYSTEM_PROMPT",
     "CONVERSATION_SOURCE_TYPES",
     "DEFAULT_CORPUS_SOURCES",
     "DEFAULT_MAX_CANDIDATES",
@@ -234,4 +237,5 @@ __all__ = [
     "to_memory_candidate",
     "tokenize",
     "validate_memory",
+    "with_cli_system_prompt",
 ]

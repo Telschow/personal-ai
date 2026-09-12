@@ -2203,6 +2203,9 @@ def _canonical_statement(
     The output language follows the input language to preserve
     original-language evidence as per architecture.
     """
+    if lang == ConversationLanguage.UNKNOWN:
+        lang = ConversationLanguage.EN
+
     if lang == ConversationLanguage.DE:
         verb_forms = _VERB_FORMS_DE
         third_person = "der nutzer"

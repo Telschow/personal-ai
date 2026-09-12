@@ -1878,6 +1878,51 @@ Existing invariants: memory is data never policy; event payloads never carry
 content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
 clean).
 
+==================================================
+MCP KNOWLEDGE BRIDGE + CLI SYSTEM PROMPT (IMPLEMENTED)
+==================================================
+
+Two read-only slices that make the stored personal knowledge actually
+reachable and usable. Phase 11–50 invariants (single policy-gated write path,
+LLM proposal-only, security, provenance, exception-only approval) are
+unchanged; **no new write or adjudication route exists**.
+
+- **CLI system prompt** (`memory/chat.py`): `CLI_SYSTEM_PROMPT` is a static
+  application instruction set and `with_cli_system_prompt(messages)` prepends
+  it to a conversation only when no ``system`` message is already present
+  (caller-supplied system prompts from Open WebUI-style callers are trusted
+  over the default and never duplicated). The prompt keeps untrusted
+  reference blocks (memory/people context) informational rather than
+  instructional — consistent with "memory is data, never policy" — and
+  directs the model to use the available tools and to answer concretely from
+  retrieved context or say it does not know. Only the CLI one-shot path wires
+  it (`cli.py`); `complete_chat`/`stream_chat` are untouched because the
+  server/client path supplies its own system message.
+- **MCP knowledge bridge** (`mcp_server.py`, stdio): exposes exactly six
+  read-only tools — `search_documents`, `get_document`, `search_memory`,
+  `get_memory`, `search_people`, `get_person` — built from one SQLite
+  connection (documents/chunks/memory/people stores) and executed through the
+  same `PolicyEngine`/`RESEARCHER` path as the chat registry, so enforcement,
+  permissions (`corpus.search`/`memory.read`/`people.read`, no new
+  permission), and the audit trail are identical to the runtime. The bridge
+  is an allow-list of the six read tools only: `propose_memory` and every
+  curation/adjudication/write surface are structurally absent (an MCP call
+  for a non-exposed tool raises). No SQL and no store access exist in the
+  bridge layer; all argument validation and caps stay in the underlying
+  handlers; results keep their untrusted labeling. Run:
+  `python -m personal_ai.mcp_server --database data/personal-ai.db`. Tests are
+  hermetic (`tests/test_mcp_bridge.py`). The `mcp` package was added to
+  dependencies (`mcp>=1.9` resolved to v2, `MCPServer`/`server.tool()`).
+- **UNKNOWN-language fallback regression fix** (`memory/conversations.py`):
+  `_canonical_statement` now maps `ConversationLanguage.UNKNOWN` to English
+  rule lookup before consulting language-keyed tables (a Gemini-sourced
+  mixed-language message previously raised `KeyError` on language-specific
+  maps). The English fallback was already the documented Phase 21 behavior;
+  this closes the crash exposed by real Gemini data. Covered by two new
+  regression tests in `tests/test_memory_conversations.py`.
+
+Full suite: 2902 passed; ruff clean; format clean.
+
 Before changing code:
 
 1. Inspect the existing implementation.

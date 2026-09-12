@@ -23,9 +23,11 @@ from personal_ai.documents.conversations import (
 )
 from personal_ai.memory.conversations import (
     CONVERSATION_SOURCE_TYPES,
+    ConversationLanguage,
     ConversationMemoryExtractor,
     ConversationMemoryIngestor,
     ConversationSourceError,
+    _canonical_statement,
 )
 from personal_ai.memory.models import (
     MemoryEvidenceRef,
@@ -562,6 +564,29 @@ def test_german_identity_extraction() -> None:
     assert candidate.kind is MemoryKind.IDENTITY
     assert candidate.temporal_scope is TemporalScope.CURRENT
     assert "Hans" in candidate.statement
+
+
+def test_unknown_language_extraction_uses_english_rules() -> None:
+    """A mixed-language message the detector cannot attribute (UNKNOWN) must
+    fall back to English rule processing instead of crashing.
+
+    Regression for the real-corpus crash in ``_canonical_statement``: a DE/EN
+    trigger tie yields ``ConversationLanguage.UNKNOWN``, yet the candidate
+    still travels through the English rule set; the canonical statement must
+    normalize UNKNOWN to English instead of KeyError-ing.
+    """
+    conv = _conv_de(source_type="gemini")
+    (candidate,) = _extract(conv, (_msg("m1", "ich arbeite and i live in berlin"),))
+    assert candidate.statement.startswith("Ich arbeite")
+    assert candidate.statement.endswith("in berlin")
+
+
+def test_unknown_language_canonical_statement_falls_back_to_english() -> None:
+    """``_canonical_statement`` must not raise on the UNKNOWN language."""
+
+    statement = _canonical_statement("I work at BCG", ConversationLanguage.UNKNOWN)
+
+    assert statement == "The user works at BCG"
 
 
 def test_german_work_current() -> None:

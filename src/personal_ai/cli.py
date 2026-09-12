@@ -42,6 +42,7 @@ from personal_ai.memory import (
     MemoryService,
     WorkoutCurationAdapter,
     open_memory_store,
+    with_cli_system_prompt,
 )
 from personal_ai.memory.corpus_audit import (
     DEFAULT_AUDIT_LIMIT,
@@ -2179,6 +2180,7 @@ def main(argv: list[str] | None = None) -> None:
     )
     try:
         messages: list[ChatMessage] = [ChatMessage(role="user", content=args.prompt)]
+        messages = with_cli_system_prompt(messages)
         if chat_memory is not None:
             result = chat_memory.chat.build_context_messages(messages)
             messages = list(result.messages)

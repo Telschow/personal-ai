@@ -6,6 +6,7 @@ from typing import Self
 import pytest
 
 from personal_ai import cli
+from personal_ai.memory.chat import CLI_SYSTEM_PROMPT
 
 
 def test_parse_args_requires_workspace(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -111,6 +112,7 @@ def test_main_runs_agent_and_prints_response(
     assert calls["client_exited"] is True
     assert calls["registry"] is registry
     assert calls["messages"] == [
-        cli.ChatMessage(role="user", content="What files are here?")
+        cli.ChatMessage(role="system", content=CLI_SYSTEM_PROMPT),
+        cli.ChatMessage(role="user", content="What files are here?"),
     ]
     assert capsys.readouterr().out == "The answer is here.\n"
