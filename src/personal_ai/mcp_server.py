@@ -42,9 +42,15 @@ from personal_ai.agents.defs import (
 from personal_ai.agents.policy import PolicyEngine
 from personal_ai.agents.skills import build_default_skill_registry
 from personal_ai.agents.tools import build_default_agent_tools
+from personal_ai.config import (
+    EmbeddingSettings,
+    load_ollama_settings,
+)
 from personal_ai.memory.service import MemoryService
 from personal_ai.memory.store import MemoryStore
+from personal_ai.ollama_embeddings import create_embedder
 from personal_ai.people.store import PersonStore
+from personal_ai.retrieval_factory import runtime_chunk_index
 from personal_ai.storage.chunks import ChunkStore
 from personal_ai.storage.documents import DocumentStore
 
@@ -76,6 +82,11 @@ def _open_connection(database: str | Path) -> sqlite3.Connection:
     return connection
 
 
+def _runtime_embedding_provider(settings: EmbeddingSettings) -> object:
+    """Build the Ollama-backed embedding provider for a configured model."""
+    return create_embedder(settings, base_url=load_ollama_settings().base_url)
+
+
 def build_mcp_server(database: str | Path) -> MCPServer:
     """Build a read-only MCP server exposing the personal knowledge tools.
 
@@ -84,9 +95,15 @@ def build_mcp_server(database: str | Path) -> MCPServer:
     researcher policy engine — no tool without a read permission exists here.
     """
     connection = _open_connection(database)
+    chunk_store = ChunkStore(connection)
+    chunk_index = runtime_chunk_index(
+        connection,
+        embedding_provider_factory=_runtime_embedding_provider,
+    )
     tools = build_default_agent_tools(
         document_store=DocumentStore(connection),
-        chunk_store=ChunkStore(connection),
+        chunk_store=chunk_store,
+        chunk_index=chunk_index,
         memory_service=MemoryService(MemoryStore(connection)),
         person_store=PersonStore(connection),
     )

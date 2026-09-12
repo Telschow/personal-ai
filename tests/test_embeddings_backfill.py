@@ -289,3 +289,156 @@ def test_backfill_module_has_no_infrastructure_imports() -> None:
 
     assert "ollama" not in source
     assert "httpx" not in source
+
+
+def seed_corpus(harness: BackfillHarness, source_keys: tuple[str, ...]) -> int:
+    """Ingest a few text-heavy records; returns the resulting chunk count."""
+    for source_key in source_keys:
+        harness.ingestor(chunk_size=40, chunk_overlap=5).ingest(
+            make_record(TEXT_HEAVY_TEXT.encode(), source_key=source_key)
+        )
+    return harness.chunk_store.count()
+
+
+def test_backfill_corpus_embeds_all_chunks_in_chunk_id_order() -> None:
+    harness = BackfillHarness()
+    total = seed_corpus(harness, ("notes/one.txt", "notes/two.txt"))
+    assert total > 3
+    expected_order = [chunk.text for chunk in harness.chunk_store.list_chunks()]
+    provider = FakeEmbeddingProvider()
+
+    summary = harness.backfiller(provider).backfill_corpus(batch_size=3)
+
+    assert summary.total_chunks == total
+    assert summary.chunks_scanned == total
+    assert summary.embeddings_created == total
+    assert provider.calls == expected_order
+    assert harness.embedding_store.count(FAKE_EMBED_MODEL) == total
+    for chunk in harness.chunk_store.list_chunks():
+        assert harness.embedding_store.get(chunk.id) == Embedding(
+            model=FAKE_EMBED_MODEL, vector=(0.5, -0.25)
+        )
+
+
+def test_backfill_corpus_is_idempotent() -> None:
+    harness = BackfillHarness()
+    total = seed_corpus(harness, ("notes/one.txt",))
+    provider = FakeEmbeddingProvider()
+    backfiller = harness.backfiller(provider)
+    assert backfiller.backfill_corpus().embeddings_created == total
+    calls_after_first = list(provider.calls)
+
+    second = backfiller.backfill_corpus()
+
+    assert second.embeddings_created == 0
+    assert second.chunks_scanned == total
+    assert provider.calls == calls_after_first
+
+
+def test_backfill_corpus_resumes_after_partial_failure() -> None:
+    harness = BackfillHarness()
+    total = seed_corpus(harness, ("notes/one.txt", "notes/two.txt"))
+    batch_size = 3
+    fail_on_call = 5
+    flaky = FlakyEmbeddingProvider(fail_on_call=fail_on_call)
+    with pytest.raises(RuntimeError, match="embedding backend unavailable"):
+        harness.backfiller(flaky).backfill_corpus(batch_size=batch_size)
+
+    persisted = harness.embedding_store.count(FAKE_EMBED_MODEL)
+    expected_persisted = ((fail_on_call - 1) // batch_size) * batch_size
+    assert 0 < persisted == expected_persisted < total
+
+    healthy = FakeEmbeddingProvider()
+    resumed = harness.backfiller(healthy).backfill_corpus(batch_size=batch_size)
+
+    assert resumed.embeddings_created == total - persisted
+    assert resumed.chunks_scanned == total
+    assert harness.embedding_store.count(FAKE_EMBED_MODEL) == total
+    again = harness.backfiller(healthy).backfill_corpus(batch_size=batch_size)
+    assert again.embeddings_created == 0
+
+
+def test_backfill_corpus_no_resume_overwrites_current_model_vectors() -> None:
+    harness = BackfillHarness()
+    total = seed_corpus(harness, ("notes/one.txt",))
+    provider = FakeEmbeddingProvider()
+    backfiller = harness.backfiller(provider)
+    assert backfiller.backfill_corpus().embeddings_created == total
+    calls_after_first = list(provider.calls)
+
+    overwritten = backfiller.backfill_corpus(resume=False)
+
+    assert overwritten.embeddings_created == total
+    assert len(provider.calls) == len(calls_after_first) + total
+    assert harness.embedding_store.count(FAKE_EMBED_MODEL) == total
+
+
+def test_backfill_corpus_model_change_reembeds_everything() -> None:
+    harness = BackfillHarness()
+    total = seed_corpus(harness, ("notes/one.txt",))
+    assert (
+        harness.backfiller(FakeEmbeddingProvider(model="old-model"))
+        .backfill_corpus()
+        .embeddings_created
+        == total
+    )
+
+    replacement = FakeEmbeddingProvider(model="new-model", vector=(0.9, 0.8))
+    summary = harness.backfiller(replacement).backfill_corpus()
+
+    assert summary.embeddings_created == total
+    assert harness.embedding_store.count("old-model") == 0
+    assert harness.embedding_store.count("new-model") == total
+    for chunk in harness.chunk_store.list_chunks():
+        assert harness.embedding_store.get(chunk.id) == Embedding(
+            model="new-model", vector=(0.9, 0.8)
+        )
+
+
+def test_backfill_corpus_progress_callback_reports_cumulative_counts() -> None:
+    harness = BackfillHarness()
+    total = seed_corpus(harness, ("notes/one.txt",))
+    progress: list[tuple[int, int]] = []
+
+    summary = harness.backfiller().backfill_corpus(
+        batch_size=4, progress_callback=lambda s, c: progress.append((s, c))
+    )
+
+    assert summary.embeddings_created == total
+    assert progress and progress[-1] == (total, total)
+    scanned = [entry[0] for entry in progress]
+    created = [entry[1] for entry in progress]
+    assert scanned == sorted(scanned) and created == sorted(created)
+    assert all(step % 4 == 0 for step in scanned[:-1]) or total < 4
+
+
+def test_backfill_corpus_empty_corpus_is_a_noop() -> None:
+    harness = BackfillHarness()
+    provider = FakeEmbeddingProvider()
+
+    summary = harness.backfiller(provider).backfill_corpus()
+
+    assert summary.total_chunks == 0
+    assert summary.chunks_scanned == 0
+    assert summary.embeddings_created == 0
+    assert provider.calls == []
+
+
+@pytest.mark.parametrize("batch_size", [0, -3])
+def test_backfill_corpus_rejects_nonpositive_batch_size(batch_size: int) -> None:
+    harness = BackfillHarness()
+    harness.ingestor().ingest(make_record(TEXT_HEAVY_TEXT.encode()))
+
+    with pytest.raises(ValueError, match="batch_size"):
+        harness.backfiller().backfill_corpus(batch_size=batch_size)
+
+
+def test_backfill_corpus_empty_chunk_text_is_never_embedded() -> None:
+    harness = BackfillHarness()
+    harness.ingestor().ingest(make_record(b""))
+    provider = FakeEmbeddingProvider()
+
+    summary = harness.backfiller(provider).backfill_corpus()
+
+    assert summary.total_chunks == 0
+    assert provider.calls == []

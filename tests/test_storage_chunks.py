@@ -222,3 +222,51 @@ def test_chunker_output_round_trips_through_the_store() -> None:
         restored = store.list_for_document("doc-42")
 
     assert restored == chunks
+
+
+def test_list_chunks_returns_all_in_chunk_id_order() -> None:
+    ids = ["chunk-z", "chunk-a", "chunk-m"]
+    chunks = [make_chunk(id=chunk_id, text=f"text {chunk_id}") for chunk_id in ids]
+
+    with make_store() as store:
+        store.add_many(chunks)
+
+        listed = store.list_chunks()
+
+    assert [chunk.id for chunk in listed] == ["chunk-a", "chunk-m", "chunk-z"]
+    assert listed == tuple(sorted(chunks, key=lambda chunk: chunk.id))
+
+
+def test_list_chunks_bounded_window_with_offset() -> None:
+    with make_store() as store:
+        for index in range(5):
+            store.add(make_chunk(id=f"chunk-{index:02d}", text=f"text {index}"))
+
+        with pytest.raises(ValueError):
+            store.list_chunks(limit=-1)
+        first = store.list_chunks(limit=2)
+        second = store.list_chunks(limit=2, offset=2)
+        tail = store.list_chunks(limit=2, offset=4)
+        beyond = store.list_chunks(limit=2, offset=10)
+        none = store.list_chunks(limit=0)
+
+    assert [chunk.id for chunk in first] == ["chunk-00", "chunk-01"]
+    assert [chunk.id for chunk in second] == ["chunk-02", "chunk-03"]
+    assert [chunk.id for chunk in tail] == ["chunk-04"]
+    assert beyond == ()
+    assert none == ()
+
+
+def test_list_chunks_offset_without_limit_returns_remainder() -> None:
+    with make_store() as store:
+        for index in range(5):
+            store.add(make_chunk(id=f"chunk-{index:02d}", text=f"text {index}"))
+
+        listed = store.list_chunks(offset=2)
+
+    assert [chunk.id for chunk in listed] == ["chunk-02", "chunk-03", "chunk-04"]
+
+
+def test_list_chunks_empty_store_returns_nothing() -> None:
+    with make_store() as store:
+        assert store.list_chunks() == ()

@@ -265,3 +265,61 @@ def test_storage_module_has_no_infrastructure_imports() -> None:
 
     assert "ollama" not in source
     assert "httpx" not in source
+
+
+def test_count_tracks_rows_per_model() -> None:
+    with make_store() as store:
+        assert store.count("nomic-embed-text") == 0
+        store.add(make_embedding(model="nomic-embed-text"), "chunk-a")
+        store.add(make_embedding(model="nomic-embed-text"), "chunk-b")
+        store.add(make_embedding(model="mxbai-embed-large"), "chunk-c")
+
+        assert store.count("nomic-embed-text") == 2
+        assert store.count("mxbai-embed-large") == 1
+        assert store.count("another-model") == 0
+
+
+def test_count_follows_update_across_models() -> None:
+    with make_store() as store:
+        store.add(make_embedding(model="old-model"), "chunk-1")
+        assert store.count("old-model") == 1
+
+        store.add(make_embedding(model="new-model"), "chunk-1")
+        assert store.count("old-model") == 0
+        assert store.count("new-model") == 1
+
+
+def test_add_many_inserts_and_updates_in_one_transaction() -> None:
+    with make_store() as store:
+        store.add(make_embedding(), "chunk-a")
+        items = [
+            (make_embedding(vector=(1.0, 1.0, 1.0)), "chunk-a"),
+            (make_embedding(vector=(2.0, 2.0, 2.0)), "chunk-b"),
+            (make_embedding(vector=(3.0, 3.0, 3.0)), "chunk-c"),
+        ]
+
+        inserted = store.add_many(items)
+
+        assert inserted == 2
+        assert store.get("chunk-b") == make_embedding(vector=(2.0, 2.0, 2.0))
+        assert store.get("chunk-c") == make_embedding(vector=(3.0, 3.0, 3.0))
+
+
+def test_add_many_rejects_invalid_embedding_whole_batch() -> None:
+    with make_store() as store:
+        items = [
+            (make_embedding(), "chunk-a"),
+            (make_embedding(vector=(True,)), "chunk-b"),
+        ]
+
+        with pytest.raises(MalformedEmbeddingError):
+            store.add_many(items)
+
+        assert store.get("chunk-a") is None
+        assert store.get("chunk-b") is None
+
+
+def test_add_many_empty_batch_is_a_noop() -> None:
+    with make_store() as store:
+        assert store.add_many([]) == 0
+        assert store.count("nomic-embed-text") == 0

@@ -105,6 +105,42 @@ class EmbeddingStore:
         self._connection.commit()
         return inserted
 
+    def add_many(self, embeddings: Iterable[tuple[Embedding, str]]) -> int:
+        """Store ``(embedding, chunk_id)`` pairs in one transaction.
+
+        Returns the number newly inserted; an existing chunk id is updated
+        with the new vector, exactly as in :meth:`add`. Either the whole
+        batch persists or, on error, the transaction rolls back and the
+        exception propagates, leaving the store unchanged.
+        """
+        inserted = 0
+        try:
+            for embedding, chunk_id in embeddings:
+                validated = _validated_embedding(embedding)
+                cursor = self._connection.execute(
+                    _INSERT_SQL, _embedding_to_row(validated, chunk_id)
+                )
+                if cursor.rowcount == 1:
+                    inserted += 1
+                else:
+                    assignments = ", ".join(f"{column} = ?" for column in _COLUMNS[1:])
+                    self._connection.execute(
+                        f"UPDATE chunk_embeddings SET {assignments} WHERE chunk_id = ?",
+                        (*_embedding_to_row(validated, chunk_id)[1:], chunk_id),
+                    )
+            self._connection.commit()
+        except BaseException:
+            self._connection.rollback()
+            raise
+        return inserted
+
+    def count(self, model: str) -> int:
+        """Return the number of stored embeddings produced by this model."""
+        row = self._connection.execute(
+            "SELECT COUNT(*) FROM chunk_embeddings WHERE model = ?", (model,)
+        ).fetchone()
+        return int(row[0]) if row is not None else 0
+
     def get(self, chunk_id: str) -> Embedding | None:
         """Return the embedding for this chunk id, or None when absent."""
         row = self._connection.execute(

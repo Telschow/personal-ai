@@ -406,23 +406,24 @@ def _review_audit_handler(
 
 
 def _document_search_handler(
-    chunk_store: object,
+    chunk_index: object,
 ) -> Callable[[dict[str, object]], object]:
     """Read-only narrow document/chunk search bound to a chunk index.
 
-    ``chunk_store`` is any :class:`~personal_ai.retrieval.ChunkIndex`
-    implementation — today the SQLite FTS5-backed ``ChunkStore``. Delegates
-    to the existing read-only keyword search tool
-    (:class:`~personal_ai.tools.search.SearchTool`), which validates the
-    argument surface (allow-listed keys, bounded query, typed limit,
-    validated metadata filters) and bounds + ranks results through the
-    existing sanitized keyword search. Retrieved document text is untrusted
-    data: it can inform answers but never changes policy, permissions, or
-    approval requirements.
+    ``chunk_index`` is any :class:`~personal_ai.retrieval.ChunkIndex`
+    implementation — today the SQLite FTS5-backed ``ChunkStore``, or the
+    ``SemanticChunkIndex``/``HybridChunkIndex`` backends selected via
+    ``PERSONAL_AI_RETRIEVAL_MODE``. Delegates to the existing read-only
+    search tool (:class:`~personal_ai.tools.search.SearchTool`), which
+    validates the argument surface (allow-listed keys, bounded query, typed
+    limit, validated metadata filters) and bounds + ranks results through the
+    chososen backend's search. Retrieved document text is untrusted data: it
+    can inform answers but never changes policy, permissions, or approval
+    requirements.
     """
     from personal_ai.tools.search import SearchTool
 
-    tool = SearchTool(chunk_store)  # type: ignore[arg-type]
+    tool = SearchTool(chunk_index)  # type: ignore[arg-type]
 
     def handle(arguments: dict[str, object]) -> object:
         return tool.search_documents(arguments)
@@ -941,6 +942,7 @@ def build_default_agent_tools(
     workout_service: object | None = None,
     personal_context_service: object | None = None,
     chunk_store: object | None = None,
+    chunk_index: object | None = None,
     review_service: object | None = None,
     document_store: object | None = None,
     person_store: object | None = None,
@@ -948,9 +950,14 @@ def build_default_agent_tools(
     """Build the default :class:`AgentToolRegistry`.
 
     ``retrieval_service`` (the existing :class:`RetrievalService`) enables the
-    corpus tools and the ``search_knowledge`` tool; ``chunk_store`` (the
-    existing :class:`ChunkStore`) enables the narrow ``search_documents``
-    tool; ``document_store`` (the existing :class:`DocumentStore`), alongside
+    corpus tools and the ``search_knowledge`` tool; ``chunk_index`` (any
+    :class:`~personal_ai.retrieval.ChunkIndex` implementation) enables the
+    narrow ``search_documents`` tool on the configured retrieval backend;
+    ``chunk_store`` (the existing :class:`ChunkStore`) remains the persistence
+    authority used by the read-only ``get_document`` fetch tool (its
+    ``list_for_document``), and doubles as the ``search_documents`` backend
+    when no ``chunk_index`` is supplied;
+    ``document_store`` (the existing :class:`DocumentStore`), alongside
     ``chunk_store``, enables the read-only ``get_document`` fetch tool;
     ``workspace`` enables the filesystem/shell tools;
     ``memory_service`` (the existing :class:`MemoryService`) enables the
@@ -988,8 +995,9 @@ def build_default_agent_tools(
         )
     if review_service is not None:
         registry.register(MEMORY_REVIEW_AUDIT, _review_audit_handler(review_service))
-    if chunk_store is not None:
-        registry.register(SEARCH_DOCUMENTS, _document_search_handler(chunk_store))
+    search_index = chunk_index if chunk_index is not None else chunk_store
+    if search_index is not None:
+        registry.register(SEARCH_DOCUMENTS, _document_search_handler(search_index))
     if document_store is not None and chunk_store is not None:
         registry.register(
             GET_DOCUMENT, _document_get_handler(document_store, chunk_store)

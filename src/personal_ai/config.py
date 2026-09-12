@@ -10,8 +10,11 @@ work is unavailable, and a chat model can never become an embedding model.
 import os
 from collections.abc import Mapping
 from dataclasses import dataclass
+from enum import Enum
 
 EMBEDDING_MODEL_ENV = "PERSONAL_AI_EMBEDDING_MODEL"
+
+RETRIEVAL_MODE_ENV = "PERSONAL_AI_RETRIEVAL_MODE"
 
 VISION_MODEL_ENV = "PERSONAL_AI_VISION_MODEL"
 VISION_PROMPT_VERSION_ENV = "PERSONAL_AI_VISION_PROMPT_VERSION"
@@ -45,6 +48,56 @@ def load_embedding_settings(
     source = os.environ if environ is None else environ
     raw = source.get(EMBEDDING_MODEL_ENV, "").strip()
     return EmbeddingSettings(model=raw or None)
+
+
+class RetrievalMode(Enum):
+    """Search backend for chunk retrieval.
+
+    ``KEYWORD`` is the production default: the SQLite FTS5 keyword index.
+    ``SEMANTIC`` and ``HYBRID`` are opt-in backends enabled via
+    :data:`RETRIEVAL_MODE_ENV`; both require an embedding model to be
+    configured (see :data:`EMBEDDING_MODEL_ENV`).
+    """
+
+    KEYWORD = "keyword"
+    SEMANTIC = "semantic"
+    HYBRID = "hybrid"
+
+
+@dataclass(frozen=True, slots=True)
+class RetrievalSettings:
+    """Chunk retrieval backend configuration.
+
+    ``mode`` selects which :class:`~personal_ai.retrieval.ChunkIndex`
+    implementation the application constructs. It is never changed by the
+    presence of an embedding model: configuring
+    :data:`EMBEDDING_MODEL_ENV` alone leaves retrieval on ``KEYWORD``.
+    """
+
+    mode: RetrievalMode = RetrievalMode.KEYWORD
+
+
+def load_retrieval_settings(
+    environ: Mapping[str, str] | None = None,
+) -> RetrievalSettings:
+    """Read retrieval configuration from the given (or real) environment.
+
+    An absent or blank :data:`RETRIEVAL_MODE_ENV` yields the ``KEYWORD``
+    default; an unknown value raises ``ValueError`` rather than degrading
+    silently, so an operator typo is surfaced instead of silently switching
+    backends.
+    """
+    source = os.environ if environ is None else environ
+    raw = source.get(RETRIEVAL_MODE_ENV, "").strip()
+    if not raw:
+        return RetrievalSettings()
+    try:
+        mode = RetrievalMode(raw.lower())
+    except ValueError as exc:
+        valid = ", ".join(m.value for m in RetrievalMode)
+        msg = f"{RETRIEVAL_MODE_ENV} must be one of {valid!r}, got {raw!r}"
+        raise ValueError(msg) from exc
+    return RetrievalSettings(mode=mode)
 
 
 @dataclass(frozen=True, slots=True)

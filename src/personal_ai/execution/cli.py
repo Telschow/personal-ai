@@ -33,6 +33,7 @@ from pathlib import Path
 from typing import Any
 
 from personal_ai.agents.tools import build_default_agent_tools
+from personal_ai.config import EmbeddingSettings, load_ollama_settings
 from personal_ai.execution import ControlPlane, open_orchestration_store
 from personal_ai.execution.control_plane import ExecutionNotFoundError
 from personal_ai.execution.models import Plan, PlanTransitionError, TaskTransitionError
@@ -48,9 +49,10 @@ from personal_ai.memory.service import (
     MemoryNotConfiguredError,
     MemoryService,
 )
+from personal_ai.ollama_embeddings import create_embedder
 from personal_ai.retrieval import RetrievalService
+from personal_ai.retrieval_factory import runtime_chunk_index
 from personal_ai.storage import (
-    ChunkStore,
     ConversationStore,
     DocumentStore,
     ExtractionStore,
@@ -90,6 +92,11 @@ def _print_json(value: Any) -> None:
     print(json.dumps(value, indent=2, default=str))
 
 
+def _runtime_embedding_provider(settings: EmbeddingSettings) -> object:
+    """Build the Ollama-backed embedding provider for a configured model."""
+    return create_embedder(settings, base_url=load_ollama_settings().base_url)
+
+
 def _build_corpora(args: argparse.Namespace) -> tuple[Any, ControlPlane, Any]:
     """Build a ControlPlane wired to memory (and the corpus when configured).
 
@@ -104,8 +111,12 @@ def _build_corpora(args: argparse.Namespace) -> tuple[Any, ControlPlane, Any]:
     if getattr(args, "corpus", None) is not None:
         corpus = connect_database(args.corpus)
         try:
+            chunk_index = runtime_chunk_index(
+                corpus,
+                embedding_provider_factory=_runtime_embedding_provider,
+            )
             retrieval_service = RetrievalService(
-                ChunkStore(corpus),
+                chunk_index,
                 ExtractionStore(corpus),
                 DocumentStore(corpus),
                 ConversationStore(corpus),

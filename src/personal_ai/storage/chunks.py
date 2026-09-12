@@ -486,6 +486,33 @@ class ChunkStore:
         rows = self._connection.execute(sql, tuple(parameters)).fetchall()
         return tuple(_row_to_chunk(row) for row in rows)
 
+    def list_chunks(
+        self, limit: int | None = None, offset: int = 0
+    ) -> tuple[DocumentChunk, ...]:
+        """Return chunks in deterministic chunk-id order within a bounded window.
+
+        The corpus-wide analogue of :meth:`list_for_document`: ``limit``
+        bounds the number of rows returned (``None`` fetches all) and
+        ``offset`` skips the leading rows, letting read-only callers iterate
+        every chunk in stable batches without loading the table at once.
+        """
+        if limit is not None and limit < 0:
+            msg = f"Chunk limit must be non-negative, got {limit}"
+            raise ValueError(msg)
+        sql = f"{_SELECT_SQL} ORDER BY chunk_id"
+        parameters: list[object] = []
+        if limit is None:
+            if offset:
+                sql += " LIMIT -1"
+        else:
+            sql += " LIMIT ?"
+            parameters.append(limit)
+        if offset:
+            sql += " OFFSET ?"
+            parameters.append(offset)
+        rows = self._connection.execute(sql, tuple(parameters)).fetchall()
+        return tuple(_row_to_chunk(row) for row in rows)
+
     def delete_for_document(self, document_id: str) -> int:
         """Remove all chunks of one document; returns the number deleted."""
         self._connection.execute(

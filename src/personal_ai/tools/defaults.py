@@ -23,6 +23,7 @@ from personal_ai.tools.workouts import build_policy_gated_workout_handler
 def create_default_registry(
     workspace: Path,
     chunk_store: ChunkStore | None = None,
+    chunk_index: object | None = None,
     retrieval_service: RetrievalService | None = None,
     event_store: EventStore | None = None,
     workout_service: object | None = None,
@@ -39,7 +40,11 @@ def create_default_registry(
     content there is nothing for this narrow chunk-only tool to search, so
     the model is never shown it; ``search_knowledge`` remains the broader
     knowledge search. When indexed documents ARE present, ``search_documents``
-    is registered exactly as before.
+    is registered exactly as before. ``chunk_index`` (any
+    :class:`~personal_ai.retrieval.ChunkIndex` implementation) selects the
+    search backend used by ``search_documents``; when absent the
+    ``chunk_store`` itself serves as the keyword backend. The registration
+    gate always reads ``chunk_store.count()``.
 
     The ``search_knowledge`` tool is registered only when a retrieval
     service is provided; it searches chunks, structured extractions, and
@@ -156,7 +161,9 @@ def create_default_registry(
     )
 
     if chunk_store is not None or retrieval_service is not None:
-        corpus = build_policy_gated_corpus_handler(retrieval_service, chunk_store)
+        corpus = build_policy_gated_corpus_handler(
+            retrieval_service, chunk_store, chunk_index
+        )
     else:
         corpus = None
 

@@ -636,6 +636,37 @@ retrieval-mode knob.
 
 Tests: 39 new. Full suite: 2767 passed. Ruff clean. Format clean.
 
+## Operator-configurable retrieval mode (Phase 51)
+
+Phase 51 closes §35.11 by implementing the recommended operator knob:
+`PERSONAL_AI_RETRIEVAL_MODE=keyword|semantic|hybrid` (default `keyword`),
+read at wiring time only.
+
+- `config.py` adds the `RetrievalMode` enum and frozen `RetrievalSettings`;
+  an absent/blank env value yields `keyword`, an unknown value raises
+  `ValueError` (operator typos fail loudly, never degrade silently).
+- `retrieval_factory.build_chunk_index(connection, settings, provider)` is the
+  single construction seam: `keyword` → `SQLiteChunkIndex`, `semantic` →
+  `SemanticChunkIndex`, `hybrid` → `HybridChunkIndex`. Semantic/hybrid
+  require an `EmbeddingProvider` and raise `ValueError` (pointing at
+  `PERSONAL_AI_EMBEDDING_MODEL`) otherwise.
+- `retrieval_factory.runtime_chunk_index(connection, *,
+  embedding_provider_factory, environ)` assembles the runtime backend from the
+  environment, deferring provider construction until a non-keyword backend is
+  actually selected. The factory imports no Ollama/httpx code.
+- Every runtime builds its search backend that way — `cli._connect_agent_
+  registry`, `cli.run_search` (`--search`), `mcp_server.build_mcp_server`, and
+  `execution/cli._build_corpora` — while `ChunkStore` remains the persistence
+  authority for `get_document` and the `search_documents` registration gate.
+  `build_default_agent_tools`, `PolicyGatedCorpus`, and
+  `create_default_registry` accept a `chunk_index` argument (falling back to
+  `chunk_store`) so the search path honors the configured backend.
+- All §34–36 invariants are unchanged: keyword is the production default;
+  embedding configuration alone never changes retrieval behavior; semantic/
+  hybrid results still depend on persisted vectors for the configured model
+  (`EmbeddingBackfiller`); per-backend-empty semantics and fail-closed
+  propagation hold; there is no CLI/HTTP retrieval-mode switch.
+
 ## Provenance and safety
 
 Each result item carries only bounded provenance keys — `chunk_id`,

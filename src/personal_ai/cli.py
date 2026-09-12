@@ -5,16 +5,24 @@ import hashlib
 import json
 import sqlite3
 import sys
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
 from personal_ai.agent import Agent, AgentObserver
-from personal_ai.config import load_ollama_settings, load_vision_settings
+from personal_ai.config import (
+    EMBEDDING_MODEL_ENV,
+    EmbeddingSettings,
+    load_embedding_settings,
+    load_ollama_settings,
+    load_vision_settings,
+)
 from personal_ai.conversation_ingestion import (
     ingest_chatgpt_conversations,
     ingest_gemini_conversations,
 )
+from personal_ai.embeddings import EmbeddingBackfiller
 from personal_ai.event_ingestion import (
     ingest_chrome_history,
     ingest_youtube_history,
@@ -61,6 +69,7 @@ from personal_ai.memory.orchestration import (
 from personal_ai.memory.proposals import DEFAULT_MAX_MESSAGES, DEFAULT_MAX_RETRIES
 from personal_ai.memory.store import MemoryStore
 from personal_ai.ollama_client import ChatMessage, OllamaClient
+from personal_ai.ollama_embeddings import create_embedder
 from personal_ai.ollama_structured import OllamaStructuredExtractor
 from personal_ai.ollama_vision import OllamaVisionExtractor
 from personal_ai.orchestration import ingest_source
@@ -74,6 +83,7 @@ from personal_ai.retrieval import (
     SearchDocumentsRequest,
     search_documents,
 )
+from personal_ai.retrieval_factory import runtime_chunk_index
 from personal_ai.sources.base import SourceError
 from personal_ai.sources.chrome_history import SOURCE_TYPE as CHROME_SOURCE_TYPE
 from personal_ai.sources.email import SOURCE_TYPE as EMAIL_SOURCE_TYPE
@@ -135,6 +145,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     if argv and argv[0] == "people":
         args = _build_people_parser().parse_args(argv[1:])
         args.command = "people"
+        return args
+    if argv and argv[0] == "embedding":
+        args = _build_embedding_parser().parse_args(argv[1:])
+        args.command = "embedding"
         return args
     return _parse_agent_args(argv)
 
@@ -238,12 +252,18 @@ def _parse_agent_args(argv: list[str]) -> argparse.Namespace:
 
 
 def run_search(query: str, database: Path, limit: int) -> None:
-    """Print keyword-search results from the knowledge database."""
+    """Print retrieval results from the knowledge database.
+
+    The search backend is the one selected by ``PERSONAL_AI_RETRIEVAL_MODE``
+    (keyword by default; semantic/hybrid require an embedding model).
+    """
     connection = connect_database(database)
     try:
-        chunk_store = ChunkStore(connection)
+        chunk_index = runtime_chunk_index(
+            connection, embedding_provider_factory=_runtime_embedding_provider
+        )
         results = search_documents(
-            chunk_store, SearchDocumentsRequest(query=query, limit=limit)
+            chunk_index, SearchDocumentsRequest(query=query, limit=limit)
         )
     finally:
         connection.close()
@@ -982,6 +1002,151 @@ def _run_people_list(database: Path, args: argparse.Namespace) -> int:
             f"last: {person.last_seen_at}"
         )
     return 0
+
+
+DEFAULT_BACKFILL_BATCH_SIZE = 32
+
+
+def _build_embedding_parser() -> argparse.ArgumentParser:
+    """Parser for ``personal-ai embedding ...`` (backfill).
+
+    Kept separate from the agent CLI parser: the ``embedding`` verb is
+    dispatched in :func:`parse_args` when it is the first positional token,
+    so the existing agent flag surface (``--workspace``, ``--database``,
+    positional ``prompt``) is untouched.
+    """
+    parser = argparse.ArgumentParser(
+        prog="personal-ai embedding",
+        description="Generate chunk embeddings for the personal knowledge corpus.",
+    )
+    sub = parser.add_subparsers(dest="verb", required=True, metavar="{backfill}")
+
+    backfill = sub.add_parser(
+        "backfill", help="Generate missing embeddings for every persisted chunk."
+    )
+    backfill.add_argument(
+        "--database",
+        type=Path,
+        required=True,
+        help="SQLite database holding the document and chunk stores (required).",
+    )
+    backfill.add_argument(
+        "--model",
+        help=(
+            "Embedding model to use (default: the "
+            f"{EMBEDDING_MODEL_ENV} configuration)."
+        ),
+    )
+    backfill.add_argument(
+        "--batch-size",
+        type=int,
+        default=DEFAULT_BACKFILL_BATCH_SIZE,
+        help=f"Chunks per batch (default: {DEFAULT_BACKFILL_BATCH_SIZE}).",
+    )
+    backfill.add_argument(
+        "--no-resume",
+        dest="resume",
+        action="store_false",
+        default=True,
+        help="Re-embed every chunk, overwriting existing current-model vectors.",
+    )
+    return parser
+
+
+def run_embedding(args: argparse.Namespace) -> int:
+    """Dispatch an ``embedding`` subcommand and return a process exit code."""
+    verb = args.verb
+    if verb == "backfill":
+        return _run_embedding_backfill(args)
+    raise SystemExit(f"Unknown embedding verb: {verb}")
+
+
+def _format_eta(seconds: float) -> str:
+    """Render a duration as ``1h 05m`` / ``3m 12s`` / ``42s``."""
+
+    def _(value: float, unit: str) -> str:
+        return f"{int(value)}{unit}"
+
+    if seconds >= 3600:
+        return f"{_(seconds // 3600, 'h')} {_(seconds % 3600 // 60, 'm')}"
+    if seconds >= 60:
+        return f"{_(seconds // 60, 'm')} {_(seconds % 60, 's')}"
+    return _(seconds, "s")
+
+
+def _run_embedding_backfill(args: argparse.Namespace) -> int:
+    """Backfill chunk embeddings for the configured (or explicit) model."""
+    if not args.database.exists():
+        raise SystemExit(f"Database not found: {args.database}")
+    if args.batch_size < 1:
+        raise SystemExit(f"batch-size must be >= 1, got {args.batch_size}")
+
+    configured = load_embedding_settings()
+    model = args.model or configured.model
+    if model is None:
+        raise SystemExit(
+            f"{EMBEDDING_MODEL_ENV} is not configured and --model was not "
+            "given; embedding backfill requires a model"
+        )
+
+    connection = connect_database(args.database)
+    try:
+        chunk_store = ChunkStore(connection)
+        embedding_store = EmbeddingStore(connection)
+        settings = EmbeddingSettings(model=model)
+        backfiller = EmbeddingBackfiller(
+            chunk_store,
+            embedding_store,
+            create_embedder(settings, base_url=load_ollama_settings().base_url),
+        )
+
+        total_chunks = chunk_store.count()
+        pending = (
+            total_chunks - embedding_store.count(model) if args.resume else total_chunks
+        )
+        batch_size = args.batch_size
+        started = time.monotonic()
+
+        def progress_cb(scanned: int, created: int) -> None:
+            elapsed = time.monotonic() - started
+            rate = created / elapsed if elapsed > 0 else 0.0
+            remaining = max(0, pending - created)
+            eta = remaining / rate if rate > 0.01 else None
+            pct = 100.0 * scanned / total_chunks if total_chunks else 100.0
+            print(
+                f"[embedding] {scanned}/{total_chunks} chunks ({pct:.1f}%) | "
+                f"{rate:.1f} chunks/s | ETA {_format_eta(eta) if eta is not None else '?'}",
+                file=sys.stderr,
+            )
+
+        print("Embedding backfill")
+        print(f"  model: {model}")
+        print(f"  database: {args.database}")
+        print(f"  batch size: {batch_size}")
+        print(f"  resume: {args.resume}")
+        print(f"  chunks: {total_chunks}")
+        print(f"  already embedded for model: {embedding_store.count(model)}")
+        print()
+
+        summary = backfiller.backfill_corpus(
+            batch_size=batch_size,
+            resume=args.resume,
+            progress_callback=progress_cb,
+        )
+
+        elapsed = time.monotonic() - started
+        print("Embedding backfill complete")
+        print(f"  chunks: {summary.total_chunks}")
+        print(f"  scanned: {summary.chunks_scanned}")
+        print(f"  embeddings created: {summary.embeddings_created}")
+        print(f"  elapsed: {_format_eta(elapsed)}")
+        print(
+            f"  stored for model {model}: "
+            f"{embedding_store.count(model)} / {total_chunks}"
+        )
+        return 0
+    finally:
+        connection.close()
 
 
 def run_memory(args: argparse.Namespace) -> int:
@@ -1833,6 +1998,11 @@ def _sha256_hex(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
+def _runtime_embedding_provider(settings: EmbeddingSettings) -> object:
+    """Build the Ollama-backed embedding provider for a configured model."""
+    return create_embedder(settings, base_url=load_ollama_settings().base_url)
+
+
 def _connect_agent_registry(
     workspace: Path,
     database: Path,
@@ -1845,7 +2015,11 @@ def _connect_agent_registry(
     Opens the workspace knowledge database and wires the existing stores into
     the default tool registry so the agent can use ``search_knowledge``
     (via :class:`~personal_ai.retrieval.RetrievalService`) and ``query_events``
-    (via :class:`~personal_ai.storage.events.EventStore`). When a workout query
+    (via :class:`~personal_ai.storage.events.EventStore`). The chunk search
+    backend is assembled by
+    :func:`~personal_ai.retrieval_factory.runtime_chunk_index`, so
+    ``PERSONAL_AI_RETRIEVAL_MODE`` selects keyword (the default), semantic,
+    or hybrid retrieval without changing anything else. When a workout query
     service is provided, the policy-gated ``search_workouts`` chat tool is
     registered as well. When a memory service is provided, the read-only
     ``personal_context`` overview reports durable-memory availability and,
@@ -1867,8 +2041,11 @@ def _connect_agent_registry(
         conversation_store = ConversationStore(connection)
         event_store = EventStore(connection)
         person_store = PersonStore(connection)
+        chunk_index = runtime_chunk_index(
+            connection, embedding_provider_factory=_runtime_embedding_provider
+        )
         retrieval_service = RetrievalService(
-            chunk_store,
+            chunk_index,
             extraction_store,
             document_store,
             conversation_store,
@@ -1882,6 +2059,7 @@ def _connect_agent_registry(
         registry = create_default_registry(
             workspace,
             chunk_store=chunk_store,
+            chunk_index=chunk_index,
             retrieval_service=retrieval_service,
             event_store=event_store,
             workout_service=workout_service,
@@ -2132,6 +2310,10 @@ def main(argv: list[str] | None = None) -> None:
 
     if getattr(args, "command", None) == "people":
         run_people(args)
+        return
+
+    if getattr(args, "command", None) == "embedding":
+        run_embedding(args)
         return
 
     if args.search_query is not None:

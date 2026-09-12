@@ -744,6 +744,18 @@ CANONICAL PHASES (all implemented):
             search_people/get_person agent and chat tools under the new
             permission people.read; fix for the "doesn't know my name / family
             / girlfriend" trial failure)
+ 51     Hybrid retrieval enablement — operator-configurable retrieval backend
+            (PERSONAL_AI_RETRIEVAL_MODE=keyword|semantic|hybrid, default
+            keyword) through a single construction seam
+            (retrieval_factory.build_chunk_index / runtime_chunk_index) wired
+            into the CLI/--search, MCP bridge, and execution corpus retrieval;
+            keyword remains the production default and embedding configuration
+            alone never changes retrieval behavior)
+ 52     Embedding backfill CLI — operator-driven population of the
+            chunk_embeddings table (personal-ai embedding backfill, idempotent
+            per-chunk corpus backfill via EmbeddingBackfiller.backfill_corpus,
+            optional --model/--batch-size/--no-resume, stderr progress with
+            rate/ETA; Phase 52B operator-assigned label)
 
 RESERVED / NOT ASSIGNED:
 
@@ -759,11 +771,12 @@ RESERVED / NOT ASSIGNED:
 DEFERRED / FUTURE WORK (no phase number assigned yet):
 
     Hybrid retrieval enabled/selected in production + tuning (Phase 35
-    contract is implemented as Phase 36 HybridChunkIndex/RRF but keyword stays
-    the production default; future work: pluggable backend selection and the
-    PERSONAL_AI_RETRIEVAL_MODE operator knob, tuning k/weights/candidate
-    windows against the Phase 37 evaluation set, ANN/vector backend for large
-    corpora beyond the brute-force scan; embeddings stay optional)
+    contract is implemented as Phase 36 HybridChunkIndex/RRF; Phase 51 added
+    the PERSONAL_AI_RETRIEVAL_MODE operator knob with keyword the production
+    default; Phase 52B added the embedding backfill CLI. Future work: tuning
+    k/weights/candidate windows against the Phase 37 evaluation set, ANN/vector
+    backend for large corpora beyond the brute-force scan; embeddings stay
+    optional)
     Vision-first source pipelines (standalone raster images now ingest and
     are vision-extractionable — see the VISION-FIRST SOURCE PIPELINE note
     under PHASE 6 — remaining work: structured extraction of vision-augmented
@@ -1873,6 +1886,133 @@ deterministic ordering, provenance shapes, memory-then-people injection,
 server `people_used`, HTTP route, database-restart persistence), plus
 `tests/test_sources_email.py` cc metadata/hash-stability (2). Full suite:
 2883 passed; ruff clean; format clean.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
+clean).
+
+==================================================
+PHASE 51 — HYBRID RETRIEVAL ENABLEMENT (IMPLEMENTED)
+==================================================
+
+Retrieval-backend selection is now operator-configurable through one
+environment variable. Phase 11–50 invariants (single policy-gated write path,
+LLM proposal-only, security, provenance, exception-only approval, read-only
+chat/agent surfaces) are unchanged; **no new write, policy, curation, or
+adjudication route exists**.
+
+- **Configuration** (`config.py`): `RetrievalMode` enum (`keyword` / `semantic`
+  / `hybrid`) and the frozen `RetrievalSettings` dataclass, read by
+  `load_retrieval_settings(environ=None)` from `PERSONAL_AI_RETRIEVAL_MODE`.
+  An absent/blank value defaults to `KEYWORD`; an unknown value raises
+  `ValueError` listing the valid modes (operator typos fail loudly, never
+  degrade silently). Configuring `PERSONAL_AI_EMBEDDING_MODEL` alone never
+  changes the mode — embedding configuration and retrieval-mode selection are
+  independent.
+- **Construction seam** (`retrieval_factory.py`):
+  `build_chunk_index(connection, settings, embedding_provider=None)` returns
+  `SQLiteChunkIndex` (keyword, the default), `SemanticChunkIndex` (semantic),
+  or `HybridChunkIndex(SQLiteChunkIndex, SemanticChunkIndex)` (hybrid, the
+  Phase 36 RRF fusion). Semantic/hybrid **require** an embedding provider and
+  raise `ValueError` otherwise (message points at
+  `PERSONAL_AI_EMBEDDING_MODEL`) — a selected backend is never silently
+  downgraded to keyword. `runtime_chunk_index(connection, *,
+  embedding_provider_factory=None, environ=None)` assembles the runtime
+  backend from the environment: it defers provider construction until a
+  non-keyword backend is actually selected and only builds the provider when
+  an embedding model is configured, so keyword production runs never touch an
+  embedding provider. The factory module imports no Ollama/httpx code
+  (provider independence preserved; guard test).
+- **Wiring** — every runtime now builds its chunk search backend through
+  `runtime_chunk_index`, and the *search* path uses the configured index while
+  the `ChunkStore` (persistence) remains the authority for `get_document`
+  (`list_for_document`) and the `search_documents` registration gate
+  (`count() > 0`):
+  - `cli._connect_agent_registry` / `cli.run_search` (`--search`),
+  - `mcp_server.build_mcp_server` (six read tools, backend honored),
+  - `execution/cli._build_corpora` (researcher corpus retrieval).
+  `build_default_agent_tools` and `PolicyGatedCorpus`/
+  `build_policy_gated_corpus_handler` gained a `chunk_index` parameter
+  (default falls back to `chunk_store`), and `create_default_registry` gained
+  a trailing `chunk_index` parameter passed through to the corpus handler —
+  all existing callers remain valid, and `get_document` still requires the
+  real `chunk_store`.
+- **Semantic/hybrid results** depend on persisted embeddings for the
+  configured model (populated via `EmbeddingBackfiller`); with no compatible
+  vectors the semantic backend contributes an empty window (per-backend-empty
+  semantics) and keyword remains the only effective backend. Fetching a
+  document by id never depends on retrieval mode.
+- **Operator surface** (`docs/CONFIGURATION`-friendly, environment only; no
+  CLI flag, no request-body knob, no retrieval-mode configuration in the HTTP
+  layer): `PERSONAL_AI_RETRIEVAL_MODE=keyword|semantic|hybrid` (default
+  `keyword`). Do NOT add a CLI/HTTP retrieval-mode switch, a second factory,
+  per-agent mode settings, or automatic mode inference from embedding
+  availability.
+
+Tests: `tests/test_config_retrieval.py` (config matrix), `tests/test_retrieval_factory.py`
+(backend selection, provider-required errors, runtime assembler, hybrid
+keyword+semantic fusion end-to-end, provider-independence guard),
+`tests/test_retrieval_mode_wiring.py` (CLI `_connect_agent_registry` +
+`--search` + MCP bridge: keyword default behavior preserved, hybrid fuses both
+backends through `search_documents`, semantic/hybrid without embedding model
+fail loudly, invalid mode fails loudly). Keyword remains the production
+default; `docs/RETRIEVAL.md` §34–36 invariants unchanged.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
+clean).
+
+==================================================
+PHASE 52B — EMBEDDING BACKFILL CLI (OPERATOR-ASSIGNED; IMPLEMENTED)
+==================================================
+
+An operator-driven corpus backfill now populates the empty `chunk_embeddings`
+table so `PERSONAL_AI_RETRIEVAL_MODE=semantic|hybrid` has real vectors to
+search. Phase 11–51 invariants (single policy-gated write path, LLM proposal-
+only, security, provenance, read-only chat/agent surfaces) are unchanged;
+**no new write, policy, curation, or adjudication route exists** — this slice
+only *stores vectors* under the existing `EmbeddingStore` contract.
+
+- **No new embedding module or checkpoint protocol.** The corpus backfill
+  lives in the existing `embeddings.py::EmbeddingBackfiller` as
+  `backfill_corpus(batch_size=32, resume=True, progress_callback=None)`
+  (plus `_embed_batch`). It reuses the exact model-match semantics of
+  `ensure_document`: a stored embedding is reused only when its recorded
+  model matches the provider; anything missing or foreign is re-embedded and
+  overwritten under the same chunk id. Chunks are visited exactly once in
+  deterministic `chunk_id` ascending order in bounded windows; each successful
+  batch commits immediately, so an interrupted run is resumed by simply
+  starting again (no separate checkpoint state can drift). Provider errors
+  propagate unchanged; `CorpusBackfillSummary(total_chunks, chunks_scanned,
+  embeddings_created)` is aggregate-only.
+- **Storage additions** (SQL stays inside the store boundary):
+  `ChunkStore.list_chunks(limit=None, offset=0)` (deterministic chunk-id
+  window, negative limit rejected) and `EmbeddingStore.count(model)` /
+  `EmbeddingStore.add_many((embedding, chunk_id) pairs)` (one transaction per
+  batch, insert-or-update like `add`).
+- **CLI verb** `personal-ai embedding backfill --database DB [--model MODEL]
+  [--batch-size 32] [--no-resume]`: `--model` defaults to the configured
+  `PERSONAL_AI_EMBEDDING_MODEL` (one source of truth with Phase 51 retrieval;
+  missing both exits non-zero). `--no-resume` forces re-embedding of existing
+  current-model vectors. Progress (scanned/total, chunks/s, ETA) prints to
+  stderr with the final aggregate summary on stdout — no vectors or chunk
+  content are ever printed. The provider is the existing Ollama-backed
+  embedder over `OLLAMA_BASE_URL`; a missing database and `batch-size < 1`
+  fail loudly.
+- **Non-goals respected**: no tuning, no parallelization, no deletion or model
+  migration, no filtering of which chunks to embed, no changes to
+  `hybrid_index.py`/`semantic_index.py`/`retrieval_factory.py`/`config.py`.
+
+Tests: `tests/test_embeddings_backfill.py` extended (deterministic corpus
+order, idempotency, mid-run failure + resume, `--no-resume` overwrite, model
+change, progress callback, empty corpus, batch-size validation, empty-chunk
+no-op), `tests/test_storage_chunks.py` (`list_chunks` windows/offset/validation),
+`tests/test_storage_embeddings.py` (`count` per model + model-change updates,
+`add_many` insert/update/validated whole-batch rollback/empty),
+`tests/test_cli_embedding.py` (parser defaults, `--no-resume`, missing
+database, missing model, hermetic end-to-end backfill with a fake provider,
+idempotent CLI re-run, batch-size guard, verb guard, `main` dispatch).
+Full suite: 2966 passed; ruff clean; format clean.
 
 Existing invariants: memory is data never policy; event payloads never carry
 content; count/provenance-only diagnostics; tests hermetic (pytest/ruff

@@ -29,10 +29,16 @@ class PolicyGatedCorpus:
     narrow ``search_documents`` and the broad ``search_knowledge`` tools.
     """
 
-    def __init__(self, retrieval_service: object, chunk_store: object) -> None:
+    def __init__(
+        self,
+        retrieval_service: object,
+        chunk_store: object,
+        chunk_index: object | None = None,
+    ) -> None:
         tools = build_default_agent_tools(
             retrieval_service=retrieval_service,
             chunk_store=chunk_store,
+            chunk_index=chunk_index,
         )
         policy = PolicyEngine(
             tools,
@@ -53,6 +59,7 @@ class PolicyGatedCorpus:
 def build_policy_gated_corpus_handler(
     retrieval_service: object,
     chunk_store: object,
+    chunk_index: object | None = None,
 ) -> PolicyGatedCorpus:
     """Return chat handlers that run document retrieval only through policy.
 
@@ -60,6 +67,9 @@ def build_policy_gated_corpus_handler(
     read-only ``corpus.search`` permission is granted with no approval
     requirement, so every chat call observes a recorded ALLOWED decision (or
     a denial) through the same code path the execution runtime uses. No
-    document data is ever accessed outside the policy engine.
+    document data is ever accessed outside the policy engine. ``chunk_index``
+    selects the search backend (any
+    :class:`~personal_ai.retrieval.ChunkIndex`); when absent,
+    ``chunk_store`` serves as the keyword backend.
     """
-    return PolicyGatedCorpus(retrieval_service, chunk_store)
+    return PolicyGatedCorpus(retrieval_service, chunk_store, chunk_index)

@@ -1,9 +1,10 @@
 """Idempotent population of durable embeddings for persisted chunks."""
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
-from personal_ai.documents.embedding import EmbeddingProvider
+from personal_ai.documents.embedding import Embedding, EmbeddingProvider
+from personal_ai.documents.models import DocumentChunk
 from personal_ai.storage.chunks import ChunkStore
 from personal_ai.storage.embeddings import EmbeddingStore
 
@@ -57,6 +58,89 @@ class EmbeddingBackfiller:
             self._embedding_store.add(embedding, chunk.id)
             embedded += 1
         return embedded
+
+    def backfill_corpus(
+        self,
+        *,
+        batch_size: int = 32,
+        resume: bool = True,
+        progress_callback: Callable[[int, int], None] | None = None,
+    ) -> CorpusBackfillSummary:
+        """Ensure every persisted chunk has a current vector, in chunk order.
+
+        Chunks are visited exactly once in deterministic chunk-id order, in
+        bounded ``batch_size`` windows. With ``resume`` (the default), a
+        stored embedding whose model matches the provider is skipped without
+        a provider call or write, so an interrupted run is resumed by simply
+        starting again; ``resume=False`` re-embeds every chunk and overwrites
+        existing current-model vectors. Both modes follow the identical
+        model-match semantics and fail-fast persistence of
+        :meth:`ensure_document`: each successful batch commits immediately
+        and provider errors propagate unchanged, leaving earlier chunks
+        valid and the remainder repairable on the next run.
+
+        ``progress_callback`` is invoked after each batch with the
+        cumulative ``(chunks_scanned, embeddings_created)`` counts.
+        """
+        if batch_size < 1:
+            msg = f"batch_size must be >= 1, got {batch_size}"
+            raise ValueError(msg)
+        total = self._chunk_store.count()
+        scanned = 0
+        created = 0
+        offset = 0
+        overwrite = not resume
+        while True:
+            chunks = self._chunk_store.list_chunks(limit=batch_size, offset=offset)
+            if not chunks:
+                break
+            scanned += len(chunks)
+            created += self._embed_batch(chunks, overwrite=overwrite)
+            offset += len(chunks)
+            if progress_callback is not None:
+                progress_callback(scanned, created)
+        return CorpusBackfillSummary(
+            total_chunks=total, chunks_scanned=scanned, embeddings_created=created
+        )
+
+    def _embed_batch(self, chunks: Iterable[DocumentChunk], *, overwrite: bool) -> int:
+        """Embed one batch and persist it in one transaction.
+
+        Returns the number of embeddings produced by the provider this
+        call (each provider call yields exactly one persisted vector).
+        """
+        chunk_list = list(chunks)
+        current = self._embedding_store.list_for_chunks(
+            chunk.id for chunk in chunk_list
+        )
+        produced: list[tuple[Embedding, str]] = []
+        for chunk in chunk_list:
+            stored = current.get(chunk.id)
+            if (
+                not overwrite
+                and stored is not None
+                and stored.model == self._embedding_provider.model
+            ):
+                continue
+            produced.append((self._embedding_provider.embed(chunk.text), chunk.id))
+        if not produced:
+            return 0
+        self._embedding_store.add_many(produced)
+        return len(produced)
+
+
+@dataclass(frozen=True, slots=True)
+class CorpusBackfillSummary:
+    """Outcome of a corpus-wide :meth:`EmbeddingBackfiller.backfill_corpus` run.
+
+    ``total_chunks`` is the authoritative chunk count at the start of the
+    run; ``chunks_scanned`` and ``embeddings_created`` are cumulative for
+    this invocation only.
+    """
+
+    total_chunks: int
+    chunks_scanned: int
+    embeddings_created: int
 
 
 @dataclass(frozen=True, slots=True)
