@@ -69,6 +69,29 @@ def _is_pdf_record(record: SourceRecord) -> bool:
     return source_path.suffix.lower() == ".pdf"
 
 
+_IMAGE_MIME_TYPES = frozenset({"image/png", "image/jpeg"})
+_IMAGE_EXTENSIONS = frozenset({".png", ".jpg", ".jpeg"})
+
+
+def is_image_record(record: SourceRecord) -> bool:
+    """Detect whether a source record is a standalone raster image file.
+
+    Same mime-type-first / extension-fallback detection as PDFs so adapters
+    that do not set mime_type still route image files correctly. Raster
+    images carry no extractable text of their own; they are routed to the
+    vision extractor at the ingestion layer instead of being decoded as
+    UTF-8 (which would always fail).
+    """
+    mime = record.metadata.get("mime_type")
+    if mime in _IMAGE_MIME_TYPES:
+        return True
+    ext = record.metadata.get("extension")
+    if ext in _IMAGE_EXTENSIONS:
+        return True
+    source_path = PurePosixPath(record.source_key)
+    return source_path.suffix.lower() in _IMAGE_EXTENSIONS
+
+
 def _extract_pdf(record: SourceRecord, document_id: str) -> TextExtractionResult:
     """Extract text from a PDF payload using PyMuPDF.
 
@@ -147,6 +170,9 @@ def extract_text(record: SourceRecord) -> TextExtractionResult:
     if _is_pdf_record(record):
         return _extract_pdf(record, document_id)
 
+    if is_image_record(record):
+        return _image_text_result(document_id, record)
+
     try:
         text = record.payload.decode("utf-8")
     except UnicodeDecodeError as exc:
@@ -160,4 +186,25 @@ def extract_text(record: SourceRecord) -> TextExtractionResult:
         content_hash=record.content_hash,
         text=text,
         metadata=dict(record.metadata),
+    )
+
+
+def _image_text_result(document_id: str, record: SourceRecord) -> TextExtractionResult:
+    """Produce an empty-text extraction for a standalone raster image.
+
+    A raster image has no text of its own, but it must still classify and
+    persist as a document (``image_count`` metadata provides the image
+    evidence the classifier requires), and the raw payload stays available
+    for the vision extractor at ingestion time. ``pages`` stays ``None``
+    until vision augmentation stamps a single derived page.
+    """
+    metadata = dict(record.metadata)
+    metadata["image_count"] = 1
+    return TextExtractionResult(
+        document_id=document_id,
+        source_type=record.source_type,
+        source_key=record.source_key,
+        content_hash=record.content_hash,
+        text="",
+        metadata=metadata,
     )

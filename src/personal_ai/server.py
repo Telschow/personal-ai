@@ -77,6 +77,7 @@ from personal_ai.ollama_client import (
     OllamaConnectionError,
     OllamaError,
 )
+from personal_ai.people import ChatPeople
 from personal_ai.workouts import WorkoutQueryService, WorkoutStore
 
 DEFAULT_WORKSPACE_ENV = "PERSONAL_AI_WORKSPACE"
@@ -264,6 +265,7 @@ def build_response(
     answer: str,
     model: str,
     memory_used: Sequence[dict[str, object]] | None = None,
+    people_used: Sequence[dict[str, object]] | None = None,
 ) -> dict:
     response = {
         "id": f"chatcmpl-{uuid.uuid4().hex}",
@@ -290,6 +292,15 @@ def build_response(
             }
             for item in memory_used
         ]
+    if people_used:
+        response["people_used"] = [
+            {
+                "person_id": item["person_id"],
+                "display_name": item["display_name"],
+                "evidence_count": item["evidence_count"],
+            }
+            for item in people_used
+        ]
     return response
 
 
@@ -299,6 +310,7 @@ def complete_chat(
     *,
     model: str,
     chat_memory: ChatMemory | None = None,
+    chat_people: ChatPeople | None = None,
 ) -> dict:
     """Run one chat completion through the Agent and return an OpenAI response.
 
@@ -306,7 +318,10 @@ def complete_chat(
     a fake. When ``chat_memory`` is wired, a small deterministic automatic
     recall runs first and its untrusted block is appended below the user
     request; safe provenance (ids + kinds only) is attached to the response.
-    All model/tool/connection failures are translated into :class:`ApiError`.
+    When ``chat_people`` is wired, a bounded deterministic people overview is
+    likewise appended as an explicitly-untrusted reference-data block, with
+    id/name/count-safe provenance attached. All model/tool/connection failures
+    are translated into :class:`ApiError`.
     """
     messages = request.validate()
     memory_used: tuple[dict[str, object], ...] = ()
@@ -314,6 +329,11 @@ def complete_chat(
         result = chat_memory.build_context_messages(messages)
         messages = result.messages
         memory_used = result.provenance
+    people_used: tuple[dict[str, object], ...] = ()
+    if chat_people is not None:
+        result = chat_people.build_context_messages(messages)
+        messages = result.messages
+        people_used = result.provenance
     try:
         answer = agent.run(messages)
     except MaxToolRoundsError as exc:
@@ -346,7 +366,12 @@ def complete_chat(
             "The agent returned an empty response.",
             error_type="server_error",
         )
-    return build_response(answer, model=MODEL_ID, memory_used=memory_used or None)
+    return build_response(
+        answer,
+        model=MODEL_ID,
+        memory_used=memory_used or None,
+        people_used=people_used or None,
+    )
 
 
 def stream_chat(
@@ -355,6 +380,7 @@ def stream_chat(
     *,
     model: str,
     chat_memory: ChatMemory | None = None,
+    chat_people: ChatPeople | None = None,
 ) -> StreamingResponse:
     """Run one chat completion and stream it as OpenAI-compatible SSE.
 
@@ -364,7 +390,8 @@ def stream_chat(
     Because the agent completes *before* any bytes are written, failures are
     translated into proper HTTP error statuses instead of a broken stream.
     The stream carries only the assistant's answer text — never prompts,
-    chain-of-thought, tool arguments, or private data.
+    chain-of-thought, tool arguments, or private data. ``chat_memory`` and
+    ``chat_people`` behave exactly as in :func:`complete_chat`.
     """
     messages = request.validate()
     memory_used: tuple[dict[str, object], ...] = ()
@@ -372,6 +399,11 @@ def stream_chat(
         result = chat_memory.build_context_messages(messages)
         messages = result.messages
         memory_used = result.provenance
+    people_used: tuple[dict[str, object], ...] = ()
+    if chat_people is not None:
+        result = chat_people.build_context_messages(messages)
+        messages = result.messages
+        people_used = result.provenance
     try:
         answer = agent.run(messages)
     except MaxToolRoundsError as exc:
@@ -405,7 +437,12 @@ def stream_chat(
             error_type="server_error",
         )
     return StreamingResponse(
-        _sse_completion(answer, model=MODEL_ID, memory_used=memory_used or None),
+        _sse_completion(
+            answer,
+            model=MODEL_ID,
+            memory_used=memory_used or None,
+            people_used=people_used or None,
+        ),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
@@ -415,13 +452,15 @@ def _sse_completion(
     answer: str,
     model: str,
     memory_used: Sequence[dict[str, object]] | None = None,
+    people_used: Sequence[dict[str, object]] | None = None,
 ):
     """Yield OpenAI-compatible ``chat.completion.chunk`` SSE frames.
 
     The first frame announces the assistant role, the second carries the whole
     answer, and the stream terminates with a ``finish_reason: stop`` frame and
     the canonical ``data: [DONE]`` sentinel. Safe memory provenance (ids +
-    kinds only) is attached to the final frame.
+    kinds only) and people provenance (id/name/count only) are attached to the
+    final frame.
     """
     base = {
         "id": f"chatcmpl-{uuid.uuid4().hex}",
@@ -454,6 +493,18 @@ def _sse_completion(
                 if memory_used
                 else None
             ),
+            "people_used": (
+                [
+                    {
+                        "person_id": item["person_id"],
+                        "display_name": item["display_name"],
+                        "evidence_count": item["evidence_count"],
+                    }
+                    for item in people_used
+                ]
+                if people_used
+                else None
+            ),
         }
         return f"data: {json.dumps(payload)}\n\n"
 
@@ -472,6 +523,7 @@ def create_app(
     token: str | None = None,
     agent_factory=None,
     chat_memory: ChatMemory | None = None,
+    chat_people: ChatPeople | None = None,
     control_plane: ControlPlane | None = None,
     workout_service: WorkoutQueryService | None = None,
     memory_service: object | None = None,
@@ -486,7 +538,9 @@ def create_app(
 
     ``chat_memory`` is an optional :class:`ChatMemory` (auto-built from the
     database by the application layer) that adds bounded, untrusted memory
-    context to chat requests.
+    context to chat requests. ``chat_people`` is an optional
+    :class:`~personal_ai.people.ChatPeople` (auto-built the same way) that
+    adds bounded, deterministic people grounding to chat requests.
 
     ``control_plane`` and ``workout_service`` are optional application
     services. When present, the read-only control-plane / memory / workout
@@ -517,6 +571,12 @@ def create_app(
                 chat_memory.chat if hasattr(chat_memory, "chat") else chat_memory
             )
             closable.append(chat_memory)
+        _app.state.chat_people = None
+        if chat_people is not None:
+            _app.state.chat_people = (
+                chat_people.chat if hasattr(chat_people, "chat") else chat_people
+            )
+            closable.append(chat_people)
         _app.state.control_plane = control_plane
         _app.state.workout_service = workout_service
         try:
@@ -652,12 +712,14 @@ def create_app(
                 resolved,
                 model=model,
                 chat_memory=app.state.chat_memory,
+                chat_people=app.state.chat_people,
             )
         result = complete_chat(
             app.state.agent,
             resolved,
             model=model,
             chat_memory=app.state.chat_memory,
+            chat_people=app.state.chat_people,
         )
         return JSONResponse(status_code=200, content=result)
 
@@ -1158,6 +1220,7 @@ def main(
         raise SystemExit(f"Workspace is not a directory: {cfg.workspace}")
 
     chat_memory = cli.build_chat_memory(cfg.database)
+    chat_people = cli.build_chat_people(cfg.database)
     orb_connection: sqlite3.Connection | None = None
     control_plane: ControlPlane | None = None
     workout_service: WorkoutQueryService | None = None
@@ -1181,6 +1244,7 @@ def main(
         model=cfg.model,
         token=cfg.token,
         chat_memory=chat_memory,
+        chat_people=chat_people,
         control_plane=control_plane,
         workout_service=workout_service,
         memory_service=memory_service,

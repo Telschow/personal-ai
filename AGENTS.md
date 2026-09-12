@@ -738,6 +738,12 @@ CANONICAL PHASES (all implemented):
             rescue stays behind the construction seam and is not default-wired;
             no retrieval-mode configuration; decision: READY WITH DOCUMENTED
             LIMITATIONS)
+ 50     Personalization track — people/identity layer (deterministic person
+            extraction from email From/To/Cc + financial payer/payee/
+            counterparty into an SQLite PersonStore, plus the read-only
+            search_people/get_person agent and chat tools under the new
+            permission people.read; fix for the "doesn't know my name / family
+            / girlfriend" trial failure)
 
 RESERVED / NOT ASSIGNED:
 
@@ -758,7 +764,11 @@ DEFERRED / FUTURE WORK (no phase number assigned yet):
     PERSONAL_AI_RETRIEVAL_MODE operator knob, tuning k/weights/candidate
     windows against the Phase 37 evaluation set, ANN/vector backend for large
     corpora beyond the brute-force scan; embeddings stay optional)
-    Vision-first source pipelines
+    Vision-first source pipelines (standalone raster images now ingest and
+    are vision-extractionable — see the VISION-FIRST SOURCE PIPELINE note
+    under PHASE 6 — remaining work: structured extraction of vision-augmented
+    image-heavy documents, scanned-document validation, denser multimodal
+    extraction)
     Durable memories as first-class execution outputs
     Multi-agent chat above the approval plane
     Additional workout/health import formats
@@ -874,6 +884,39 @@ For image-heavy documents:
     vision model
 
 Do not send unnecessary data to the vision model.
+
+VISION-FIRST SOURCE PIPELINE (IMPLEMENTED SLICE)
+
+Standalone raster images (`.png`/`.jpg`/`.jpeg`) are now first-class
+sources alongside PDFs:
+
+- ``extract_text`` (`documents/extractor.py::is_image_record`) recognizes
+  image records by mime_type first, extension fallback (same convention as
+  PDF detection) and returns an empty-text result carrying image evidence
+  (``metadata["image_count"] = 1``, ``pages`` stays ``None``) — image bytes
+  are never UTF-8 decoded, so the old ``TextExtractionError`` on image
+  files is gone.
+- ``classify_document`` (`documents/classifier.py`) honors non-PDF
+  ``image_count`` metadata as image evidence, so an empty-text raster image
+  classifies ``IMAGE_HEAVY`` (never ``EMPTY``).
+- Ingestion vision augmentation (`ingestion.py::_augment_with_vision` →
+  ``_augment_image``) treats a raster image as one derived page: the raw
+  payload bytes feed the vision extractor directly (no PDF rendering), the
+  result is chunked/searchable when substantial, and it is cached in
+  ``VisionStore`` under ``(document_id, 1)`` with the same model + prompt
+  version key as PDF pages. Empty vision output is neither cached nor
+  retried within a run (mirrors the PDF page path). Without a vision
+  extractor configured the image still ingests as an unchunked
+  ``IMAGE_HEAVY`` document — no crash, no model call.
+- Existing PDF behavior is unchanged (image-heavy PDFs still route through
+  render-per-page augmentation); only raster image FILES changed. The
+  filesystem source already discovers images; any source adapter may now
+  emit image records and get the same pipeline.
+
+This slice covers ingestion + vision augmentation only. Structured
+extraction over vision-augmented image-heavy documents, scanned-document
+validation, and denser multimodal extraction remain future work (see
+DEFERRED / FUTURE WORK).
 
 PHASE 7 — CHUNKING + EMBEDDINGS
 
@@ -1735,6 +1778,101 @@ byte-identical no-write regression, privacy key-set assertions);
 `tests/test_cli_wiring.py` updated for the wired chat set (get_document
 present, get_memory absent without a memory service). Full suite: 2604 passed;
 ruff clean; format clean.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
+clean).
+
+==================================================
+PHASE 50 — PERSONALIZATION TRACK: PEOPLE / IDENTITY LAYER (IMPLEMENTED)
+==================================================
+
+A deterministic people/identity layer now lets the system name the people in
+the user's life — the direct fix for the trial failure "doesn't know my name /
+family / girlfriend". Phase 11–38 invariants (single policy-gated write path,
+LLM proposal-only, security, provenance, read-only chat/agent surfaces) are
+unchanged; **this phase adds only read surfaces and a new dotted permission —
+no new write or adjudication route exists**.
+
+- **Extraction is deterministic and name-anchored** (`people/extract.py`,
+  roles `email` / `financial`). Email: every named mailbox in From/To/Cc
+  metadata becomes a reference (display name required; bare addresses, address-
+  shaped names, and a fixed non-person blocklist — MAILER-DAEMON, no-reply,
+  noreply, bounce-*, do-not-reply, notifications, postmaster, root — are
+  skipped). Financial: the canonical payload's `payer:` / `payee:` /
+  `counterparty_name:` labels are read verbatim (merchant-style tokens like
+  "Netflix" surface as counterparties; merchant-vs-person remains future
+  heuristic work). Per-record dedup by `(name, email)`; other source types
+  yield zero references. Document ids come from the shared stable
+  `compute_document_id`, so evidence deduplicates across re-runs.
+- **Identity is conservative**: `identity = NFKC + casefold +
+  whitespace-collapse` of the display form; `person_id = sha256("people\x00"
+  + identity)`. No nickname/initial/merchant fusion. `display_name` = longest
+  observed original form (ties: lexicographic). Emails/roles/sources are stored
+  sorted-distinct; first/last seen come from the evidence window.
+- **Storage** (`people/store.py`): tables `people` (cached aggregates) and
+  `people_evidence` (PK `(person_id, document_id)`, `INSERT OR IGNORE`,
+  `ON DELETE CASCADE`); aggregates are always recomputed from evidence, so
+  re-`upsert_reference` of unchanged documents is idempotent. `search(query,
+  limit, offset, role)` = literal LIKE substring over name/identity/emails
+  (wildcards escaped), ordered evidence-count DESC, display-name ASC, id ASC;
+  `list`, `count`, `evidence_for(person_id)` newest-first bounded.
+- **Indexing** (`people/indexer.py`): `PersonIndexer.index_records(...)` and
+  `index_documents(document_store, source_type="email", ...)` (rebuilt pseudo
+  records from stored email metadata so an operator never needs to re-export a
+  source dir). Bounded pagination, aggregate-only `PersonIndexReport`.
+- **Agent tools** (`agents/tools.py`): `search_people` (query ≤120 chars,
+  limit default 20/max 50) and `get_person` (evidence_limit default 20/max
+  100, unknown id → `not_found`) under the **new `Permission.PEOPLE_READ =
+  "people.read"`** (risk READ, mutates_state False, deterministic True),
+  registered via `build_default_agent_tools(person_store=...)` only when a
+  store is wired. Handlers project strictly name/email/count metadata; denial
+  happens before any store call. The researcher agent gains the people-research
+  skill, both tools, PEOPLE_READ, and `policy=_read_only(..., people=True)`;
+  curator/engineer/orchestrator/reviewer remain denied.
+- **Chat exposure** (`tools/people.py` `PolicyGatedPeople` +
+  `build_policy_gated_people_handler`): same pattern as `tools/fetch.py` — ONE
+  PolicyEngine over `build_default_agent_tools(person_store=...)`, running
+  `search_people`/`get_person` by impersonating ONLY the researcher. Registered
+  in `create_default_registry(person_store=...)` **only when the store holds at
+  least one identity** (`count() > 0`), mirroring the `search_documents` gate —
+  with no people derived the model never sees the tools. `cli._connect_agent_
+  registry` wires `PersonStore` on the shared connection (agent + server paths).
+- **CLI** (`people` verb, kept separate from agent flags): `personal-ai people
+  index --database DB --source email|financial [--path DIR] [--limit N]` —
+  `--path` uses the source adapter; without it, already-ingested email
+  documents are indexed from stored metadata — financial REQUIRES `--path`
+  and `personal-ai people list [--query Q] [--limit N]`; both support `--json`.
+- **Privacy**: tools/results/CLI carry names + email aliases + aggregate counts
+  only — never messages, statements, or bodies. `sources/email.py` gained the
+  `cc` metadata field only; `compose_message_text` is untouched so content
+  hashes stay stable and no re-ingestion is required.
+- **Automatic chat grounding** (`people/chat.py` `ChatPeople` +
+  `PeopleContext`, the Phase 50/S1 companion to `memory/chat.py::ChatMemory`):
+  before a chat model call the application runs a deterministic, query-free,
+  bounded overview — the top identities by evidence count (`DEFAULT_PEOPLE_LIMIT
+  = 8`, hard cap `MAX_PEOPLE_LIMIT = 20`) — and appends it below the user
+  request as an explicitly-untrusted reference block
+  (`<people_context untrusted="true">`, names + email aliases + count metadata
+  only). This lets the model name the user's family/friends/frequent
+  correspondents (the "who is my girlfriend?" case) without a tool call; an
+  empty store renders no block. The chat layer never opens SQLite and never
+  writes; `search_people`/`get_person` remain the explicit discovery surface.
+  `cli.build_chat_people` (application-layer constructor sharing the database
+  file, so `people index` output is immediately groundable) is wired into the
+  CLI prompt path and `server.main`; `server.create_app`/`complete_chat`/
+  `stream_chat`/`build_response`/`_sse_completion` accept `chat_people` and
+  emit `people_used` provenance (`person_id`, `display_name`,
+  `evidence_count` only) exactly parallel to `memory_used`.
+
+Tests: `tests/test_people_extract.py` (14), `tests/test_people_store.py` (20),
+`tests/test_agent_people_tools.py` (16), `tests/test_chat_people_tools.py`
+(15), `tests/test_cli_people.py` (9), `tests/test_people_chat.py` (23:
+untrusted rendering, bounded/clamped overview, limit validation,
+deterministic ordering, provenance shapes, memory-then-people injection,
+server `people_used`, HTTP route, database-restart persistence), plus
+`tests/test_sources_email.py` cc metadata/hash-stability (2). Full suite:
+2883 passed; ruff clean; format clean.
 
 Existing invariants: memory is data never policy; event payloads never carry
 content; count/provenance-only diagnostics; tests hermetic (pytest/ruff

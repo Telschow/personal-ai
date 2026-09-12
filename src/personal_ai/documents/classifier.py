@@ -99,14 +99,19 @@ def classify_document(extraction: TextExtractionResult) -> DocumentClassificatio
     """Classify straight from a Phase 4 extraction result.
 
     For PDFs, uses the page and image counts stored in extraction metadata
-    by the PDF extractor.  For non-PDF documents, falls back to text-only
-    measurement.
+    by the PDF extractor (including zero image counts). For non-PDF
+    documents, falls back to text-only measurement. Standalone raster
+    images carry ``image_count`` metadata (from the image text extraction),
+    which is honored as image evidence so an empty-text image classifies as
+    ``IMAGE_HEAVY`` rather than ``EMPTY``.
     """
     characteristics = measure_text(extraction.text)
 
     page_count = extraction.metadata.get("pdf_page_count")
     image_count = extraction.metadata.get("pdf_image_count")
-    if page_count is not None:
+    if image_count is None:
+        image_count = extraction.metadata.get("image_count")
+    if page_count is not None or image_count is not None:
         characteristics = DocumentCharacteristics(
             text_character_count=characteristics.text_character_count,
             non_whitespace_character_count=characteristics.non_whitespace_character_count,

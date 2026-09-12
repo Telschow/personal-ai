@@ -231,6 +231,41 @@ class TestRecordBuilding:
             == "<original@example.com> <reply@example.com>"
         )
 
+    def test_cc_header_captured_in_metadata(self) -> None:
+        msg = make_message(
+            from_addr="Alice <alice@example.com>",
+            to_addr="Recipient <recipient@example.com>",
+        )
+        msg["Cc"] = "first@example.com, Second Person <second@example.com>"
+        record = build_message_record("test.mbox/message_000000", msg)
+        assert (
+            record.metadata["cc"]
+            == "first@example.com, Second Person <second@example.com>"
+        )
+
+    def test_cc_header_does_not_change_content_hash(self) -> None:
+        base = make_message(
+            from_addr="Alice <alice@example.com>",
+            to_addr="Recipient <recipient@example.com>",
+            subject="Same Subject",
+            body="Same body",
+            message_id="<same-id@example.com>",
+        )
+        with_cc = make_message(
+            from_addr="Alice <alice@example.com>",
+            to_addr="Recipient <recipient@example.com>",
+            subject="Same Subject",
+            body="Same body",
+            message_id="<same-id@example.com>",
+        )
+        with_cc["Cc"] = "second@example.com"
+        record_base = build_message_record("test.mbox/message_000000", base)
+        record_cc = build_message_record("test.mbox/message_000000", with_cc)
+        assert record_base.metadata["cc"] == ""
+        assert record_cc.metadata["cc"] == "second@example.com"
+        assert record_base.payload == record_cc.payload
+        assert record_base.content_hash == record_cc.content_hash
+
 
 class TestEmailSourceAdapter:
     @pytest.fixture()

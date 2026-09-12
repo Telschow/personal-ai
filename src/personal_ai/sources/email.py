@@ -244,6 +244,7 @@ def build_message_record(
     subject = _decode_header_value(msg.get("Subject"))
     sender = _decode_header_value(msg.get("From"))
     to = _decode_header_value(msg.get("To"))
+    cc = _decode_header_value(msg.get("Cc"))
     message_id = msg.get("Message-ID", "")
     in_reply_to = msg.get("In-Reply-To", "")
     references = msg.get("References", "")
@@ -272,6 +273,7 @@ def build_message_record(
         "subject": subject,
         "sender": sender,
         "to": to,
+        "cc": cc,
         "message_id": message_id,
     }
     if in_reply_to:

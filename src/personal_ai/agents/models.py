@@ -67,6 +67,8 @@ class Permission(Enum):
     WORKOUT_READ = "workout.read"
     # read-only personal-context overview retrieval (aggregate metadata)
     PERSONAL_CONTEXT_READ = "personal_context.read"
+    # read-only derived people/identity retrieval
+    PEOPLE_READ = "people.read"
     # workspace mutation
     FILESYSTEM_WRITE = "filesystem.write"
     # execution

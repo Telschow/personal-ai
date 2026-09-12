@@ -7,7 +7,6 @@ from personal_ai.documents import (
     DocumentCharacteristics,
     DocumentKind,
     PDFExtractionError,
-    TextExtractionError,
     chunk_document,
     classify,
     classify_document,
@@ -484,8 +483,11 @@ class TestNonPDFRegression:
             metadata={"mime_type": "image/png", "extension": ".png"},
         )
 
-        with pytest.raises(TextExtractionError):
-            extract_text(record)
+        result = extract_text(record)
+
+        assert result.text == ""
+        assert result.metadata["image_count"] == 1
+        assert result.pages is None
 
 
 # ---------------------------------------------------------------------------

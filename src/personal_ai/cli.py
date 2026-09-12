@@ -63,6 +63,11 @@ from personal_ai.ollama_client import ChatMessage, OllamaClient
 from personal_ai.ollama_structured import OllamaStructuredExtractor
 from personal_ai.ollama_vision import OllamaVisionExtractor
 from personal_ai.orchestration import ingest_source
+from personal_ai.people import (
+    ChatPeople,
+    PersonIndexer,
+    PersonStore,
+)
 from personal_ai.retrieval import (
     RetrievalService,
     SearchDocumentsRequest,
@@ -125,6 +130,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     if argv and argv[0] == "memory":
         args = _build_memory_parser().parse_args(argv[1:])
         args.command = "memory"
+        return args
+    if argv and argv[0] == "people":
+        args = _build_people_parser().parse_args(argv[1:])
+        args.command = "people"
         return args
     return _parse_agent_args(argv)
 
@@ -808,6 +817,170 @@ def _build_memory_parser() -> argparse.ArgumentParser:
         help="Emit machine-consumable JSON instead of human text.",
     )
     return parser
+
+
+def _build_people_parser() -> argparse.ArgumentParser:
+    """Parser for ``personal-ai people ...`` (index/list).
+
+    Kept separate from the agent CLI parser: the ``people`` verb is
+    dispatched in :func:`parse_args` when it is the first positional token,
+    so the existing agent flag surface (``--workspace``, ``--database``,
+    positional ``prompt``) is untouched.
+    """
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument(
+        "--database",
+        type=Path,
+        required=True,
+        help="SQLite database holding the document and people stores (required).",
+    )
+    common.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit machine-consumable JSON instead of human text.",
+    )
+    parser = argparse.ArgumentParser(
+        prog="personal-ai people",
+        description="People / identity layer: derive people from your corpus (local, offline).",
+    )
+    sub = parser.add_subparsers(dest="verb", required=True, metavar="{index,list}")
+
+    index = sub.add_parser(
+        "index", parents=[common], help="Derive people identities from your corpus."
+    )
+    index.add_argument(
+        "--source",
+        choices=(EMAIL, FINANCIAL),
+        default=EMAIL,
+        help=(
+            "Source to derive people from: 'email' (From/To/Cc headers) or "
+            "'financial' (payer/payee/counterparty). Default: email."
+        ),
+    )
+    index.add_argument(
+        "--path",
+        type=Path,
+        help=(
+            "Source directory for the adapter route. When omitted, already-"
+            "ingested email documents are indexed from their stored metadata "
+            "(required for --source financial)."
+        ),
+    )
+    index.add_argument(
+        "--limit",
+        type=int,
+        help="Maximum number of records to index (default: all).",
+    )
+
+    lister = sub.add_parser(
+        "list", parents=[common], help="List the derived people identities."
+    )
+    lister.add_argument("--query", help="Filter identities by a name/email substring.")
+    lister.add_argument(
+        "--limit",
+        type=int,
+        default=50,
+        help="Maximum identities to list (default: 50).",
+    )
+    return parser
+
+
+def run_people(args: argparse.Namespace) -> int:
+    """Dispatch a ``people`` subcommand and return a process exit code."""
+    verb = args.verb
+    database = args.database
+    if verb == "index":
+        return _run_people_index(database, args)
+    if verb == "list":
+        return _run_people_list(database, args)
+    raise SystemExit(f"Unknown people verb: {verb}")
+
+
+def _person_cli_dict(person) -> dict[str, object]:
+    return {
+        "person_id": person.person_id,
+        "display_name": person.display_name,
+        "emails": list(person.emails),
+        "roles": list(person.roles),
+        "sources": list(person.sources),
+        "evidence_count": person.evidence_count,
+        "first_seen_at": person.first_seen_at,
+        "last_seen_at": person.last_seen_at,
+    }
+
+
+def _run_people_index(database: Path, args: argparse.Namespace) -> int:
+    """Derive people identities from an adapter route or stored documents.
+
+    With ``--path`` the selected source adapter discovers records directly
+    (the financial route has no stored metadata). Without ``--path`` the
+    already-ingested email documents are indexed from their stored headers.
+    Re-indexing is idempotent: unchanged records add no evidence and no new
+    people.
+    """
+    source_type = args.source
+    connection = connect_database(database)
+    try:
+        store = PersonStore(connection)
+        indexer = PersonIndexer(store)
+        if args.path is not None:
+            if not args.path.is_dir():
+                raise SystemExit(f"Source path is not a directory: {args.path}")
+            try:
+                adapter = resolve_source_adapter(source_type, args.path)
+            except SourceError as exc:
+                raise SystemExit(str(exc)) from exc
+            report = indexer.index_records(adapter.discover(), limit=args.limit)
+        else:
+            if source_type != EMAIL:
+                raise SystemExit(f"--path is required to index source {source_type!r}")
+            document_store = DocumentStore(connection)
+            report = indexer.index_documents(
+                document_store, source_type=EMAIL, limit=args.limit
+            )
+    finally:
+        connection.close()
+
+    if args.json:
+        _print_json({"source": report.source_type, **report.summary()})
+        return 0
+    print(f"people index: {report.source_type or 'unknown'}")
+    print(f"  records: {report.records}")
+    print(f"  references: {report.references}")
+    print(f"  people_before: {report.people_before}")
+    print(f"  people_after: {report.people_after}")
+    print(f"  new_people: {report.new_people}")
+    return 0
+
+
+def _run_people_list(database: Path, args: argparse.Namespace) -> int:
+    """List the derived people identities (deterministic order)."""
+    connection = connect_database(database)
+    try:
+        store = PersonStore(connection)
+        if args.query:
+            people = store.search(args.query, limit=args.limit)
+        else:
+            people = store.list(limit=args.limit)
+    finally:
+        connection.close()
+
+    if args.json:
+        _print_json({"people": [_person_cli_dict(person) for person in people]})
+        return 0
+    if not people:
+        print("No people derived yet. Run 'personal-ai people index --database ...'")
+        return 0
+    for person in people:
+        print(f"{person.person_id}")
+        print(f"  {person.display_name}")
+        print(f"  roles: {', '.join(person.roles) or '-'}")
+        print(f"  emails: {', '.join(person.emails) or '-'}")
+        print(
+            f"  evidence: {person.evidence_count}  first: {person.first_seen_at}  "
+            f"last: {person.last_seen_at}"
+        )
+    return 0
 
 
 def run_memory(args: argparse.Namespace) -> int:
@@ -1692,6 +1865,7 @@ def _connect_agent_registry(
         extraction_store = ExtractionStore(connection)
         conversation_store = ConversationStore(connection)
         event_store = EventStore(connection)
+        person_store = PersonStore(connection)
         retrieval_service = RetrievalService(
             chunk_store,
             extraction_store,
@@ -1714,6 +1888,7 @@ def _connect_agent_registry(
             memory_service=memory_service,
             memory_proposal_approver=memory_proposal_approver,
             document_store=document_store,
+            person_store=person_store,
         )
         return registry, connection
     except BaseException:
@@ -1843,6 +2018,40 @@ def build_chat_memory(database: Path | None) -> BuiltChatMemory | None:
     return BuiltChatMemory(chat=ChatMemory(service), connection=connection)
 
 
+@dataclass
+class BuiltChatPeople:
+    """A constructed :class:`ChatPeople` together with its database resource.
+
+    ``build_chat_people`` is the application-layer construction path for
+    automatic people grounding. Persistence lives here (SQLite), so the HTTP
+    layer never touches the database or :class:`PersonStore` directly.
+    """
+
+    chat: ChatPeople
+    connection: sqlite3.Connection | None = None
+
+    def close(self) -> None:
+        if self.connection is not None:
+            self.connection.close()
+
+
+def build_chat_people(database: Path | None) -> BuiltChatPeople | None:
+    """Construct bounded automatic people grounding, or ``None``.
+
+    Called by the application layer (server ``main``) only — never by the
+    HTTP handlers. When ``database`` is ``None`` no people context is wired
+    and chat works exactly as before. People tables co-locate in the shared
+    database file, so identities derived by ``people index`` are immediately
+    groundable by chat without re-exporting a source.
+    """
+    if database is None:
+        return None
+    connection = connect_database(database)
+    return BuiltChatPeople(
+        chat=ChatPeople(PersonStore(connection)), connection=connection
+    )
+
+
 def _make_interactive_memory_approver() -> Callable[[object, object, object], bool]:
     """Return an approver that asks the user on the terminal for memory writes.
 
@@ -1920,6 +2129,10 @@ def main(argv: list[str] | None = None) -> None:
         run_memory(args)
         return
 
+    if getattr(args, "command", None) == "people":
+        run_people(args)
+        return
+
     if args.search_query is not None:
         run_search(args.search_query, args.database, args.limit)
         return
@@ -1950,6 +2163,7 @@ def main(argv: list[str] | None = None) -> None:
     memory_service: object | None = (
         chat_memory.chat.service if chat_memory is not None else None
     )
+    chat_people = build_chat_people(args.database)
     interactive = bool(
         sys.stdin is not None and hasattr(sys.stdin, "isatty") and sys.stdin.isatty()
     )
@@ -1968,11 +2182,16 @@ def main(argv: list[str] | None = None) -> None:
         if chat_memory is not None:
             result = chat_memory.chat.build_context_messages(messages)
             messages = list(result.messages)
+        if chat_people is not None:
+            result = chat_people.chat.build_context_messages(messages)
+            messages = list(result.messages)
         response = built.agent.run(messages)
     finally:
         built.close()
         if chat_memory is not None:
             chat_memory.close()
+        if chat_people is not None:
+            chat_people.close()
 
     print(response)
 

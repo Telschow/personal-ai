@@ -18,6 +18,7 @@ from personal_ai.documents.extractor import (
     PageExtraction,
     TextExtractionResult,
     extract_text,
+    is_image_record,
 )
 from personal_ai.documents.models import DocumentChunk
 from personal_ai.documents.structured import StructuredExtraction, StructuredExtractor
@@ -93,11 +94,13 @@ class DocumentIngestor:
     vision extraction: each page's rendered image produces vision text that
     is appended to that page's verbatim extracted text, and the measured
     augmented text decides chunking, so an otherwise blank scanned page can
-    become searchable. Vision output is cached per page keyed by model and
-    prompt version; a complete cache avoids all rendering and model calls.
-    Rendering failures skip only the affected page, while provider errors
-    propagate. Classification always measures the original extracted text,
-    so vision never changes a document's kind.
+    become searchable. Standalone raster image files are a single derived
+    page: the raw payload bytes feed the vision extractor directly and the
+    vision text becomes the document's only text. Vision output is cached
+    per page keyed by model and prompt version; a complete cache avoids all
+    rendering and model calls. Rendering failures skip only the affected
+    page, while provider errors propagate. Classification always measures
+    the original extracted text, so vision never changes a document's kind.
     """
 
     def __init__(
@@ -172,14 +175,23 @@ class DocumentIngestor:
         extracted text verbatim, vision text is appended, and pages are
         never merged. Cached pages (matching model and prompt version) make
         no vision call at all.
+
+        Standalone raster image records are one artificial page: the raw
+        payload bytes are the image, and a single page-1 vision extraction
+        supplies the document's only text.
         """
         if (
             kind is not DocumentKind.IMAGE_HEAVY
             or self._vision_extractor is None
             or self._vision_store is None
-            or extracted.pages is None
             or record.payload is None
         ):
+            return extracted
+
+        if is_image_record(record):
+            return self._augment_image(document_id, extracted, record.payload)
+
+        if extracted.pages is None:
             return extracted
 
         import pymupdf
@@ -209,6 +221,48 @@ class DocumentIngestor:
             text="\n\n".join(p.text for p in pages),
             metadata=extracted.metadata,
             pages=tuple(pages),
+        )
+
+    def _augment_image(
+        self,
+        document_id: str,
+        extracted: TextExtractionResult,
+        payload: bytes,
+    ) -> TextExtractionResult:
+        """Run vision extraction over one standalone raster image.
+
+        The raw payload bytes are the image, so no PDF rendering is needed:
+        the vision extractor describes the whole image as a single page-1
+        extraction. A matched cache row short-circuits before any model
+        call; empty model output is not cached and leaves the document
+        unchanged (unchunked), mirroring the PDF page path.
+        """
+        cached = self._vision_store.get(document_id, 1)
+        if (
+            cached is not None
+            and cached.vision_model == self._vision_extractor.model
+            and cached.prompt_version == self._vision_extractor.prompt_version
+        ):
+            vision_text = cached.text
+        else:
+            vision_text = self._vision_extractor.extract(payload)
+            if vision_text is None or not vision_text.strip():
+                return extracted
+            self._vision_store.save(
+                document_id,
+                1,
+                vision_text,
+                self._vision_extractor.model,
+                self._vision_extractor.prompt_version,
+            )
+        return TextExtractionResult(
+            document_id=extracted.document_id,
+            source_type=extracted.source_type,
+            source_key=extracted.source_key,
+            content_hash=extracted.content_hash,
+            text=vision_text,
+            metadata=dict(extracted.metadata),
+            pages=(PageExtraction(page_number=1, text=vision_text),),
         )
 
     def _vision_page(
