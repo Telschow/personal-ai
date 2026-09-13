@@ -667,6 +667,31 @@ read at wiring time only.
   (`EmbeddingBackfiller`); per-backend-empty semantics and fail-closed
   propagation hold; there is no CLI/HTTP retrieval-mode switch.
 
+## Real-corpus evaluation and production default (Phase 52C)
+
+Phase 52C was a measurement-only, bounded sample of the real personal corpus
+(a stand-in outside the repository; zero production code or data changed). On
+that sample it measured the three backends against user-submitted queries at
+k=10: hybrid achieved the best measured recall/precision (**recall 0.588,
+precision 0.310**), ranking above both keyword and semantic; semantic alone
+trailed. This is an **empirical result for this corpus**, not a claim that
+hybrid is universally superior; tuning `k`, weights, and candidate windows
+remains future work defined by the Phase 37 harness.
+
+**Production enablement:** the application code default stays `keyword`
+(`config.py` never changes). The operator-managed deployment
+(`docker/docker-compose.yml`, the Phase 45 gateway) now defaults
+`PERSONAL_AI_RETRIEVAL_MODE=hybrid` and `PERSONAL_AI_EMBEDDING_MODEL`
+matching the Phase 52B backfilled vector model (`nomic-embed-text`), both
+overridable per deployment via `${VAR:-default}` interpolation. Keyword remains
+reachable for any deployment with
+`PERSONAL_AI_RETRIEVAL_MODE=keyword docker compose up -d`. Semantic/hybrid
+require the configured embedding model's vectors to be present in
+`chunk_embeddings` (Phase 52B `embedding backfill`); without them the semantic
+backend contributes an empty window and hybrid degrades only to keyword — and,
+per Phase 51, selecting semantic/hybrid with no embedding model configured
+fails loudly rather than silently downgrading.
+
 ## Provenance and safety
 
 Each result item carries only bounded provenance keys — `chunk_id`,

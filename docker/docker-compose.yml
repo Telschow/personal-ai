@@ -41,6 +41,16 @@ services:
       # The gateway talks to the containerized Ollama on its own bridge network.
       OLLAMA_BASE_URL: http://ollama:11434
       PERSONAL_AI_CHAT_MODEL: ${PERSONAL_AI_CHAT_MODEL:-qwen3.5:9b}
+      # Production retrieval backend: hybrid (RRF fusion of keyword + semantic)
+      # is the compose deployment default after the Phase 52C real-corpus
+      # evaluation (best recall/precision at k=10). Override per deployment:
+      #   PERSONAL_AI_RETRIEVAL_MODE=keyword docker compose up -d
+      # Keyword remains the application code default in config.py.
+      PERSONAL_AI_RETRIEVAL_MODE: ${PERSONAL_AI_RETRIEVAL_MODE:-hybrid}
+      # Embedding model must match the model the corpus vectors were backfilled
+      # with (Phase 52B `embedding backfill`) — semantic/hybrid reuse stored
+      # embeddings only for this model.
+      PERSONAL_AI_EMBEDDING_MODEL: ${PERSONAL_AI_EMBEDDING_MODEL:-nomic-embed-text}
     volumes:
       # Dedicated writable runtime location: SQLite database + agent workspace.
       - ../data:/data

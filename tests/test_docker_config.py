@@ -119,3 +119,11 @@ class TestCompose:
     def test_chat_model_is_environment_overridable(self) -> None:
         assert "PERSONAL_AI_CHAT_MODEL" in COMPOSE
         assert "qwen3.5:9b" in COMPOSE
+
+    def test_retrieval_mode_is_compose_defaulted_and_overridable(self) -> None:
+        assert "PERSONAL_AI_RETRIEVAL_MODE" in COMPOSE
+        assert "${PERSONAL_AI_RETRIEVAL_MODE:-hybrid}" in COMPOSE
+
+    def test_embedding_model_is_compose_defaulted(self) -> None:
+        assert "PERSONAL_AI_EMBEDDING_MODEL" in COMPOSE
+        assert "nomic-embed-text" in COMPOSE

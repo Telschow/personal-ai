@@ -769,13 +769,23 @@ RESERVED / NOT ASSIGNED:
            docs/ROADMAP.md). It is not a canonical development phase and
            never had an AGENTS.md section; its findings motivated the Phase
            25 P3 fixes.
+    52C    Historical only. A measurement-only real-corpus retrieval pilot run
+           with an external /tmp harness (zero repository code changed; docs
+           in docs/RETRIEVAL.md). Not a canonical phase. Result: at k=10
+           hybrid achieved recall 0.588 / precision 0.310, best of keyword/
+           semantic/hybrid on the then-current real corpus. This evidence set
+           the compose deployment default (PERSONAL_AI_RETRIEVAL_MODE=hybrid,
+           operator-overridable), while config.py's application code default
+           stays keyword.
 
 DEFERRED / FUTURE WORK (no phase number assigned yet):
 
-    Hybrid retrieval enabled/selected in production + tuning (Phase 35
-    contract is implemented as Phase 36 HybridChunkIndex/RRF; Phase 51 added
-    the PERSONAL_AI_RETRIEVAL_MODE operator knob with keyword the production
-    default; Phase 52B added the embedding backfill CLI. Future work: tuning
+    Hybrid retrieval tuning (Phase 35 contract is implemented as Phase 36
+    HybridChunkIndex/RRF; Phase 51 added the PERSONAL_AI_RETRIEVAL_MODE
+    operator knob with keyword the application code default; Phase 52B added
+    the embedding backfill CLI; Phase 52C real-corpus evidence set the
+    docker/docker-compose.yml production default to hybrid — operator-
+    overridable, keyword stays the code/fallback default. Future work: tuning
     k/weights/candidate windows against the Phase 37 evaluation set, ANN/vector
     backend for large corpora beyond the brute-force scan; embeddings stay
     optional)
