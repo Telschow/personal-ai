@@ -841,7 +841,7 @@ def _build_memory_parser() -> argparse.ArgumentParser:
 
 
 def _build_people_parser() -> argparse.ArgumentParser:
-    """Parser for ``personal-ai people ...`` (index/list).
+    """Parser for ``personal-ai people ...`` (index/list/canonicalize).
 
     Kept separate from the agent CLI parser: the ``people`` verb is
     dispatched in :func:`parse_args` when it is the first positional token,
@@ -864,7 +864,9 @@ def _build_people_parser() -> argparse.ArgumentParser:
         prog="personal-ai people",
         description="People / identity layer: derive people from your corpus (local, offline).",
     )
-    sub = parser.add_subparsers(dest="verb", required=True, metavar="{index,list}")
+    sub = parser.add_subparsers(
+        dest="verb", required=True, metavar="{index,list,canonicalize}"
+    )
 
     index = sub.add_parser(
         "index", parents=[common], help="Derive people identities from your corpus."
@@ -903,6 +905,20 @@ def _build_people_parser() -> argparse.ArgumentParser:
         default=50,
         help="Maximum identities to list (default: 50).",
     )
+
+    canonicalizer = sub.add_parser(
+        "canonicalize",
+        parents=[common],
+        help="Re-key display-name variants into canonical identities (dry-run by default).",
+    )
+    canonicalizer.add_argument(
+        "--apply",
+        action="store_true",
+        help=(
+            "Write the fold: rebuild people/evidence under canonical "
+            "identities. Default is a read-only dry-run."
+        ),
+    )
     return parser
 
 
@@ -914,6 +930,8 @@ def run_people(args: argparse.Namespace) -> int:
         return _run_people_index(database, args)
     if verb == "list":
         return _run_people_list(database, args)
+    if verb == "canonicalize":
+        return _run_people_canonicalize(database, args)
     raise SystemExit(f"Unknown people verb: {verb}")
 
 
@@ -1001,6 +1019,35 @@ def _run_people_list(database: Path, args: argparse.Namespace) -> int:
             f"  evidence: {person.evidence_count}  first: {person.first_seen_at}  "
             f"last: {person.last_seen_at}"
         )
+    return 0
+
+
+def _run_people_canonicalize(database: Path, args: argparse.Namespace) -> int:
+    """Report (dry-run) or apply (``--apply``) canonical identity folding.
+
+    Output is aggregate-only: how many identities would be re-keyed/merged
+    and how the evidence counts move. Display names are never printed here.
+    """
+    connection = connect_database(database)
+    try:
+        store = PersonStore(connection)
+        report = store.canonicalize(apply=args.apply)
+    finally:
+        connection.close()
+
+    if args.json:
+        _print_json({"command": "canonicalize", **report.summary()})
+        return 0
+    mode = "applied" if report.applied else "dry-run (no writes)"
+    print(f"people canonicalize: {mode}")
+    print(f"  people_before: {report.people_before}")
+    print(f"  people_after: {report.people_after}")
+    print(f"  people_rekeyed: {report.people_rekeyed}")
+    print(f"  merged_groups: {report.merged_groups}")
+    print(f"  evidence_before: {report.evidence_before}")
+    print(f"  evidence_after: {report.evidence_after}")
+    if not report.applied:
+        print("  re-run with --apply to write the fold")
     return 0
 
 

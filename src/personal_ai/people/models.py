@@ -2,12 +2,14 @@
 
 The identity layer is a deterministic, name-anchored view of the people who
 appear in the user's personal corpus. Identity is deliberately conservative:
-a person is keyed by the casefolded normalization of their display name, so
-only name-identical references merge. Email addresses are stored as aliases
-and source-derived roles (``email`` / ``financial``) are kept per reference,
-but variant name spellings are NOT fused (nicknames, initials, merchant forms)
-— that is future, deliberately heuristic work. Everything here is plain data;
-no model call is ever involved.
+a person is keyed by the canonical identity of their display name, so only
+name-anchored variants merge. The deterministic folding rules live in
+``people/canonicalize.py``, so ``Daniel Telschow`` / ``Dani Telschow`` /
+``Telschow, Daniel`` fuse while distinct people stay separate. Email
+addresses are stored as aliases and source-derived roles (``email`` /
+``financial``) are kept per reference, but identity is NEVER fused by email
+alone and merchants/opaque usernames never fold into people. Everything here
+is plain data; no model call is ever involved.
 """
 
 from __future__ import annotations
@@ -103,4 +105,35 @@ class PersonIndexReport:
             "people_before": self.people_before,
             "people_after": self.people_after,
             "new_people": self.new_people,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class PeopleFoldReport:
+    """Aggregate-only outcome of one identity-canonicalization pass.
+
+    ``people_rekeyed`` counts stored identities whose canonical key differs
+    from their stored key; ``merged_groups`` counts canonical identities that
+    absorb evidence from two or more stored identities. Neither field ever
+    names a person.
+    """
+
+    people_before: int
+    people_after: int
+    people_rekeyed: int
+    merged_groups: int
+    evidence_before: int
+    evidence_after: int
+    applied: bool
+
+    def summary(self) -> dict[str, object]:
+        """Return the count-only, JSON-serializable report shape."""
+        return {
+            "people_before": self.people_before,
+            "people_after": self.people_after,
+            "people_rekeyed": self.people_rekeyed,
+            "merged_groups": self.merged_groups,
+            "evidence_before": self.evidence_before,
+            "evidence_after": self.evidence_after,
+            "applied": self.applied,
         }

@@ -5,11 +5,12 @@ import sqlite3
 from types import TracebackType
 from typing import Self
 
+from personal_ai.people.canonicalize import canonical_identity
 from personal_ai.people.models import (
+    PeopleFoldReport,
     Person,
     PersonEvidence,
     PersonReference,
-    normalize_identity,
     person_id_for,
 )
 
@@ -118,7 +119,7 @@ class PersonStore:
 
     def upsert_reference(self, reference: PersonReference) -> Person:
         """Store one reference, fusing it into its identity's aggregates."""
-        identity = normalize_identity(reference.name)
+        identity = canonical_identity(reference.name)
         person_id = person_id_for(identity)
         self._connection.execute(
             _INSERT_PERSON_SQL,
@@ -161,6 +162,93 @@ class PersonStore:
         person = self.get(person_id)
         assert person is not None
         return person
+
+    def canonicalize(self, *, apply: bool = False) -> PeopleFoldReport:
+        """Re-key stored evidence to canonical identities; dry-run by default.
+
+        Reads every stored person + evidence row, recomputes the canonical
+        identity/person_id for each stored display name, and reports how many
+        identities would be re-keyed or merged (aggregate-only). When ``apply``
+        is True the people and evidence tables are rebuilt transactionally
+        (one ``BEGIN IMMEDIATE`` ... ``COMMIT``) so folded families share one
+        person row with fused aggregates and document provenance is preserved
+        (one evidence row per ``document_id``). Rerunning after an ``apply``
+        is a no-op (``people_rekeyed == 0``).
+        """
+        rows = self._connection.execute(
+            "SELECT person_id, document_id, name, email, role, source_type, "
+            "seen_at FROM people_evidence"
+        ).fetchall()
+        records: list[tuple[str, str, str, str, str, str]] = []
+        evidence_before = len(rows)
+        people_before = self.count()
+
+        sids_by_cid: dict[str, set[str]] = {}
+        rekeyed: set[str] = set()
+        seen_documents: set[tuple[str, str]] = set()
+        for row in rows:
+            sid = str(row[0])
+            document_id, name = str(row[1]), str(row[2])
+            records.append(
+                (document_id, name, str(row[3]), str(row[4]), str(row[5]), str(row[6]))
+            )
+            canonical = canonical_identity(name)
+            cid = person_id_for(canonical)
+            sids_by_cid.setdefault(cid, set()).add(sid)
+            if sid != cid:
+                rekeyed.add(sid)
+            seen_documents.add((cid, document_id))
+
+        report = PeopleFoldReport(
+            people_before=people_before,
+            people_after=len(sids_by_cid),
+            people_rekeyed=len(rekeyed),
+            merged_groups=sum(1 for sids in sids_by_cid.values() if len(sids) > 1),
+            evidence_before=evidence_before,
+            evidence_after=len(seen_documents),
+            applied=False,
+        )
+        if not apply:
+            return report
+
+        ordered = sorted(
+            (person_id_for(canonical_identity(record[1])), record) for record in records
+        )
+        self._connection.execute("BEGIN IMMEDIATE")
+        try:
+            self._connection.execute("DELETE FROM people_evidence")
+            self._connection.execute("DELETE FROM people")
+            for cid, record in ordered:
+                self._connection.execute(
+                    _INSERT_PERSON_SQL,
+                    (
+                        cid,
+                        canonical_identity(record[1]),
+                        record[1],
+                        "[]",
+                        "[]",
+                        "[]",
+                        "",
+                        "",
+                    ),
+                )
+            for cid, record in ordered:
+                self._connection.execute(_INSERT_EVIDENCE_SQL, (cid, *record))
+            for cid in sids_by_cid:
+                self._refresh_aggregates(cid)
+            self._connection.execute("COMMIT")
+        except BaseException:
+            self._connection.execute("ROLLBACK")
+            raise
+        return PeopleFoldReport(
+            people_before=people_before,
+            people_after=len(sids_by_cid),
+            people_rekeyed=len(rekeyed),
+            merged_groups=sum(1 for sids in sids_by_cid.values() if len(sids) > 1),
+            evidence_before=evidence_before,
+            evidence_after=len(seen_documents),
+            applied=True,
+        )
 
     def get(self, person_id: str) -> Person | None:
         """Return the person with this id, or None when absent."""

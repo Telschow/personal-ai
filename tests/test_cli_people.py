@@ -16,6 +16,7 @@ import pytest
 
 from personal_ai import cli
 from personal_ai.documents.models import Document
+from personal_ai.people.canonicalize import canonical_identity
 from personal_ai.people.models import normalize_identity, person_id_for
 from personal_ai.storage import DocumentStore, connect_database
 
@@ -328,3 +329,75 @@ def test_people_unknown_verb_exits(tmp_path: Path) -> None:
     db = tmp_path / "people.db"
     with pytest.raises(SystemExit):
         cli.run_people(cli.parse_args(["people", "frobnicate", "--database", str(db)]))
+
+
+def _seed_legacy_people(db: Path, names: list[str]) -> None:
+    """Seed pre-50A-style (normalize-keyed) people rows for canonicalize tests."""
+    from personal_ai.people.store import PersonStore
+
+    connection = connect_database(db)
+    try:
+        store = PersonStore(connection)
+        for i, name in enumerate(names):
+            identity = normalize_identity(name)
+            pid = person_id_for(identity)
+            connection.execute(
+                "INSERT INTO people (person_id, identity, display_name, emails_json, "
+                "roles_json, sources_json, first_seen_at, last_seen_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (pid, identity, name, "[]", "[]", "[]", "", ""),
+            )
+            connection.execute(
+                "INSERT INTO people_evidence (person_id, document_id, name, email, "
+                "role, source_type, seen_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (pid, f"d{i}", name, "", "email", "email", ""),
+            )
+        connection.commit()
+        assert store.count() == len(names)
+    finally:
+        connection.close()
+
+
+def test_people_canonicalize_dry_run_and_apply(tmp_path: Path) -> None:
+    from personal_ai.people.store import PersonStore
+
+    db = tmp_path / "people.db"
+    _seed_legacy_people(db, ["Daniel Telschow", "Dani Telschow", "Telschow, Daniel"])
+
+    dry = cli.run_people(
+        cli.parse_args(["people", "canonicalize", "--database", str(db)])
+    )
+    assert dry == 0
+    connection = connect_database(db)
+    try:
+        assert PersonStore(connection).count() == 3
+    finally:
+        connection.close()
+
+    applied = cli.run_people(
+        cli.parse_args(["people", "canonicalize", "--database", str(db), "--apply"])
+    )
+    assert applied == 0
+    connection = connect_database(db)
+    try:
+        store = PersonStore(connection)
+        assert store.count() == 1
+        daniel = store.get(person_id_for(canonical_identity("Daniel Telschow")))
+        assert daniel is not None and daniel.evidence_count == 3
+    finally:
+        connection.close()
+
+
+def test_people_canonicalize_json_dry_run(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    db = tmp_path / "people.db"
+    _seed_legacy_people(db, ["Daniel Telschow", "Dani Telschow"])
+    code = cli.run_people(
+        cli.parse_args(["people", "canonicalize", "--database", str(db), "--json"])
+    )
+    assert code == 0
+    payload = capsys.readouterr().out.strip()
+    assert '"command"' in payload
+    assert '"people_before"' in payload
+    assert '"applied"' in payload

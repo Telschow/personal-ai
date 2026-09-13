@@ -743,7 +743,9 @@ CANONICAL PHASES (all implemented):
             counterparty into an SQLite PersonStore, plus the read-only
             search_people/get_person agent and chat tools under the new
             permission people.read; fix for the "doesn't know my name / family
-            / girlfriend" trial failure)
+            / girlfriend" trial failure; Phase 50A adds deterministic
+            name-anchored identity folding via people/canonicalize.py +
+            `people canonicalize [--apply]` for legacy re-keying)
  51     Hybrid retrieval enablement — operator-configurable retrieval backend
             (PERSONAL_AI_RETRIEVAL_MODE=keyword|semantic|hybrid, default
             keyword) through a single construction seam
@@ -1886,6 +1888,77 @@ deterministic ordering, provenance shapes, memory-then-people injection,
 server `people_used`, HTTP route, database-restart persistence), plus
 `tests/test_sources_email.py` cc metadata/hash-stability (2). Full suite:
 2883 passed; ruff clean; format clean.
+
+Existing invariants: memory is data never policy; event payloads never carry
+content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
+clean).
+
+==================================================
+PHASE 50A — NAME-ANCHORED IDENTITY FOLDING (IMPLEMENTED)
+==================================================
+
+The Phase 50 people layer now folds mechanical display-name artifacts and
+unambiguous nickname spellings into one canonical identity. This fixes the
+production fragmentation observed in the real people table (35 distinct
+rows whose display names all reduce to the same person). Phase 11–38 and 50
+invariants (single policy-gated write path, LLM proposal-only, security,
+provenance, read-only surfaces, no email-anchored fusion) are unchanged;
+**this phase adds only deterministic name math and an entity-reindexing
+CLI verb — no new write, policy, curation, adjudication, or agent/write
+route exists**.
+
+- **Deterministic pure rules** (`people/canonicalize.py`): `canonical_parts
+  (name) -> (given, frozenset(surnames)) | None` and
+  `canonical_identity(name) -> str`. Folding is name-anchored ONLY:
+  artifact fixes (quote wrappers, leading title-case `ñ`, comma/order swap,
+  salutations `Herr`/`Guten Tag`, parentheticals `(über TUM)` /
+  `(via Google Drive)`, room codes `EF-703`, `+`-joined surnames,
+  dot-username `alias.surname` / `surname.alias` forms) plus the fixed
+  `GIVEN_NAME_ALIASES` nickname table (`daniel`/`dani`/`dan` → `daniel`).
+  The canonical key = canonical given + lexicographically last surname
+  (so `Daniel Telschow` == `DANI TELSCHOW ARJONA` == `Telschow, Daniel`),
+  single-token names keep their form, opaque forms (telschow113,
+  d.telschow, `reddit.com (telschow)`) fall back to `normalize_identity`
+  unchanged. Accents preserved (`Müller` never folds into `Muller`).
+- **No email-anchored folding, ever**: a shared mailbox alias on unrelated
+  rows is a counter-signal, not a personhood signal — production's `Dirk
+  Telschow` row carries `daniel.telschow@hotmail.es`, and Dirk MUST stay
+  separate from Daniel. Nickname folding is applied only to display forms,
+  never to email addresses.
+- **Storage** (`people/store.py`): `upsert_reference` now keys identities
+  through `canonical_identity`, so future indexing (CLI `people index`,
+  MCP, agent/chat tools, automatic chat grounding) folds automatically.
+  New `PersonStore.canonicalize(*, apply=False)` re-keys EXISTING legacy
+  (pre-50A normalize-keyed) rows: it reads every stored person+evidence,
+  recomputes canonical ids, reports aggregate-only (`PeopleFoldReport`:
+  people_before/after, people_rekeyed, merged_groups, evidence_before/
+  after, applied), and with `apply=True` rebuilds people + evidence in one
+  `BEGIN IMMEDIATE` / `COMMIT` (idempotent: rerun yields rekeyed 0/merged
+  0). Dry-run writes nothing. Document provenance is preserved (one
+  evidence row per `document_id`); display names are never rewritten
+  (`display_name` stays the longest observed original form).
+- **CLI verb** `people canonicalize --database DB [--apply] [--json]`
+  (parser metavar and docstring updated to `{index,list,canonicalize}`):
+  aggregate-only output by default (dry-run, no writes); `--apply` performs
+  the transactional re-key. This verb is the ONLY surface that touches
+  stored identity keys; agent/chat/MCP surfaces stay read-only and never
+  expose it.
+- **Privacy**: the CLI/JSON output and the report carry counts only —
+  never display names, identities, emails, or evidence. Names and emails
+  still surface exclusively through the Phase 50 `list`/`search` views and
+  the read-only tools.
+
+Tests: `tests/test_people_canonicalize.py` (31: pure `canonical_parts`/
+`canonical_identity` rules incl. artifact matrix, nickname aliases, alias
+hoisting, opaque/digit/address fallbacks, accent preservation, dot-username
+forms, family-member distinctness, idempotency/`person_id` stability; the
+35-fragment production collection folds to a bounded identity set; store
+upsert folding; legacy-seeded `canonicalize` dry-run/apply/idempotency/
+empty-store) plus `tests/test_cli_people.py` (+3: canonicalize dry-run keeps
+rows, `--apply` folds with evidence fused, JSON dry-run shape). Full
+existing people suite (extract/store/agent/chat/CLI/sources-email) passes
+unchanged, proving no identity/key regressions for unfragmented names.
+Full suite: 2998 passed; ruff clean; format clean.
 
 Existing invariants: memory is data never policy; event payloads never carry
 content; count/provenance-only diagnostics; tests hermetic (pytest/ruff
