@@ -143,8 +143,14 @@ class TestRasterImageIngestion:
             result = harness.ingestor.ingest(record)
 
             assert result.kind is DocumentKind.IMAGE_HEAVY
-            assert result.structured_extraction is None
-            assert harness.structured.calls == []
+            assert result.structured_extraction is not None
+            assert (
+                result.structured_extraction.metadata["extraction_source"] == "vision"
+            )
+            assert (
+                result.structured_extraction.metadata["vision_model"] == "vision-model"
+            )
+            assert len(harness.structured.calls) == 1
             assert harness.document_store.get(result.document_id) is not None
 
             assert len(harness.vision.calls) == 1

@@ -780,7 +780,17 @@ def test_ingest_image_heavy_pdf_runs_vision_when_configured(
     assert (documents, chunks, embeddings) == (1, 1, 0)
     assert len(vision.calls) == 1
     assert vision.calls[0][:8] == b"\x89PNG\r\n\x1a\n"
-    assert len(faked_model.calls) == 0
+    # The substantial vision text is also routed through the structured
+    # extractor; the persisted extraction carries the vision provenance.
+    assert len(faked_model.calls) == 1
+    connection = connect_database(database)
+    try:
+        extraction = connection.execute(
+            "SELECT metadata FROM structured_extractions"
+        ).fetchone()[0]
+    finally:
+        connection.close()
+    assert json.loads(extraction)["extraction_source"] == "vision"
 
 
 def test_ingest_image_heavy_becomes_searchable_after_vision(

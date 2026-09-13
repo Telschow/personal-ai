@@ -21,10 +21,10 @@ duplicates documents or chunks. Document content is keyed by content hash.
 
 - Text-heavy documents get structured extraction plus chunked text.
 - Mixed documents (text plus images, e.g. scanned pages) get chunked text but
-  no model extraction; image-only and near-empty documents are stored but not
-  chunked until the vision-capable pipeline lands.
+  no model extraction; image-only and near-empty documents are stored but only
+  become searchable once a vision model is configured (see below).
 - Ingestion never uploads anything: only your local Ollama model is called, and
-  only for text-heavy documents.
+  only for text-heavy documents plus vision-augmented image-heavy documents.
 
 Knowledge-database-backed agent queries and `--search` then include the ingested
 documents automatically.
@@ -276,6 +276,12 @@ How it works:
 - Results are cached per document, page, vision model, and prompt version.
   Re-running ingestion on unchanged scans makes **zero** vision calls. Empty or
   failed page output is skipped and retried on the next run.
+- When the augmented text of an image-heavy document is substantial, the same
+  structured extractor as text-heavy documents runs over that vision text, so
+  vision boards and scanned pages also yield a summary, people, and topics.
+  That extraction is cached per document under the vision model and prompt
+  version that produced it and is re-extracted only when either changes;
+  re-running unchanged configuration makes zero extra model calls.
 - Nothing is uploaded, and neither extracted text nor vision output is logged.
 
 ## Two ways to use it

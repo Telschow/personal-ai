@@ -1,6 +1,6 @@
 """Typed structured knowledge extraction results and their contract."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Protocol, runtime_checkable
 
 from personal_ai.documents.extractor import TextExtractionResult
@@ -83,3 +83,39 @@ def _validated_collection(field_name: str, raw_value: object) -> tuple[str, ...]
         msg = f"'{field_name}' must be an array of strings"
         raise MalformedStructuredOutputError(msg)
     return tuple(raw_value)
+
+
+def normalize_structured_extraction(
+    extraction: StructuredExtraction,
+) -> StructuredExtraction:
+    """Whitespace-clean a structured extraction deterministically.
+
+    Strips surrounding whitespace from the summary and from every
+    collection item, drops empty items, and collapses exact duplicates
+    preserving first-occurrence order. Case and accents are preserved
+    (``München`` stays distinct from ``MUNCHEN``), so normalization is
+    mechanical: it never transliterates, folds, or invents values.
+    Metadata is preserved by value (copied, never aliased or mutated).
+    """
+    summary = extraction.summary.strip()
+    collections = {
+        field_name: _normalized_collection(getattr(extraction, field_name))
+        for field_name in _COLLECTION_FIELDS
+    }
+    return replace(
+        extraction,
+        summary=summary,
+        metadata=dict(extraction.metadata),
+        **collections,
+    )
+
+
+def _normalized_collection(values: tuple[str, ...]) -> tuple[str, ...]:
+    seen: set[str] = set()
+    cleaned: list[str] = []
+    for value in values:
+        candidate = value.strip()
+        if candidate and candidate not in seen:
+            seen.add(candidate)
+            cleaned.append(candidate)
+    return tuple(cleaned)

@@ -1,6 +1,6 @@
 """Orchestration of source records into durable documents and extractions."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from personal_ai.documents.canonical import document_from_source_record
 from personal_ai.documents.chunker import (
@@ -21,7 +21,11 @@ from personal_ai.documents.extractor import (
     is_image_record,
 )
 from personal_ai.documents.models import DocumentChunk
-from personal_ai.documents.structured import StructuredExtraction, StructuredExtractor
+from personal_ai.documents.structured import (
+    StructuredExtraction,
+    StructuredExtractor,
+    normalize_structured_extraction,
+)
 from personal_ai.documents.vision import (
     VisionExtractionError,
     VisionExtractor,
@@ -34,15 +38,23 @@ from personal_ai.storage.embeddings import EmbeddingStore
 from personal_ai.storage.extractions import ExtractionStore
 from personal_ai.storage.vision import VisionStore
 
+# Provenance markers stamped on structured extractions produced over
+# vision-augmented text so a persisted result can be matched to the vision
+# model and prompt version that produced it.
+VISION_EXTRACTION_SOURCE = "vision"
+VISION_EXTRACTION_SCHEMA_VERSION = "vision-v1"
+
 
 @dataclass(frozen=True, slots=True)
 class IngestionResult:
     """Outcome of ingesting one source record.
 
-    ``structured_extraction`` is ``None`` exactly when classification
-    routed the document away from structured text extraction. ``chunks``
-    mirrors the chunk set ensured in storage: empty for documents whose
-    usable extracted text fell below the chunking threshold.
+    ``structured_extraction`` is ``None`` exactly when neither the text nor
+    the vision path produced one (for example sources without a structured
+    extractor, or image-heavy documents whose vision-augmented text stays
+    below the chunking threshold). ``chunks`` mirrors the chunk set ensured
+    in storage: empty for documents whose usable extracted text fell below
+    the chunking threshold.
 
     Ingestion is durable on its own and never requires an embedding
     provider. Embeddings are derived data populated separately by
@@ -82,12 +94,11 @@ class DocumentIngestor:
     is chunked regardless of kind, so a mixed document is chunked from its
     extracted text alone. Documents whose extracted text falls below the
     threshold (image-heavy scans, near-empty documents) are stored
-    unchunked. Only ``TEXT_HEAVY`` documents ever reach the structured
-    extractor; other kinds never trigger a model call. When
-    ``structured_extractor`` is ``None``, no document triggers structured
-    extraction at all — text-heavy sources are still chunked and searchable
-    (used for sources whose extraction is fully local and deterministic,
-    such as email).
+    unchunked. ``TEXT_HEAVY`` documents reach the structured extractor over
+    their extracted text. When ``structured_extractor`` is ``None``, no
+    document triggers structured extraction at all — text-heavy sources are
+    still chunked and searchable (used for sources whose extraction is
+    fully local and deterministic, such as email).
 
     When a vision extractor and vision store are both configured, every
     ``IMAGE_HEAVY`` document is additionally routed through page-level
@@ -101,6 +112,18 @@ class DocumentIngestor:
     rendering and model calls. Rendering failures skip only the affected
     page, while provider errors propagate. Classification always measures
     the original extracted text, so vision never changes a document's kind.
+
+    Image-heavy documents whose vision-augmented text reaches the chunking
+    threshold are also routed through the same structured extractor over
+    that augmented text, so scanned pages and standalone images can yield
+    the same structured understanding as readable text. The persisted
+    extraction is provenance-checked like vision pages: it is honored only
+    when it was itself produced with the same vision model and prompt
+    version; a missing or stale extraction is re-extracted and the stored
+    record replaced, keeping reruns idempotent across unchanged
+    configurations. Below-threshold augmented text yields no structured
+    extraction, and failures propagate exactly as for text extraction — no
+    fake extraction is ever persisted.
     """
 
     def __init__(
@@ -149,6 +172,9 @@ class DocumentIngestor:
         effective = self._augment_with_vision(
             classification.kind, document.id, extracted, record
         )
+        structured_extraction = self._vision_structured_extraction(
+            document.id, effective, structured_extraction, classification.kind
+        )
         total_characters = measure_text(effective.text).non_whitespace_character_count
         if total_characters >= TEXT_HEAVY_MIN_NON_WHITESPACE_CHARACTERS:
             chunks = self._ensure_chunks(document.id, effective)
@@ -158,6 +184,78 @@ class DocumentIngestor:
             kind=classification.kind,
             structured_extraction=structured_extraction,
             chunks=chunks,
+        )
+
+    def _vision_structured_extraction(
+        self,
+        document_id: str,
+        effective: TextExtractionResult,
+        structured_extraction: StructuredExtraction | None,
+        kind: DocumentKind,
+    ) -> StructuredExtraction | None:
+        """Structured extraction over vision-augmented image-heavy text.
+
+        Runs the shared structured extractor over the vision-augmented text
+        of an ``IMAGE_HEAVY`` document when that text reaches the chunking
+        threshold, so a scanned page or standalone image yields the same
+        structured understanding as readable text. Only ``IMAGE_HEAVY``
+        documents route here — every other kind keeps its existing text-only
+        behavior. The augmented text is normalized deterministically before
+        persistence (whitespace strip, empty drop, exact dedupe). A
+        persisted extraction is reused only when it was itself produced with
+        the current vision model and prompt version, mirroring the
+        vision-page cache convention; a missing, below-threshold, or stale
+        extraction never fabricates a result. Provider and validation
+        failures propagate unchanged, so a failed model call never leaves a
+        fake extraction behind and a plain retry re-extracts.
+        """
+        if (
+            kind is not DocumentKind.IMAGE_HEAVY
+            or structured_extraction is not None
+            or self._vision_extractor is None
+            or self._structured_extractor is None
+        ):
+            return structured_extraction
+
+        characters = measure_text(effective.text).non_whitespace_character_count
+        if characters < TEXT_HEAVY_MIN_NON_WHITESPACE_CHARACTERS:
+            return None
+
+        vision_model = self._vision_extractor.model
+        vision_prompt_version = self._vision_extractor.prompt_version
+
+        existing = self._extraction_store.get(document_id)
+        if existing is not None and self._is_vision_extraction(
+            existing, vision_model, vision_prompt_version
+        ):
+            return existing
+
+        provider = self._structured_extractor.extract(effective)
+        normalized = normalize_structured_extraction(provider)
+        stamped = replace(
+            normalized,
+            metadata={
+                "extraction_source": VISION_EXTRACTION_SOURCE,
+                "vision_model": vision_model,
+                "vision_prompt_version": vision_prompt_version,
+                "schema_version": VISION_EXTRACTION_SCHEMA_VERSION,
+            },
+        )
+        self._extraction_store.save(stamped)
+        return stamped
+
+    @staticmethod
+    def _is_vision_extraction(
+        extraction: StructuredExtraction,
+        vision_model: str,
+        vision_prompt_version: str,
+    ) -> bool:
+        """True when the persisted extraction matches the current vision setup."""
+        metadata = extraction.metadata
+        return (
+            metadata.get("extraction_source") == VISION_EXTRACTION_SOURCE
+            and metadata.get("vision_model") == vision_model
+            and metadata.get("vision_prompt_version") == vision_prompt_version
         )
 
     def _augment_with_vision(

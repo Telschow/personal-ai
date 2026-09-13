@@ -178,11 +178,20 @@ class TestImageHeavyVisionRouting:
             result = harness.ingestor.ingest(record)
 
             assert result.kind is DocumentKind.IMAGE_HEAVY
-            assert result.structured_extraction is None
-            assert harness.structured.calls == []
+            assert result.structured_extraction is not None
+            assert (
+                result.structured_extraction.metadata["extraction_source"] == "vision"
+            )
+            assert (
+                result.structured_extraction.metadata["vision_model"] == "vision-model"
+            )
             assert result.chunks
             assert len(vision.calls) == 2
             assert vision.calls[0][:8] == PNG_MAGIC
+
+            assert len(harness.structured.calls) == 1
+            assert "alpha" in harness.structured.calls[0].text
+            assert "beta" in harness.structured.calls[0].text
 
             by_page = collect_pages(result.chunks)
             assert {1, 2} == set(by_page)

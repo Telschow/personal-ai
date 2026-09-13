@@ -790,9 +790,9 @@ DEFERRED / FUTURE WORK (no phase number assigned yet):
     backend for large corpora beyond the brute-force scan; embeddings stay
     optional)
     Vision-first source pipelines (standalone raster images now ingest and
-    are vision-extractionable — see the VISION-FIRST SOURCE PIPELINE note
-    under PHASE 6 — remaining work: structured extraction of vision-augmented
-    image-heavy documents, scanned-document validation, denser multimodal
+    are vision-extractionable and vision-structured-extractionable — see the
+    VISION-FIRST SOURCE PIPELINE and VISION-STRUCTURED EXTRACTION notes under
+    PHASE 6 — remaining work: scanned-document validation, denser multimodal
     extraction)
     Durable memories as first-class execution outputs
     Multi-agent chat above the approval plane
@@ -939,9 +939,42 @@ sources alongside PDFs:
   emit image records and get the same pipeline.
 
 This slice covers ingestion + vision augmentation only. Structured
-extraction over vision-augmented image-heavy documents, scanned-document
-validation, and denser multimodal extraction remain future work (see
-DEFERRED / FUTURE WORK).
+extraction over vision-augmented image-heavy documents is now implemented
+(see VISION-STRUCTURED EXTRACTION); scanned-document validation and denser
+multimodal extraction remain future work (see DEFERRED / FUTURE WORK).
+
+VISION-STRUCTURED EXTRACTION (IMPLEMENTED SLICE)
+
+Image-heavy documents whose vision-augmented text reaches the chunking
+threshold are now routed through the same structured extractor as text-heavy
+documents:
+
+- ``DocumentIngestor._vision_structured_extraction``
+  (`ingestion.py`) runs the shared ``StructuredExtractor`` over the
+  vision-augmented text of ``IMAGE_HEAVY`` documents (raster images and
+  image-heavy PDFs) when ``measure_text`` reports at least
+  ``TEXT_HEAVY_MIN_NON_WHITESPACE_CHARACTERS`` characters — the same
+  substance gate used for chunking, so a vision board or scanned page can
+  yield the same summary/people/organizations/projects/goals/topics as
+  readable text. No new extractor boundary: the model consumes text only
+  (the vision model is never called twice).
+- Output is normalized deterministically before persistence
+  (``normalize_structured_extraction`` in `documents/structured.py`):
+  surrounding whitespace stripped, empty items dropped, exact duplicates
+  collapsed preserving first-occurrence order — case and accents preserved
+  (mechanical, never transliterating or inventing values).
+- Provenance is stamped into the extraction metadata
+  (``extraction_source="vision"``, ``vision_model``, ``vision_prompt_version``,
+  ``schema_version``) and the record lives under the existing
+  ``structured_extractions`` table (document id primary key, no migration).
+- Idempotency mirrors the vision-page cache convention: a persisted
+  extraction is reused only when it was itself produced with the current
+  vision model and prompt version; a missing, below-threshold, or stale
+  extraction is re-extracted (overwriting via ``ExtractionStore.save``) —
+  reruns on unchanged configuration make zero vision and zero extraction
+  calls. Failures (provider or ``MalformedStructuredOutputError``) propagate
+  unchanged and never leave a fake extraction behind; a plain retry
+  re-extracts. ``MIXED`` and other kinds keep their text-only behavior.
 
 PHASE 7 — CHUNKING + EMBEDDINGS
 
