@@ -35,6 +35,30 @@ def normalize_text(t: str) -> str:
     return re.sub(r"\s{2,}", " ", (t or "").casefold())
 
 
+def _tokens(t: str) -> list[str]:
+    """Split normalized text into tokens on non-alphanumeric runs.
+
+    ``international`` stays a single token, so a negative keyword like
+    ``intern`` never matches inside it.
+    """
+    return re.split(r"[^a-z0-9]+", normalize_text(t))
+
+
+def contains_negative_keyword(text: str, keyword: str) -> bool:
+    """Whole-token, contiguous presence test for a negative keyword.
+
+    Matches the exact token sequence (``intern`` == ``[intern]``) rather
+    than a raw substring, so ``international product manager`` is not a
+    hard exclusion even though it contains the letters ``intern``.
+    """
+    tokens = _tokens(text)
+    keyword_tokens = _tokens(keyword)
+    if not keyword_tokens or any(not tok for tok in keyword_tokens):
+        return False
+    width = len(keyword_tokens)
+    return any(tokens[i : i + width] == keyword_tokens for i in range(len(tokens) - width + 1))
+
+
 def title_like(job: Job, roles: list[str]) -> float:
     if not job.title:
         return 0.0
@@ -227,7 +251,7 @@ def score(job: Job, profile: dict, policy: ScoringPolicy) -> Score:
     gaps: list[str] = []
 
     for neg in pos:
-        if normalize_text(neg) in text:
+        if contains_negative_keyword(text, neg):
             hard.append(f"negative keyword: {neg}")
 
     role_sim = title_like(job, list(policy.target_roles))

@@ -427,6 +427,145 @@ class TestRoutes:
             assert app.state.agent is fake
         assert built.closed is True
 
+    def test_static_dashboard_served_at_root(self):
+        app, _, _ = make_app(answer="hi there")
+        with TestClient(app) as client:
+            index = client.get("/")
+            assert index.status_code == 200
+            assert "Personal Job Agent" in index.text
+            app_js = client.get("/app.js")
+            assert app_js.status_code == 200
+            assert "text/javascript" in app_js.headers["content-type"]
+            styles = client.get("/styles.css")
+            assert styles.status_code == 200
+            assert "text/css" in styles.headers["content-type"]
+
+    def test_discover_writes_to_app_job_db(self, tmp_path):
+        import sqlite3
+
+        import pytest
+
+        from personal_ai.server import JOB_AGENT_AVAILABLE
+
+        if not JOB_AGENT_AVAILABLE:
+            pytest.skip("job_agent module not installed")
+
+        from job_agent import discovery_search, pipeline
+
+        job_db = tmp_path / "app-job.sqlite3"
+
+        class FakeResult:
+            def __init__(self):
+                self.persisted_by_source = {"remote_remoteok": 2}
+                self.total_duplicates = 0
+                self.jobs_seen = {"job-1"}
+
+        class FakePacingReport:
+            def to_dict(self):
+                return {"ok": True}
+
+        class FakePlan:
+            def queries(self):
+                return ["site:remoteok.com product jobs"]
+
+        def fake_discovery(*args, **kwargs):
+            return FakePlan(), [], [], [], FakePacingReport()
+
+        def fake_ingest(
+            conn, jobs, profile, policy, provenance=None, run_started_at=None
+        ):
+            conn.execute("CREATE TABLE IF NOT EXISTS marker (x INTEGER)")
+            conn.execute("INSERT INTO marker VALUES (1)")
+            conn.commit()
+            return FakeResult()
+
+        def fake_lifecycle(conn, cfg, seen_ids):
+            return {"active": 1}
+
+        monkeypatch = pytest.MonkeyPatch()
+        monkeypatch.setattr(discovery_search, "run_planned_discovery", fake_discovery)
+        monkeypatch.setattr(pipeline, "ingest_global_jobs", fake_ingest)
+        monkeypatch.setattr(pipeline, "run_lifecycle", fake_lifecycle)
+
+        fake = FakeAgent()
+        app = create_app(
+            None,
+            None,
+            model=DEFAULT_MODEL,
+            agent_factory=lambda: FakeBuilt(fake),
+            job_db_path=job_db,
+        )
+        try:
+            with TestClient(app) as client:
+                res = client.post("/api/job-agent/discover", json={})
+            assert res.status_code == 200
+            body = res.json()
+            assert body["jobs_persisted"] == 2
+            marker = (
+                sqlite3.connect(str(job_db))
+                .execute("SELECT COUNT(*) FROM marker")
+                .fetchone()[0]
+            )
+            assert marker == 1
+        finally:
+            monkeypatch.undo()
+
+    def test_evaluation_total_is_normalized_to_01(self, tmp_path):
+
+        import pytest
+
+        from personal_ai.server import JOB_AGENT_AVAILABLE
+
+        if not JOB_AGENT_AVAILABLE:
+            pytest.skip("job_agent module not installed")
+
+        from job_agent.models import Job, Score
+
+        from job_agent import db as job_db
+
+        job_file = tmp_path / "jobs.sqlite3"
+        conn = job_db.connect(str(job_file))
+        job = Job(
+            id="test:1",
+            title="Senior Product Manager",
+            company="Test Corp",
+            url="https://example.org/job",
+            source="jsonld",
+            source_type="ats",
+            description="A product management role.",
+        )
+        job_db.upsert_job(conn, job)
+        job_db.record_evaluation(
+            conn,
+            "test:1",
+            Score(
+                total=72.8,
+                decision="review",
+                reasons=["strong title match"],
+                gaps=["no travel"],
+                confidence=0.7,
+            ),
+            scoring_version="1.0",
+            profile_version="p1",
+        )
+        conn.commit()
+        conn.close()
+
+        fake = FakeAgent()
+        app = create_app(
+            None,
+            None,
+            model=DEFAULT_MODEL,
+            agent_factory=lambda: FakeBuilt(fake),
+            job_db_path=job_file,
+        )
+        with TestClient(app) as client:
+            res = client.get("/api/job-agent/jobs/test:1")
+            assert res.status_code == 200
+            body = res.json()
+            assert body["evaluation"]["total"] == pytest.approx(0.728)
+            assert body["evaluation"]["decision"] == "review"
+
 
 class TestConfigPrecedence:
     def make_args(self, token=None, host=None, port=None):

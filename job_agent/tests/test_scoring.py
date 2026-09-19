@@ -1,5 +1,10 @@
 from job_agent.models import Job
-from job_agent.scoring import ScoringPolicy, score, scoring_policy_from_config
+from job_agent.scoring import (
+    ScoringPolicy,
+    contains_negative_keyword,
+    score,
+    scoring_policy_from_config,
+)
 
 
 def policy():
@@ -111,6 +116,73 @@ def test_above_target_gets_compensation_reason():
     )
     s = score(j, profile(), policy())
     assert any("≥ target" in r for r in s.reasons)
+
+
+def test_negative_keyword_is_word_boundary_not_substring():
+    assert contains_negative_keyword("Product Manager (f/m/d) with internship focus", "intern") is False
+    assert contains_negative_keyword("international product manager", "intern") is False
+    assert contains_negative_keyword("NPI manager - international product lifecycle", "intern") is False
+    assert contains_negative_keyword("Junior Product Manager", "junior")
+    assert contains_negative_keyword("Software Engineering Intern", "intern") is True
+    assert contains_negative_keyword("working student, product management", "working student") is True
+
+
+def test_international_job_not_hard_rejected_for_intern():
+    j = Job(
+        id="int-1",
+        title="Product Manager (f/m/d)",
+        company="Munich Electrification",
+        url="https://x",
+        source="jsonld",
+        location="Munich",
+        description="As an international product manager you coordinate our global product line.",
+        salary_max_eur=150_000,
+    )
+    p = ScoringPolicy(
+        salary_min=120_000,
+        salary_target=150_000,
+        similarity_weight=0.25,
+        ai_weight=0.20,
+        compensation_weight=0.15,
+        location_weight=0.10,
+        leadership_weight=0.20,
+        purpose_weight=0.05,
+        wlb_weight=0.05,
+        industries=("AI", "Defence"),
+        negative_keywords=("intern", "junior"),
+        target_roles=("Product Manager", "Technical Program Manager"),
+    )
+    s = score(j, profile(), p)
+    assert s.decision != "reject"
+    assert not any("intern" in r for r in s.reasons)
+
+
+def test_internship_job_rejected_for_intern():
+    j = Job(
+        id="int-2",
+        title="Product Management Intern",
+        company="X",
+        url="https://x",
+        source="test",
+        location="Munich",
+        description="Six-month internship for students.",
+    )
+    p = ScoringPolicy(
+        salary_min=120_000,
+        salary_target=150_000,
+        similarity_weight=0.25,
+        ai_weight=0.20,
+        compensation_weight=0.15,
+        location_weight=0.10,
+        leadership_weight=0.20,
+        purpose_weight=0.05,
+        wlb_weight=0.05,
+        industries=("AI", "Defence"),
+        negative_keywords=("intern", "junior"),
+        target_roles=("Product Manager", "Technical Program Manager"),
+    )
+    s = score(j, profile(), p)
+    assert s.decision == "reject" and s.hard_fail
 
 
 def test_config_policy_mapping():

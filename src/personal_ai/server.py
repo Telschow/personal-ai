@@ -52,6 +52,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from personal_ai import cli, config
 from personal_ai.agent import AgentError, MaxToolRoundsError
@@ -607,6 +608,7 @@ def create_app(
         if job_db_path is not None and JOB_AGENT_AVAILABLE:
             job_db_conn = job_db.connect(str(job_db_path))
             _app.state.job_db = job_db_conn
+            _app.state.job_db_path = str(Path(job_db_path).resolve())
             closable.append(job_db_conn)
         try:
             yield
@@ -756,6 +758,14 @@ def create_app(
 
     _mount_gateway_endpoints(app)
     _mount_job_agent(app)
+
+    _static_dir = Path(__file__).parent / "static"
+    if _static_dir.is_dir():
+        app.mount(
+            "/",
+            StaticFiles(directory=str(_static_dir), html=True),
+            name="static",
+        )
 
     return app
 
@@ -1283,10 +1293,15 @@ def _job_dict(job) -> dict[str, object]:
 
 
 def _job_with_score_dict(job, score=None) -> dict[str, object]:
-    """Serialize a Job with optional score for the API."""
+    """Serialize a Job with optional score for the API.
+
+    Fit scores are exposed on the 0..1 scale (divided by 100): the stored
+    ``evaluations.total`` is 0..100 but the API contract — and every UI
+    consumer — uses 0..1.
+    """
     base = _job_dict(job)
     if score:
-        base["fit_score"] = score.total
+        base["fit_score"] = score.total / 100.0
         base["fit_decision"] = score.decision
         base["fit_reasons"] = score.reasons
         base["fit_gaps"] = score.gaps
@@ -1354,10 +1369,12 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
             if location and location.lower() not in (job.location or "").lower():
                 continue
             if min_fit is not None:
-                # Check if job has evaluation with sufficient score
+                # Check if job has evaluation with sufficient score.
+                # ``min_fit`` is on the API 0..1 scale while the stored
+                # ``evaluations.total`` is 0..100.
                 row = job_db_conn.execute(
                     "SELECT total FROM evaluations WHERE job_id=? AND total >= ?",
-                    (job.id, min_fit),
+                    (job.id, min_fit * 100),
                 ).fetchone()
                 if not row:
                     continue
@@ -1371,10 +1388,32 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
                     continue
             filtered.append(job)
 
+        # Batch-load evaluation totals and per-job track so the table renders
+        # both columns (fit_score on the API 0..1 scale).
+        pending = [job.id for job in filtered]
+        totals: dict[str, float] = {}
+        if pending:
+            placeholders = ",".join("?" * len(pending))
+            for row in job_db_conn.execute(
+                f"SELECT job_id, total FROM evaluations WHERE job_id IN ({placeholders})",
+                pending,
+            ):
+                totals[row["job_id"]] = row["total"] / 100.0
+
+        from job_agent.career_tracks import classify_track
+
+        jobs_out = []
+        for job in filtered:
+            item = _job_with_score_dict(job)
+            item["fit_score"] = totals.get(job.id)
+            t = classify_track(job.title, job.description)
+            item["track"] = t.track_id if t else None
+            jobs_out.append(item)
+
         return JSONResponse(
             status_code=200,
             content={
-                "jobs": [_job_with_score_dict(j) for j in filtered],
+                "jobs": jobs_out,
                 "count": len(filtered),
                 "limit": limit,
                 "offset": offset,
@@ -1407,7 +1446,7 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
         response = _job_dict(job)
         if eval_row:
             response["evaluation"] = {
-                "total": eval_row["total"],
+                "total": eval_row["total"] / 100.0,
                 "decision": eval_row["decision"],
                 "reasons": json.loads(eval_row["reasons_json"] or "[]"),
                 "gaps": json.loads(eval_row["gaps_json"] or "[]"),
@@ -1523,8 +1562,12 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
         )
         policy = scoring_policy_from_config(cfg.model_dump())
 
-        # Use in-memory DB for dry run
-        conn = job_db.connect(":memory:" if dry_run else cfg.database_path)
+        # Use in-memory DB for dry run; otherwise persist into the same
+        # database the app/UI reads (the ``--job-db`` connection), never the
+        # config-defaulted path.
+        app_job_db = getattr(app.state, "job_db_path", None)
+        db_path = app_job_db or cfg.database_path
+        conn = job_db.connect(":memory:" if dry_run else db_path)
 
         try:
             run_started_at = datetime.now(UTC).isoformat(timespec="seconds")
@@ -1554,6 +1597,7 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
                     "jobs_persisted": sum(result.persisted_by_source.values()),
                     "duplicates": result.total_duplicates,
                     "fetch_errors": len(errors),
+                    "fetch_error_details": list(errors),
                     "pacing": pacing_report.to_dict(),
                     "lifecycle": lifecycle,
                     "dry_run": dry_run,

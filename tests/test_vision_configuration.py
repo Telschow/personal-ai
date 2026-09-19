@@ -33,8 +33,8 @@ class TestVisionSettings:
         }
         assert load_vision_settings(environ).model is None
 
-    def test_prompt_version_defaults_to_v1(self) -> None:
-        assert load_vision_settings({}).prompt_version == "v1"
+    def test_prompt_version_defaults_to_v2(self) -> None:
+        assert load_vision_settings({}).prompt_version == "v2"
 
     def test_prompt_version_is_read_from_environment(self) -> None:
         settings = load_vision_settings(
@@ -56,4 +56,4 @@ class TestVisionSettings:
 
     def test_settings_value_object_remains_a_plain_dataclass(self) -> None:
         assert VisionSettings(model=None).model is None
-        assert VisionSettings(model="m").prompt_version == "v1"
+        assert VisionSettings(model="m").prompt_version == "v2"

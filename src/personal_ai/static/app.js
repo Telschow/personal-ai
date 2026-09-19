@@ -383,7 +383,7 @@ async function runDiscovery() {
             body: JSON.stringify({ limit_total: 30, limit_per_track: 5, max_pages: 30 })
         });
         const data = await res.json();
-        alert(`Discovery complete!\nPlanned: ${data.planned_queries}\nFound: ${data.candidates_found}\nPersisted: ${data.jobs_persisted}\nDuplicates: ${data.duplicates}\nErrors: ${data.fetch_errors}`);
+        alert(`Discovery complete!\nPlanned: ${data.planned_queries}\nFound: ${data.candidates_found}\nPersisted: ${data.jobs_persisted}\nDuplicates: ${data.duplicates}\nErrors: ${data.fetch_errors}` + (data.fetch_error_details?.length ? '\n\n' + data.fetch_error_details.join('\n') : ''));
         await loadHealth();
         await loadDashboard();
         await loadJobs();

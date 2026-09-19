@@ -260,8 +260,12 @@ vision extraction turns those blank pages into searchable chunks:
 - Set `PERSONAL_AI_VISION_MODEL` to a local vision-capable Ollama model (the
   current chat model `qwen3.5:9b` supports vision). Leave it unset to keep the
   plain store-without-chunks behavior.
-- `PERSONAL_AI_VISION_PROMPT_VERSION` (default `v1`) selects the extraction
-  prompt; changing it re-extracts pages produced with an older version.
+- `PERSONAL_AI_VISION_PROMPT_VERSION` (default `v2`) selects the extraction
+  prompt; changing it re-extracts pages produced with an older version. v2 adds
+  an exhaustive-transcription contract (every visible heading, label, number,
+  date, name and unit; structure and groupings; explicit `[illegible]` instead
+  of guessing) so information-dense visual sources such as vision boards and
+  collages preserve enough text to be chunked, searchable, and extractable.
 
 How it works:
 

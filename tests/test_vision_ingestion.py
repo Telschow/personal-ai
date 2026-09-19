@@ -99,7 +99,7 @@ class FakeVisionExtractor:
         self,
         *,
         model: str = "vision-model",
-        prompt_version: str = "v1",
+        prompt_version: str = "v2",
         outputs: list[str] | None = None,
         raise_call_index: int | None = None,
         raise_error: type[Exception] = VisionExtractionError,
@@ -202,7 +202,7 @@ class TestImageHeavyVisionRouting:
                 stored = harness.vision_store.get(result.document_id, page_number)
                 assert stored is not None
                 assert stored.vision_model == "vision-model"
-                assert stored.prompt_version == "v1"
+                assert stored.prompt_version == "v2"
         finally:
             harness.close()
 

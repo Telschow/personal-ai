@@ -108,7 +108,7 @@ class TestVisionContract:
 
     def test_prompt_version_is_configurable(self) -> None:
         assert self._extractor().prompt_version == VISION_PROMPT_VERSION
-        assert self._extractor().prompt_version == "v1"
+        assert self._extractor().prompt_version == "v2"
 
 
 class TestOllamaVisionExtractor:

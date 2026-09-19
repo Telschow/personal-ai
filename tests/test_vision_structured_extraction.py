@@ -246,7 +246,7 @@ class TestVisionStructuredGate:
             )
             assert (
                 _provenance(result.structured_extraction)["vision_prompt_version"]
-                == "v1"
+                == "v2"
             )
             assert _provenance(result.structured_extraction)["schema_version"] == (
                 VISION_EXTRACTION_SCHEMA_VERSION
@@ -390,7 +390,7 @@ class TestVisionStructuredPersistence:
             harness.close()
 
     def test_vision_prompt_version_change_re_extracts(self) -> None:
-        harness, structured = _vision_harness()
+        harness, structured = _vision_harness(prompt_version="v1")
         try:
             harness.ingestor.ingest(make_image_record())
 
