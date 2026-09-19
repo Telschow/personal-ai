@@ -79,6 +79,20 @@ Every canonical phase is **done**:
 Detailed per-phase specifications live in `AGENTS.md`. The sections below
 record implementation notes for the most recent canonical work.
 
+### Phase 18 maintenance — Critical reliability fix (curate-all source registry)
+
+Critical reliability fix: `memory curate-all` now registers and executes all
+seven documented curation sources (chatgpt/gemini/email/document/financial/
+workout/activity). The generic CLI registry previously registered only the
+workout/event adapters and passed the raw `WorkoutStore` where the workout
+adapter requires a `WorkoutQuerySource`, so all but `activity` failed (opaque
+`source` / `internal_error`) while the suite stayed green — the curate-all
+test only asserted aggregate review-queue counts. `_build_curation_registry_generic`
+now wires the same adapters the per-source `_build_curation_registry` uses
+(workout via `WorkoutQueryService(WorkoutStore(conn))`), and
+`_run_memory_curate_all` supplies an LLM client in adaptive mode. Regression
+coverage verifies per-source execution for all seven sources.
+
 ### Phase 20 — Multilingual Security + Unicode Retrieval Foundation (done)
 
 Security and Unicode foundation for processing the user's English/German/Spanish

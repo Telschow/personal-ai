@@ -1715,15 +1715,19 @@ def _run_memory_curate_all(database: Path, args: argparse.Namespace) -> int:
     try:
         curation_store = CurationStore(connection)
         service = MemoryService(memory_store)
-        registry = _build_curation_registry_generic(connection, args.model)
+        manager = _NullContext(None)
+        if config.mode == "adaptive":
+            manager = OllamaClient(model=args.model or MODEL)
+        with manager as client:
+            registry = _build_curation_registry_generic(connection, client)
 
-        orchestrator = CorpusCurationOrchestrator(
-            curation_store=curation_store,
-            registry=registry,
-            memory_service=service,
-        )
+            orchestrator = CorpusCurationOrchestrator(
+                curation_store=curation_store,
+                registry=registry,
+                memory_service=service,
+            )
 
-        report = orchestrator.run(config)
+            report = orchestrator.run(config)
     finally:
         memory_connection.close()
         connection.close()
@@ -1733,35 +1737,25 @@ def _run_memory_curate_all(database: Path, args: argparse.Namespace) -> int:
 
 
 def _build_curation_registry_generic(
-    connection: sqlite3.Connection, model: str | None
+    connection: sqlite3.Connection, client: object | None
 ) -> CurationAdapterRegistry:
-    """Build a generic adapter registry over all sources (used by orchestration)."""
-    # We don't need a client for deterministic-only sources; pass None and the
-    # runner will handle graceful degradation per-unit.
-    from personal_ai.memory.adapters import (
-        EventCurationAdapter,
-        WorkoutCurationAdapter,
-    )
-    from personal_ai.storage.events import EventStore
-    from personal_ai.workouts.store import WorkoutStore
+    """Build a generic adapter registry over every documented curation source.
 
-    # Email and document adapters need a client only for LLM mode; orchestration
-    # will create one on demand per source. For now pass None.
-    adapters: list[object] = []
-
-    # Conversation sources (chatgpt/gemini) always need a client for llm mode
-    # but orchestration creates one lazily; we'll register empty adapters and
-    # let the runner raise early if LLM-mode is requested without a client.
-    # For deterministic mode we skip them (the CLI default is adaptive).
-    # The runner resolves adapters from registry per source.
-    # To keep this simple, we only register the non-LLM adapters.
-    # LLM sources (chatgpt/gemini/email/document) are conditionally registered
-    # when --mode deterministic: they run deterministic only.
-
-    # Deterministic adapters only:
-    adapters.append(WorkoutCurationAdapter(WorkoutStore(connection)))
-    adapters.append(EventCurationAdapter(EventStore(connection)))
-
+    Used by ``memory curate-all``. Each adapter is constructed exactly as the
+    per-source ``_build_curation_registry`` does, so orchestration resolves the
+    same adapter a ``memory curate --source <s>`` run would use. LLM-capable
+    adapters (conversation/email/document) receive the optional model client
+    (``None`` in deterministic mode); financial/workout/activity stay
+    deterministic and never send content to the model.
+    """
+    adapters: list[object] = [
+        ConversationCurationAdapter(ConversationStore(connection), client=client),
+        DocumentCurationAdapter(
+            DocumentStore(connection), ChunkStore(connection), client=client
+        ),
+        WorkoutCurationAdapter(WorkoutQueryService(WorkoutStore(connection))),
+        EventCurationAdapter(EventStore(connection)),
+    ]
     return CurationAdapterRegistry(*adapters)  # type: ignore[arg-type]
 
 

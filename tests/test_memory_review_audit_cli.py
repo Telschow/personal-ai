@@ -388,6 +388,84 @@ def test_curate_all_defer_and_reject_reflected(
 
 
 # ---------------------------------------------------------------------------
+# Regression (Critical): curate-all registers and executes every documented
+# source. The old generic registry registered only the deterministic adapters
+# and passed the raw WorkoutStore where the workout adapter needs a query
+# service, so chatgpt/gemini/email/document/financial failed with "source" and
+# workout with "internal_error" while the suite stayed green because the
+# curate-all test only checked aggregate review-queue counts.
+# ---------------------------------------------------------------------------
+
+
+def test_generic_registry_resolves_all_documented_sources(tmp_path: Path) -> None:
+    from personal_ai.memory.orchestration import DEFAULT_CORPUS_SOURCES
+
+    documented = {
+        "chatgpt",
+        "gemini",
+        "email",
+        "document",
+        "financial",
+        "workout",
+        "activity",
+    }
+    assert set(DEFAULT_CORPUS_SOURCES) == documented
+
+    db = tmp_path / "db.sqlite"
+    connection = connect_database(db)
+    try:
+        registry = cli._build_curation_registry_generic(connection, client=None)
+        for source in documented:
+            assert registry.for_source(source) is not None, source
+        assert registry.for_source("unknown-source") is None
+    finally:
+        connection.close()
+
+
+def test_curate_all_processes_all_documented_sources(tmp_path: Path, capsys) -> None:
+    db = str(tmp_path / "db.sqlite")
+    _seed(
+        tmp_path / "db.sqlite",
+        (_conv("conv-1"), (_msg("m1", "conv-1", content="I work at BCG"),)),
+    )
+    cli.main(
+        ["memory", "curate-all", "--database", db, "--mode", "deterministic", "--json"]
+    )
+    report = json.loads(capsys.readouterr().out)
+
+    documented = {
+        "chatgpt",
+        "gemini",
+        "email",
+        "document",
+        "financial",
+        "workout",
+        "activity",
+    }
+    # Every documented source must produce an explicit per-source result entry;
+    # a source with no registered adapter appears in ``failures`` instead.
+    assert report["source_count"] == len(documented)
+    assert report["failures"] == []
+    executed = {outcome["source"] for outcome in report["sources"]}
+    assert executed == documented
+    for outcome in report["sources"]:
+        assert outcome["status"] in {"completed", "partial"}
+        assert outcome["failure_reason"] == ""
+    # The seeded chatgpt conversation must have actually run a unit.
+    chatgpt = next(
+        outcome for outcome in report["sources"] if outcome["source"] == "chatgpt"
+    )
+    assert chatgpt["units"]["completed"] == 1
+    # workout: the corrected query-service interface clears the internal error.
+    workout = next(
+        outcome for outcome in report["sources"] if outcome["source"] == "workout"
+    )
+    assert workout["status"] == "completed"
+    assert workout["units"]["failed"] == 0
+    assert report["model_calls"] == 0
+
+
+# ---------------------------------------------------------------------------
 # Human (non-JSON) audit surfaces stay privacy-safe and bounded
 # ---------------------------------------------------------------------------
 
