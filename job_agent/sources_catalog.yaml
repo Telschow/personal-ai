@@ -527,6 +527,7 @@ sources:
     enabled: true
     priority: 74
     query_host: remoteok.com
+    provider: remoteok
     upstream: awesome_job_boards
   - source_id: remote_remotive
     name: Remotive
@@ -543,6 +544,7 @@ sources:
     enabled: true
     priority: 72
     query_host: remotive.com
+    provider: remotive
     upstream: awesome_job_boards
   - source_id: remote_himalayas
     name: Himalayas

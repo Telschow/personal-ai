@@ -56,6 +56,45 @@ async function loadDashboard() {
     } catch (e) {
         console.error('Dashboard load failed:', e);
     }
+
+    try {
+        const res = await fetch(`${API_BASE}/dashboard`);
+        const data = await res.json();
+        const stages = data.applications_by_stage || {};
+        document.getElementById('stat-interview').textContent = stages.INTERVIEW || 0;
+        document.getElementById('stat-offer').textContent = (stages.OFFER || 0) + (stages.HIRED || 0);
+        renderLastRun(data);
+    } catch (e) {
+        const bar = document.getElementById('last-run-bar');
+        bar.textContent = 'Run status unavailable';
+    }
+}
+
+function renderLastRun(data) {
+    const bar = document.getElementById('last-run-bar');
+    const run = data.last_run;
+    const parts = [];
+    if (run && run.ran_at) {
+        const when = new Date(run.ran_at);
+        const hh = String(when.getUTCHours()).padStart(2, '0');
+        const mm = String(when.getUTCMinutes()).padStart(2, '0');
+        parts.push(`Last discovery: ${formatDate(run.ran_at)} @ ${hh}:${mm} UTC`);
+        parts.push(`persisted ${run.jobs_persisted || 0} jobs (${run.jobs_from_providers || 0} provider / ${run.jobs_from_search || 0} search)`);
+        if ((run.provider_failures || 0) > 0) parts.push(`provider failures: ${run.provider_failures}`);
+    } else {
+        parts.push('No discovery run recorded yet');
+    }
+    const providers = data.provider_runs || [];
+    if (providers.length) {
+        const ok = providers.filter(p => p.status === 'ok').length;
+        const failed = providers.filter(p => p.status === 'failed').length;
+        const zero = providers.filter(p => p.status === 'zero_yield').length;
+        parts.push(`${providers.length} provider source(s) latest: ${ok} ok / ${zero} zero-yield / ${failed} failed`);
+    }
+    if (data.provider_failures_total) {
+        parts.push(`all-time provider failures: ${data.provider_failures_total}`);
+    }
+    bar.textContent = parts.join(' · ');
 }
 
 async function loadJobs() {
@@ -209,6 +248,7 @@ function setupEventListeners() {
     document.getElementById('action-reject').addEventListener('click', () => updateModalJobStatus('REJECTED'));
     document.getElementById('action-applied').addEventListener('click', () => updateModalJobStatus('APPLIED'));
     document.getElementById('action-reset').addEventListener('click', () => updateModalJobStatus('NEW'));
+    document.getElementById('app-save').addEventListener('click', saveApplication);
 }
 
 let currentModalJobId = null;
@@ -222,14 +262,58 @@ async function openJobDetail(jobId) {
     document.getElementById('modal-title').textContent = 'Loading...';
     document.getElementById('job-factual').innerHTML = '';
     document.getElementById('job-analysis').innerHTML = '';
+    document.getElementById('app-stage').value = '';
+    document.getElementById('app-notes').value = '';
+    document.getElementById('app-feedback').textContent = '';
 
     try {
         const res = await fetch(`${API_BASE}/jobs/${jobId}`);
         const job = await res.json();
         renderJobDetail(job);
+        loadApplication(jobId);
     } catch (e) {
         document.getElementById('job-factual').innerHTML = '<dd>Failed to load job details</dd>';
         console.error('Job detail load failed:', e);
+    }
+}
+
+async function loadApplication(jobId) {
+    try {
+        const res = await fetch(`${API_BASE}/applications/${jobId}`);
+        if (res.status === 404) return;
+        if (!res.ok) return;
+        const app = await res.json();
+        if (app.stage) document.getElementById('app-stage').value = app.stage;
+        if (app.notes) document.getElementById('app-notes').value = app.notes;
+    } catch (e) {
+        console.error('Application load failed:', e);
+    }
+}
+
+async function saveApplication() {
+    if (!currentModalJobId) return;
+    const stage = document.getElementById('app-stage').value;
+    const notes = document.getElementById('app-notes').value.trim();
+    if (!stage) {
+        document.getElementById('app-feedback').textContent = 'Select a stage first';
+        return;
+    }
+    const feedback = document.getElementById('app-feedback');
+    try {
+        const res = await fetch(`${API_BASE}/applications/${currentModalJobId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stage, notes })
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            feedback.textContent = ((err.error && err.error.message) || 'Failed to save');
+            return;
+        }
+        feedback.textContent = 'Saved';
+        await loadDashboard();
+    } catch (e) {
+        feedback.textContent = 'Failed to save: ' + e.message;
     }
 }
 
@@ -376,14 +460,20 @@ async function runDiscovery() {
     btn.disabled = true;
     btn.textContent = 'Running...';
 
+    const dryRun = document.getElementById('discovery-dry-run') && document.getElementById('discovery-dry-run').checked;
+    const limit = document.getElementById('discovery-limit') && parseInt(document.getElementById('discovery-limit').value, 10) || 30;
+
     try {
         const res = await fetch(`${API_BASE}/discover`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ limit_total: 30, limit_per_track: 5, max_pages: 30 })
+            body: JSON.stringify({ limit_total: limit, limit_per_track: 5, max_pages: 30, dry_run: dryRun })
         });
         const data = await res.json();
-        alert(`Discovery complete!\nPlanned: ${data.planned_queries}\nFound: ${data.candidates_found}\nPersisted: ${data.jobs_persisted}\nDuplicates: ${data.duplicates}\nErrors: ${data.fetch_errors}` + (data.fetch_error_details?.length ? '\n\n' + data.fetch_error_details.join('\n') : ''));
+        const providerLine = (data.provider_runs || []).map(p =>
+            `${p.provider} → ${p.status} (${p.candidate_jobs}/${p.hits} candidates, ${Math.round(p.latency_ms)}ms)`
+        ).join('\n');
+        alert(`Discovery ${data.dry_run ? '[DRY RUN — nothing persisted]' : ''} complete!\nPlanned: ${data.planned_queries}\nFound: ${data.candidates_found}\nPersisted: ${data.jobs_persisted} (${data.jobs_from_providers || 0} from providers / ${data.jobs_from_search || 0} from search)\nDuplicates: ${data.duplicates}\nErrors: ${data.fetch_errors}` + (providerLine ? '\n\nProviders:\n' + providerLine : '') + (data.fetch_error_details?.length ? '\n\n' + data.fetch_error_details.join('\n') : ''));
         await loadHealth();
         await loadDashboard();
         await loadJobs();

@@ -1035,6 +1035,37 @@ curation).
 
 ---
 
+### Job-Agent track — Phase 40/4 (provider discovery + career workflow M3)
+
+The job-agent is a side project (Python package `job_agent`, its own
+pyproject/uv.lock + CI suite) that shares this repository's gateway process.
+Legacy numbering inside job_agent uses its own "Phase 4" — this section
+documents the current slice.
+
+- **Native providers** (`job_agent/providers.py`): RemoteOK and Remotive
+  direct-feed clients behind one `ProviderResult` contract; `ProviderStatus`
+  (ok / zero_yield / failed) and read-only `ProviderHealth` diagnostics.
+  A missing/unknown provider falls back to the DDGS search track. Provider
+  failures are isolated per source (FAILED result, run continues).
+- **Career pipeline statistics / applications** (`job_agent/application.py`,
+  migrations v8–v10): typed stage state machine
+  (NOT_APPLIED → APPLIED → RESPONDED → INTERVIEW → OFFER → HIRED plus
+  terminal REJECTED/WITHDRAWN), `Application.enter()`/`with_fields()`
+  validation, `provider_runs` / `discovery_runs` / `applications` telemetry.
+- **HTTP** (`src/personal_ai/server.py`): `/api/job-agent/dashboard`,
+  `/api/job-agent/applications` (list + per-job GET/POST/PATCH), job detail
+  carries `application`, discover returns `provider_runs` +
+  `jobs_from_providers/search` and persists runs (dry-run writes nothing).
+- **GUI** (`src/personal_ai/static/`): dashboard stage counts + last-run /
+  provider-health bar, discovery limit + dry-run controls, application
+  tracking panel in the job modal.
+- **Docker**: job-agent installed editable into the gateway venv
+  (runtime data kept at `/app/job_agent`); `JOB_AGENT_DB=/data/job-agent.db`.
+- Docs: `job_agent/docs/PROVIDERS.md` (provider contract, comparison table
+  vs the Career-Ops Node study at `/tmp/opencode/career-ops`).
+
+---
+
 ## Working principles
 
 - Every slice lands with tests; the full suite stays hermetic (no Ollama, no

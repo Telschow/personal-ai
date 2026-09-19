@@ -86,7 +86,7 @@ def test_migration_v4_to_v5_preserves_data(tmp_path):
 
     # now open through our normal path → migrates to the current schema version
     conn = db.connect(path)
-    assert migrations.current_version(conn) == 7
+    assert migrations.current_version(conn) == migrations.latest_version()
     row = conn.execute("SELECT * FROM career_artifacts WHERE job_id='p:9'").fetchone()
     assert row is not None
     assert row["version"] == 1  # legacy row defaults to version 1

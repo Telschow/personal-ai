@@ -191,6 +191,34 @@ def cmd_discover(args: argparse.Namespace) -> int:
         qualifying_sources={e.source_id for e in catalog.enabled()},
     )
 
+    if not args.dry_run:
+        for pstat in pacing_report.providers:
+            db.record_provider_run(
+                connection,
+                source_id=pstat["source_id"],
+                provider=pstat["provider"],
+                status=pstat["status"],
+                requests=pstat["requests"],
+                hits=pstat["hits"],
+                candidate_jobs=pstat["candidate_jobs"],
+                duplicates=pstat["duplicates"],
+                errors=list(pstat["errors"]),
+                latency_ms=pstat["latency_ms"],
+            )
+        provider_totals = yield_report.provider_totals
+        db.record_discovery_run(
+            connection,
+            planned_queries=len(plan.queries()),
+            candidates_found=len(jobs),
+            jobs_persisted=sum(result.persisted_by_source.values()),
+            jobs_from_providers=int(provider_totals.get("jobs_persisted", 0)),
+            jobs_from_search=sum(result.persisted_by_source.values()) - int(provider_totals.get("jobs_persisted", 0)),
+            provider_failures=int(provider_totals.get("failed", 0)),
+            fetch_errors=len(search_errors),
+            duration_ms=int(elapsed_fetch * 1000),
+        )
+        connection.commit()
+
     if args.json:
         print(
             json.dumps(
@@ -238,6 +266,19 @@ def cmd_discover(args: argparse.Namespace) -> int:
         print(f"zero-yield sources: {', '.join(yield_report.zero_yield_sources)}")
     if yield_report.never_queried_sources:
         print(f"never-queried sources: {', '.join(yield_report.never_queried_sources)}")
+    if yield_report.providers:
+        pt = yield_report.provider_totals
+        print(
+            f"providers: {pt['sources']} sources, {pt['ok']} ok, {pt['zero_yield']} zero-yield, "
+            f"{pt['failed']} failed, {pt['hits']} hits -> {pt['candidates']} candidates -> "
+            f"{pt['jobs_persisted']} persisted"
+        )
+        for pstat in pacing_report.providers:
+            print(
+                f"  {pstat['source_id']:<24} {pstat['provider']:<10} {pstat['status']:<10} "
+                f"{pstat['requests']}req {pstat['hits']}hits -> {pstat['candidate_jobs']} candidates "
+                f"({pstat['latency_ms']}ms)"
+            )
     print(f"jobs in db (sampled {diag.jobs_sampled}/{diag.jobs_total}):")
     for track, count in sorted(diag.jobs_by_career_track.items(), key=lambda kv: -kv[1]):
         print(f"  {track:<24} {count}")

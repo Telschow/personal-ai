@@ -38,6 +38,10 @@ services:
       # Runtime paths, provided by the mounts below — never baked into the image.
       PERSONAL_AI_WORKSPACE: /data/workspace
       PERSONAL_AI_DATABASE: /data/personal-ai.db
+      # Job-Agent database lives next to the Personal AI database on the same
+      # persistent volume so discovery runs and application tracking survive
+      # container restarts (Phase 40+/M3 career workflow).
+      JOB_AGENT_DB: /data/job-agent.db
       # The gateway talks to the containerized Ollama on its own bridge network.
       OLLAMA_BASE_URL: http://ollama:11434
       PERSONAL_AI_CHAT_MODEL: ${PERSONAL_AI_CHAT_MODEL:-qwen3.5:9b}

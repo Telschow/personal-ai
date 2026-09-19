@@ -377,6 +377,100 @@ def _v7_user_job_status(conn: sqlite3.Connection) -> None:
     )
 
 
+@migration(8)
+def _v8_provider_runs(conn: sqlite3.Connection) -> None:
+    """M3 MVP: native provider run telemetry (content-free).
+
+    One row per provider fetch during discovery. Stores ids, counters and
+    statuses only — never job text, URLs, or query terms. Used for dashboard
+    "provider failures / jobs from providers" diagnostics and for read-only
+    health classification. Diagnostic only: a FAILED row never disables a
+    source and never affects scoring.
+    """
+    _exec_many(
+        conn,
+        """
+        CREATE TABLE IF NOT EXISTS provider_runs (
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_id      TEXT NOT NULL,
+            provider       TEXT NOT NULL,
+            status         TEXT NOT NULL,
+            requests       INTEGER NOT NULL DEFAULT 0,
+            hits           INTEGER NOT NULL DEFAULT 0,
+            candidate_jobs INTEGER NOT NULL DEFAULT 0,
+            duplicates     INTEGER NOT NULL DEFAULT 0,
+            errors_json    TEXT,
+            latency_ms     INTEGER NOT NULL DEFAULT 0,
+            ran_at         TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_provider_runs_source ON provider_runs(source_id, ran_at);
+        """,
+    )
+
+
+@migration(9)
+def _v9_discovery_runs(conn: sqlite3.Connection) -> None:
+    """M3 MVP: per-run discovery aggregates (content-free).
+
+    One row per discovery run capturing aggregate counters only — planned /
+    candidate / persisted totals, provider vs search split, failure counts,
+    and timing. Powers the dashboard "new candidates this run" and recent-run
+    telemetry without re-reading jobs.
+    """
+    _exec_many(
+        conn,
+        """
+        CREATE TABLE IF NOT EXISTS discovery_runs (
+            id                INTEGER PRIMARY KEY AUTOINCREMENT,
+            planned_queries   INTEGER NOT NULL DEFAULT 0,
+            candidates_found  INTEGER NOT NULL DEFAULT 0,
+            jobs_persisted    INTEGER NOT NULL DEFAULT 0,
+            jobs_from_providers INTEGER NOT NULL DEFAULT 0,
+            jobs_from_search  INTEGER NOT NULL DEFAULT 0,
+            provider_failures INTEGER NOT NULL DEFAULT 0,
+            fetch_errors      INTEGER NOT NULL DEFAULT 0,
+            duration_ms       INTEGER NOT NULL DEFAULT 0,
+            ran_at            TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_discovery_runs_ran_at ON discovery_runs(ran_at);
+        """,
+    )
+
+
+@migration(10)
+def _v10_application_lifecycle(conn: sqlite3.Connection) -> None:
+    """M3 MVP: application lifecycle staging.
+
+    Adds deterministic final-stage fields on top of the legacy v1
+    ``applications`` table (whose ``status`` column is preserved untouched for
+    backward compatibility). ``stage`` follows the deterministic
+    :mod:`job_agent.application` state machine; timestamp columns are stamped
+    automatically on stage progression.
+    """
+    for column, ddl in (
+        ("stage", "TEXT NOT NULL DEFAULT 'NOT_APPLIED'"),
+        ("created_at", "TEXT"),
+        ("applied_at", "TEXT"),
+        ("responded_at", "TEXT"),
+        ("offer_at", "TEXT"),
+        ("closed_at", "TEXT"),
+        ("follow_up_at", "TEXT"),
+        ("interview_stage", "TEXT"),
+        ("interview_date", "TEXT"),
+        ("interview_notes", "TEXT"),
+    ):
+        if not _column_exists(conn, "applications", column):
+            conn.execute(f"ALTER TABLE applications ADD COLUMN {column} {ddl}")
+    if not _column_exists(conn, "applications", "updated_at"):
+        conn.execute("ALTER TABLE applications ADD COLUMN updated_at TEXT")
+    _exec_many(
+        conn,
+        """
+        CREATE INDEX IF NOT EXISTS idx_applications_stage ON applications(stage);
+        """,
+    )
+
+
 def current_version(conn: sqlite3.Connection) -> int:
     row = conn.execute("PRAGMA user_version").fetchone()
     return int(row[0]) if row else 0

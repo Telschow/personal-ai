@@ -114,6 +114,10 @@ class DiscoveryYieldReport(BaseModel):
     ``duplicate_workspace`` — fragmented same-key rows merged by lifecycle
     dedup; ``previous_runs`` — ingest matches against rows that predate the run
     (re-discovery). Content-free: identifiers and counts only.
+
+    ``providers`` carries aggregate-only per-provider run results (M3) and
+    ``provider_totals`` folds their counters, including how many provider
+    candidates actually persisted (attributed from the ingest result).
     """
 
     per_source: list[PerSourceYield] = field(default_factory=list)
@@ -122,6 +126,8 @@ class DiscoveryYieldReport(BaseModel):
     catalog_unknown_jobs: int = 0
     totals: dict[str, int] = field(default_factory=dict)
     dedup_workspace: dict[str, int] = field(default_factory=dict)
+    providers: list[dict[str, object]] = field(default_factory=list)
+    provider_totals: dict[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         return self.model_dump(mode="json")
@@ -206,6 +212,21 @@ def discovery_yield_report(
         "catalog_unknown_jobs": pacing_report.catalog_unknown_jobs,
     }
 
+    providers = [dict(p) for p in getattr(pacing_report, "providers", ())]
+    provider_source_ids = {str(p.get("source_id")) for p in providers}
+    provider_totals: dict[str, object] = {
+        "sources": len(providers),
+        "ok": sum(1 for p in providers if p.get("status") == "ok"),
+        "zero_yield": sum(1 for p in providers if p.get("status") == "zero_yield"),
+        "failed": sum(1 for p in providers if p.get("status") == "failed"),
+        "requests": sum(int(p.get("requests") or 0) for p in providers),
+        "hits": sum(int(p.get("hits") or 0) for p in providers),
+        "candidates": sum(int(p.get("candidate_jobs") or 0) for p in providers),
+        "jobs_persisted": sum(
+            row["jobs_persisted"] for source_id, row in by_source.items() if source_id in provider_source_ids
+        ),
+    }
+
     return DiscoveryYieldReport(
         per_source=per_source,
         zero_yield_sources=zero_yield,
@@ -216,6 +237,8 @@ def discovery_yield_report(
             "groups": lifecycle.get("dedup_groups", 0),
             "merged": lifecycle.get("dedup_merged", 0),
         },
+        providers=providers,
+        provider_totals=provider_totals,
     )
 
 

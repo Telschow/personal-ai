@@ -461,8 +461,10 @@ class TestRoutes:
                 self.jobs_seen = {"job-1"}
 
         class FakePacingReport:
+            providers: tuple = ()
+
             def to_dict(self):
-                return {"ok": True}
+                return {"ok": True, "providers": list(self.providers)}
 
         class FakePlan:
             def queries(self):

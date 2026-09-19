@@ -1,5 +1,7 @@
 """Minimal typed client for a local Ollama server."""
 
+from __future__ import annotations
+
 from collections.abc import Sequence
 from dataclasses import dataclass
 from types import TracebackType

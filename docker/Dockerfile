@@ -29,6 +29,14 @@ COPY src ./src
 # from the build context via .dockerignore).
 RUN uv sync --frozen --no-dev --no-editable
 
+# Job-Agent: the local job discovery/application package (Phase 4/40+). It is
+# installed *editable* so its runtime data (sources_catalog.yaml, profile/,
+# templates/) stays at /app/job_agent and resolves through PROJECT_ROOT.
+# Providers need the `discovery` extra (DDGS) for the search-fallback track.
+COPY job_agent ./job_agent
+RUN uv pip install --python /app/.venv/bin/python \
+        --editable "/app/job_agent[discovery]"
+
 ENV PATH="/app/.venv/bin:$PATH"
 
 EXPOSE 8000
@@ -37,6 +45,7 @@ EXPOSE 8000
 # Docker network. All other configuration arrives through the environment:
 #   PERSONAL_AI_WORKSPACE   (agent workspace sandbox, must be a directory)
 #   PERSONAL_AI_DATABASE    (SQLite runtime database)
+#   JOB_AGENT_DB            (Job-Agent SQLite database, defaults under /data)
 #   OLLAMA_BASE_URL         (e.g. http://ollama:11434)
 #   PERSONAL_AI_CHAT_MODEL, PERSONAL_AI_API_TOKEN, ...
 CMD ["python", "-m", "personal_ai.server", "--host", "0.0.0.0", "--port", "8000"]

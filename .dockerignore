@@ -14,6 +14,21 @@ raw_data_extracted
 data
 knowledge.db
 
+# Job-Agent private/derived data and local dev artifacts (the package itself,
+# sources_catalog.yaml, profile/ and templates/ stay in the image).
+job_agent/output
+job_agent/config.yaml
+job_agent/.venv
+job_agent/.ruff_cache
+job_agent/.pytest_cache
+job_agent/.mypy_cache
+job_agent/personal_job_agent.egg-info
+job_agent/systemd
+job_agent/uv.lock
+job_agent/requirements.txt
+job_agent/.env.example
+job_agent/.gitignore
+
 # Local development artifacts.
 .git
 .venv

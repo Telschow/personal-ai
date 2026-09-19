@@ -2,13 +2,15 @@
 
 ## Status
 
-**WORKING MVP — READY FOR REAL-WORLD USAGE**
+**OPERATIONAL MVP — JOB-AGENT RUNNING IN DOCKER WITH WORKING GUI**
 
 The system is a complete, local-first career-intelligence loop: catalog-driven
 discovery → typed normalization → deterministic scoring → SQLite persistence →
 evidence-based career-fit analysis → tailored-application proposals (proposal-only,
-never auto-submitted) → local web UI. Every slice is validated by hermetic tests
-and by live, measurement-only benchmark runs documented below.
+never auto-submitted) → local web UI → career application tracking. Native
+provider feeds (RemoteOK/Remotive) augment the DDGS search track. Every slice is
+validated by hermetic tests and by live, measurement-only benchmark runs
+documented below.
 
 **STOP ENGINEERING AFTER THIS CHECKPOINT** — future work belongs to a new,
 explicitly-scoped phase, not to silent additions.
@@ -32,6 +34,8 @@ job_agent/
     config.py           # typed pydantic Config (env overrides)
     db.py               # SQLite schema + migrations (PRAGMA user_version)
     discovery_search.py # planned discovery loop + DDGS search engine
+    providers.py        # native provider feeds (RemoteOK/Remotive) + health
+    application.py      # career application state machine (typed stages)
     location.py         # tiered location parsing
     normalizer.py       # job canonicalization
     pipeline.py         # ingest + lifecycle (stale/closed/dedup)
@@ -55,7 +59,43 @@ job_agent/
 | v0.4 = M2 | Discovery observability: per-source queried-vs-yielded, five-level dedup attribution, workspace dedup, `DiscoveryYieldReport` | ✅ implemented (475 tests) |
 | M3 | Local Job-Agent MVP: `/api/job-agent/*` endpoints in the Personal AI gateway, user status persistence, minimal HTML/JS UI, 8 smoke tests | ✅ implemented |
 | M3.1 | Web UI integrations: discovery execution from UI, status actions, agent analysis in job detail modal | ✅ implemented |
+| M3.2 | Provider track (RemoteOK/Remotive) + career application lifecycle + gateway dashboard/telemetry + GUI application panel + provider-run persistence (migrations v8–v10) | ✅ implemented (518 suite) |
 | final | Bounded broad-discovery benchmark (see below) + docs + test/lint/format verification | ✅ done (this checkpoint) |
+
+## Phase 40/4 slice (M3.2) — provider track + career workflow
+
+- **Native providers** (`providers.py`): RemoteOK + Remotive direct-feed
+  clients behind the `ProviderResult` contract; `ProviderStatus`
+  (ok / zero_yield / failed); read-only `ProviderHealth`. Catalog entries
+  `remote_remoteok` / `remote_remotive` declare `provider:` + `url:`. Unknown/
+  missing provider ⇒ search-fallback (never a hard error). See
+  `docs/PROVIDERS.md` (contract, health, fallback, testing, comparison vs the
+  Career-Ops Node reference study).
+- **Salary/date parsing** hardened: European thousands (`€65.000` → 65000.0),
+  description normalization, `_parse_payload(source_id, entry, ...)` signature
+  so provider entries can vary their feed per source.
+- **Applications** (`application.py`): typed stage machine
+  (NOT_APPLIED → APPLIED → RESPONDED → INTERVIEW → OFFER → HIRED; terminal
+  REJECTED/WITHDRAWN), `enter()` transitions + `with_fields()` validation
+  (interview_stage enum, ISO follow_up/interview dates), timestamps stamped on
+  the right transitions. Persisted via `save_application` UPSERT; `OFFER` is a
+  legal target from INTERVIEW (was missing from `NON_TERMINAL_STAGES`).
+- **Gateway** (`src/personal_ai/server.py`): `/api/job-agent/dashboard`
+  (application stage counts, last discovery run, provider-run health),
+  `/api/job-agent/applications` (list w/ stage filter; per-job GET 404-if-none,
+  POST upsert with transition validation → 400, PATCH metadata/notes),
+  job detail carries `application`, discover returns `provider_runs` +
+  `jobs_from_providers/search` and persists runs (+ commit). Dry-run uses an
+  in-memory DB and writes nothing. `_apply_application` closure bug fixed
+  (local `app` shadow) via rename to `application`.
+- **GUI** (`src/personal_ai/static/`): pipeline stat cards (In Interview/Offer),
+  last-run + provider-health bar, discovery limit + dry-run controls, and an
+  Application Tracking panel (stage + notes) in the job modal.
+- **Docker**: job-agent installed editable into the gateway venv after
+  `uv sync` (`--extra discovery`); runtime data (sources_catalog.yaml,
+  profile/, templates/) kept at `/app/job_agent`; `JOB_AGENT_DB=/data/job-agent.db`
+  on the shared `/data` volume. `.dockerignore` excludes `job_agent/output`
+  and dev artifacts.
 
 ## Final checkpoint benchmark (measurement-only)
 
@@ -112,9 +152,11 @@ limitation). DDGS throttling capped execution at 117/144 queries (~19% skipped).
 
 ### Verification (this checkpoint)
 
-- `pytest -q` (job_agent suite): **436 passed**. `ruff check .`, `ruff format
-  --check .`, `mypy` clean. See `docs/ROADMAP.md` for per-version counts.
-- Production DB `output/jobs.sqlite3` untouched by the benchmark (scratch DB
+- `pytest -q` (job_agent suite): **518 passed**. `ruff check .`, `ruff format
+  --check .` clean (line-length 120, select E/F/W/I/UP/B/SIM). Root suite
+  `uv run pytest` (Personal AI gateway + shared server tests): **3059 passed**;
+  root `ruff check .` clean; `ruff format --check src tests` clean.
+- Production DB `output/jobs.sqlite3` untouched by benchmarks (scratch DB
   only).
 
 ## Known limitations (deferred — do not fix silently)

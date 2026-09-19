@@ -18,12 +18,38 @@ from __future__ import annotations
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
+from . import providers as providers_mod
+from .catalog import load_catalog
 from .logging_setup import get_logger, log_event
 from .models import Job
+from .pipeline import Provenance
 from .sources import DirectPageSource
 
+if TYPE_CHECKING:
+    from .providers import DiscoveryProvider
+
 log = get_logger("discovery")
+
+
+def _first_term_for_source(plan, source_id: str) -> str | None:
+    """First quoted search term a plan assigns to a source (filter hint).
+
+    Providers use the term as an optional relevance filter ("filter, never
+    volume"): the feed is bounded regardless and the term only narrows which
+    items a source's bounded candidates include. Returns None when the plan
+    assigns no quoted term to the source.
+    """
+    for item in plan.items:
+        if item.source_id != source_id:
+            continue
+        import re
+
+        match = re.search(r'"([^"]+)"', item.query or "")
+        if match:
+            return match.group(1)
+    return None
 
 
 class RateLimitExceeded(Exception):
@@ -176,11 +202,13 @@ class DiscoveryPacingReport:
 
     ``catalog_unknown_jobs`` counts jobs emitted by fetch whose provenance could
     not be attributed to a plan query (surface-level attribution gap).
+    ``providers`` holds aggregate-only per-provider run results (content-free).
     """
 
     per_source: tuple[SourceRunStats, ...] = ()
     cost_seconds: float = 0.0
     catalog_unknown_jobs: int = 0
+    providers: tuple[dict[str, object], ...] = ()
 
     @property
     def totals(self) -> dict[str, int]:
@@ -203,6 +231,7 @@ class DiscoveryPacingReport:
             "per_source": [s.to_dict() for s in self.per_source],
             "totals": {**self.totals, "cost_seconds": round(self.cost_seconds, 3)},
             "catalog_unknown_jobs": self.catalog_unknown_jobs,
+            "providers": [dict(p) for p in self.providers],
         }
 
 
@@ -302,7 +331,11 @@ class RateLimitPacer:
     def note_catalog_unknown_jobs(self, count: int) -> None:
         self.catalog_unknown_jobs += count
 
-    def report(self, rate_limit_class_for: dict[str, str]) -> DiscoveryPacingReport:
+    def report(
+        self,
+        rate_limit_class_for: dict[str, str],
+        providers: tuple[dict[str, object], ...] = (),
+    ) -> DiscoveryPacingReport:
         ordered = sorted(self._states.items(), key=lambda kv: kv[0])
         rows = []
         for source_id, state in ordered:
@@ -324,7 +357,10 @@ class RateLimitPacer:
                 )
             )
         return DiscoveryPacingReport(
-            per_source=tuple(rows), cost_seconds=self._slept_s, catalog_unknown_jobs=self.catalog_unknown_jobs
+            per_source=tuple(rows),
+            cost_seconds=self._slept_s,
+            catalog_unknown_jobs=self.catalog_unknown_jobs,
+            providers=providers,
         )
 
 
@@ -416,7 +452,6 @@ def run_planned_discovery(
     pervasively rate-limited source is paused for the run while others
     continue. ``engine``/``fetch``/``pacing`` are injectable for hermetic tests.
     """
-    from .pipeline import Provenance
     from .query_plan import build_query_plan
 
     plan = build_query_plan(
@@ -427,6 +462,22 @@ def run_planned_discovery(
         limit_sources=limit_sources,
     )
     item_by_query = {item.query: item for item in plan.items}
+
+    # Provider-backed sources: catalog entries that declare a native provider
+    # (e.g. remoteok/remotive) are fetched directly from their feed; the
+    # generic search-engine path remains the fallback for everything else.
+    provider_by_source: dict[str, DiscoveryProvider] = {}
+    catalog: object | None = None
+    catalog_loaded = False
+    try:
+        catalog = load_catalog(cfg.catalog_path_resolved())
+        catalog_loaded = True
+        for entry in catalog.sources:
+            resolved = providers_mod.provider_for(entry)
+            if resolved is not None:
+                provider_by_source[entry.source_id] = resolved
+    except Exception:  # noqa: BLE001 — missing/unparseable catalog => search fallback only
+        catalog_loaded = False
 
     if pacing is None:
         pacing = RateLimitPacer(cfg.career.pacing)
@@ -444,6 +495,8 @@ def run_planned_discovery(
     url_source: dict[str, str] = {}
     candidate_by_source: dict[str, int] = {}
     for item in plan.items:
+        if item.source_id in provider_by_source:
+            continue  # provider-backed sources are fetched directly, not queried
         pacing.wait_before(item.source_id, item.rate_limit_class)
         if not pacing.should_attempt(item.source_id):
             continue
@@ -514,4 +567,43 @@ def run_planned_discovery(
     for source_id, count in jobs_by_source.items():
         pacing.note_jobs_parsed(source_id, count)
     pacing.note_catalog_unknown_jobs(catalog_unknown)
-    return plan, jobs, provenance, errors, pacing.report(class_for)
+
+    # Provider-backed sources are fetched once each (bounded by their planned
+    # share of the discovery budget). A provider failure is isolated and only
+    # reported — it never aborts the run and never affects scoring.
+    provider_stats: list[dict[str, object]] = []
+    if provider_by_source:
+        entry_by_id = {entry.source_id: entry for entry in (catalog.sources if catalog_loaded else [])}
+        for source_id in sorted(provider_by_source):
+            provider = provider_by_source[source_id]
+            limit = min(
+                max(1, per_source_planned.get(source_id, 1)) * max_results,
+                providers_mod._MAX_PROVIDER_LIMIT,
+            )
+            try:
+                result = provider.fetch(
+                    source_id=source_id, limit=limit, search=_first_term_for_source(plan, source_id)
+                )
+            except Exception as exc:  # noqa: BLE001 — per-provider isolation
+                result = providers_mod.ProviderResult(
+                    source_id=source_id,
+                    provider=provider.name,
+                    jobs=(),
+                    status=providers_mod.ProviderStatus.FAILED,
+                    errors=(f"{provider.name}: {exc}"[:200],),
+                )
+            entry = entry_by_id.get(source_id)
+            for job in result.jobs:
+                jobs.append(job)
+                provenance.append(
+                    Provenance(
+                        source_id=source_id,
+                        source_name=source_id,
+                        source_url=entry.url if entry else None,
+                        discovery_method="provider",
+                    )
+                )
+            provider_stats.append(result.to_run_stats().to_dict())
+            if result.status == providers_mod.ProviderStatus.OK:
+                pacing.note_jobs_parsed(source_id, len(result.jobs))
+    return plan, jobs, provenance, errors, pacing.report(class_for, providers=tuple(provider_stats))

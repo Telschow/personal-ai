@@ -72,6 +72,7 @@ class SourceCatalogEntry(BaseModel):
     reason: str = ""
     query_host: str = ""
     upstream: str = ""
+    provider: str = ""
 
 
 class SourceCatalog(BaseModel):

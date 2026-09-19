@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from . import migrations
+from .application import ALL_STAGES
 from .logging_setup import get_logger
 from .models import Job, Score
 
@@ -622,6 +623,264 @@ def record_scan_run(
 def average_source_duration_ms(conn: sqlite3.Connection) -> float:
     row = conn.execute("SELECT AVG(duration_ms) AS avg_ms FROM scan_runs WHERE duration_ms IS NOT NULL").fetchone()
     return float(row["avg_ms"] or 0.0)
+
+
+# ---------------------------------------------------------------------------
+# Provider run telemetry (M3; content-free)
+# ---------------------------------------------------------------------------
+
+
+def record_provider_run(
+    conn: sqlite3.Connection,
+    *,
+    source_id: str,
+    provider: str,
+    status: str,
+    requests: int,
+    hits: int,
+    candidate_jobs: int,
+    duplicates: int = 0,
+    errors: list[str] | None = None,
+    latency_ms: int = 0,
+) -> int:
+    """Persist one provider fetch (ids + counters only, never content)."""
+    cur = conn.execute(
+        """
+        INSERT INTO provider_runs
+            (source_id, provider, status, requests, hits, candidate_jobs,
+             duplicates, errors_json, latency_ms, ran_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            source_id,
+            provider,
+            status,
+            requests,
+            hits,
+            candidate_jobs,
+            duplicates,
+            json.dumps(errors or []),
+            latency_ms,
+            _now(),
+        ),
+    )
+    return int(cur.lastrowid or 0)
+
+
+def latest_provider_runs(conn: sqlite3.Connection, *, limit: int = 50) -> list[dict[str, Any]]:
+    """Newest-first content-free provider run rows (deterministic by id)."""
+    if limit < 0:
+        raise ValueError("limit must be non-negative")
+    rows = conn.execute(
+        """
+        SELECT id, source_id, provider, status, requests, hits, candidate_jobs,
+               duplicates, errors_json, latency_ms, ran_at
+        FROM provider_runs
+        ORDER BY id DESC LIMIT ?
+        """,
+        (limit,),
+    ).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["errors"] = json.loads(d.pop("errors_json") or "[]")
+        out.append(d)
+    return out
+
+
+def latest_provider_run_for_source(conn: sqlite3.Connection, source_id: str) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        SELECT source_id, provider, status, requests, hits, candidate_jobs,
+               duplicates, errors_json, latency_ms, ran_at
+        FROM provider_runs WHERE source_id=?
+        ORDER BY id DESC LIMIT 1
+        """,
+        (source_id,),
+    ).fetchone()
+    if row is None:
+        return None
+    d = dict(row)
+    d["errors"] = json.loads(d.pop("errors_json") or "[]")
+    return d
+
+
+def provider_failure_count(conn: sqlite3.Connection) -> int:
+    row = conn.execute("SELECT COUNT(*) AS n FROM provider_runs WHERE status='failed'").fetchone()
+    return int(row["n"] or 0)
+
+
+# ---------------------------------------------------------------------------
+# Discovery run aggregates (M3; content-free)
+# ---------------------------------------------------------------------------
+
+
+def record_discovery_run(
+    conn: sqlite3.Connection,
+    *,
+    planned_queries: int,
+    candidates_found: int,
+    jobs_persisted: int,
+    jobs_from_providers: int,
+    jobs_from_search: int,
+    provider_failures: int,
+    fetch_errors: int,
+    duration_ms: int,
+) -> int:
+    cur = conn.execute(
+        """
+        INSERT INTO discovery_runs
+            (planned_queries, candidates_found, jobs_persisted,
+             jobs_from_providers, jobs_from_search, provider_failures,
+             fetch_errors, duration_ms, ran_at)
+        VALUES (?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            planned_queries,
+            candidates_found,
+            jobs_persisted,
+            jobs_from_providers,
+            jobs_from_search,
+            provider_failures,
+            fetch_errors,
+            duration_ms,
+            _now(),
+        ),
+    )
+    return int(cur.lastrowid or 0)
+
+
+def latest_discovery_run(conn: sqlite3.Connection) -> dict[str, Any] | None:
+    row = conn.execute(
+        """
+        SELECT id, planned_queries, candidates_found, jobs_persisted,
+               jobs_from_providers, jobs_from_search, provider_failures,
+               fetch_errors, duration_ms, ran_at
+        FROM discovery_runs ORDER BY id DESC LIMIT 1
+        """
+    ).fetchone()
+    return dict(row) if row else None
+
+
+# ---------------------------------------------------------------------------
+# Applications (M3 lifecycle)
+# ---------------------------------------------------------------------------
+
+
+_APPLICATION_COLUMNS = (
+    "job_id",
+    "status",
+    "stage",
+    "notes",
+    "created_at",
+    "updated_at",
+    "applied_at",
+    "responded_at",
+    "offer_at",
+    "closed_at",
+    "follow_up_at",
+    "interview_stage",
+    "interview_date",
+    "interview_notes",
+    "cv_path",
+    "letter_path",
+    "submitted_at",
+)
+
+
+def get_application(conn: sqlite3.Connection, job_id: str) -> dict[str, Any] | None:
+    row = conn.execute("SELECT * FROM applications WHERE job_id=?", (job_id,)).fetchone()
+    if row is None:
+        return None
+    d = dict(row)
+    d.setdefault("stage", "NOT_APPLIED")
+    return d
+
+
+def save_application(conn: sqlite3.Connection, application: Any) -> None:
+    """Insert or replace an application lifecycle record for a job.
+
+    ``application`` is a :class:`job_agent.application.Application`. The legacy
+    ``status`` column is left untouched (it predates staging and stays
+    backward compatible).
+    """
+    conn.execute(
+        """
+        INSERT INTO applications
+            (job_id, stage, notes, created_at, updated_at, applied_at,
+             responded_at, offer_at, closed_at, follow_up_at,
+             interview_stage, interview_date, interview_notes)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ON CONFLICT(job_id) DO UPDATE SET
+            stage=excluded.stage, notes=excluded.notes, updated_at=excluded.updated_at,
+            applied_at=excluded.applied_at, responded_at=excluded.responded_at,
+            offer_at=excluded.offer_at, closed_at=excluded.closed_at,
+            follow_up_at=excluded.follow_up_at,
+            interview_stage=excluded.interview_stage,
+            interview_date=excluded.interview_date,
+            interview_notes=excluded.interview_notes
+        """,
+        (
+            application.job_id,
+            application.stage,
+            application.notes,
+            application.created_at.isoformat() if application.created_at else None,
+            application.updated_at.isoformat() if application.updated_at else None,
+            application.applied_at.isoformat() if application.applied_at else None,
+            application.responded_at.isoformat() if application.responded_at else None,
+            application.offer_at.isoformat() if application.offer_at else None,
+            application.closed_at.isoformat() if application.closed_at else None,
+            application.follow_up_at.isoformat() if application.follow_up_at else None,
+            application.interview_stage,
+            application.interview_date.isoformat() if application.interview_date else None,
+            application.interview_notes,
+        ),
+    )
+    conn.commit()
+
+
+def application_stage_counts(conn: sqlite3.Connection) -> dict[str, int]:
+    out = {stage: 0 for stage in ALL_STAGES}
+    for row in conn.execute("SELECT stage, COUNT(*) AS n FROM applications GROUP BY stage"):
+        out[row["stage"]] = int(row["n"])
+    return out
+
+
+def list_applications(
+    conn: sqlite3.Connection,
+    *,
+    stage: str | None = None,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[dict[str, Any]]:
+    where, params = "", list[Any]()
+    if stage:
+        where, params = " WHERE stage=?", [stage]
+    params.extend([limit, offset])
+    rows = conn.execute(
+        f"""
+        SELECT a.*, j.title, j.company, j.location, j.source, j.apply_url,
+               j.canonical_url, e.total AS e_total
+        FROM applications a
+        LEFT JOIN jobs j ON j.id = a.job_id
+        LEFT JOIN evaluations e ON e.job_id = a.job_id
+        {where}
+        ORDER BY a.updated_at DESC, a.job_id ASC
+        LIMIT ? OFFSET ?
+        """,
+        params,
+    ).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d.pop("e_total", None)
+        out.append(d)
+    return out
+
+
+def application_job_exists(conn: sqlite3.Connection, job_id: str) -> bool:
+    row = conn.execute("SELECT 1 FROM jobs WHERE id=?", (job_id,)).fetchone()
+    return row is not None
 
 
 # ---------------------------------------------------------------------------

@@ -11,6 +11,13 @@
         <div class="container">
             <h1>Personal Job Agent</h1>
             <div class="header-actions">
+                <label class="discovery-limit-label">
+                    Limit
+                    <input type="number" id="discovery-limit" min="1" max="200" value="30" style="width: 60px;">
+                </label>
+                <label class="discovery-dry-label">
+                    <input type="checkbox" id="discovery-dry-run"> Dry run
+                </label>
                 <button id="run-discovery" class="btn btn-primary">Run Discovery</button>
                 <span id="health-status" class="status-indicator">Loading...</span>
             </div>
@@ -33,13 +40,24 @@
                     <div class="stat-label">Saved</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="stat-rejected">-</div>
-                    <div class="stat-label">Rejected</div>
-                </div>
-                <div class="stat-card">
                     <div class="stat-value" id="stat-applied">-</div>
                     <div class="stat-label">Applied</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-interview">-</div>
+                    <div class="stat-label">In Interview</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-offer">-</div>
+                    <div class="stat-label">Offer</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-rejected">-</div>
+                    <div class="stat-label">Rejected</div>
+                </div>
+            </div>
+            <div id="last-run-bar" class="last-run-bar">
+                Loading run status...
             </div>
         </div>
 
@@ -121,6 +139,31 @@
                             <button class="btn btn-warning" id="action-applied">Applied</button>
                             <button class="btn btn-secondary" id="action-reset">Reset to New</button>
                             <a class="btn btn-secondary" id="action-open-original" target="_blank">Open Original</a>
+                        </div>
+                        <div class="application-panel">
+                            <h3>Application Tracking</h3>
+                            <div class="application-row">
+                                <label for="app-stage">Stage</label>
+                                <select id="app-stage">
+                                    <option value="">— select —</option>
+                                    <option value="NOT_APPLIED">Not Applied</option>
+                                    <option value="APPLIED">Applied</option>
+                                    <option value="RESPONDED">Responded</option>
+                                    <option value="INTERVIEW">In Interview</option>
+                                    <option value="OFFER">Offer Received</option>
+                                    <option value="HIRED">Hired</option>
+                                    <option value="REJECTED">Rejected</option>
+                                    <option value="WITHDRAWN">Withdrawn</option>
+                                </select>
+                            </div>
+                            <div class="application-row">
+                                <label for="app-notes">Notes</label>
+                                <textarea id="app-notes" rows="2" placeholder="Recruiter contacts, links, next steps..."></textarea>
+                            </div>
+                            <div class="application-row">
+                                <button class="btn btn-primary" id="app-save">Save Application</button>
+                                <span id="app-feedback" class="app-feedback"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="job-analysis">

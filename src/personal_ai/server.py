@@ -48,6 +48,7 @@ import uuid
 from collections.abc import Callable, Sequence
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -1257,6 +1258,40 @@ def _gateway_job_db(app: FastAPI) -> sqlite3.Connection:
     return db
 
 
+def _dt_from_iso(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        text = value[:-1] + "+00:00" if value.endswith("Z") else value
+        return datetime.fromisoformat(text)
+    except ValueError:
+        return None
+
+
+def _parse_date_iso(value: str) -> tuple[datetime | None, str | None]:
+    """Parse a date/ISO timestamp into a timezone-aware UTC datetime.
+
+    Returns ``(parsed, error)``; ``YYYY-MM-DD`` is midnight UTC.
+    """
+    text = (value or "").strip()
+    if not text:
+        return None, None
+    try:
+        normalized_text = text[:-1] + "+00:00" if text.endswith("Z") else text
+        dt = datetime.fromisoformat(normalized_text)
+        normalized = dt.replace(tzinfo=UTC) if dt.tzinfo is None else dt.astimezone(UTC)
+        return normalized, None
+    except ValueError:
+        pass
+    try:
+        from datetime import date as _date
+
+        parsed = datetime.combine(_date.fromisoformat(text), datetime.min.time())
+        return parsed.replace(tzinfo=UTC), None
+    except ValueError:
+        return None, f"invalid date: {value!r}"
+
+
 def _job_dict(job) -> dict[str, object]:
     """Serialize a Job for the API."""
     return {
@@ -1487,6 +1522,14 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
                 for r in prov_rows
             ]
 
+        application_row = job_db_conn.execute(
+            "SELECT * FROM applications WHERE job_id=?", (job_id,)
+        ).fetchone()
+        if application_row:
+            app_dict = dict(application_row)
+            app_dict.setdefault("stage", "NOT_APPLIED")
+            response["application"] = app_dict
+
         return JSONResponse(status_code=200, content=response)
 
     @app.post("/api/job-agent/jobs/{job_id}/status")
@@ -1514,6 +1557,190 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
         updated_job = job_db.get_job(job_db_conn, job_id)
         return JSONResponse(status_code=200, content=_job_dict(updated_job))
 
+    @app.get("/api/job-agent/dashboard")
+    async def job_agent_dashboard() -> JSONResponse:
+        """Career-dashboard aggregates (content-free: counts and metadata only)."""
+        job_db_conn = _gateway_job_db(app)
+        user_counts = job_db.get_user_status_counts(job_db_conn)
+        stage_counts = job_db.application_stage_counts(job_db_conn)
+        last_run = job_db.latest_discovery_run(job_db_conn)
+        provider_runs = job_db.latest_provider_runs(job_db_conn, limit=50)
+        provider_health = {}
+        for run in provider_runs:
+            sid = run["source_id"]
+            if sid not in provider_health:
+                provider_health[sid] = {
+                    "last_status": run["status"],
+                    "last_ran_at": run["ran_at"],
+                }
+        return JSONResponse(
+            status_code=200,
+            content={
+                "jobs_by_user_status": {k: v for k, v in sorted(user_counts.items())},
+                "applications_by_stage": {
+                    k: v for k, v in sorted(stage_counts.items())
+                },
+                "applications_total": sum(stage_counts.values()),
+                "last_run": last_run or None,
+                "provider_runs": provider_runs,
+                "provider_failures_total": job_db.provider_failure_count(job_db_conn),
+            },
+        )
+
+    @app.get("/api/job-agent/applications")
+    async def job_agent_list_applications(
+        stage: str | None = None, limit: int = 100, offset: int = 0
+    ) -> JSONResponse:
+        """List application lifecycle records (optionally filtered by stage)."""
+        job_db_conn = _gateway_job_db(app)
+        if stage is not None:
+            from job_agent.application import is_valid_stage
+
+            if not is_valid_stage(stage):
+                raise ApiError(
+                    400,
+                    f"Invalid application stage: {stage}",
+                    error_type="invalid_request_error",
+                )
+        rows = job_db.list_applications(
+            job_db_conn,
+            stage=stage,
+            limit=min(max(limit, 0), 500),
+            offset=max(offset, 0),
+        )
+        return JSONResponse(
+            status_code=200, content={"applications": rows, "count": len(rows)}
+        )
+
+    async def _apply_application(
+        job_id: str,
+        body: dict,
+        *,
+        require_existing: bool,
+    ) -> JSONResponse:
+        from job_agent.application import (
+            Application,
+            InvalidApplicationTransition,
+            UnknownStageError,
+            is_valid_interview_stage,
+            is_valid_stage,
+            valid_stages,
+        )
+
+        job_db_conn = _gateway_job_db(app)
+        if not job_db.application_job_exists(job_db_conn, job_id):
+            raise ApiError(404, f"Job not found: {job_id}", error_type="not_found")
+        existing = job_db.get_application(job_db_conn, job_id)
+        if require_existing and existing is None:
+            raise ApiError(
+                404, f"Application not found: {job_id}", error_type="not_found"
+            )
+
+        if existing:
+            application = Application(
+                job_id=job_id,
+                stage=existing.get("stage") or "NOT_APPLIED",
+                notes=existing.get("notes"),
+                created_at=_dt_from_iso(existing.get("created_at")),
+                updated_at=_dt_from_iso(existing.get("updated_at")),
+                applied_at=_dt_from_iso(existing.get("applied_at")),
+                responded_at=_dt_from_iso(existing.get("responded_at")),
+                offer_at=_dt_from_iso(existing.get("offer_at")),
+                closed_at=_dt_from_iso(existing.get("closed_at")),
+                follow_up_at=_dt_from_iso(existing.get("follow_up_at")),
+                interview_stage=existing.get("interview_stage"),
+                interview_date=_dt_from_iso(existing.get("interview_date")),
+                interview_notes=existing.get("interview_notes"),
+            )
+        else:
+            application = Application(job_id=job_id)
+
+        target_stage = body.get("stage") or application.stage
+        if not is_valid_stage(target_stage):
+            raise ApiError(
+                400,
+                f"Invalid application stage. Must be one of: {', '.join(valid_stages())}",
+                error_type="invalid_request_error",
+            )
+        try:
+            if target_stage != application.stage:
+                application = application.enter(target_stage)
+        except (InvalidApplicationTransition, UnknownStageError) as exc:
+            raise ApiError(400, str(exc), error_type="invalid_request_error") from exc
+
+        if "notes" in body:
+            application = application.with_fields(
+                notes=str(body["notes"] or "").strip() or None
+            )
+        if "interview_notes" in body:
+            application = application.with_fields(
+                interview_notes=str(body["interview_notes"] or "").strip() or None
+            )
+        interview_stage = body.get("interview_stage")
+        if interview_stage is not None:
+            if not is_valid_interview_stage(interview_stage):
+                raise ApiError(
+                    400,
+                    f"Invalid interview stage: {interview_stage}",
+                    error_type="invalid_request_error",
+                )
+            application = application.with_fields(interview_stage=interview_stage)
+        for date_key in ("follow_up_at", "interview_date"):
+            if date_key in body and body.get(date_key):
+                parsed, error = _parse_date_iso(str(body[date_key]))
+                if error is not None or parsed is None:
+                    raise ApiError(
+                        400,
+                        f"Invalid {date_key}: {error or 'missing value'}",
+                        error_type="invalid_request_error",
+                    )
+                application = application.with_fields(**{date_key: parsed})
+
+        job_db.save_application(job_db_conn, application)
+        return JSONResponse(
+            status_code=200, content=job_db.get_application(job_db_conn, job_id)
+        )
+
+    @app.get("/api/job-agent/applications/{job_id}")
+    async def job_agent_get_application(job_id: str) -> JSONResponse:
+        job_db_conn = _gateway_job_db(app)
+        app_row = job_db.get_application(job_db_conn, job_id)
+        if app_row is None:
+            raise ApiError(
+                404, f"Application not found: {job_id}", error_type="not_found"
+            )
+        return JSONResponse(status_code=200, content=app_row)
+
+    @app.post("/api/job-agent/applications/{job_id}")
+    async def job_agent_upsert_application(
+        job_id: str, request: Request
+    ) -> JSONResponse:
+        body = (
+            await request.json()
+            if request.headers.get("content-type", "").startswith("application/json")
+            else {}
+        )
+        if not isinstance(body, dict):
+            raise ApiError(
+                400, "Invalid application payload", error_type="invalid_request_error"
+            )
+        return await _apply_application(job_id, body, require_existing=False)
+
+    @app.patch("/api/job-agent/applications/{job_id}")
+    async def job_agent_update_application(
+        job_id: str, request: Request
+    ) -> JSONResponse:
+        body = (
+            await request.json()
+            if request.headers.get("content-type", "").startswith("application/json")
+            else {}
+        )
+        if not isinstance(body, dict):
+            raise ApiError(
+                400, "Invalid application payload", error_type="invalid_request_error"
+            )
+        return await _apply_application(job_id, body, require_existing=True)
+
     @app.post("/api/job-agent/discover")
     async def job_agent_discover(
         request: Request,
@@ -1529,6 +1756,7 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
             )
 
         # Import job_agent modules lazily so they don't affect startup if not available
+        import time
         from datetime import UTC, datetime
         from pathlib import Path
 
@@ -1571,6 +1799,7 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
 
         try:
             run_started_at = datetime.now(UTC).isoformat(timespec="seconds")
+            _run_started = time.monotonic()
 
             plan, jobs, provenance, errors, pacing_report = run_planned_discovery(
                 cfg,
@@ -1589,16 +1818,56 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
             )
             lifecycle = run_lifecycle(conn, cfg, result.jobs_seen)
 
+            provider_runs = [dict(p) for p in pacing_report.providers]
+            provider_failed = [p for p in provider_runs if p.get("status") == "failed"]
+            jobs_persisted = sum(result.persisted_by_source.values())
+            jobs_from_providers_persisted = sum(
+                result.persisted_by_source.get(str(p.get("source_id")), 0)
+                for p in provider_runs
+            )
+            jobs_from_search_persisted = jobs_persisted - jobs_from_providers_persisted
+
+            if not dry_run:
+                for pstat in provider_runs:
+                    job_db.record_provider_run(
+                        conn,
+                        source_id=pstat["source_id"],
+                        provider=pstat["provider"],
+                        status=pstat["status"],
+                        requests=pstat["requests"],
+                        hits=pstat["hits"],
+                        candidate_jobs=pstat["candidate_jobs"],
+                        duplicates=pstat["duplicates"],
+                        errors=list(pstat["errors"]),
+                        latency_ms=pstat["latency_ms"],
+                    )
+                job_db.record_discovery_run(
+                    conn,
+                    planned_queries=len(plan.queries()),
+                    candidates_found=len(jobs),
+                    jobs_persisted=jobs_persisted,
+                    jobs_from_providers=jobs_from_providers_persisted,
+                    jobs_from_search=jobs_from_search_persisted,
+                    provider_failures=len(provider_failed),
+                    fetch_errors=len(errors),
+                    duration_ms=int((time.monotonic() - _run_started) * 1000),
+                )
+                conn.commit()
+
             return JSONResponse(
                 status_code=200,
                 content={
                     "planned_queries": len(plan.queries()),
                     "candidates_found": len(jobs),
-                    "jobs_persisted": sum(result.persisted_by_source.values()),
+                    "jobs_persisted": jobs_persisted,
+                    "jobs_from_providers": jobs_from_providers_persisted,
+                    "jobs_from_search": jobs_from_search_persisted,
+                    "provider_failures": len(provider_failed),
                     "duplicates": result.total_duplicates,
                     "fetch_errors": len(errors),
                     "fetch_error_details": list(errors),
                     "pacing": pacing_report.to_dict(),
+                    "provider_runs": provider_runs,
                     "lifecycle": lifecycle,
                     "dry_run": dry_run,
                 },

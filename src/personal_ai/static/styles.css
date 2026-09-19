@@ -43,6 +43,69 @@ header h1 {
     gap: 12px;
 }
 
+.discovery-limit-label,
+.discovery-dry-label {
+    font-size: 0.8125rem;
+    color: #555;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.discovery-limit-label input,
+.discovery-dry-label input {
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.last-run-bar {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: #eef1f5;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    color: #444;
+}
+
+.application-panel {
+    margin-top: 18px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 14px;
+}
+
+.application-panel h3 {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+}
+
+.application-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.application-row label {
+    font-size: 0.8125rem;
+    color: #555;
+}
+
+.application-row select,
+.application-row textarea {
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-family: inherit;
+}
+
+.app-feedback {
+    font-size: 0.8125rem;
+    color: #166534;
+    margin-left: 8px;
+}
+
 .btn {
     padding: 8px 16px;
     border: none;
