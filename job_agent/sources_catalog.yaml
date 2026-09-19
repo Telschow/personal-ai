@@ -1,0 +1,677 @@
+# Job-source catalog (v1)
+#
+# Versioned, provenance-tracked inventory of sources the personal job agent
+# MAY discover jobs through. Selection is deterministic (see catalog.py) and
+# happens by career track; NO scraping, browser automation, or API keys are
+# implied by this file's existence.
+#
+# Provenance: primary community index consulted at retrieval time is
+# emredurukn/awesome-job-boards. Entries are a curated, conservative subset;
+# categories and flags are maintained by this repository. Disabled entries
+# are retained with a `reason` so the registry documents deliberate exclusions
+# (bot-hostile / ToS-bound sites are never probed).
+#
+# Field notes:
+#   source_type   = ats | structured_data | search_engine | feed | direct | browser | restricted
+#   discovery_method = ats_api | jsonld | rss_json | search_engine | browser | restricted
+#   query_host    = the `site:` host used for search-engine discovery ("" => plain query)
+#   rate_limit_class = low | medium | high   (drives pacing, never infinite loops)
+version: "1"
+provenance:
+  repository: "https://github.com/emredurukn/awesome-job-boards"
+  license: "CC0-1.0"
+  retrieved: "2026-09-18"
+  note: "Curated subset; per-entry accuracy verified by this repository."
+sources:
+  # --- ATS platforms (structured APIs, canonical URLs) ----------------------
+  - source_id: ats_greenhouse
+    name: Greenhouse
+    url: "https://boards.greenhouse.io"
+    category: ats
+    country: global
+    source_type: ats
+    discovery_method: ats_api
+    supports_location_filter: true
+    supports_keyword_filter: true
+    supports_pagination: true
+    supports_structured_data: true
+    supports_ats_links: true
+    rate_limit_class: low
+    enabled: true
+    priority: 90
+    query_host: boards.greenhouse.io
+    upstream: vendor
+  - source_id: ats_lever
+    name: Lever
+    url: "https://jobs.lever.co"
+    category: ats
+    country: global
+    source_type: ats
+    discovery_method: ats_api
+    supports_location_filter: true
+    supports_remote_filter: true
+    supports_keyword_filter: true
+    supports_pagination: true
+    supports_structured_data: true
+    supports_ats_links: true
+    rate_limit_class: low
+    enabled: true
+    priority: 88
+    query_host: jobs.lever.co
+    upstream: vendor
+  - source_id: ats_ashby
+    name: Ashby
+    url: "https://www.ashbyhq.com"
+    category: ats
+    country: global
+    source_type: ats
+    discovery_method: ats_api
+    supports_location_filter: true
+    supports_remote_filter: true
+    supports_keyword_filter: true
+    supports_pagination: true
+    supports_structured_data: true
+    supports_ats_links: true
+    rate_limit_class: low
+    enabled: true
+    priority: 86
+    query_host: ashbyhq.com
+    upstream: vendor
+  - source_id: ats_smartrecruiters
+    name: SmartRecruiters
+    url: "https://careers.smartrecruiters.com"
+    category: ats
+    country: global
+    source_type: ats
+    discovery_method: ats_api
+    supports_location_filter: true
+    supports_keyword_filter: true
+    supports_pagination: true
+    supports_structured_data: true
+    supports_ats_links: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 84
+    query_host: careers.smartrecruiters.com
+    upstream: vendor
+  - source_id: ats_workable
+    name: Workable
+    url: "https://apply.workable.com"
+    category: ats
+    country: global
+    source_type: ats
+    discovery_method: ats_api
+    supports_location_filter: false
+    supports_remote_filter: true
+    supports_keyword_filter: true
+    supports_pagination: true
+    supports_structured_data: true
+    supports_ats_links: true
+    rate_limit_class: low
+    enabled: true
+    priority: 80
+    query_host: apply.workable.com
+    upstream: vendor
+  - source_id: ats_recruitee
+    name: Recruitee
+    url: "https://recruitee.com"
+    category: ats
+    country: global
+    source_type: ats
+    discovery_method: ats_api
+    supports_location_filter: true
+    supports_remote_filter: true
+    supports_keyword_filter: true
+    supports_pagination: true
+    supports_structured_data: true
+    supports_ats_links: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 76
+    query_host: careers.recruitee.com
+    upstream: vendor
+  - source_id: ats_join
+    name: JOIN
+    url: "https://join.com"
+    category: ats
+    country: DE
+    region: DACH
+    language: de
+    source_type: ats
+    discovery_method: ats_api
+    supports_keyword_filter: true
+    supports_structured_data: true
+    supports_ats_links: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 74
+    query_host: join.com
+    upstream: vendor
+  - source_id: ats_personio
+    name: Personio
+    url: "https://www.personio.com"
+    category: ats
+    country: DE
+    region: DACH
+    source_type: ats
+    discovery_method: ats_api
+    supports_location_filter: true
+    supports_remote_filter: true
+    supports_keyword_filter: true
+    supports_structured_data: true
+    supports_ats_links: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 72
+    query_host: jobs.personio.de
+    upstream: vendor
+  - source_id: ats_teamtailor
+    name: Teamtailor
+    url: "https://www.teamtailor.com"
+    category: ats
+    country: global
+    source_type: ats
+    discovery_method: ats_api
+    supports_location_filter: true
+    supports_remote_filter: true
+    supports_keyword_filter: true
+    supports_structured_data: true
+    supports_ats_links: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 68
+    query_host: careers.teamtailor.com
+    upstream: vendor
+
+  # --- Search engines / aggregators (site: hosts for discovery) -------------
+  - source_id: search_linkedin
+    name: LinkedIn Jobs
+    url: "https://www.linkedin.com/jobs"
+    category: aggregator
+    country: global
+    source_type: restricted
+    discovery_method: restricted
+    supports_keyword_filter: true
+    supports_location_filter: true
+    rate_limit_class: high
+    enabled: false
+    reason: "bot-hostile; ToS forbids automated probing"
+    query_host: linkedin.com
+    upstream: awesome_job_boards
+  - source_id: search_indeed
+    name: Indeed
+    url: "https://de.indeed.com"
+    category: aggregator
+    country: global
+    source_type: restricted
+    discovery_method: restricted
+    supports_keyword_filter: true
+    supports_location_filter: true
+    rate_limit_class: high
+    enabled: false
+    reason: "bot-hostile; ToS forbids automated probing"
+    query_host: indeed.com
+    upstream: awesome_job_boards
+  - source_id: search_stepstone
+    name: StepStone
+    url: "https://www.stepstone.de"
+    category: aggregator
+    country: DE
+    region: DACH
+    language: de
+    source_type: restricted
+    discovery_method: restricted
+    supports_keyword_filter: true
+    supports_location_filter: true
+    supports_salary_filter: true
+    rate_limit_class: high
+    enabled: false
+    reason: "bot-hostile; ToS / anti-bot"
+    query_host: stepstone.de
+    upstream: awesome_job_boards
+  - source_id: search_xing
+    name: XING Jobs
+    url: "https://www.xing.com/jobs"
+    category: aggregator
+    country: DE
+    region: DACH
+    language: de
+    source_type: restricted
+    discovery_method: restricted
+    supports_keyword_filter: true
+    supports_location_filter: true
+    rate_limit_class: high
+    enabled: false
+    reason: "bot-hostile; ToS forbids automated probing"
+    query_host: xing.com
+    upstream: awesome_job_boards
+  - source_id: search_glassdoor
+    name: Glassdoor
+    url: "https://www.glassdoor.com"
+    category: aggregator
+    country: global
+    source_type: restricted
+    discovery_method: restricted
+    supports_keyword_filter: true
+    supports_location_filter: true
+    rate_limit_class: high
+    enabled: false
+    reason: "bot-hostile; anti-bot + ToS"
+    query_host: glassdoor.com
+    upstream: awesome_job_boards
+  - source_id: search_google_jobs
+    name: Google Jobs
+    url: "https://www.google.com/search?ibp=htl;jobs"
+    category: aggregator
+    country: global
+    source_type: search_engine
+    discovery_method: search_engine
+    supports_keyword_filter: true
+    supports_location_filter: true
+    rate_limit_class: high
+    enabled: true
+    priority: 60
+    upstream: awesome_job_boards
+  - source_id: search_otta
+    name: Otta
+    url: "https://otta.com"
+    category: startup
+    country: global
+    source_type: structured_data
+    discovery_method: jsonld
+    supports_keyword_filter: true
+    supports_location_filter: true
+    supports_remote_filter: true
+    rate_limit_class: high
+    enabled: true
+    priority: 78
+    query_host: otta.com
+    upstream: awesome_job_boards
+  - source_id: search_wellfound
+    name: Wellfound
+    url: "https://wellfound.com"
+    category: startup
+    country: global
+    source_type: structured_data
+    discovery_method: jsonld
+    supports_keyword_filter: true
+    supports_location_filter: true
+    supports_remote_filter: true
+    rate_limit_class: high
+    enabled: true
+    priority: 74
+    query_host: wellfound.com
+    upstream: awesome_job_boards
+  - source_id: search_workatastartup
+    name: Work at a Startup
+    url: "https://www.workatastartup.com"
+    category: startup
+    country: global
+    source_type: search_engine
+    discovery_method: search_engine
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 70
+    query_host: workatastartup.com
+    upstream: awesome_job_boards
+  - source_id: search_berlin_startup
+    name: BerlinStartupJobs
+    url: "https://berlinstartupjobs.com"
+    category: startup
+    country: DE
+    region: DACH
+    source_type: search_engine
+    discovery_method: search_engine
+    supports_keyword_filter: true
+    supports_location_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 72
+    query_host: berlinstartupjobs.com
+    upstream: awesome_job_boards
+  - source_id: search_munich_startup
+    name: Munich Startup Jobs
+    url: "https://www.munichstartupjobs.com"
+    category: startup
+    country: DE
+    region: DACH
+    source_type: search_engine
+    discovery_method: search_engine
+    supports_keyword_filter: true
+    supports_location_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 72
+    query_host: munichstartupjobs.com
+    upstream: awesome_job_boards
+  - source_id: search_eu_startups
+    name: EU-Startups Jobs
+    url: "https://www.eu-startups.com"
+    category: startup
+    country: EU
+    region: europe
+    source_type: search_engine
+    discovery_method: search_engine
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 64
+    query_host: eu-startups.com
+    upstream: awesome_job_boards
+  - source_id: search_arbeitsagentur
+    name: Bundesagentur Jobbörse
+    url: "https://jobsuche.arbeitsagentur.de"
+    category: general
+    country: DE
+    region: DACH
+    language: de
+    source_type: structured_data
+    discovery_method: jsonld
+    supports_keyword_filter: true
+    supports_location_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 62
+    query_host: arbeitsagentur.de
+    upstream: awesome_job_boards
+  - source_id: search_ingenieur
+    name: Ingenieur.de
+    url: "https://www.ingenieur.de/jobs"
+    category: engineering
+    country: DE
+    region: DACH
+    language: de
+    source_type: structured_data
+    discovery_method: jsonld
+    supports_keyword_filter: true
+    supports_location_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 66
+    query_host: ingenieur.de
+    upstream: awesome_job_boards
+  - source_id: search_energy_jobline
+    name: Energy Jobline
+    url: "https://www.energyjobline.com"
+    category: energy_cleantech
+    country: global
+    source_type: search_engine
+    discovery_method: search_engine
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 60
+    query_host: energyjobline.com
+    upstream: awesome_job_boards
+  - source_id: search_climatebase
+    name: Climatebase
+    url: "https://climatebase.org/jobs"
+    category: energy_cleantech
+    country: global
+    source_type: search_engine
+    discovery_method: search_engine
+    supports_keyword_filter: true
+    supports_location_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 60
+    query_host: climatebase.org
+    upstream: awesome_job_boards
+  - source_id: search_builtin
+    name: Built In
+    url: "https://builtin.com/jobs"
+    category: tech_general
+    country: US
+    source_type: search_engine
+    discovery_method: search_engine
+    supports_keyword_filter: true
+    supports_location_filter: true
+    supports_remote_filter: true
+    rate_limit_class: high
+    enabled: true
+    priority: 50
+    query_host: builtin.com
+    upstream: awesome_job_boards
+  - source_id: search_efinancial
+    name: eFinancialCareers
+    url: "https://www.efinancialcareers.com"
+    category: finance
+    country: global
+    source_type: search_engine
+    discovery_method: search_engine
+    supports_keyword_filter: true
+    supports_location_filter: true
+    rate_limit_class: high
+    enabled: true
+    priority: 50
+    query_host: efinancialcareers.com
+    upstream: awesome_job_boards
+  - source_id: search_hn_jobs
+    name: Hacker News "Who is Hiring"
+    url: "https://news.ycombinator.com"
+    category: tech_general
+    country: global
+    source_type: search_engine
+    discovery_method: search_engine
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    rate_limit_class: low
+    enabled: true
+    priority: 40
+    query_host: news.ycombinator.com
+    upstream: awesome_job_boards
+  - source_id: search_dice
+    name: Dice
+    url: "https://www.dice.com"
+    category: tech_general
+    country: US
+    source_type: restricted
+    discovery_method: restricted
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    rate_limit_class: high
+    enabled: false
+    reason: "US-centric contract market; ToS restricts automated use"
+    query_host: dice.com
+    upstream: awesome_job_boards
+  - source_id: search_flexjobs
+    name: FlexJobs
+    url: "https://www.flexjobs.com"
+    category: remote
+    country: global
+    source_type: restricted
+    discovery_method: restricted
+    supports_keyword_filter: true
+    rate_limit_class: medium
+    enabled: false
+    reason: "subscription-only; paywalled listings are out of scope"
+    query_host: flexjobs.com
+    upstream: awesome_job_boards
+
+  # --- Remote-first ---------------------------------------------------------
+  - source_id: remote_weworkremotely
+    name: We Work Remotely
+    url: "https://weworkremotely.com"
+    category: remote
+    country: global
+    source_type: structured_data
+    discovery_method: rss_json
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    supports_structured_data: true
+    rate_limit_class: low
+    enabled: true
+    priority: 76
+    query_host: weworkremotely.com
+    upstream: awesome_job_boards
+  - source_id: remote_remoteok
+    name: RemoteOK
+    url: "https://remoteok.com"
+    category: remote
+    country: global
+    source_type: structured_data
+    discovery_method: rss_json
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    supports_structured_data: true
+    supports_ats_links: true
+    rate_limit_class: low
+    enabled: true
+    priority: 74
+    query_host: remoteok.com
+    upstream: awesome_job_boards
+  - source_id: remote_remotive
+    name: Remotive
+    url: "https://remotive.com"
+    category: remote
+    country: global
+    source_type: structured_data
+    discovery_method: rss_json
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    supports_structured_data: true
+    supports_ats_links: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 72
+    query_host: remotive.com
+    upstream: awesome_job_boards
+  - source_id: remote_himalayas
+    name: Himalayas
+    url: "https://www.himalayas.app"
+    category: remote
+    country: global
+    source_type: search_engine
+    discovery_method: search_engine
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 70
+    query_host: himalayas.app
+    upstream: awesome_job_boards
+  - source_id: remote_remote_co
+    name: Remote.co
+    url: "https://remote.co"
+    category: remote
+    country: global
+    source_type: search_engine
+    discovery_method: search_engine
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 64
+    query_host: remote.co
+    upstream: awesome_job_boards
+
+  # --- AI / ML --------------------------------------------------------------
+  - source_id: ai_aijobs_net
+    name: AI Jobs Net
+    url: "https://ai-jobs.net"
+    category: ai
+    country: global
+    source_type: structured_data
+    discovery_method: jsonld
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    supports_structured_data: true
+    rate_limit_class: low
+    enabled: true
+    priority: 78
+    query_host: ai-jobs.net
+    upstream: awesome_job_boards
+  - source_id: ai_aijobs_ai
+    name: AI Jobs
+    url: "https://aijobs.ai"
+    category: ai
+    country: global
+    source_type: structured_data
+    discovery_method: jsonld
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 76
+    query_host: aijobs.ai
+    upstream: awesome_job_boards
+  - source_id: ai_mljobs_io
+    name: ML Jobs
+    url: "https://mljobs.io"
+    category: ai
+    country: global
+    source_type: structured_data
+    discovery_method: jsonld
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 74
+    query_host: mljobs.io
+    upstream: awesome_job_boards
+  - source_id: ai_machinelearningjobs
+    name: Machine Learning Jobs
+    url: "https://www.machinelearningjobs.com"
+    category: ai
+    country: global
+    source_type: structured_data
+    discovery_method: jsonld
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 72
+    query_host: machinelearningjobs.com
+    upstream: awesome_job_boards
+  - source_id: ai_deeplearningjobs
+    name: Deep Learning Jobs
+    url: "https://deeplearningjobs.com"
+    category: ai
+    country: global
+    source_type: structured_data
+    discovery_method: jsonld
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    rate_limit_class: medium
+    enabled: true
+    priority: 70
+    query_host: deeplearningjobs.com
+    upstream: awesome_job_boards
+
+  # --- Robotics / engineering niche -----------------------------------------
+  - source_id: robotics_ros_jobs
+    name: ROS Jobs
+    url: "https://jobs.ros.org"
+    category: robotics
+    country: global
+    source_type: structured_data
+    discovery_method: jsonld
+    supports_keyword_filter: true
+    supports_remote_filter: true
+    supports_structured_data: true
+    rate_limit_class: low
+    enabled: true
+    priority: 78
+    query_host: jobs.ros.org
+    upstream: awesome_job_boards
+  # --- Defence / public-sector (deliberately disabled) -----------------------
+  - source_id: restricted_bundeswehr
+    name: Bundeswehr Karriere
+    url: "https://www.bundeswehrkarriere.de"
+    category: defence
+    country: DE
+    region: DACH
+    language: de
+    source_type: restricted
+    discovery_method: restricted
+    rate_limit_class: low
+    enabled: false
+    reason: "public-sector career portal; application flow is manual and unparseable as job data"

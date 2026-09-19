@@ -1,0 +1,70 @@
+[project]
+name = "personal-job-agent"
+version = "0.2.0"
+description = "Local job discovery, scoring, tailoring and human-approved application assistant"
+requires-python = ">=3.11"
+dependencies = [
+  "httpx>=0.27,<1",
+  "beautifulsoup4>=4.12,<5",
+  "pydantic>=2.7,<3",
+  "PyYAML>=6.0,<7",
+  "python-dateutil>=2.9,<3",
+  "rapidfuzz>=3.9,<4",
+  "tenacity>=8.2,<10",
+  "trafilatura>=1.9,<3",
+  "python-docx>=1.1,<2",
+  "pypdf>=5,<7",
+]
+
+[project.optional-dependencies]
+llm = ["ollama>=0.3,<1"]
+playwright = ["playwright>=1.46,<2"]
+discovery = ["ddgs>=9,<10"]
+dev = ["pytest>=8,<9", "ruff>=0.6,<1", "mypy>=1.11,<2", "types-PyYAML>=6"]
+all = ["ollama>=0.3,<1", "playwright>=1.46,<2", "ddgs>=9,<10"]
+
+[project.scripts]
+job-agent = "job_agent.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["job_agent*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = ["E501", "B905"]
+
+[tool.ruff.lint.per-file-ignores]
+# Latent, unwired modules from the pre-Slice-1 codebase; not part of this
+# slice's scope. They are not loaded by the current pipeline.
+"job_agent/llm.py" = ["E701", "E702", "B", "SIM"]
+"job_agent/tailor.py" = ["E701", "E702", "B", "SIM"]
+"job_agent/apply.py" = ["E701", "E702", "B", "SIM"]
+"job_agent/validate.py" = ["E701", "F841", "B"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.11"
+files = ["job_agent"]
+check_untyped_defs = true
+warn_unused_ignores = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+# The parent `personal_ai` package lives outside this repo (read-only adapter).
+module = ["personal_ai", "personal_ai.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Latent, unwired pre-Slice-1 modules; excluded from strict checking.
+module = ["job_agent.apply", "job_agent.tailor", "job_agent.llm", "job_agent.validate"]
+ignore_errors = true

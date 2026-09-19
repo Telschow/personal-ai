@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Job Agent</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Personal Job Agent</h1>
+            <div class="header-actions">
+                <button id="run-discovery" class="btn btn-primary">Run Discovery</button>
+                <span id="health-status" class="status-indicator">Loading...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="dashboard" class="dashboard">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total">-</div>
+                    <div class="stat-label">Total Jobs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-new">-</div>
+                    <div class="stat-label">New</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-saved">-</div>
+                    <div class="stat-label">Saved</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-rejected">-</div>
+                    <div class="stat-label">Rejected</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-applied">-</div>
+                    <div class="stat-label">Applied</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="filters">
+                <select id="filter-status" class="filter-select">
+                    <option value="">All Statuses</option>
+                    <option value="NEW">New</option>
+                    <option value="SAVED">Saved</option>
+                    <option value="REJECTED">Rejected</option>
+                    <option value="APPLIED">Applied</option>
+                </select>
+                <select id="filter-track" class="filter-select">
+                    <option value="">All Tracks</option>
+                </select>
+                <select id="filter-location" class="filter-select">
+                    <option value="">All Locations</option>
+                </select>
+                <input type="text" id="filter-min-fit" class="filter-input" placeholder="Min Fit Score (0-1)" style="width: 120px;">
+            </div>
+            <div class="sort-controls">
+                <label>Sort by:</label>
+                <select id="sort-by" class="filter-select">
+                    <option value="fit_score_desc">Fit Score (High → Low)</option>
+                    <option value="fit_score_asc">Fit Score (Low → High)</option>
+                    <option value="date_desc">Discovery Date (Newest)</option>
+                    <option value="date_asc">Discovery Date (Oldest)</option>
+                    <option value="company_asc">Company (A-Z)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="jobs-table-container">
+            <table id="jobs-table" class="jobs-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Company</th>
+                        <th>Location</th>
+                        <th>Track</th>
+                        <th>Fit Score</th>
+                        <th>Status</th>
+                        <th>Source</th>
+                        <th>Discovered</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="jobs-tbody">
+                    <tr><td colspan="9" class="loading">Loading jobs...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <button id="prev-page" class="btn" disabled>Previous</button>
+            <span id="page-info">Page 1</span>
+            <button id="next-page" class="btn" disabled>Next</button>
+        </div>
+    </main>
+
+    <!-- Job Detail Modal -->
+    <div id="job-modal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Job Details</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="job-detail">
+                    <div class="job-factual">
+                        <h3>Factual Information</h3>
+                        <dl id="job-factual">
+                            <!-- Populated by JS -->
+                        </dl>
+                        <div class="job-actions">
+                            <button class="btn btn-primary" id="action-save">Save</button>
+                            <button class="btn btn-danger" id="action-reject">Reject</button>
+                            <button class="btn btn-warning" id="action-applied">Applied</button>
+                            <button class="btn btn-secondary" id="action-reset">Reset to New</button>
+                            <a class="btn btn-secondary" id="action-open-original" target="_blank">Open Original</a>
+                        </div>
+                    </div>
+                    <div class="job-analysis">
+                        <h3>Agent Analysis</h3>
+                        <div id="job-analysis">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

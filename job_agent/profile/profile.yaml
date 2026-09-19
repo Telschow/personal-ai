@@ -1,0 +1,80 @@
+name: Daniel Telschow
+location: Munich, Germany
+languages:
+  - German: native/bilingual
+  - Spanish: native/bilingual
+  - English: professional working
+education:
+  - school: Technical University of Munich
+    degree: MSc Automotive and Combustion Engine Technology
+    years: 2018-2021
+  - school: Technical University of Munich
+    degree: BSc Mechanical Engineering
+    years: 2015-2018
+experience:
+  - company: BMW Group
+    title: Product Owner - Autonomous Driving
+    dates: 2024-present
+    location: Munich
+    facts:
+      - Automated Valet Parking (SAE L2)
+  - company: BMW Group
+    title: Function Owner - Autonomous Driving
+    dates: 2023-2024
+    location: Munich
+    facts:
+      - Automated Maneuver Assistant
+  - company: BMW Group
+    title: Specialist Engineer - Autonomous Driving
+    dates: 2022-2023
+    location: Munich
+    facts:
+      - ADAS development and validation
+  - company: Bertrandt Group
+    title: Development Engineer - Autonomous Driving
+    dates: 2021-2022
+    location: Germany
+  - company: EDAG
+    title: Development Engineer - Product Design
+    dates: 2019-2020
+    location: Germany
+  - company: TUMCREATE
+    title: Research Assistant - Autonomous Driving (SAE L4)
+    dates: 2018-2019
+    location: Singapore
+  - company: EDAG
+    title: Development Engineer - Product Design
+    dates: 2017-2018
+    location: Germany
+  - company: TUfast e.V. Eco Team
+    title: Head of Chassis Department
+    dates: 2016-2017
+    location: Munich
+skills:
+  - Product Management
+  - Product Ownership
+  - Product Strategy
+  - Roadmapping
+  - Backlog Management
+  - Stakeholder Management
+  - Team Leadership
+  - Agile Project Management
+  - Systems Engineering
+  - Autonomous Driving
+  - ADAS
+  - Requirements Engineering
+  - Cross-functional Coordination
+values:
+  purpose: 9
+  technology: 10
+  leadership: 9
+  work_life_balance: 9
+  financial_security: 8
+  prestige: 4
+constraints:
+  minimum_salary_eur: 120000
+  preferred_salary_eur: 150000
+  willing_to_relocate: true
+  family_compatibility_important: true
+  no_unverified_claims: true
+  no_exaggerated_scope: true

@@ -104,6 +104,7 @@ def test_resolve_config_overrides():
             self.host = "0.0.0.0"
             self.port = 1234
             self.token = None
+            self.job_db = None
 
     cfg = resolve_config(Args(), {})
     assert cfg.host == "0.0.0.0"
@@ -436,6 +437,7 @@ class TestConfigPrecedence:
                 self.host = host
                 self.port = port
                 self.token = token
+                self.job_db = None
 
         return Args()
 

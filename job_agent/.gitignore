@@ -1,0 +1,26 @@
+# Runtime state
+output/
+*.sqlite3
+*.sqlite3-journal
+*.db
+
+# Secrets — never commit real credentials/tokens.
+.env
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling caches
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/

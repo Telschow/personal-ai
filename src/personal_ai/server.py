@@ -80,6 +80,14 @@ from personal_ai.ollama_client import (
 from personal_ai.people import ChatPeople
 from personal_ai.workouts import WorkoutQueryService, WorkoutStore
 
+# M3: Job-Agent imports
+try:
+    from job_agent import db as job_db
+
+    JOB_AGENT_AVAILABLE = True
+except ImportError:
+    JOB_AGENT_AVAILABLE = False
+
 DEFAULT_WORKSPACE_ENV = "PERSONAL_AI_WORKSPACE"
 DEFAULT_DATABASE_ENV = "PERSONAL_AI_DATABASE"
 API_TOKEN_ENV = "PERSONAL_AI_API_TOKEN"
@@ -140,6 +148,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Optional bearer token required for every request",
     )
+    parser.add_argument(
+        "--job-db",
+        type=Path,
+        default=None,
+        help="Path to Job-Agent SQLite database (default: $JOB_AGENT_DB or job_agent/output/jobs.sqlite3)",
+    )
     return parser.parse_args(argv)
 
 
@@ -160,6 +174,7 @@ class RequestConfig:
     port: int
     model: str
     token: str | None
+    job_db: Path | None
 
 
 def resolve_config(
@@ -178,9 +193,15 @@ def resolve_config(
     settings = config.load_api_settings(environ)
     source = os.environ if environ is None else environ
     env_token = source.get(API_TOKEN_ENV, "").strip() or None
+    env_job_db = source.get("JOB_AGENT_DB", "").strip() or None
     host = args.host or settings.host
     port = args.port or settings.port
     token = args.token or env_token
+    job_db = (
+        args.job_db.resolve()
+        if args.job_db is not None
+        else (Path(env_job_db) if env_job_db else None)
+    )
     return RequestConfig(
         workspace=args.workspace.resolve(),
         database=args.database.resolve() if args.database is not None else None,
@@ -188,6 +209,7 @@ def resolve_config(
         port=port,
         model=settings.model,
         token=token,
+        job_db=job_db,
     )
 
 
@@ -527,6 +549,7 @@ def create_app(
     control_plane: ControlPlane | None = None,
     workout_service: WorkoutQueryService | None = None,
     memory_service: object | None = None,
+    job_db_path: Path | None = None,
 ) -> FastAPI:
     """Build the FastAPI application bound to a Personal AI Agent.
 
@@ -579,12 +602,20 @@ def create_app(
             closable.append(chat_people)
         _app.state.control_plane = control_plane
         _app.state.workout_service = workout_service
+        # Job-Agent database connection
+        job_db_conn: sqlite3.Connection | None = None
+        if job_db_path is not None and JOB_AGENT_AVAILABLE:
+            job_db_conn = job_db.connect(str(job_db_path))
+            _app.state.job_db = job_db_conn
+            closable.append(job_db_conn)
         try:
             yield
         finally:
             for resource in closable:
                 if hasattr(resource, "close"):
                     resource.close()
+            if job_db_conn is not None:
+                job_db_conn.close()
 
     app = FastAPI(title="Personal AI", version="0.1.0", lifespan=lifespan)
 
@@ -724,6 +755,7 @@ def create_app(
         return JSONResponse(status_code=200, content=result)
 
     _mount_gateway_endpoints(app)
+    _mount_job_agent(app)
 
     return app
 
@@ -1202,6 +1234,344 @@ def _mount_gateway_endpoints(app: FastAPI) -> None:
         return JSONResponse(status_code=200, content=_workout_dict(workout))
 
 
+# ---- job-agent (M3 MVP) ----
+def _gateway_job_db(app: FastAPI) -> sqlite3.Connection:
+    """Get the Job-Agent database connection from app state."""
+    db = getattr(app.state, "job_db", None)
+    if db is None:
+        raise ApiError(
+            503,
+            "Job-Agent database not configured (start with --job-db or set JOB_AGENT_DB).",
+            error_type="service_unavailable",
+        )
+    return db
+
+
+def _job_dict(job) -> dict[str, object]:
+    """Serialize a Job for the API."""
+    return {
+        "id": job.id,
+        "title": job.title,
+        "company": job.company,
+        "url": job.url,
+        "apply_url": job.apply_url,
+        "source": job.source,
+        "source_type": job.source_type,
+        "canonical_url": job.canonical_url,
+        "location": job.location,
+        "country": job.country,
+        "normalized_location": job.normalized_location,
+        "remote_mode": job.remote_mode,
+        "employment_type": job.employment_type,
+        "date_posted": job.date_posted.isoformat() if job.date_posted else None,
+        "description": job.description,
+        "salary_min": job.salary_min,
+        "salary_max": job.salary_max,
+        "salary_currency": job.salary_currency,
+        "salary_min_eur": job.salary_min_eur,
+        "salary_max_eur": job.salary_max_eur,
+        "canonical_key": job.canonical_key,
+        "status": job.status,
+        "closed_at": job.closed_at,
+        "discovered_at": job.discovered_at,
+        "last_seen": job.last_seen,
+        "last_checked": job.last_checked,
+        "missing_scans": job.missing_scans,
+        "user_status": job.user_status,
+        "user_status_updated_at": job.user_status_updated_at,
+    }
+
+
+def _job_with_score_dict(job, score=None) -> dict[str, object]:
+    """Serialize a Job with optional score for the API."""
+    base = _job_dict(job)
+    if score:
+        base["fit_score"] = score.total
+        base["fit_decision"] = score.decision
+        base["fit_reasons"] = score.reasons
+        base["fit_gaps"] = score.gaps
+    return base
+
+
+def _mount_job_agent_endpoints(app: FastAPI) -> None:
+    """Mount the Job-Agent HTTP endpoints under /api/job-agent/*."""
+
+    @app.get("/api/job-agent/health")
+    async def job_agent_health() -> JSONResponse:
+        """Health check for the Job-Agent subsystem."""
+        if not JOB_AGENT_AVAILABLE:
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "status": "unavailable",
+                    "reason": "job_agent module not installed",
+                },
+            )
+        job_db_conn = _gateway_job_db(app)
+        stats = job_db.stats_counts(job_db_conn)
+        user_counts = job_db.get_user_status_counts(job_db_conn)
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "healthy",
+                "jobs_total": stats.get("total_jobs", 0),
+                "jobs_by_user_status": user_counts,
+            },
+        )
+
+    @app.get("/api/job-agent/jobs")
+    async def job_agent_jobs(
+        user_status: str | None = None,
+        track: str | None = None,
+        location: str | None = None,
+        min_fit: float | None = None,
+        source: str | None = None,
+        analyzed: bool | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> JSONResponse:
+        """List jobs with filtering and sorting."""
+        job_db_conn = _gateway_job_db(app)
+
+        if user_status:
+            jobs = job_db.get_jobs_by_user_status(
+                job_db_conn, user_status, limit=limit, offset=offset
+            )
+        else:
+            jobs = job_db.get_jobs(
+                job_db_conn, status="active", source=source, limit=limit, offset=offset
+            )
+
+        # Apply filters
+        filtered = []
+        for job in jobs:
+            if track:
+                from job_agent.career_tracks import classify_track
+
+                t = classify_track(job.title, job.description)
+                if not t or t.track_id != track:
+                    continue
+            if location and location.lower() not in (job.location or "").lower():
+                continue
+            if min_fit is not None:
+                # Check if job has evaluation with sufficient score
+                row = job_db_conn.execute(
+                    "SELECT total FROM evaluations WHERE job_id=? AND total >= ?",
+                    (job.id, min_fit),
+                ).fetchone()
+                if not row:
+                    continue
+            if analyzed is not None:
+                has_eval = job_db_conn.execute(
+                    "SELECT 1 FROM evaluations WHERE job_id=?", (job.id,)
+                ).fetchone()
+                if analyzed and not has_eval:
+                    continue
+                if not analyzed and has_eval:
+                    continue
+            filtered.append(job)
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "jobs": [_job_with_score_dict(j) for j in filtered],
+                "count": len(filtered),
+                "limit": limit,
+                "offset": offset,
+            },
+        )
+
+    @app.get("/api/job-agent/jobs/{job_id}")
+    async def job_agent_job_detail(job_id: str) -> JSONResponse:
+        """Get job detail with analysis if available."""
+        job_db_conn = _gateway_job_db(app)
+        job = job_db.get_job(job_db_conn, job_id)
+        if job is None:
+            raise ApiError(404, f"Job not found: {job_id}", error_type="not_found")
+
+        # Get evaluation if exists
+        eval_row = job_db_conn.execute(
+            "SELECT * FROM evaluations WHERE job_id=?", (job_id,)
+        ).fetchone()
+
+        # Get career_fit if exists
+        fit_row = job_db_conn.execute(
+            "SELECT * FROM career_fit WHERE job_id=?", (job_id,)
+        ).fetchone()
+
+        # Get provenance
+        prov_rows = job_db_conn.execute(
+            "SELECT * FROM job_sources WHERE job_id=? ORDER BY source_id", (job_id,)
+        ).fetchall()
+
+        response = _job_dict(job)
+        if eval_row:
+            response["evaluation"] = {
+                "total": eval_row["total"],
+                "decision": eval_row["decision"],
+                "reasons": json.loads(eval_row["reasons_json"] or "[]"),
+                "gaps": json.loads(eval_row["gaps_json"] or "[]"),
+                "confidence": eval_row["confidence"],
+                "scoring_version": eval_row["scoring_version"],
+                "profile_version": eval_row["profile_version"],
+                "evaluated_at": eval_row["evaluated_at"],
+            }
+        if fit_row:
+            response["career_fit"] = {
+                "current_fit": fit_row["current_fit"],
+                "career_upside": fit_row["career_upside"],
+                "evidence_coverage": fit_row["evidence_coverage"],
+                "strengths": json.loads(fit_row["strengths_json"] or "[]"),
+                "gaps": json.loads(fit_row["gaps_json"] or "[]"),
+                "transferables": json.loads(fit_row["transferable_json"] or "[]"),
+                "positioning": json.loads(fit_row["positioning_json"] or "{}"),
+                "risks": json.loads(fit_row["risks_json"] or "[]"),
+                "evidence_refs": json.loads(fit_row["evidence_refs_json"] or "[]"),
+                "knowledge_sources": json.loads(
+                    fit_row["knowledge_sources_json"] or "[]"
+                ),
+                "narrative": fit_row["narrative_json"],
+                "llm_used": bool(fit_row["llm_used"]),
+                "created_at": fit_row["created_at"],
+            }
+        if prov_rows:
+            response["provenance"] = [
+                {
+                    "source_id": r["source_id"],
+                    "source_name": r["source_name"],
+                    "source_url": r["source_url"],
+                    "discovery_method": r["discovery_method"],
+                    "query": r["query"],
+                    "canonical_url": r["canonical_url"],
+                    "discovered_at": r["discovered_at"],
+                }
+                for r in prov_rows
+            ]
+
+        return JSONResponse(status_code=200, content=response)
+
+    @app.post("/api/job-agent/jobs/{job_id}/status")
+    async def job_agent_update_status(job_id: str, request: Request) -> JSONResponse:
+        """Update user status for a job."""
+        job_db_conn = _gateway_job_db(app)
+        body = await request.json()
+        new_status = body.get("user_status")
+        valid_statuses = {"NEW", "SAVED", "REJECTED", "APPLIED"}
+        if new_status not in valid_statuses:
+            raise ApiError(
+                400,
+                f"Invalid user_status. Must be one of: {', '.join(sorted(valid_statuses))}",
+                error_type="invalid_request_error",
+            )
+        job = job_db.get_job(job_db_conn, job_id)
+        if job is None:
+            raise ApiError(404, f"Job not found: {job_id}", error_type="not_found")
+
+        success = job_db.update_user_job_status(job_db_conn, job_id, new_status)
+        if not success:
+            raise ApiError(500, "Failed to update status", error_type="server_error")
+
+        # Return updated job
+        updated_job = job_db.get_job(job_db_conn, job_id)
+        return JSONResponse(status_code=200, content=_job_dict(updated_job))
+
+    @app.post("/api/job-agent/discover")
+    async def job_agent_discover(
+        request: Request,
+        limit_total: int | None = None,
+        limit_per_track: int | None = None,
+        max_pages: int | None = None,
+        dry_run: bool = False,
+    ) -> JSONResponse:
+        """Run a bounded discovery cycle."""
+        if not JOB_AGENT_AVAILABLE:
+            raise ApiError(
+                503, "Job-Agent module not available", error_type="service_unavailable"
+            )
+
+        # Import job_agent modules lazily so they don't affect startup if not available
+        from datetime import UTC, datetime
+        from pathlib import Path
+
+        import yaml
+        from job_agent.config import load_config as load_job_config
+        from job_agent.discovery_search import run_planned_discovery
+        from job_agent.pipeline import ingest_global_jobs, run_lifecycle
+        from job_agent.scoring import scoring_policy_from_config
+
+        body = (
+            await request.json()
+            if request.headers.get("content-type", "").startswith("application/json")
+            else {}
+        )
+        limit_total = body.get("limit_total", limit_total)
+        limit_per_track = body.get("limit_per_track", limit_per_track)
+        max_pages = body.get("max_pages", max_pages)
+        dry_run = body.get("dry_run", dry_run)
+
+        # Load config and profile
+        cfg = load_job_config()
+        profile_path = (
+            Path(cfg.profile_path)
+            if Path(cfg.profile_path).is_absolute()
+            else Path(__file__).parent.parent.parent / "job_agent" / cfg.profile_path
+        )
+        profile = (
+            yaml.safe_load(profile_path.read_text(encoding="utf-8"))
+            if profile_path.exists()
+            else {}
+        )
+        policy = scoring_policy_from_config(cfg.model_dump())
+
+        # Use in-memory DB for dry run
+        conn = job_db.connect(":memory:" if dry_run else cfg.database_path)
+
+        try:
+            run_started_at = datetime.now(UTC).isoformat(timespec="seconds")
+
+            plan, jobs, provenance, errors, pacing_report = run_planned_discovery(
+                cfg,
+                max_pages=max_pages or cfg.search.max_global_pages,
+                max_results=cfg.career.discovery.max_results_per_query,
+                limit_total=limit_total,
+                limit_per_track=limit_per_track,
+            )
+            result = ingest_global_jobs(
+                conn,
+                jobs,
+                profile,
+                policy,
+                provenance=provenance,
+                run_started_at=run_started_at,
+            )
+            lifecycle = run_lifecycle(conn, cfg, result.jobs_seen)
+
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "planned_queries": len(plan.queries()),
+                    "candidates_found": len(jobs),
+                    "jobs_persisted": sum(result.persisted_by_source.values()),
+                    "duplicates": result.total_duplicates,
+                    "fetch_errors": len(errors),
+                    "pacing": pacing_report.to_dict(),
+                    "lifecycle": lifecycle,
+                    "dry_run": dry_run,
+                },
+            )
+        except Exception as exc:
+            raise ApiError(
+                500, f"Discovery failed: {exc}", error_type="server_error"
+            ) from exc
+
+
+# Mount the job-agent endpoints
+# This will be called from create_app
+def _mount_job_agent(app: FastAPI) -> None:
+    if JOB_AGENT_AVAILABLE:
+        _mount_job_agent_endpoints(app)
+
+
 def main(
     argv: list[str] | None = None,
     *,
@@ -1248,6 +1618,7 @@ def main(
         control_plane=control_plane,
         workout_service=workout_service,
         memory_service=memory_service,
+        job_db_path=cfg.job_db,
     )
     if not run:
         return app

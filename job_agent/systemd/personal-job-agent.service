@@ -1,0 +1,8 @@
+[Unit]
+Description=Personal Job Agent daily scan
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/personal-job-agent
+ExecStart=%h/personal-job-agent/.venv/bin/job-agent scan --config %h/personal-job-agent/config.yaml

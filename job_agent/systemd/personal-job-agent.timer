@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Personal Job Agent daily
+
+[Timer]
+OnCalendar=*-*-* 18:30:00
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

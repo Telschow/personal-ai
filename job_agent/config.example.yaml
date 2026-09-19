@@ -1,0 +1,99 @@
+# Personal AI job agent — example configuration.
+# Copy to config.yaml and adjust. All values here are placeholders; the
+# "example-company" tokens match the built-in example guard and are skipped
+# by discovery, so a fresh checkout never hits the network.
+
+profile_path: profile/profile.yaml
+database_path: output/jobs.sqlite3
+report_dir: output/reports
+cv_template_path: templates/cv_master.docx
+
+llm:
+  provider: ollama
+  base_url: http://127.0.0.1:11434
+  model: qwen3.5:9b
+  temperature: 0.15
+  timeout_seconds: 300.0    # per-call guardrail; the client also disables
+                            # Ollama reasoning ("think": false) so strict-
+                            # schema calls return real content (~20-40s)
+
+search:
+  global_enabled: true
+  max_jobs_per_source: 250
+  result_query_cap: 120
+  results_per_query: 25
+  max_global_pages: 400
+  countries: [DE]
+  global_locations: [Munich, Berlin]
+  target_roles: [Product Manager]
+  keywords_positive: [AI, machine learning]
+  keywords_negative: [junior, intern]
+
+jobs:
+  salary:
+    minimum_eur: 120000
+    target_eur: 150000
+  freshness_days: 30
+  close_after_missing_scans: 2
+  unknown_salary_reviewable: true
+
+ranking:
+  similarity_weight: 0.25
+  ai_relevance_weight: 0.20
+  compensation_weight: 0.15
+  location_weight: 0.10
+  leadership_weight: 0.20
+  purpose_weight: 0.05
+  wlb_weight: 0.05
+
+digest:
+  type: filesystem
+  directory: output/reports
+
+projects:
+  sandbox_root: output/projects
+  auto_publish: false
+
+application:
+  auto_submit: false
+  never_submit: true
+
+career:
+  knowledge:
+    # provider: "none" (profile-only evidence) | "personal_ai" (read-only
+    # retrieval against the parent personal_ai database).
+    # "personal_ai" never changes scores; it only adds documented evidence
+    # and an explicit risk note when the provider is unavailable.
+    provider: none
+    database_path: ""          # "" => PERSONAL_AI_DATABASE env var
+    memory_kinds: []           # empty => default memory kinds
+    max_corpus_evidence: 40    # bounded parent-corpus retrieval window
+    max_memory_evidence: 20    # bounded parent-memory retrieval window
+  weights:
+    role_family: 0.22
+    ai_relevance: 0.18
+    leadership: 0.18
+    technical_depth: 0.14
+    product_scope: 0.10
+    seniority: 0.08
+    domain: 0.10
+  llm:
+    enabled: false             # true => fit narrative explains, never decides
+    model: ""                  # empty => reuse llm.model
+    base_url: ""               # empty => reuse llm.base_url
+    temperature: 0.15
+    timeout_seconds: 0.0       # <=0 => reuse llm.timeout_seconds
+    semantic: true             # tailor: allow the semantic mapping refinement
+                               # (operates only over allow-listed evidence)
+
+# Sources: each is a list of entries. Entries whose identifying value starts
+# with "example" are treated as placeholders and never fetched.
+sources:
+  greenhouse: []
+  lever: []
+  ashby: []
+  smartrecruiters: []
+  workable: []            # e.g. - subdomain: acme
+  rss_json: []            # e.g. - name: warpjobs, url: https://warpjobs.../feed.json
+  sitemap: []             # e.g. - url: https://careers.acme.com/sitemap.xml
+  direct_company_domains: []

@@ -1,0 +1,125 @@
+profile_path: profile/profile.yaml
+database_path: output/jobs.sqlite3
+report_dir: output/reports
+cv_template_path: templates/cv_master.docx
+
+llm:
+  provider: ollama
+  base_url: http://127.0.0.1:11434
+  model: qwen3.5:9b
+  temperature: 0.15
+
+search:
+  global_enabled: true
+  max_jobs_per_source: 250
+  result_query_cap: 120
+  results_per_query: 25
+  max_global_pages: 400
+  countries: [DE, AT, CH, NL, DK, SE, "NO", ES, UK]
+  global_locations:
+    - Munich
+    - Berlin
+    - Hamburg
+    - Stuttgart
+    - Frankfurt
+    - Cologne
+    - Karlsruhe
+    - Nuremberg
+    - Germany
+    - Austria
+    - Switzerland
+    - Netherlands
+    - Denmark
+    - Sweden
+    - Norway
+    - Spain
+    - United Kingdom
+    - Europe
+    - remote
+    - hybrid
+  target_roles:
+    - Product Manager
+    - Senior Product Manager
+    - Product Lead
+    - Group Product Manager
+    - Program Manager
+    - Senior Program Manager
+    - Program Lead
+    - Technical Program Manager
+    - Project Lead
+    - Project Manager
+    - Engineering Manager
+    - Product Operations
+    - Strategy Manager
+    - Innovation Manager
+    - AI Product Manager
+    - AI Program Manager
+  keywords_positive:
+    - artificial intelligence
+    - AI
+    - machine learning
+    - autonomous systems
+    - robotics
+    - deep tech
+    - product strategy
+    - technology strategy
+    - platform
+    - systems engineering
+    - cross-functional leadership
+    - roadmap
+    - autonomous driving
+  keywords_negative:
+    - junior
+    - intern
+    - working student
+    - sales development representative
+    - pure software developer
+    - manual tester
+
+jobs:
+  salary:
+    minimum_eur: 120000
+    target_eur: 150000
+  freshness_days: 30
+  close_after_missing_scans: 2
+  unknown_salary_reviewable: true
+
+ranking:
+  similarity_weight: 0.25
+  ai_relevance_weight: 0.20
+  compensation_weight: 0.15
+  location_weight: 0.10
+  leadership_weight: 0.20
+  purpose_weight: 0.05
+  wlb_weight: 0.05
+
+digest:
+  type: filesystem
+  directory: output/reports
+
+projects:
+  sandbox_root: output/projects
+  auto_publish: false
+
+application:
+  auto_submit: false
+  never_submit: true
+
+sources:
+  greenhouse:
+    - token: example-company
+  lever:
+    - site: example-company
+  ashby:
+    - board: example-company
+  smartrecruiters:
+    - company: example-company
+  workable:
+    - subdomain: example-company
+  rss_json: []
+  sitemap: []
+  direct_company_domains:
+    - https://www.bmwgroup.com
+    - https://www.quantumsystems.com
+    - https://www.rohde-schwarz.com
+    - https://www.helsing.ai
