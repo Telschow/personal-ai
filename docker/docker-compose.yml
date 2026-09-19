@@ -34,6 +34,8 @@ services:
       dockerfile: docker/Dockerfile
     container_name: personal-ai
     restart: unless-stopped
+    ports:
+      - "8090:8000"
     environment:
       # Runtime paths, provided by the mounts below — never baked into the image.
       PERSONAL_AI_WORKSPACE: /data/workspace

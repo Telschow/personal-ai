@@ -35,9 +35,10 @@ from enum import StrEnum
 
 import httpx
 
+from job_agent.sources import DEFAULT_TIMEOUT, MAX_RESPONSE_BYTES, UA
+
 from .logging_setup import get_logger, log_event
 from .models import Job
-from .sources import DEFAULT_TIMEOUT, MAX_RESPONSE_BYTES, UA
 
 log = get_logger("providers")
 
