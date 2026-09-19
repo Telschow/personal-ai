@@ -580,3 +580,99 @@ main {
         display: none;
     }
 }
+
+/* Artifacts Panel */
+.artifacts-panel {
+    margin-top: 18px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 14px;
+}
+
+.artifacts-panel h3 {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+}
+
+.artifacts-section {
+    margin-bottom: 16px;
+}
+
+.artifacts-section h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.artifact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.artifact-item {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.artifact-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.8125rem;
+}
+
+.artifact-filename {
+    font-weight: 500;
+    color: #111827;
+    flex: 1;
+    min-width: 120px;
+}
+
+.artifact-status {
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.artifact-status.status-uploaded { background: #dbeafe; color: #1e40af; }
+.artifact-status.status-approved { background: #dcfce7; color: #166534; }
+.artifact-status.status-archived { background: #f3f4f6; color: #374151; }
+.artifact-status.status-draft { background: #fef3c7; color: #92400e; }
+
+.artifact-approved {
+    color: #166534;
+    font-size: 0.75rem;
+}
+
+.artifact-date {
+    color: #6b7280;
+    font-size: 0.75rem;
+}
+
+.artifact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 4px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.artifact-empty {
+    color: #9ca3af;
+    font-size: 0.8125rem;
+    padding: 8px 0;
+}
+
+.btn-sm {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+}

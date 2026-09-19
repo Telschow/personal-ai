@@ -1317,3 +1317,163 @@ def artifact_require_approval(
             "UPDATE career_artifacts SET status='requires_review' WHERE job_id=? AND version=?",
             (job_id, version),
         )
+
+
+# ---------------------------------------------------------------------------
+# User Artifacts (Phase 4.1: CV, cover letter uploads with approval)
+# ---------------------------------------------------------------------------
+
+
+def _now_iso() -> str:
+    return datetime.now(UTC).isoformat(timespec="seconds")
+
+
+def save_user_artifact(conn: sqlite3.Connection, artifact: Any) -> bool:
+    """Persist a user artifact; idempotent on ``id`` (INSERT OR IGNORE).
+
+    Returns True when inserted, False when the artifact already existed.
+    """
+    cur = conn.execute(
+        """
+        INSERT OR IGNORE INTO user_artifacts
+            (id, job_id, artifact_type, status, filename, mime_type,
+             storage_path, content_hash, size_bytes, created_at, updated_at,
+             approved_at, source, source_artifact_id, metadata_json)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """,
+        (
+            artifact.id,
+            artifact.job_id,
+            artifact.artifact_type.value if hasattr(artifact.artifact_type, "value") else str(artifact.artifact_type),
+            artifact.status.value if hasattr(artifact.status, "value") else str(artifact.status),
+            artifact.filename,
+            artifact.mime_type,
+            artifact.storage_path,
+            artifact.content_hash,
+            artifact.size_bytes,
+            artifact.created_at,
+            artifact.updated_at,
+            artifact.approved_at,
+            artifact.source.value if hasattr(artifact.source, "value") else str(artifact.source),
+            artifact.source_artifact_id,
+            json.dumps(artifact.metadata, ensure_ascii=False) if artifact.metadata else None,
+        ),
+    )
+    return bool(cur.rowcount)
+
+
+def get_user_artifact(conn: sqlite3.Connection, artifact_id: str) -> dict[str, Any] | None:
+    """Fetch a user artifact by its ID."""
+    row = conn.execute("SELECT * FROM user_artifacts WHERE id=?", (artifact_id,)).fetchone()
+    if row is None:
+        return None
+    out = dict(row)
+    out["metadata"] = json.loads(out.pop("metadata_json") or "{}")
+    return out
+
+
+def get_user_artifacts_for_job(
+    conn: sqlite3.Connection,
+    job_id: str,
+    *,
+    artifact_type: str | None = None,
+) -> list[dict[str, Any]]:
+    """List all user artifacts for a job, optionally filtered by type.
+
+    Ordered by updated_at DESC (newest first), then by artifact_type.
+    """
+    clauses = ["job_id=?"]
+    params: list[Any] = [job_id]
+    if artifact_type:
+        clauses.append("artifact_type=?")
+        params.append(artifact_type)
+    rows = conn.execute(
+        f"""
+        SELECT * FROM user_artifacts
+        WHERE {" AND ".join(clauses)}
+        ORDER BY updated_at DESC, artifact_type
+        """,
+        params,
+    ).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["metadata"] = json.loads(d.pop("metadata_json") or "{}")
+        out.append(d)
+    return out
+
+
+def update_user_artifact(
+    conn: sqlite3.Connection,
+    artifact_id: str,
+    *,
+    status: str | None = None,
+    approved_at: str | None = None,
+    metadata: dict | None = None,
+) -> bool:
+    """Update mutable fields of a user artifact.
+
+    Returns True if the artifact was found and updated.
+    """
+    sets = ["updated_at=?"]
+    params: list[Any] = [_now_iso()]
+    if status is not None:
+        sets.append("status=?")
+        params.append(status)
+    if approved_at is not None:
+        sets.append("approved_at=?")
+        params.append(approved_at)
+    if metadata is not None:
+        sets.append("metadata_json=?")
+        params.append(json.dumps(metadata, ensure_ascii=False))
+    params.append(artifact_id)
+    cur = conn.execute(
+        f"UPDATE user_artifacts SET {', '.join(sets)} WHERE id=?",
+        params,
+    )
+    return cur.rowcount > 0
+
+
+def delete_user_artifact(conn: sqlite3.Connection, artifact_id: str) -> bool:
+    """Delete a user artifact and its file (if it exists and is not referenced elsewhere).
+
+    Returns True if the artifact row was deleted.
+    """
+    # Check if file is referenced by any other artifact (same content_hash)
+    row = conn.execute("SELECT content_hash FROM user_artifacts WHERE id=?", (artifact_id,)).fetchone()
+    if row is None:
+        return False
+    content_hash = row["content_hash"]
+
+    cur = conn.execute("DELETE FROM user_artifacts WHERE id=?", (artifact_id,))
+    deleted = cur.rowcount > 0
+    if deleted:
+        # Delete file only if no other artifact references this hash
+        other = conn.execute(
+            "SELECT 1 FROM user_artifacts WHERE content_hash=? LIMIT 1",
+            (content_hash,),
+        ).fetchone()
+        if other is None:
+            # File cleanup handled by caller with storage_path
+            pass
+    return deleted
+
+
+def approve_user_artifact(conn: sqlite3.Connection, artifact_id: str) -> bool:
+    """Mark a user artifact as APPROVED with current timestamp."""
+    now = _now_iso()
+    cur = conn.execute(
+        "UPDATE user_artifacts SET status='approved', approved_at=?, updated_at=? WHERE id=? AND status!='archived'",
+        (now, now, artifact_id),
+    )
+    return cur.rowcount > 0
+
+
+def archive_user_artifact(conn: sqlite3.Connection, artifact_id: str) -> bool:
+    """Mark a user artifact as ARCHIVED (soft delete)."""
+    now = _now_iso()
+    cur = conn.execute(
+        "UPDATE user_artifacts SET status='archived', updated_at=? WHERE id=?",
+        (now, artifact_id),
+    )
+    return cur.rowcount > 0

@@ -52,7 +52,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from personal_ai import cli, config
@@ -1740,6 +1740,253 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
                 400, "Invalid application payload", error_type="invalid_request_error"
             )
         return await _apply_application(job_id, body, require_existing=True)
+
+    # ------------------------------------------------------------------
+    # User Artifacts (Phase 4.1: CV, cover letter uploads with approval)
+    # ------------------------------------------------------------------
+
+    @app.get("/api/job-agent/jobs/{job_id}/artifacts")
+    async def job_agent_list_artifacts(job_id: str) -> JSONResponse:
+        """List all user artifacts for a job."""
+        job_db_conn = _gateway_job_db(app)
+        if not job_db.application_job_exists(job_db_conn, job_id):
+            raise ApiError(404, f"Job not found: {job_id}", error_type="not_found")
+
+        artifacts = job_db.get_user_artifacts_for_job(job_db_conn, job_id)
+        return JSONResponse(
+            status_code=200, content={"artifacts": artifacts, "count": len(artifacts)}
+        )
+
+    @app.post("/api/job-agent/jobs/{job_id}/artifacts")
+    async def job_agent_upload_artifact(job_id: str, request: Request) -> JSONResponse:
+        """Upload a CV or cover letter artifact for a job.
+
+        Expects multipart/form-data with:
+        - file: the artifact file (PDF, DOCX, TXT)
+        - artifact_type: "cv" or "cover_letter"
+        """
+        job_db_conn = _gateway_job_db(app)
+        if not job_db.application_job_exists(job_db_conn, job_id):
+            raise ApiError(404, f"Job not found: {job_id}", error_type="not_found")
+
+        from job_agent.career.user_artifacts import (
+            EXTENSION_TO_MIME,
+            MAX_ARTIFACT_SIZE,
+            ArtifactValidationError,
+            UserArtifact,
+            UserArtifactSource,
+            UserArtifactStatus,
+            UserArtifactType,
+            artifact_id_for,
+            artifact_storage_path,
+            content_hash,
+            resolve_artifact_root,
+            safe_filename,
+            validate_artifact_file,
+        )
+
+        form = await request.form()
+        file = form["file"]
+        artifact_type_str = form.get("artifact_type")
+
+        filename = getattr(file, "filename", "")
+        if not file or not filename:
+            raise ApiError(
+                400,
+                f"Missing file upload. Got file: {type(file)}, filename: '{filename}'. File type: {getattr(file, 'content_type', 'N/A')}. Form keys: {list(form.keys())}",
+                error_type="invalid_request_error",
+            )
+        if not artifact_type_str:
+            raise ApiError(
+                400,
+                "Missing artifact_type (cv or cover_letter)",
+                error_type="invalid_request_error",
+            )
+
+        try:
+            artifact_type = UserArtifactType(artifact_type_str)
+        except ValueError:
+            raise ApiError(
+                400,
+                f"Invalid artifact_type: {artifact_type_str} (must be 'cv' or 'cover_letter')",
+                error_type="invalid_request_error",
+            )
+
+        # Save to temp file for validation (with correct extension)
+        import tempfile
+
+        suffix = Path(filename).suffix.lower()
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            content = await file.read()
+            tmp.write(content)
+            tmp_path = Path(tmp.name)
+
+        try:
+            validate_artifact_file(tmp_path, artifact_type, max_size=MAX_ARTIFACT_SIZE)
+        except ArtifactValidationError as e:
+            tmp_path.unlink(missing_ok=True)
+            raise ApiError(400, str(e), error_type="invalid_request_error")
+
+        # Compute hash and check for duplicate
+        file_hash = content_hash(tmp_path)
+        existing = job_db_conn.execute(
+            "SELECT id FROM user_artifacts WHERE content_hash=? AND job_id=?",
+            (file_hash, job_id),
+        ).fetchone()
+        if existing:
+            tmp_path.unlink(missing_ok=True)
+            raise ApiError(
+                409,
+                f"Artifact with same content already exists: {existing['id']}",
+                error_type="conflict",
+            )
+
+        # Move to permanent storage
+        import shutil
+
+        root = resolve_artifact_root()
+        root.mkdir(parents=True, exist_ok=True)
+        safe_name = safe_filename(filename)
+        storage_path = artifact_storage_path(root, job_id, artifact_type, safe_name)
+        storage_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(tmp_path), str(storage_path))
+
+        # Create artifact record
+        now = datetime.now(UTC).isoformat(timespec="seconds")
+        artifact = UserArtifact(
+            id=artifact_id_for(file_hash, job_id, artifact_type),
+            job_id=job_id,
+            artifact_type=artifact_type,
+            status=UserArtifactStatus.UPLOADED,
+            filename=file.filename,
+            mime_type=EXTENSION_TO_MIME.get(
+                Path(file.filename).suffix.lower(), "application/octet-stream"
+            ),
+            storage_path=str(storage_path),
+            content_hash=file_hash,
+            size_bytes=len(content),
+            created_at=now,
+            updated_at=now,
+            approved_at=None,
+            source=UserArtifactSource.UPLOADED,
+            source_artifact_id=None,
+            metadata={},
+        )
+
+        job_db.save_user_artifact(job_db_conn, artifact)
+        job_db_conn.commit()
+
+        return JSONResponse(status_code=201, content=artifact.to_dict())
+
+    @app.get("/api/job-agent/artifacts/{artifact_id}")
+    async def job_agent_get_artifact(artifact_id: str) -> JSONResponse:
+        """Get artifact metadata by ID."""
+        job_db_conn = _gateway_job_db(app)
+        artifact = job_db.get_user_artifact(job_db_conn, artifact_id)
+        if artifact is None:
+            raise ApiError(
+                404, f"Artifact not found: {artifact_id}", error_type="not_found"
+            )
+        return JSONResponse(status_code=200, content=artifact)
+
+    @app.get("/api/job-agent/artifacts/{artifact_id}/content")
+    async def job_agent_get_artifact_content(artifact_id: str) -> FileResponse:
+        """Download or preview artifact file."""
+
+        job_db_conn = _gateway_job_db(app)
+        artifact = job_db.get_user_artifact(job_db_conn, artifact_id)
+        if artifact is None:
+            raise ApiError(
+                404, f"Artifact not found: {artifact_id}", error_type="not_found"
+            )
+
+        path = Path(artifact["storage_path"])
+        if not path.is_file():
+            raise ApiError(
+                404, "Artifact file not found on disk", error_type="not_found"
+            )
+
+        return FileResponse(
+            path=path,
+            media_type=artifact["mime_type"],
+            filename=artifact["filename"],
+        )
+
+    @app.post("/api/job-agent/artifacts/{artifact_id}/approve")
+    async def job_agent_approve_artifact(artifact_id: str) -> JSONResponse:
+        """Approve an artifact (UPLOADED/DRAFT -> APPROVED)."""
+        job_db_conn = _gateway_job_db(app)
+        artifact = job_db.get_user_artifact(job_db_conn, artifact_id)
+        if artifact is None:
+            raise ApiError(
+                404, f"Artifact not found: {artifact_id}", error_type="not_found"
+            )
+
+        if artifact["status"] == "archived":
+            raise ApiError(
+                400,
+                "Cannot approve archived artifact",
+                error_type="invalid_request_error",
+            )
+
+        job_db.approve_user_artifact(job_db_conn, artifact_id)
+        job_db_conn.commit()
+
+        updated = job_db.get_user_artifact(job_db_conn, artifact_id)
+        return JSONResponse(status_code=200, content=updated)
+
+    @app.post("/api/job-agent/artifacts/{artifact_id}/archive")
+    async def job_agent_archive_artifact(artifact_id: str) -> JSONResponse:
+        """Archive an artifact (soft delete)."""
+        job_db_conn = _gateway_job_db(app)
+        artifact = job_db.get_user_artifact(job_db_conn, artifact_id)
+        if artifact is None:
+            raise ApiError(
+                404, f"Artifact not found: {artifact_id}", error_type="not_found"
+            )
+
+        job_db.archive_user_artifact(job_db_conn, artifact_id)
+        job_db_conn.commit()
+
+        updated = job_db.get_user_artifact(job_db_conn, artifact_id)
+        return JSONResponse(status_code=200, content=updated)
+
+    @app.delete("/api/job-agent/artifacts/{artifact_id}")
+    async def job_agent_delete_artifact(artifact_id: str) -> JSONResponse:
+        """Delete an artifact (hard delete - removes file if unreferenced)."""
+        job_db_conn = _gateway_job_db(app)
+        artifact = job_db.get_user_artifact(job_db_conn, artifact_id)
+        if artifact is None:
+            raise ApiError(
+                404, f"Artifact not found: {artifact_id}", error_type="not_found"
+            )
+
+        storage_path = artifact["storage_path"]
+        content_hash = artifact["content_hash"]
+
+        # Delete row
+        cur = job_db_conn.execute(
+            "DELETE FROM user_artifacts WHERE id=?", (artifact_id,)
+        )
+        if cur.rowcount == 0:
+            raise ApiError(
+                404, f"Artifact not found: {artifact_id}", error_type="not_found"
+            )
+
+        # Delete file only if no other artifact references this hash
+        other = job_db_conn.execute(
+            "SELECT 1 FROM user_artifacts WHERE content_hash=? LIMIT 1",
+            (content_hash,),
+        ).fetchone()
+        if other is None:
+            from pathlib import Path
+
+            Path(storage_path).unlink(missing_ok=True)
+
+        job_db_conn.commit()
+        return JSONResponse(
+            status_code=200, content={"deleted": True, "artifact_id": artifact_id}
+        )
 
     @app.post("/api/job-agent/discover")
     async def job_agent_discover(

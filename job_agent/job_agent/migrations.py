@@ -471,6 +471,43 @@ def _v10_application_lifecycle(conn: sqlite3.Connection) -> None:
     )
 
 
+@migration(11)
+def _v11_user_artifacts(conn: sqlite3.Connection) -> None:
+    """Phase 4.1: user-uploaded career artifacts (CV, cover letter).
+
+    Stores file metadata and provenance for artifacts the user attaches to a job.
+    Files live on disk (JOB_AGENT_ARTIFACTS); this table holds the metadata.
+    Status tracks the approval lifecycle: UPLOADED -> APPROVED (terminal) or
+    ARCHIVED. DRAFT is reserved for generated artifacts not yet reviewed.
+    """
+    _exec_many(
+        conn,
+        """
+        CREATE TABLE IF NOT EXISTS user_artifacts (
+            id              TEXT PRIMARY KEY,
+            job_id          TEXT NOT NULL,
+            artifact_type   TEXT NOT NULL,
+            status          TEXT NOT NULL DEFAULT 'UPLOADED',
+            filename        TEXT NOT NULL,
+            mime_type       TEXT NOT NULL,
+            storage_path    TEXT NOT NULL,
+            content_hash    TEXT NOT NULL,
+            size_bytes      INTEGER NOT NULL,
+            created_at      TEXT NOT NULL,
+            updated_at      TEXT NOT NULL,
+            approved_at     TEXT,
+            source          TEXT NOT NULL DEFAULT 'UPLOADED',
+            source_artifact_id TEXT,
+            metadata_json   TEXT,
+            FOREIGN KEY(job_id) REFERENCES jobs(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_user_artifacts_job ON user_artifacts(job_id);
+        CREATE INDEX IF NOT EXISTS idx_user_artifacts_job_type ON user_artifacts(job_id, artifact_type);
+        CREATE INDEX IF NOT EXISTS idx_user_artifacts_hash ON user_artifacts(content_hash);
+        """,
+    )
+
+
 def current_version(conn: sqlite3.Connection) -> int:
     row = conn.execute("PRAGMA user_version").fetchone()
     return int(row[0]) if row else 0

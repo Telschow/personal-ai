@@ -21,6 +21,8 @@ Public surface used by the CLI and tests:
   positioning.
 - ``validate_claim`` / ``CVArtifact`` — anti-fabrication claim validation and
   the (proposal-only) artifact model.
+- ``UserArtifact`` / ``UserArtifactType`` / ``UserArtifactStatus`` —
+  user-uploaded career artifacts (CV, cover letter) with approval lifecycle.
 """
 
 from .achievements import Achievement, derive_achievements
@@ -70,11 +72,28 @@ from .retrieval import (
     compact_evidence,
     concept_coverage,
 )
+from .user_artifacts import (
+    ALLOWED_MIME_TYPES,
+    MAX_ARTIFACT_SIZE,
+    ArtifactValidationError,
+    UserArtifact,
+    UserArtifactSource,
+    UserArtifactStatus,
+    UserArtifactType,
+    artifact_id_for,
+    artifact_storage_path,
+    content_hash,
+    resolve_artifact_root,
+    safe_filename,
+    validate_artifact_file,
+)
 from .validation import ClaimValidation, validate_claim
 
 __all__ = [
     "Achievement",
+    "ALLOWED_MIME_TYPES",
     "ArtifactStatus",
+    "ArtifactValidationError",
     "CATEGORY_KEYS",
     "CVArtifact",
     "CareerDocument",
@@ -90,6 +109,7 @@ __all__ = [
     "FitNarrative",
     "FitScore",
     "FitWeights",
+    "MAX_ARTIFACT_SIZE",
     "NullCareerKnowledge",
     "OllamaJsonClient",
     "PersonalAiCareerKnowledge",
@@ -100,7 +120,13 @@ __all__ = [
     "RequirementMap",
     "StructuredJobAttributes",
     "VerificationLevel",
+    "UserArtifact",
+    "UserArtifactSource",
+    "UserArtifactStatus",
+    "UserArtifactType",
     "analyze_fit",
+    "artifact_id_for",
+    "artifact_storage_path",
     "build_knowledge",
     "build_positioning_plan",
     "build_profile_evidence",
@@ -110,6 +136,7 @@ __all__ = [
     "collect_evidence",
     "compact_evidence",
     "concept_coverage",
+    "content_hash",
     "derive_achievements",
     "derive_career_profile",
     "document_id_for",
@@ -121,5 +148,8 @@ __all__ = [
     "parse_narrative",
     "rank_evidence",
     "reconcile_document",
+    "resolve_artifact_root",
+    "safe_filename",
+    "validate_artifact_file",
     "validate_claim",
 ]

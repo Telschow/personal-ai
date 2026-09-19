@@ -249,6 +249,12 @@ function setupEventListeners() {
     document.getElementById('action-applied').addEventListener('click', () => updateModalJobStatus('APPLIED'));
     document.getElementById('action-reset').addEventListener('click', () => updateModalJobStatus('NEW'));
     document.getElementById('app-save').addEventListener('click', saveApplication);
+
+    // Artifacts
+    document.getElementById('upload-cv').addEventListener('click', () => document.getElementById('cv-file-input').click());
+    document.getElementById('cv-file-input').addEventListener('change', (e) => uploadArtifact(e.target.files[0], 'cv'));
+    document.getElementById('upload-cover-letter').addEventListener('click', () => document.getElementById('cover-letter-file-input').click());
+    document.getElementById('cover-letter-file-input').addEventListener('change', (e) => uploadArtifact(e.target.files[0], 'cover_letter'));
 }
 
 let currentModalJobId = null;
@@ -265,12 +271,15 @@ async function openJobDetail(jobId) {
     document.getElementById('app-stage').value = '';
     document.getElementById('app-notes').value = '';
     document.getElementById('app-feedback').textContent = '';
+    document.getElementById('artifact-list-cv').innerHTML = '';
+    document.getElementById('artifact-list-cover-letter').innerHTML = '';
 
     try {
         const res = await fetch(`${API_BASE}/jobs/${jobId}`);
         const job = await res.json();
         renderJobDetail(job);
         loadApplication(jobId);
+        loadArtifacts(jobId);
     } catch (e) {
         document.getElementById('job-factual').innerHTML = '<dd>Failed to load job details</dd>';
         console.error('Job detail load failed:', e);
@@ -453,6 +462,106 @@ async function updateModalJobStatus(newStatus) {
 function closeModal() {
     document.getElementById('job-modal').style.display = 'none';
     currentModalJobId = null;
+}
+
+async function loadArtifacts(jobId) {
+    try {
+        const res = await fetch(`${API_BASE}/jobs/${jobId}/artifacts`);
+        if (!res.ok) return;
+        const data = await res.json();
+        renderArtifacts(data.artifacts || []);
+    } catch (e) {
+        console.error('Artifacts load failed:', e);
+    }
+}
+
+function renderArtifacts(artifacts) {
+    const cvList = document.getElementById('artifact-list-cv');
+    const clList = document.getElementById('artifact-list-cover-letter');
+
+    const cvArtifacts = artifacts.filter(a => a.artifact_type === 'cv');
+    const clArtifacts = artifacts.filter(a => a.artifact_type === 'cover_letter');
+
+    cvList.innerHTML = cvArtifacts.length ? cvArtifacts.map(a => artifactHtml(a)).join('') : '<p class="artifact-empty">No CV uploaded</p>';
+    clList.innerHTML = clArtifacts.length ? clArtifacts.map(a => artifactHtml(a)).join('') : '<p class="artifact-empty">No cover letter uploaded</p>';
+}
+
+function artifactHtml(a) {
+    const statusCls = a.status === 'approved' ? 'status-approved' : a.status === 'archived' ? 'status-archived' : 'status-uploaded';
+    const approved = a.approved_at ? `Approved: ${formatDate(a.approved_at)}` : '';
+    return `
+        <div class="artifact-item" data-artifact-id="${a.id}">
+            <div class="artifact-info">
+                <span class="artifact-filename">${escapeHtml(a.filename)}</span>
+                <span class="artifact-status ${statusCls}">${a.status.toUpperCase()}</span>
+                ${approved ? `<span class="artifact-approved">${escapeHtml(approved)}</span>` : ''}
+                <span class="artifact-date">Added: ${formatDate(a.created_at)}</span>
+            </div>
+            <div class="artifact-actions">
+                <a class="btn btn-sm btn-secondary" href="${API_BASE}/artifacts/${a.id}/content" target="_blank">Preview</a>
+                <a class="btn btn-sm btn-secondary" href="${API_BASE}/artifacts/${a.id}/content" download>Download</a>
+                ${a.status !== 'approved' && a.status !== 'archived' ? `<button class="btn btn-sm btn-primary" onclick="approveArtifact('${a.id}')">Approve</button>` : ''}
+                ${a.status !== 'archived' ? `<button class="btn btn-sm btn-warning" onclick="archiveArtifact('${a.id}')">Archive</button>` : ''}
+                <button class="btn btn-sm btn-danger" onclick="deleteArtifact('${a.id}')">Delete</button>
+            </div>
+        </div>
+    `;
+}
+
+async function uploadArtifact(file, artifactType) {
+    if (!currentModalJobId || !file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('artifact_type', artifactType);
+
+    try {
+        const res = await fetch(`${API_BASE}/jobs/${currentModalJobId}/artifacts`, {
+            method: 'POST',
+            body: formData,
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            alert('Upload failed: ' + (err.error?.message || 'Unknown error'));
+            return;
+        }
+        await loadArtifacts(currentModalJobId);
+        document.getElementById('cv-file-input').value = '';
+        document.getElementById('cover-letter-file-input').value = '';
+    } catch (e) {
+        alert('Upload failed: ' + e.message);
+    }
+}
+
+async function approveArtifact(artifactId) {
+    try {
+        const res = await fetch(`${API_BASE}/artifacts/${artifactId}/approve`, { method: 'POST' });
+        if (!res.ok) throw new Error('Failed to approve');
+        await loadArtifacts(currentModalJobId);
+    } catch (e) {
+        alert('Approve failed: ' + e.message);
+    }
+}
+
+async function archiveArtifact(artifactId) {
+    try {
+        const res = await fetch(`${API_BASE}/artifacts/${artifactId}/archive`, { method: 'POST' });
+        if (!res.ok) throw new Error('Failed to archive');
+        await loadArtifacts(currentModalJobId);
+    } catch (e) {
+        alert('Archive failed: ' + e.message);
+    }
+}
+
+async function deleteArtifact(artifactId) {
+    if (!confirm('Delete this artifact? This cannot be undone.')) return;
+    try {
+        const res = await fetch(`${API_BASE}/artifacts/${artifactId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete');
+        await loadArtifacts(currentModalJobId);
+    } catch (e) {
+        alert('Delete failed: ' + e.message);
+    }
 }
 
 async function runDiscovery() {
