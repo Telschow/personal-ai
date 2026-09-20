@@ -1,0 +1,388 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Personal AI — local-first agent and knowledge system",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "viewBox": [
+      950,
+      840
+    ]
+  },
+  "components": [
+    {
+      "id": "users",
+      "type": "external",
+      "label": "Users",
+      "sublabel": "via Tailscale",
+      "pos": [
+        16,
+        132
+      ],
+      "size": [
+        90,
+        60
+      ]
+    },
+    {
+      "id": "webui",
+      "type": "frontend",
+      "label": "Open WebUI",
+      "sublabel": "chat front-end",
+      "pos": [
+        136,
+        132
+      ],
+      "size": [
+        125,
+        60
+      ]
+    },
+    {
+      "id": "gateway",
+      "type": "backend",
+      "label": "FastAPI Gateway",
+      "sublabel": "/v1 OpenAI-compatible :8000",
+      "pos": [
+        301,
+        132
+      ],
+      "size": [
+        150,
+        62
+      ],
+      "brand": "fastapi",
+      "tag": "server.py"
+    },
+    {
+      "id": "agent",
+      "type": "backend",
+      "label": "Agent Loop",
+      "sublabel": "message loop + tool orchestration",
+      "pos": [
+        491,
+        132
+      ],
+      "size": [
+        150,
+        62
+      ],
+      "tag": "agent.py"
+    },
+    {
+      "id": "ollama",
+      "type": "external",
+      "label": "Ollama",
+      "sublabel": "local · :11434 · qwen3.5:9b",
+      "pos": [
+        691,
+        133
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "brand": "ollama"
+    },
+    {
+      "id": "policy",
+      "type": "security",
+      "label": "PolicyEngine",
+      "sublabel": "perm-gated tool execution",
+      "pos": [
+        301,
+        288
+      ],
+      "size": [
+        150,
+        62
+      ],
+      "tag": "policy.py"
+    },
+    {
+      "id": "tools",
+      "type": "backend",
+      "label": "Tool Registry",
+      "sublabel": "explicit allow-listed tools",
+      "pos": [
+        491,
+        288
+      ],
+      "size": [
+        150,
+        62
+      ],
+      "tag": "tools/"
+    },
+    {
+      "id": "retrieval",
+      "type": "backend",
+      "label": "Retrieval",
+      "sublabel": "keyword · semantic · hybrid",
+      "pos": [
+        301,
+        470
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "tag": "retrieval.py"
+    },
+    {
+      "id": "sandbox",
+      "type": "security",
+      "label": "Workspace Sandbox",
+      "sublabel": "FilesystemTool · /data/workspace",
+      "pos": [
+        511,
+        470
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "tag": "hard boundary"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "SQLite Knowledge Base",
+      "sublabel": "documents · chunks · memory · events",
+      "pos": [
+        741,
+        300
+      ],
+      "size": [
+        150,
+        66
+      ],
+      "brand": "sqlite"
+    },
+    {
+      "id": "jobagent",
+      "type": "backend",
+      "label": "Job Agent",
+      "sublabel": "discovery · scoring · applications",
+      "pos": [
+        491,
+        636
+      ],
+      "size": [
+        150,
+        60
+      ],
+      "tag": "job_agent/"
+    },
+    {
+      "id": "jobfeeds",
+      "type": "external",
+      "label": "Job Feeds",
+      "sublabel": "RemoteOK · Remotive · ATS · DDG",
+      "pos": [
+        691,
+        636
+      ],
+      "size": [
+        150,
+        60
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Local-first deployment · Docker + Tailscale (no cloud)",
+      "wraps": [
+        "webui",
+        "gateway",
+        "agent",
+        "policy",
+        "tools",
+        "retrieval",
+        "sandbox",
+        "db",
+        "ollama",
+        "jobagent",
+        "jobfeeds"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "Sandbox boundary · no eval/exec/shell",
+      "wraps": [
+        "sandbox"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "u2w",
+      "from": "users",
+      "to": "webui",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "w2g",
+      "from": "webui",
+      "to": "gateway",
+      "label": "OpenAI-compatible /v1",
+      "variant": "emphasis",
+      "labelDy": 54
+    },
+    {
+      "id": "g2a",
+      "from": "gateway",
+      "to": "agent",
+      "label": "run agent loop",
+      "labelAt": [
+        471,
+        208
+      ]
+    },
+    {
+      "id": "a2o",
+      "from": "agent",
+      "to": "ollama",
+      "label": "chat · /api/chat",
+      "variant": "emphasis",
+      "labelAt": [
+        666,
+        208
+      ]
+    },
+    {
+      "id": "a2p",
+      "from": "agent",
+      "to": "policy",
+      "label": "gate every call",
+      "variant": "security",
+      "toSide": "top",
+      "via": [
+        [
+          566,
+          240
+        ],
+        [
+          376,
+          240
+        ]
+      ],
+      "fromSide": "bottom"
+    },
+    {
+      "id": "p2t",
+      "from": "policy",
+      "to": "tools",
+      "label": "allow-listed tools",
+      "variant": "security",
+      "labelAt": [
+        410,
+        366
+      ],
+      "route": "orthogonal-h"
+    },
+    {
+      "id": "t2s",
+      "from": "tools",
+      "to": "sandbox",
+      "label": "workspace r/w",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "t2r",
+      "from": "tools",
+      "to": "retrieval",
+      "label": "search corpus"
+    },
+    {
+      "id": "r2db",
+      "from": "retrieval",
+      "to": "db",
+      "label": "FTS5 · vector",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "bottom",
+      "via": [
+        [
+          376,
+          566
+        ],
+        [
+          816,
+          566
+        ]
+      ]
+    },
+    {
+      "id": "t2db",
+      "from": "tools",
+      "to": "db",
+      "label": "get_document",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        665,
+        364
+      ]
+    },
+    {
+      "id": "ja2f",
+      "from": "jobagent",
+      "to": "jobfeeds",
+      "label": "HTTPS feeds",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        666,
+        712
+      ],
+      "route": "orthogonal-h"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Ingestion & sources",
+      "items": [
+        "Adapters: Keep · NotebookLM · Gemini · ChatGPT · email · financial · files",
+        "Extract → chunk → classify → embed → store (DocumentStore, FTS5, EmbeddingStore)",
+        "Conversations → ConversationStore · Chrome/YouTube → EventStore"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Retrieval & memory",
+      "items": [
+        "Keyword default · semantic/hybrid opt-in (fail loudly, never silent degrade)",
+        "MemoryService: SQLite memories + audit trail, chat auto-recall (≤ 3)",
+        "Person blocks and workout queries via policy-gated tools"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Execution control plane",
+      "items": [
+        "Planner → Orchestrator → Researcher → DeterministicVerifier",
+        "Durable task-scoped approvals · Kanban board API",
+        "Explicit tool allow-list only — no eval/exec/shell/dynamic imports"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Job agent pipeline",
+      "items": [
+        "Query plan → rate-limited discovery → normalize → score → persist",
+        "Reads sibling job-agent.db on the same data volume · never auto-submits",
+        "Career artifacts: CV / cover-letter upload, preview, DRAFT → APPROVED",
+        "generate_materials via the local Ollama model"
+      ]
+    }
+  ]
+}

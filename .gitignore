@@ -23,6 +23,7 @@ build/
 data/
 tmp/
 cache/
+output/
 
 # Secrets
 secrets/
@@ -41,3 +42,4 @@ raw_data_extracted/
 /Email_Outlook/
 /Financial_data/
 chat-export-*.json
+/Daniel Telschow CV.pdf

@@ -128,9 +128,12 @@ excluded from the repo (`.gitignore`) and from Docker images (`.dockerignore`).
                                                     │
                                     ┌───────────────┴───────────────┐
                                     ▼                               ▼
-                              Text model (Ollama)            Vision model (Ollama,
-                              + local parser/classifier       optional, legacy Phase 34a)
+Text model (Ollama)            Vision model (Ollama,
+                               + local parser/classifier       optional, legacy Phase 34a)
 ```
+
+> **Interactive diagram:** explore the same system in `docs/architecture/personal-ai.html`
+> (theme-aware viewer with an inline SVG; source: `docs/architecture/personal-ai.architecture.json`).
 
 Three ways to drive the same Agent + ToolRegistry:
 
