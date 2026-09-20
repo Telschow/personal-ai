@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Personal AI + Job Agent Architecture",
+    "quality_profile": "showcase",
+    "locale": "en"
+  },
+  "layout": {
+    "mode": "grid",
+    "cols": 4,
+    "gapX": 80,
+    "gapY": 60,
+    "cellW": 300,
+    "cellH": 180
+  },
+  "components": [
+    { "id": "openwebui", "type": "external", "label": "Open WebUI" },
+    { "id": "personal_ai", "type": "backend", "label": "Personal AI Gateway" },
+    { "id": "agent_core", "type": "backend", "label": "Agent + Tools" },
+    { "id": "memory_sys", "type": "database", "label": "Memory" },
+    { "id": "retrieval", "type": "backend", "label": "Retrieval" },
+    { "id": "model_router", "type": "backend", "label": "Ollama Router" },
+    { "id": "sqlite_db", "type": "database", "label": "SQLite DB" },
+    { "id": "job_agent", "type": "backend", "label": "Job Agent" },
+    { "id": "discovery", "type": "backend", "label": "Discovery" },
+    { "id": "providers", "type": "external", "label": "Job Sources" },
+    { "id": "intelligence", "type": "backend", "label": "Career Intel" },
+    { "id": "evidence", "type": "database", "label": "Evidence" },
+    { "id": "career_artifacts", "type": "backend", "label": "CV Artifacts" },
+    { "id": "applications", "type": "backend", "label": "Applications" },
+    { "id": "web_ui", "type": "frontend", "label": "Dashboard" },
+    { "id": "docker", "type": "cloud", "label": "Docker" },
+    { "id": "ollama", "type": "external", "label": "Ollama" }
+  ],
+  "connections": [
+    { "from": "openwebui", "to": "personal_ai", "label": "HTTPS /v1" },
+    { "from": "personal_ai", "to": "agent_core", "label": "routes" },
+    { "from": "agent_core", "to": "memory_sys", "label": "search_knowledge" },
+    { "from": "agent_core", "to": "retrieval", "label": "search_documents" },
+    { "from": "agent_core", "to": "model_router", "label": "chat" },
+    { "from": "agent_core", "to": "job_agent", "label": "/api/job-agent/*" },
+    { "from": "memory_sys", "to": "sqlite_db", "label": "memories" },
+    { "from": "retrieval", "to": "sqlite_db", "label": "FTS5 / vectors" },
+    { "from": "model_router", "to": "ollama", "label": "HTTP :11434" },
+    { "from": "job_agent", "to": "sqlite_db", "label": "jobs, apps, artifacts" },
+    { "from": "discovery", "to": "providers", "label": "fetch feeds" },
+    { "from": "discovery", "to": "job_agent", "label": "Jobs" },
+    { "from": "intelligence", "to": "evidence", "label": "evidence" },
+    { "from": "intelligence", "to": "job_agent", "label": "FitAssessment" },
+    { "from": "career_artifacts", "to": "evidence", "label": "evidence_ids" },
+    { "from": "career_artifacts", "to": "job_agent", "label": "CV proposals" },
+    { "from": "applications", "to": "job_agent", "label": "state machine" },
+    { "from": "web_ui", "to": "personal_ai", "label": "/api/job-agent/*" },
+    { "from": "docker", "to": "personal_ai", "label": "runs" },
+    { "from": "docker", "to": "ollama", "label": "network" },
+    { "from": "sqlite_db", "to": "docker", "label": "volume /data" }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Key Principles",
+      "items": [
+        "Local-first: Ollama, SQLite, Docker on your machine",
+        "LLM is a component, not the authority",
+        "Deterministic pipeline authoritative; LLM consults only",
+        "Database stores facts; LLM interprets; human decides",
+        "Native providers > search fallback for discovery",
+        "Evidence ladder: VERIFIED > DOCUMENTED > INFERRED",
+        "Append-only career artifacts; never auto-submit"
+      ]
+    }
+  ]
+}

@@ -1376,11 +1376,16 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
         location: str | None = None,
         min_fit: float | None = None,
         source: str | None = None,
+        system_status: str | None = None,
         analyzed: bool | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> JSONResponse:
-        """List jobs with filtering and sorting."""
+        """List jobs with filtering and sorting.
+
+        system_status filters by the lifecycle status (active/stale/closed/duplicate).
+        If not specified, defaults to "active" unless source filter is used.
+        """
         job_db_conn = _gateway_job_db(app)
 
         if user_status:
@@ -1388,8 +1393,9 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
                 job_db_conn, user_status, limit=limit, offset=offset
             )
         else:
+            effective_status = system_status or (None if source else "active")
             jobs = job_db.get_jobs(
-                job_db_conn, status="active", source=source, limit=limit, offset=offset
+                job_db_conn, status=effective_status, source=source, limit=limit, offset=offset
             )
 
         # Apply filters
