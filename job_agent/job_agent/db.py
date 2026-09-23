@@ -51,9 +51,12 @@ def upsert_job(conn: sqlite3.Connection, job: Job) -> None:
         "id,title,company,url,apply_url,source,source_type,location,country,normalized_location,"
         "remote_mode,employment_type,date_posted,description,salary_min,salary_max,salary_currency,"
         "salary_min_eur,salary_max_eur,salary_converted,raw_json,canonical_key,status,discovered_at,"
-        "last_seen,last_checked,missing_scans,canonical_url,source_count,user_status,user_status_updated_at"
+        "last_seen,last_checked,missing_scans,canonical_url,source_count,user_status,user_status_updated_at,run_id,"
+        "discovery_source,company_radar_id,provider_native_id,role_family,role_classification_confidence,"
+        "role_classification_reason,location_city,location_country,location_scope,location_score,location_reason,"
+        "salary_period,salary_source,salary_confidence,compensation_status"
     )
-    placeholders = ",".join(["?"] * 31)
+    placeholders = ",".join(["?"] * 47)
     now = _now()
     sql = f"""
         INSERT OR IGNORE INTO jobs ({cols}) VALUES ({placeholders})
@@ -92,6 +95,22 @@ def upsert_job(conn: sqlite3.Connection, job: Job) -> None:
             0,
             job.user_status if job.user_status else "NEW",
             job.user_status_updated_at,
+            job.run_id,
+            job.discovery_source,
+            job.company_radar_id,
+            job.provider_native_id,
+            job.role_family,
+            job.role_classification_confidence,
+            job.role_classification_reason,
+            job.location_city,
+            job.location_country,
+            job.location_scope,
+            job.location_score,
+            job.location_reason,
+            job.salary_period,
+            job.salary_source,
+            job.salary_confidence,
+            job.compensation_status,
         ),
     )
     # Refresh last_seen/last_checked whenever the job is seen again.
@@ -190,6 +209,36 @@ def get_jobs(
     return [j for j in (_job_from_row(r) for r in rows) if j is not None]
 
 
+def count_jobs(conn: sqlite3.Connection) -> int:
+    """Count all jobs in the database."""
+    row = conn.execute("SELECT COUNT(*) FROM jobs").fetchone()
+    return row[0] if row else 0
+
+
+def get_score(conn: sqlite3.Connection, job_id: str) -> Score | None:
+    """Get the score for a job."""
+    row = conn.execute(
+        """
+        SELECT total, decision, reasons_json, gaps_json, evaluated_at, llm_explanation, confidence, scoring_version, profile_version
+        FROM evaluations
+        WHERE job_id = ?
+        """,
+        (job_id,),
+    ).fetchone()
+    if not row:
+        return None
+
+    return Score(
+        total=float(row["total"]),
+        decision=row["decision"],
+        reasons=json.loads(row["reasons_json"]) if row["reasons_json"] else [],
+        gaps=json.loads(row["gaps_json"]) if row["gaps_json"] else [],
+        hard_fail=False,
+        confidence=float(row["confidence"]) if row["confidence"] else 0.5,
+        breakdown={},
+    )
+
+
 def jobs_for_analysis(
     conn: sqlite3.Connection,
     *,
@@ -234,11 +283,27 @@ def _job_from_row(row: sqlite3.Row | None) -> Job | None:
         salary_min=row["salary_min"],
         salary_max=row["salary_max"],
         salary_currency=row["salary_currency"],
+        salary_period=row["salary_period"],
+        salary_source=row["salary_source"],
+        salary_confidence=row["salary_confidence"],
+        compensation_status=row["compensation_status"],
         salary_min_eur=row["salary_min_eur"],
         salary_max_eur=row["salary_max_eur"],
         salary_converted=bool(row["salary_converted"]),
         canonical_key=row["canonical_key"],
         status=row["status"],
+        run_id=row_dict.get("run_id"),
+        discovery_source=row_dict.get("discovery_source"),
+        company_radar_id=row_dict.get("company_radar_id"),
+        provider_native_id=row_dict.get("provider_native_id"),
+        role_family=row_dict.get("role_family"),
+        role_classification_confidence=row_dict.get("role_classification_confidence", 0.0),
+        role_classification_reason=row_dict.get("role_classification_reason"),
+        location_city=row_dict.get("location_city"),
+        location_country=row_dict.get("location_country"),
+        location_scope=row_dict.get("location_scope"),
+        location_score=row_dict.get("location_score", 0.0),
+        location_reason=row_dict.get("location_reason"),
         closed_at=row["closed_at"],
         discovered_at=row["discovered_at"],
         last_seen=row["last_seen"],
@@ -718,6 +783,8 @@ def provider_failure_count(conn: sqlite3.Connection) -> int:
 def record_discovery_run(
     conn: sqlite3.Connection,
     *,
+    run_id: str,
+    started_at: str | None = None,
     planned_queries: int,
     candidates_found: int,
     jobs_persisted: int,
@@ -730,12 +797,13 @@ def record_discovery_run(
     cur = conn.execute(
         """
         INSERT INTO discovery_runs
-            (planned_queries, candidates_found, jobs_persisted,
+            (run_id, planned_queries, candidates_found, jobs_persisted,
              jobs_from_providers, jobs_from_search, provider_failures,
              fetch_errors, duration_ms, ran_at)
-        VALUES (?,?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?,?)
         """,
         (
+            run_id,
             planned_queries,
             candidates_found,
             jobs_persisted,
@@ -744,7 +812,7 @@ def record_discovery_run(
             provider_failures,
             fetch_errors,
             duration_ms,
-            _now(),
+            started_at or _now(),
         ),
     )
     return int(cur.lastrowid or 0)

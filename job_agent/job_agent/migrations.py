@@ -508,6 +508,112 @@ def _v11_user_artifacts(conn: sqlite3.Connection) -> None:
     )
 
 
+@ migration(12)
+def _v12_run_isolation(conn: sqlite3.Connection) -> None:
+    """Add run isolation columns and tables for per-run metrics.
+    """
+    if not _column_exists(conn, "jobs", "run_id"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN run_id TEXT")
+    # Add run_id to discovery_runs if present
+    if not _column_exists(conn, "discovery_runs", "run_id"):
+        _exec_many(
+            conn,
+            """
+            ALTER TABLE discovery_runs ADD COLUMN run_id TEXT;
+            """
+        )
+    # Ensure run_id is indexed for fast lookup
+    _exec_many(
+        conn,
+        """
+        CREATE INDEX IF NOT EXISTS idx_jobs_run_id ON jobs(run_id);
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_discovery_runs_run_id ON discovery_runs(run_id);
+        """
+    )
+
+
+@ migration(13)
+def _v13_provenance(conn: sqlite3.Connection) -> None:
+    """Add provenance fields to jobs for company radar and discovery source tracking."""
+    if not _column_exists(conn, "jobs", "discovery_source"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN discovery_source TEXT")
+    if not _column_exists(conn, "jobs", "company_radar_id"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN company_radar_id TEXT")
+    if not _column_exists(conn, "jobs", "provider_native_id"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN provider_native_id TEXT")
+    _exec_many(
+        conn,
+        """
+        CREATE INDEX IF NOT EXISTS idx_jobs_company_radar_id ON jobs(company_radar_id);
+        CREATE INDEX IF NOT EXISTS idx_jobs_discovery_source ON jobs(discovery_source);
+        """
+    )
+
+
+@ migration(14)
+def _v14_classification(conn: sqlite3.Connection) -> None:
+    """Add role and location classification fields to jobs."""
+    if not _column_exists(conn, "jobs", "role_family"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN role_family TEXT")
+    if not _column_exists(conn, "jobs", "role_classification_confidence"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN role_classification_confidence REAL DEFAULT 0.0")
+    if not _column_exists(conn, "jobs", "role_classification_reason"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN role_classification_reason TEXT")
+    if not _column_exists(conn, "jobs", "location_city"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN location_city TEXT")
+    if not _column_exists(conn, "jobs", "location_country"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN location_country TEXT")
+    if not _column_exists(conn, "jobs", "location_scope"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN location_scope TEXT")
+    if not _column_exists(conn, "jobs", "location_score"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN location_score REAL DEFAULT 0.0")
+    if not _column_exists(conn, "jobs", "location_reason"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN location_reason TEXT")
+    _exec_many(
+        conn,
+        """
+        CREATE INDEX IF NOT EXISTS idx_jobs_role_family ON jobs(role_family);
+        CREATE INDEX IF NOT EXISTS idx_jobs_location_city ON jobs(location_city);
+        CREATE INDEX IF NOT EXISTS idx_jobs_location_scope ON jobs(location_scope);
+        """
+    )
+
+
+@ migration(15)
+def _v15_compensation_tracking(conn: sqlite3.Connection) -> None:
+    """Add compensation tracking fields for salary metadata and status."""
+    if not _column_exists(conn, "jobs", "salary_period"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN salary_period TEXT")
+    if not _column_exists(conn, "jobs", "salary_source"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN salary_source TEXT")
+    if not _column_exists(conn, "jobs", "salary_confidence"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN salary_confidence REAL DEFAULT 0.0")
+    if not _column_exists(conn, "jobs", "compensation_status"):
+        conn.execute("ALTER TABLE jobs ADD COLUMN compensation_status TEXT DEFAULT 'unknown'")
+
+
+@ migration(16)
+def _v16_human_feedback(conn: sqlite3.Connection) -> None:
+    """Add human feedback table for calibration."""
+    _exec_many(
+        conn,
+        """
+        CREATE TABLE IF NOT EXISTS feedback (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id          TEXT NOT NULL,
+            label           TEXT NOT NULL,
+            note            TEXT,
+            created_at      TEXT NOT NULL,
+            run_id          TEXT,
+            FOREIGN KEY(job_id) REFERENCES jobs(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_feedback_job ON feedback(job_id);
+        CREATE INDEX IF NOT EXISTS idx_feedback_label ON feedback(label);
+        CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at);
+        """
+    )
+
+
 def current_version(conn: sqlite3.Connection) -> int:
     row = conn.execute("PRAGMA user_version").fetchone()
     return int(row[0]) if row else 0

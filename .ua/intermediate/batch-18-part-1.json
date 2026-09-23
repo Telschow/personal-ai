@@ -1,0 +1,3477 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_agent_tool_workouts.py",
+      "type": "file",
+      "name": "test_agent_tool_workouts.py",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "summary": "Tests workout search tool registration, permissions, and control plane integration.",
+      "tags": [
+        "test",
+        "agent",
+        "tools",
+        "policy"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:service",
+      "type": "function",
+      "name": "service",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        73,
+        80
+      ],
+      "summary": "Function service with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "function",
+      "name": "_workout_tools",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        83,
+        84
+      ],
+      "summary": "Helper function: _workout_tools.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:_policy",
+      "type": "function",
+      "name": "_policy",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        87,
+        92
+      ],
+      "summary": "Helper function: _policy.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "function",
+      "name": "_search",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        95,
+        102
+      ],
+      "summary": "Helper function: _search.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_search_workouts_not_registered_without_workout_service",
+      "type": "function",
+      "name": "test_search_workouts_not_registered_without_workout_service",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        110,
+        116
+      ],
+      "summary": "Test: search workouts not registered without workout service.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_search_workouts_registered_when_workout_service_provided",
+      "type": "function",
+      "name": "test_search_workouts_registered_when_workout_service_provided",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        119,
+        124
+      ],
+      "summary": "Test: search workouts registered when workout service provided.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_search_workouts_registers_alongside_other_dependencies",
+      "type": "function",
+      "name": "test_search_workouts_registers_alongside_other_dependencies",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        127,
+        137
+      ],
+      "summary": "Test: search workouts registers alongside other dependencies.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_search_workouts_profile_is_read_only",
+      "type": "function",
+      "name": "test_search_workouts_profile_is_read_only",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        140,
+        147
+      ],
+      "summary": "Test: search workouts profile is read only.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_workout_read_is_a_distinct_permission",
+      "type": "function",
+      "name": "test_workout_read_is_a_distinct_permission",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        155,
+        168
+      ],
+      "summary": "Test: workout read is a distinct permission.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_researcher_declares_search_workouts_and_workout_read",
+      "type": "function",
+      "name": "test_researcher_declares_search_workouts_and_workout_read",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        171,
+        175
+      ],
+      "summary": "Test: researcher declares search workouts and workout read.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_researcher_requires_workout_read_via_skill",
+      "type": "function",
+      "name": "test_researcher_requires_workout_read_via_skill",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        178,
+        180
+      ],
+      "summary": "Test: researcher requires workout read via skill.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_unauthorized_agents_are_denied_search_workouts",
+      "type": "function",
+      "name": "test_unauthorized_agents_are_denied_search_workouts",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        183,
+        192
+      ],
+      "summary": "Test: unauthorized agents are denied search workouts.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_workout_read_grant_does_not_authorize_memory_or_writes",
+      "type": "function",
+      "name": "test_workout_read_grant_does_not_authorize_memory_or_writes",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        195,
+        219
+      ],
+      "summary": "Test: workout read grant does not authorize memory or writes.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_engineer_policy_never_auto_approves_workout_read",
+      "type": "function",
+      "name": "test_engineer_policy_never_auto_approves_workout_read",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        222,
+        229
+      ],
+      "summary": "Test: engineer policy never auto approves workout read.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_search_returns_stable_json_shape",
+      "type": "function",
+      "name": "test_search_returns_stable_json_shape",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        237,
+        247
+      ],
+      "summary": "Test: search returns stable json shape.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_search_respects_limit",
+      "type": "function",
+      "name": "test_search_respects_limit",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        250,
+        257
+      ],
+      "summary": "Test: search respects limit.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_search_is_deterministic",
+      "type": "function",
+      "name": "test_search_is_deterministic",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        260,
+        264
+      ],
+      "summary": "Test: search is deterministic.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_search_is_case_insensitive",
+      "type": "function",
+      "name": "test_search_is_case_insensitive",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        267,
+        271
+      ],
+      "summary": "Test: search is case insensitive.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_search_with_completely_unmatched_query_is_empty",
+      "type": "function",
+      "name": "test_search_with_completely_unmatched_query_is_empty",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        274,
+        279
+      ],
+      "summary": "Test: search with completely unmatched query is empty.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_search_requires_string_and_positive_limit",
+      "type": "function",
+      "name": "test_search_requires_string_and_positive_limit",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        282,
+        289
+      ],
+      "summary": "Test: search requires string and positive limit.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_search_does_not_mutate_the_store",
+      "type": "function",
+      "name": "test_search_does_not_mutate_the_store",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        297,
+        309
+      ],
+      "summary": "Test: search does not mutate the store.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_search_creates_no_audit_events_and_no_approvals",
+      "type": "function",
+      "name": "test_search_creates_no_audit_events_and_no_approvals",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        312,
+        319
+      ],
+      "summary": "Test: search creates no audit events and no approvals.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_trick_exercise_is_returned_as_inert_data",
+      "type": "function",
+      "name": "test_trick_exercise_is_returned_as_inert_data",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        327,
+        357
+      ],
+      "summary": "Test: trick exercise is returned as inert data.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:_workout_cp",
+      "type": "function",
+      "name": "_workout_cp",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        429,
+        444
+      ],
+      "summary": "Helper function: _workout_cp.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_workout_research_execution_completes_and_collects_evidence",
+      "type": "function",
+      "name": "test_workout_research_execution_completes_and_collects_evidence",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        447,
+        459
+      ],
+      "summary": "Test: workout research execution completes and collects evidence.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_workout_research_execution_event_stream_is_safe",
+      "type": "function",
+      "name": "test_workout_research_execution_event_stream_is_safe",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        462,
+        491
+      ],
+      "summary": "Test: workout research execution event stream is safe.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_workout_research_task_outputs_summary_and_metric",
+      "type": "function",
+      "name": "test_workout_research_task_outputs_summary_and_metric",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        494,
+        504
+      ],
+      "summary": "Test: workout research task outputs summary and metric.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_control_plane_registers_search_workouts_when_workout_present",
+      "type": "function",
+      "name": "test_control_plane_registers_search_workouts_when_workout_present",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        507,
+        524
+      ],
+      "summary": "Test: control plane registers search workouts when workout present.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agent_tool_workouts.py:test_control_plane_without_workout_has_no_search_tool",
+      "type": "function",
+      "name": "test_control_plane_without_workout_has_no_search_tool",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        527,
+        539
+      ],
+      "summary": "Test: control plane without workout has no search tool.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_agent_tool_workouts.py:_WorkoutResearchPlanner",
+      "type": "class",
+      "name": "_WorkoutResearchPlanner",
+      "filePath": "tests/test_agent_tool_workouts.py",
+      "lineRange": [
+        365,
+        426
+      ],
+      "summary": "Test class _WorkoutResearchPlanner with 2 methods.",
+      "tags": [
+        "helper-class",
+        "exported"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_agents_orchestration.py",
+      "type": "file",
+      "name": "test_agents_orchestration.py",
+      "filePath": "tests/test_agents_orchestration.py",
+      "summary": "Tests agent orchestration, policy engine, planner, executor, and verifier components.",
+      "tags": [
+        "test",
+        "agent",
+        "tools",
+        "policy"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:_default_hits",
+      "type": "function",
+      "name": "_default_hits",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        106,
+        122
+      ],
+      "summary": "Helper function: _default_hits.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:_no_hits",
+      "type": "function",
+      "name": "_no_hits",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        125,
+        126
+      ],
+      "summary": "Helper function: _no_hits.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "function",
+      "name": "build_stack",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        129,
+        156
+      ],
+      "summary": "Function build_stack with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:make_orchestrator",
+      "type": "function",
+      "name": "make_orchestrator",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        159,
+        169
+      ],
+      "summary": "Function make_orchestrator with 2 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_agents_skill_tool_permission_are_distinct_concepts",
+      "type": "function",
+      "name": "test_agents_skill_tool_permission_are_distinct_concepts",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        177,
+        190
+      ],
+      "summary": "Test: agents skill tool permission are distinct concepts.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_agent_and_tool_and_skill_share_no_identity",
+      "type": "function",
+      "name": "test_agent_and_tool_and_skill_share_no_identity",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        193,
+        195
+      ],
+      "summary": "Test: agent and tool and skill share no identity.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_engineer_write_and_shell_are_approval_required_and_not_auto_run",
+      "type": "function",
+      "name": "test_engineer_write_and_shell_are_approval_required_and_not_auto_run",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        203,
+        228
+      ],
+      "summary": "Test: engineer write and shell are approval required and not auto run.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_denied_permission_blocks_and_records_decision",
+      "type": "function",
+      "name": "test_denied_permission_blocks_and_records_decision",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        231,
+        244
+      ],
+      "summary": "Test: denied permission blocks and records decision.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_allowed_tool_runs_only_via_policy_engine",
+      "type": "function",
+      "name": "test_allowed_tool_runs_only_via_policy_engine",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        247,
+        252
+      ],
+      "summary": "Test: allowed tool runs only via policy engine.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_researcher_denied_in_denied_agent_raises",
+      "type": "function",
+      "name": "test_researcher_denied_in_denied_agent_raises",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        255,
+        267
+      ],
+      "summary": "Test: researcher denied in denied agent raises.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_engineer_policy_defaults_conservative",
+      "type": "function",
+      "name": "test_engineer_policy_defaults_conservative",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        270,
+        275
+      ],
+      "summary": "Test: engineer policy defaults conservative.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_duplicate_registrations_rejected",
+      "type": "function",
+      "name": "test_duplicate_registrations_rejected",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        283,
+        289
+      ],
+      "summary": "Test: duplicate registrations rejected.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_default_agent_and_skill_and_tool_registries",
+      "type": "function",
+      "name": "test_default_agent_and_skill_and_tool_registries",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        292,
+        298
+      ],
+      "summary": "Test: default agent and skill and tool registries.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_router_resolves_research_capability_to_configured_model",
+      "type": "function",
+      "name": "test_router_resolves_research_capability_to_configured_model",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        306,
+        314
+      ],
+      "summary": "Test: router resolves research capability to configured model.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_router_falls_back_when_no_provider_can_satisfy",
+      "type": "function",
+      "name": "test_router_falls_back_when_no_provider_can_satisfy",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        317,
+        323
+      ],
+      "summary": "Test: router falls back when no provider can satisfy.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_router_default_provider_covers_any_capability",
+      "type": "function",
+      "name": "test_router_default_provider_covers_any_capability",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        326,
+        332
+      ],
+      "summary": "Test: router default provider covers any capability.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_ollama_provider_refuses_non_local",
+      "type": "function",
+      "name": "test_ollama_provider_refuses_non_local",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        335,
+        340
+      ],
+      "summary": "Test: ollama provider refuses non local.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_available_capabilities",
+      "type": "function",
+      "name": "test_available_capabilities",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        343,
+        347
+      ],
+      "summary": "Test: available capabilities.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:_task",
+      "type": "function",
+      "name": "_task",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        355,
+        356
+      ],
+      "summary": "Helper function: _task.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_state_machine_allowed_and_denied_transitions",
+      "type": "function",
+      "name": "test_state_machine_allowed_and_denied_transitions",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        359,
+        366
+      ],
+      "summary": "Test: state machine allowed and denied transitions.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_with_status_returns_new_task_and_preserves_fields",
+      "type": "function",
+      "name": "test_with_status_returns_new_task_and_preserves_fields",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        369,
+        372
+      ],
+      "summary": "Test: with status returns new task and preserves fields.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_allowed_transitions_exposes_permitted_set",
+      "type": "function",
+      "name": "test_allowed_transitions_exposes_permitted_set",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        375,
+        376
+      ],
+      "summary": "Test: allowed transitions exposes permitted set.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_compute_artifact_hash_is_deterministic",
+      "type": "function",
+      "name": "test_compute_artifact_hash_is_deterministic",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        384,
+        386
+      ],
+      "summary": "Test: compute artifact hash is deterministic.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_planner_rejects_unknown_agent",
+      "type": "function",
+      "name": "test_planner_rejects_unknown_agent",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        394,
+        402
+      ],
+      "summary": "Test: planner rejects unknown agent.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_planner_rejects_undeclared_tool",
+      "type": "function",
+      "name": "test_planner_rejects_undeclared_tool",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        405,
+        415
+      ],
+      "summary": "Test: planner rejects undeclared tool.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_planner_rejects_undeclared_skill",
+      "type": "function",
+      "name": "test_planner_rejects_undeclared_skill",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        418,
+        428
+      ],
+      "summary": "Test: planner rejects undeclared skill.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_planner_rejects_unknown_dependency_and_duplicate_ids",
+      "type": "function",
+      "name": "test_planner_rejects_unknown_dependency_and_duplicate_ids",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        431,
+        457
+      ],
+      "summary": "Test: planner rejects unknown dependency and duplicate ids.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_task_spec_from_llm_is_whitelisted_and_safe",
+      "type": "function",
+      "name": "test_task_spec_from_llm_is_whitelisted_and_safe",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        460,
+        474
+      ],
+      "summary": "Test: task spec from llm is whitelisted and safe.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_task_spec_from_llm_rejects_non_string_agent",
+      "type": "function",
+      "name": "test_task_spec_from_llm_rejects_non_string_agent",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        477,
+        479
+      ],
+      "summary": "Test: task spec from llm rejects non string agent.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_storage_round_trip_plan_task_artifact_event",
+      "type": "function",
+      "name": "test_storage_round_trip_plan_task_artifact_event",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        487,
+        538
+      ],
+      "summary": "Test: storage round trip plan task artifact event.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_storage_save_plan_is_idempotent",
+      "type": "function",
+      "name": "test_storage_save_plan_is_idempotent",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        541,
+        547
+      ],
+      "summary": "Test: storage save plan is idempotent.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:_evidence",
+      "type": "function",
+      "name": "_evidence",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        555,
+        556
+      ],
+      "summary": "Helper function: _evidence.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_verifier_passes_with_evidence_and_summary",
+      "type": "function",
+      "name": "test_verifier_passes_with_evidence_and_summary",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        559,
+        571
+      ],
+      "summary": "Test: verifier passes with evidence and summary.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_verifier_fails_when_required_evidence_missing",
+      "type": "function",
+      "name": "test_verifier_fails_when_required_evidence_missing",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        574,
+        587
+      ],
+      "summary": "Test: verifier fails when required evidence missing.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_verifier_fails_on_empty_summary",
+      "type": "function",
+      "name": "test_verifier_fails_on_empty_summary",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        590,
+        601
+      ],
+      "summary": "Test: verifier fails on empty summary.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_verifier_fails_when_denial_event_recorded",
+      "type": "function",
+      "name": "test_verifier_fails_when_denial_event_recorded",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        604,
+        625
+      ],
+      "summary": "Test: verifier fails when denial event recorded.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:_executor",
+      "type": "function",
+      "name": "_executor",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        633,
+        644
+      ],
+      "summary": "Helper function: _executor.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_executor_denied_tool_does_not_run_and_records_denial",
+      "type": "function",
+      "name": "test_executor_denied_tool_does_not_run_and_records_denial",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        647,
+        698
+      ],
+      "summary": "Test: executor denied tool does not run and records denial.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_executor_retry_is_bounded",
+      "type": "function",
+      "name": "test_executor_retry_is_bounded",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        701,
+        739
+      ],
+      "summary": "Test: executor retry is bounded.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_orchestrator_researcher_to_verifier_succeeds",
+      "type": "function",
+      "name": "test_orchestrator_researcher_to_verifier_succeeds",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        747,
+        761
+      ],
+      "summary": "Test: orchestrator researcher to verifier succeeds.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_orchestrator_fails_when_no_evidence",
+      "type": "function",
+      "name": "test_orchestrator_fails_when_no_evidence",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        764,
+        771
+      ],
+      "summary": "Test: orchestrator fails when no evidence.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_orchestrator_unknown_plan_raises",
+      "type": "function",
+      "name": "test_orchestrator_unknown_plan_raises",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        774,
+        777
+      ],
+      "summary": "Test: orchestrator unknown plan raises.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_orchestrator_records_artifacts",
+      "type": "function",
+      "name": "test_orchestrator_records_artifacts",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        780,
+        788
+      ],
+      "summary": "Test: orchestrator records artifacts.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_orchestrator_chat_model_default_unchanged",
+      "type": "function",
+      "name": "test_orchestrator_chat_model_default_unchanged",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        791,
+        798
+      ],
+      "summary": "Test: orchestrator chat model default unchanged.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_corpus_text_is_data_never_instructions",
+      "type": "function",
+      "name": "test_corpus_text_is_data_never_instructions",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        806,
+        836
+      ],
+      "summary": "Test: corpus text is data never instructions.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_agents_orchestration.py:test_approval_required_action_never_executes_before_approval",
+      "type": "function",
+      "name": "test_approval_required_action_never_executes_before_approval",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        839,
+        846
+      ],
+      "summary": "Test: approval required action never executes before approval.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_agents_orchestration.py:_FakeHit",
+      "type": "class",
+      "name": "_FakeHit",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        80,
+        88
+      ],
+      "summary": "Test class _FakeHit with 1 methods.",
+      "tags": [
+        "helper-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_agents_orchestration.py:_FakeRetrieval",
+      "type": "class",
+      "name": "_FakeRetrieval",
+      "filePath": "tests/test_agents_orchestration.py",
+      "lineRange": [
+        91,
+        103
+      ],
+      "summary": "Test class _FakeRetrieval with 2 methods.",
+      "tags": [
+        "helper-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_automatic_memory_curator.py",
+      "type": "file",
+      "name": "test_automatic_memory_curator.py",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "summary": "Tests automatic memory curation with policy enforcement and approval gates.",
+      "tags": [
+        "test",
+        "unit-test"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "function",
+      "name": "_service",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        27,
+        28
+      ],
+      "summary": "Helper function: _service.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:_evidence",
+      "type": "function",
+      "name": "_evidence",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        31,
+        39
+      ],
+      "summary": "Helper function: _evidence.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "function",
+      "name": "_candidate",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        42,
+        58
+      ],
+      "summary": "Helper function: _candidate.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:test_accepted_candidate_is_persisted_through_policy_engine",
+      "type": "function",
+      "name": "test_accepted_candidate_is_persisted_through_policy_engine",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        61,
+        75
+      ],
+      "summary": "Test: accepted candidate is persisted through policy engine.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:test_accepted_candidate_does_not_bypass_policy_engine_gate",
+      "type": "function",
+      "name": "test_accepted_candidate_does_not_bypass_policy_engine_gate",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        78,
+        88
+      ],
+      "summary": "Test: accepted candidate does not bypass policy engine gate.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:test_no_bypass_without_any_approver_even_for_accepted",
+      "type": "function",
+      "name": "test_no_bypass_without_any_approver_even_for_accepted",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        91,
+        100
+      ],
+      "summary": "Test: no bypass without any approver even for accepted.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:test_secret_never_reaches_write_path",
+      "type": "function",
+      "name": "test_secret_never_reaches_write_path",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        103,
+        116
+      ],
+      "summary": "Test: secret never reaches write path.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:test_deferred_candidate_not_written",
+      "type": "function",
+      "name": "test_deferred_candidate_not_written",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        119,
+        126
+      ],
+      "summary": "Test: deferred candidate not written.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:test_sensitive_candidate_requires_approval_and_uses_interactive_approver",
+      "type": "function",
+      "name": "test_sensitive_candidate_requires_approval_and_uses_interactive_approver",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        129,
+        142
+      ],
+      "summary": "Test: sensitive candidate requires approval and uses interactive approver.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:test_sensitive_with_denied_interactive_approval_never_writes",
+      "type": "function",
+      "name": "test_sensitive_with_denied_interactive_approval_never_writes",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        145,
+        155
+      ],
+      "summary": "Test: sensitive with denied interactive approval never writes.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:test_sensitive_without_approver_stays_unwritten",
+      "type": "function",
+      "name": "test_sensitive_without_approver_stays_unwritten",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        158,
+        166
+      ],
+      "summary": "Test: sensitive without approver stays unwritten.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:test_results_never_echo_statement_text",
+      "type": "function",
+      "name": "test_results_never_echo_statement_text",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        169,
+        174
+      ],
+      "summary": "Test: results never echo statement text.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_automatic_memory_curator.py:test_accepted_supersede_path_goes_through_curator",
+      "type": "function",
+      "name": "test_accepted_supersede_path_goes_through_curator",
+      "filePath": "tests/test_automatic_memory_curator.py",
+      "lineRange": [
+        177,
+        201
+      ],
+      "summary": "Test: accepted supersede path goes through curator.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:service",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:service",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:_policy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:_policy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_workouts_not_registered_without_workout_service",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_workouts_not_registered_without_workout_service",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_workouts_registered_when_workout_service_provided",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_workouts_registered_when_workout_service_provided",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_workouts_registers_alongside_other_dependencies",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_workouts_registers_alongside_other_dependencies",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_workouts_profile_is_read_only",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_workouts_profile_is_read_only",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_workout_read_is_a_distinct_permission",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_workout_read_is_a_distinct_permission",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_researcher_declares_search_workouts_and_workout_read",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_researcher_declares_search_workouts_and_workout_read",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_researcher_requires_workout_read_via_skill",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_researcher_requires_workout_read_via_skill",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_unauthorized_agents_are_denied_search_workouts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_unauthorized_agents_are_denied_search_workouts",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_workout_read_grant_does_not_authorize_memory_or_writes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_workout_read_grant_does_not_authorize_memory_or_writes",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_engineer_policy_never_auto_approves_workout_read",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_engineer_policy_never_auto_approves_workout_read",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_returns_stable_json_shape",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_returns_stable_json_shape",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_respects_limit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_respects_limit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_is_deterministic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_is_deterministic",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_is_case_insensitive",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_is_case_insensitive",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_with_completely_unmatched_query_is_empty",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_with_completely_unmatched_query_is_empty",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_requires_string_and_positive_limit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_requires_string_and_positive_limit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_does_not_mutate_the_store",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_does_not_mutate_the_store",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_creates_no_audit_events_and_no_approvals",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_search_creates_no_audit_events_and_no_approvals",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_trick_exercise_is_returned_as_inert_data",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_trick_exercise_is_returned_as_inert_data",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_cp",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_cp",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_workout_research_execution_completes_and_collects_evidence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_workout_research_execution_completes_and_collects_evidence",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_workout_research_execution_event_stream_is_safe",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_workout_research_execution_event_stream_is_safe",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_workout_research_task_outputs_summary_and_metric",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_workout_research_task_outputs_summary_and_metric",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_control_plane_registers_search_workouts_when_workout_present",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_control_plane_registers_search_workouts_when_workout_present",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_control_plane_without_workout_has_no_search_tool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "function:tests/test_agent_tool_workouts.py:test_control_plane_without_workout_has_no_search_tool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "class:tests/test_agent_tool_workouts.py:_WorkoutResearchPlanner",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agent_tool_workouts.py",
+      "target": "class:tests/test_agent_tool_workouts.py:_WorkoutResearchPlanner",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_workouts_registered_when_workout_service_provided",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_unauthorized_agents_are_denied_search_workouts",
+      "target": "function:tests/test_agent_tool_workouts.py:_policy",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_unauthorized_agents_are_denied_search_workouts",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_returns_stable_json_shape",
+      "target": "function:tests/test_agent_tool_workouts.py:_policy",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_returns_stable_json_shape",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_returns_stable_json_shape",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_respects_limit",
+      "target": "function:tests/test_agent_tool_workouts.py:_policy",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_respects_limit",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_respects_limit",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_respects_limit",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_respects_limit",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_is_deterministic",
+      "target": "function:tests/test_agent_tool_workouts.py:_policy",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_is_deterministic",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_is_deterministic",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_is_deterministic",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_is_case_insensitive",
+      "target": "function:tests/test_agent_tool_workouts.py:_policy",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_is_case_insensitive",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_is_case_insensitive",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_is_case_insensitive",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_with_completely_unmatched_query_is_empty",
+      "target": "function:tests/test_agent_tool_workouts.py:_policy",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_with_completely_unmatched_query_is_empty",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_with_completely_unmatched_query_is_empty",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_requires_string_and_positive_limit",
+      "target": "function:tests/test_agent_tool_workouts.py:_policy",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_requires_string_and_positive_limit",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_requires_string_and_positive_limit",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_requires_string_and_positive_limit",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_does_not_mutate_the_store",
+      "target": "function:tests/test_agent_tool_workouts.py:_policy",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_does_not_mutate_the_store",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_does_not_mutate_the_store",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_does_not_mutate_the_store",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_search_creates_no_audit_events_and_no_approvals",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_cp",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_trick_exercise_is_returned_as_inert_data",
+      "target": "function:tests/test_agent_tool_workouts.py:_policy",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_trick_exercise_is_returned_as_inert_data",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_tools",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_trick_exercise_is_returned_as_inert_data",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_workout_research_execution_completes_and_collects_evidence",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_cp",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_workout_research_execution_event_stream_is_safe",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_cp",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_workout_research_task_outputs_summary_and_metric",
+      "target": "function:tests/test_agent_tool_workouts.py:_workout_cp",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agent_tool_workouts.py:test_control_plane_registers_search_workouts_when_workout_present",
+      "target": "function:tests/test_agent_tool_workouts.py:_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:_default_hits",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:_default_hits",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:_no_hits",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:_no_hits",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:make_orchestrator",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:make_orchestrator",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_agents_skill_tool_permission_are_distinct_concepts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_agents_skill_tool_permission_are_distinct_concepts",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_agent_and_tool_and_skill_share_no_identity",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_agent_and_tool_and_skill_share_no_identity",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_engineer_write_and_shell_are_approval_required_and_not_auto_run",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_engineer_write_and_shell_are_approval_required_and_not_auto_run",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_denied_permission_blocks_and_records_decision",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_denied_permission_blocks_and_records_decision",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_allowed_tool_runs_only_via_policy_engine",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_allowed_tool_runs_only_via_policy_engine",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_researcher_denied_in_denied_agent_raises",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_researcher_denied_in_denied_agent_raises",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_engineer_policy_defaults_conservative",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_engineer_policy_defaults_conservative",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_duplicate_registrations_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_duplicate_registrations_rejected",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_default_agent_and_skill_and_tool_registries",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_default_agent_and_skill_and_tool_registries",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_router_resolves_research_capability_to_configured_model",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_router_resolves_research_capability_to_configured_model",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_router_falls_back_when_no_provider_can_satisfy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_router_falls_back_when_no_provider_can_satisfy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_router_default_provider_covers_any_capability",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_router_default_provider_covers_any_capability",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_ollama_provider_refuses_non_local",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_ollama_provider_refuses_non_local",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_available_capabilities",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_available_capabilities",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:_task",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:_task",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_state_machine_allowed_and_denied_transitions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_state_machine_allowed_and_denied_transitions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_with_status_returns_new_task_and_preserves_fields",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_with_status_returns_new_task_and_preserves_fields",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_allowed_transitions_exposes_permitted_set",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_allowed_transitions_exposes_permitted_set",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_compute_artifact_hash_is_deterministic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_compute_artifact_hash_is_deterministic",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_planner_rejects_unknown_agent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_planner_rejects_unknown_agent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_planner_rejects_undeclared_tool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_planner_rejects_undeclared_tool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_planner_rejects_undeclared_skill",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_planner_rejects_undeclared_skill",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_planner_rejects_unknown_dependency_and_duplicate_ids",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_planner_rejects_unknown_dependency_and_duplicate_ids",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_task_spec_from_llm_is_whitelisted_and_safe",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_task_spec_from_llm_is_whitelisted_and_safe",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_task_spec_from_llm_rejects_non_string_agent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_task_spec_from_llm_rejects_non_string_agent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_storage_round_trip_plan_task_artifact_event",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_storage_round_trip_plan_task_artifact_event",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_storage_save_plan_is_idempotent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_storage_save_plan_is_idempotent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:_evidence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:_evidence",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_verifier_passes_with_evidence_and_summary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_verifier_passes_with_evidence_and_summary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_verifier_fails_when_required_evidence_missing",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_verifier_fails_when_required_evidence_missing",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_verifier_fails_on_empty_summary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_verifier_fails_on_empty_summary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_verifier_fails_when_denial_event_recorded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_verifier_fails_when_denial_event_recorded",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:_executor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:_executor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_executor_denied_tool_does_not_run_and_records_denial",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_executor_denied_tool_does_not_run_and_records_denial",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_executor_retry_is_bounded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_executor_retry_is_bounded",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_orchestrator_researcher_to_verifier_succeeds",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_orchestrator_researcher_to_verifier_succeeds",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_orchestrator_fails_when_no_evidence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_orchestrator_fails_when_no_evidence",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_orchestrator_unknown_plan_raises",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_orchestrator_unknown_plan_raises",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_orchestrator_records_artifacts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_orchestrator_records_artifacts",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_orchestrator_chat_model_default_unchanged",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_orchestrator_chat_model_default_unchanged",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_corpus_text_is_data_never_instructions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_corpus_text_is_data_never_instructions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_approval_required_action_never_executes_before_approval",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "function:tests/test_agents_orchestration.py:test_approval_required_action_never_executes_before_approval",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "class:tests/test_agents_orchestration.py:_FakeHit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "class:tests/test_agents_orchestration.py:_FakeHit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "class:tests/test_agents_orchestration.py:_FakeRetrieval",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_agents_orchestration.py",
+      "target": "class:tests/test_agents_orchestration.py:_FakeRetrieval",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_agents_orchestration.py:_FakeHit",
+      "target": "function:tests/test_agents_orchestration.py:_default_hits",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:make_orchestrator",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_engineer_write_and_shell_are_approval_required_and_not_auto_run",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_denied_permission_blocks_and_records_decision",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_allowed_tool_runs_only_via_policy_engine",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_researcher_denied_in_denied_agent_raises",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_router_resolves_research_capability_to_configured_model",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_router_default_provider_covers_any_capability",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_available_capabilities",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_with_status_returns_new_task_and_preserves_fields",
+      "target": "function:tests/test_agents_orchestration.py:_task",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_planner_rejects_unknown_agent",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_planner_rejects_undeclared_tool",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_planner_rejects_undeclared_skill",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_planner_rejects_unknown_dependency_and_duplicate_ids",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_verifier_passes_with_evidence_and_summary",
+      "target": "function:tests/test_agents_orchestration.py:_evidence",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_verifier_fails_on_empty_summary",
+      "target": "function:tests/test_agents_orchestration.py:_evidence",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_verifier_fails_when_denial_event_recorded",
+      "target": "function:tests/test_agents_orchestration.py:_evidence",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:_executor",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_executor_denied_tool_does_not_run_and_records_denial",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_executor_retry_is_bounded",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_orchestrator_researcher_to_verifier_succeeds",
+      "target": "function:tests/test_agents_orchestration.py:make_orchestrator",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_orchestrator_fails_when_no_evidence",
+      "target": "function:tests/test_agents_orchestration.py:make_orchestrator",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_orchestrator_fails_when_no_evidence",
+      "target": "function:tests/test_agents_orchestration.py:_no_hits",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_orchestrator_unknown_plan_raises",
+      "target": "function:tests/test_agents_orchestration.py:make_orchestrator",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_orchestrator_records_artifacts",
+      "target": "function:tests/test_agents_orchestration.py:make_orchestrator",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_orchestrator_chat_model_default_unchanged",
+      "target": "function:tests/test_agents_orchestration.py:make_orchestrator",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_corpus_text_is_data_never_instructions",
+      "target": "function:tests/test_agents_orchestration.py:make_orchestrator",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_agents_orchestration.py:test_approval_required_action_never_executes_before_approval",
+      "target": "function:tests/test_agents_orchestration.py:build_stack",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:_evidence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:_evidence",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_accepted_candidate_is_persisted_through_policy_engine",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_accepted_candidate_is_persisted_through_policy_engine",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_accepted_candidate_does_not_bypass_policy_engine_gate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_accepted_candidate_does_not_bypass_policy_engine_gate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_no_bypass_without_any_approver_even_for_accepted",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_no_bypass_without_any_approver_even_for_accepted",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_secret_never_reaches_write_path",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_secret_never_reaches_write_path",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_deferred_candidate_not_written",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_deferred_candidate_not_written",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_sensitive_candidate_requires_approval_and_uses_interactive_approver",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_sensitive_candidate_requires_approval_and_uses_interactive_approver",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_sensitive_with_denied_interactive_approval_never_writes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_sensitive_with_denied_interactive_approval_never_writes",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_sensitive_without_approver_stays_unwritten",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_sensitive_without_approver_stays_unwritten",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_results_never_echo_statement_text",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_results_never_echo_statement_text",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_accepted_supersede_path_goes_through_curator",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_automatic_memory_curator.py",
+      "target": "function:tests/test_automatic_memory_curator.py:test_accepted_supersede_path_goes_through_curator",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "target": "function:tests/test_automatic_memory_curator.py:_evidence",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_accepted_candidate_is_persisted_through_policy_engine",
+      "target": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_accepted_candidate_is_persisted_through_policy_engine",
+      "target": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_accepted_candidate_does_not_bypass_policy_engine_gate",
+      "target": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_accepted_candidate_does_not_bypass_policy_engine_gate",
+      "target": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_no_bypass_without_any_approver_even_for_accepted",
+      "target": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_no_bypass_without_any_approver_even_for_accepted",
+      "target": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_secret_never_reaches_write_path",
+      "target": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_secret_never_reaches_write_path",
+      "target": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_deferred_candidate_not_written",
+      "target": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_deferred_candidate_not_written",
+      "target": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_sensitive_candidate_requires_approval_and_uses_interactive_approver",
+      "target": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_sensitive_candidate_requires_approval_and_uses_interactive_approver",
+      "target": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_sensitive_with_denied_interactive_approval_never_writes",
+      "target": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_sensitive_with_denied_interactive_approval_never_writes",
+      "target": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_sensitive_without_approver_stays_unwritten",
+      "target": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_sensitive_without_approver_stays_unwritten",
+      "target": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_results_never_echo_statement_text",
+      "target": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_results_never_echo_statement_text",
+      "target": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_accepted_supersede_path_goes_through_curator",
+      "target": "function:tests/test_automatic_memory_curator.py:_service",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_accepted_supersede_path_goes_through_curator",
+      "target": "function:tests/test_automatic_memory_curator.py:_candidate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_automatic_memory_curator.py:test_accepted_supersede_path_goes_through_curator",
+      "target": "function:tests/test_automatic_memory_curator.py:_evidence",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/workouts.py",
+      "target": "file:tests/test_agent_tool_workouts.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/execution/control_plane.py",
+      "target": "file:tests/test_agent_tool_workouts.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/execution/orchestrator.py",
+      "target": "file:tests/test_agents_orchestration.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/execution/executor.py",
+      "target": "file:tests/test_agents_orchestration.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/execution/planner.py",
+      "target": "file:tests/test_agents_orchestration.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/execution/verifier.py",
+      "target": "file:tests/test_agents_orchestration.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/agents/registry.py",
+      "target": "file:tests/test_agents_orchestration.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/agents/policy.py",
+      "target": "file:tests/test_agents_orchestration.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/tools/memory.py",
+      "target": "file:tests/test_automatic_memory_curator.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/memory/service.py",
+      "target": "file:tests/test_automatic_memory_curator.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

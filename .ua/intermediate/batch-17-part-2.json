@@ -1,0 +1,1457 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/personal_ai/workouts/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/personal_ai/workouts/__init__.py",
+      "summary": "Package init file exporting 0 symbols.",
+      "tags": [
+        "type-definition"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/personal_ai/workouts/models.py",
+      "type": "file",
+      "name": "models.py",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "summary": "Workout domain module for models operations.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/models.py:_stable_id",
+      "type": "function",
+      "name": "_stable_id",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        30,
+        38
+      ],
+      "summary": "Function _stable_id with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/models.py:workout_id",
+      "type": "function",
+      "name": "workout_id",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        41,
+        43
+      ],
+      "summary": "Function workout_id with 3 parameters.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/models.py:exercise_id",
+      "type": "function",
+      "name": "exercise_id",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        46,
+        48
+      ],
+      "summary": "Function exercise_id with 3 parameters.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/models.py:set_id",
+      "type": "function",
+      "name": "set_id",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        51,
+        53
+      ],
+      "summary": "Function set_id with 2 parameters.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/models.py:compute_content_hash",
+      "type": "function",
+      "name": "compute_content_hash",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        369,
+        429
+      ],
+      "summary": "Function compute_content_hash with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/models.py:_float_repr",
+      "type": "function",
+      "name": "_float_repr",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        432,
+        436
+      ],
+      "summary": "Function _float_repr with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/models.py:WorkoutSet",
+      "type": "class",
+      "name": "WorkoutSet",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        57,
+        91
+      ],
+      "summary": "Class WorkoutSet with 2 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/models.py:WorkoutExercise",
+      "type": "class",
+      "name": "WorkoutExercise",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        95,
+        118
+      ],
+      "summary": "Class WorkoutExercise with 1 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/models.py:WorkoutRecord",
+      "type": "class",
+      "name": "WorkoutRecord",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        122,
+        154
+      ],
+      "summary": "Class WorkoutRecord with 2 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/models.py:Workout",
+      "type": "class",
+      "name": "Workout",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        158,
+        217
+      ],
+      "summary": "Class Workout with 5 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/models.py:WorkoutSummary",
+      "type": "class",
+      "name": "WorkoutSummary",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        221,
+        234
+      ],
+      "summary": "Class WorkoutSummary with 0 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/models.py:ExerciseSummary",
+      "type": "class",
+      "name": "ExerciseSummary",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        238,
+        250
+      ],
+      "summary": "Class ExerciseSummary with 0 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/models.py:SetSummary",
+      "type": "class",
+      "name": "SetSummary",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        254,
+        270
+      ],
+      "summary": "Class SetSummary with 0 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/models.py:RowWarning",
+      "type": "class",
+      "name": "RowWarning",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        274,
+        283
+      ],
+      "summary": "Class RowWarning with 0 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/models.py:WorkoutSearchResult",
+      "type": "class",
+      "name": "WorkoutSearchResult",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        287,
+        319
+      ],
+      "summary": "Class WorkoutSearchResult with 1 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/models.py:WorkoutImportResult",
+      "type": "class",
+      "name": "WorkoutImportResult",
+      "filePath": "src/personal_ai/workouts/models.py",
+      "lineRange": [
+        323,
+        366
+      ],
+      "summary": "Class WorkoutImportResult with 2 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/workouts/parser.py",
+      "type": "file",
+      "name": "parser.py",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "summary": "Workout domain module for parser operations.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/parser.py:detect_source_type",
+      "type": "function",
+      "name": "detect_source_type",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        80,
+        88
+      ],
+      "summary": "Function detect_source_type with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/parser.py:parse_workout_file",
+      "type": "function",
+      "name": "parse_workout_file",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        91,
+        120
+      ],
+      "summary": "Function parse_workout_file with 3 parameters.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/parser.py:parse_boostcamp_csv",
+      "type": "function",
+      "name": "parse_boostcamp_csv",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        123,
+        147
+      ],
+      "summary": "Function parse_boostcamp_csv with 3 parameters.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/parser.py:_candidate_records",
+      "type": "function",
+      "name": "_candidate_records",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        150,
+        154
+      ],
+      "summary": "Function _candidate_records with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/parser.py:_normalize_header",
+      "type": "function",
+      "name": "_normalize_header",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        157,
+        159
+      ],
+      "summary": "Function _normalize_header with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/parser.py:_normalize_timestamp",
+      "type": "function",
+      "name": "_normalize_timestamp",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        162,
+        194
+      ],
+      "summary": "Function _normalize_timestamp with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/parser.py:_parse_int",
+      "type": "function",
+      "name": "_parse_int",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        197,
+        204
+      ],
+      "summary": "Function _parse_int with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/parser.py:_parse_float",
+      "type": "function",
+      "name": "_parse_float",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        207,
+        214
+      ],
+      "summary": "Function _parse_float with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/parser.py:_parse_optional",
+      "type": "function",
+      "name": "_parse_optional",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        217,
+        218
+      ],
+      "summary": "Function _parse_optional with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/parser.py:_parse_row",
+      "type": "function",
+      "name": "_parse_row",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        221,
+        296
+      ],
+      "summary": "Function _parse_row with 5 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/parser.py:_parse_exercises",
+      "type": "function",
+      "name": "_parse_exercises",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        299,
+        407
+      ],
+      "summary": "Function _parse_exercises with 5 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/parser.py:_parse_set",
+      "type": "function",
+      "name": "_parse_set",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        410,
+        485
+      ],
+      "summary": "Function _parse_set with 6 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/parser.py:WorkoutParseError",
+      "type": "class",
+      "name": "WorkoutParseError",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        57,
+        58
+      ],
+      "summary": "Custom exception WorkoutParseError for error handling.",
+      "tags": [
+        "error-type"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/parser.py:UnsupportedWorkoutFormatError",
+      "type": "class",
+      "name": "UnsupportedWorkoutFormatError",
+      "filePath": "src/personal_ai/workouts/parser.py",
+      "lineRange": [
+        61,
+        62
+      ],
+      "summary": "Custom exception UnsupportedWorkoutFormatError for error handling.",
+      "tags": [
+        "error-type"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/workouts/query.py",
+      "type": "file",
+      "name": "query.py",
+      "filePath": "src/personal_ai/workouts/query.py",
+      "summary": "Workout domain module for query operations.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/query.py:_date_floor",
+      "type": "function",
+      "name": "_date_floor",
+      "filePath": "src/personal_ai/workouts/query.py",
+      "lineRange": [
+        99,
+        100
+      ],
+      "summary": "Function _date_floor with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/query.py:_date_ceil",
+      "type": "function",
+      "name": "_date_ceil",
+      "filePath": "src/personal_ai/workouts/query.py",
+      "lineRange": [
+        103,
+        104
+      ],
+      "summary": "Function _date_ceil with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/query.py:_limit_clause",
+      "type": "function",
+      "name": "_limit_clause",
+      "filePath": "src/personal_ai/workouts/query.py",
+      "lineRange": [
+        362,
+        363
+      ],
+      "summary": "Function _limit_clause with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/query.py:_row_to_workout_summary",
+      "type": "function",
+      "name": "_row_to_workout_summary",
+      "filePath": "src/personal_ai/workouts/query.py",
+      "lineRange": [
+        366,
+        380
+      ],
+      "summary": "Function _row_to_workout_summary with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/query.py:_row_to_exercise_summary",
+      "type": "function",
+      "name": "_row_to_exercise_summary",
+      "filePath": "src/personal_ai/workouts/query.py",
+      "lineRange": [
+        383,
+        396
+      ],
+      "summary": "Function _row_to_exercise_summary with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/query.py:_row_to_set_summary",
+      "type": "function",
+      "name": "_row_to_set_summary",
+      "filePath": "src/personal_ai/workouts/query.py",
+      "lineRange": [
+        399,
+        416
+      ],
+      "summary": "Function _row_to_set_summary with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/query.py:WorkoutQueryService",
+      "type": "class",
+      "name": "WorkoutQueryService",
+      "filePath": "src/personal_ai/workouts/query.py",
+      "lineRange": [
+        107,
+        359
+      ],
+      "summary": "Service class WorkoutQueryService providing business logic.",
+      "tags": [
+        "service"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/personal_ai/workouts/store.py",
+      "type": "file",
+      "name": "store.py",
+      "filePath": "src/personal_ai/workouts/store.py",
+      "summary": "Workout domain module for store operations.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/store.py:_checksum",
+      "type": "function",
+      "name": "_checksum",
+      "filePath": "src/personal_ai/workouts/store.py",
+      "lineRange": [
+        177,
+        178
+      ],
+      "summary": "Function _checksum with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/store.py:now_iso",
+      "type": "function",
+      "name": "now_iso",
+      "filePath": "src/personal_ai/workouts/store.py",
+      "lineRange": [
+        426,
+        428
+      ],
+      "summary": "Function now_iso with 0 parameters.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/store.py:open_workout_store",
+      "type": "function",
+      "name": "open_workout_store",
+      "filePath": "src/personal_ai/workouts/store.py",
+      "lineRange": [
+        431,
+        440
+      ],
+      "summary": "Function open_workout_store with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/store.py:import_workout_directory",
+      "type": "function",
+      "name": "import_workout_directory",
+      "filePath": "src/personal_ai/workouts/store.py",
+      "lineRange": [
+        443,
+        503
+      ],
+      "summary": "Function import_workout_directory with 2 parameters.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/store.py:_row_to_workout",
+      "type": "function",
+      "name": "_row_to_workout",
+      "filePath": "src/personal_ai/workouts/store.py",
+      "lineRange": [
+        506,
+        529
+      ],
+      "summary": "Function _row_to_workout with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/store.py:_row_to_exercise",
+      "type": "function",
+      "name": "_row_to_exercise",
+      "filePath": "src/personal_ai/workouts/store.py",
+      "lineRange": [
+        532,
+        543
+      ],
+      "summary": "Function _row_to_exercise with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/workouts/store.py:_row_to_set",
+      "type": "function",
+      "name": "_row_to_set",
+      "filePath": "src/personal_ai/workouts/store.py",
+      "lineRange": [
+        546,
+        564
+      ],
+      "summary": "Function _row_to_set with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/workouts/store.py:WorkoutStore",
+      "type": "class",
+      "name": "WorkoutStore",
+      "filePath": "src/personal_ai/workouts/store.py",
+      "lineRange": [
+        181,
+        423
+      ],
+      "summary": "Storage class WorkoutStore for database operations.",
+      "tags": [
+        "storage"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "tests/__init__.py",
+      "summary": "Package init file exporting 0 symbols.",
+      "tags": [
+        "type-definition"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/conftest.py",
+      "type": "file",
+      "name": "conftest.py",
+      "filePath": "tests/conftest.py",
+      "summary": "conftest.py module with 0 functions and 0 classes.",
+      "tags": [
+        "type-definition"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "function:src/personal_ai/workouts/models.py:_stable_id",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "function:src/personal_ai/workouts/models.py:_stable_id",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "function:src/personal_ai/workouts/models.py:workout_id",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "function:src/personal_ai/workouts/models.py:workout_id",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "function:src/personal_ai/workouts/models.py:exercise_id",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "function:src/personal_ai/workouts/models.py:exercise_id",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "function:src/personal_ai/workouts/models.py:set_id",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "function:src/personal_ai/workouts/models.py:set_id",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "function:src/personal_ai/workouts/models.py:compute_content_hash",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "function:src/personal_ai/workouts/models.py:compute_content_hash",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "function:src/personal_ai/workouts/models.py:_float_repr",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "function:src/personal_ai/workouts/models.py:_float_repr",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:WorkoutSet",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:WorkoutSet",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:WorkoutExercise",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:WorkoutExercise",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:WorkoutRecord",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:WorkoutRecord",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:Workout",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:Workout",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:WorkoutSummary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:WorkoutSummary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:ExerciseSummary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:ExerciseSummary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:SetSummary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:SetSummary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:RowWarning",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:RowWarning",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:WorkoutSearchResult",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:WorkoutSearchResult",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:WorkoutImportResult",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/models.py",
+      "target": "class:src/personal_ai/workouts/models.py:WorkoutImportResult",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:detect_source_type",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:detect_source_type",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:parse_workout_file",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:parse_workout_file",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:parse_boostcamp_csv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:parse_boostcamp_csv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_candidate_records",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_candidate_records",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_normalize_header",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_normalize_header",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_normalize_timestamp",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_normalize_timestamp",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_parse_int",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_parse_int",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_parse_float",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_parse_float",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_parse_optional",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_parse_optional",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_parse_row",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_parse_row",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_parse_exercises",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_parse_exercises",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_parse_set",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "function:src/personal_ai/workouts/parser.py:_parse_set",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "class:src/personal_ai/workouts/parser.py:WorkoutParseError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "class:src/personal_ai/workouts/parser.py:WorkoutParseError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "class:src/personal_ai/workouts/parser.py:UnsupportedWorkoutFormatError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/parser.py",
+      "target": "class:src/personal_ai/workouts/parser.py:UnsupportedWorkoutFormatError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "function:src/personal_ai/workouts/query.py:_date_floor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "function:src/personal_ai/workouts/query.py:_date_floor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "function:src/personal_ai/workouts/query.py:_date_ceil",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "function:src/personal_ai/workouts/query.py:_date_ceil",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "function:src/personal_ai/workouts/query.py:_limit_clause",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "function:src/personal_ai/workouts/query.py:_limit_clause",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "function:src/personal_ai/workouts/query.py:_row_to_workout_summary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "function:src/personal_ai/workouts/query.py:_row_to_workout_summary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "function:src/personal_ai/workouts/query.py:_row_to_exercise_summary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "function:src/personal_ai/workouts/query.py:_row_to_exercise_summary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "function:src/personal_ai/workouts/query.py:_row_to_set_summary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "function:src/personal_ai/workouts/query.py:_row_to_set_summary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "class:src/personal_ai/workouts/query.py:WorkoutQueryService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/query.py",
+      "target": "class:src/personal_ai/workouts/query.py:WorkoutQueryService",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:_checksum",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:_checksum",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:now_iso",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:now_iso",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:open_workout_store",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:open_workout_store",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:import_workout_directory",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:import_workout_directory",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:_row_to_workout",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:_row_to_workout",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:_row_to_exercise",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:_row_to_exercise",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:_row_to_set",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "function:src/personal_ai/workouts/store.py:_row_to_set",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "class:src/personal_ai/workouts/store.py:WorkoutStore",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/workouts/store.py",
+      "target": "class:src/personal_ai/workouts/store.py:WorkoutStore",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/workouts/__init__.py",
+      "target": "file:tests/__init__.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

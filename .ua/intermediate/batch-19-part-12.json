@@ -1,0 +1,1740 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_memory_chat.py",
+      "type": "file",
+      "name": "test_memory_chat.py",
+      "filePath": "tests/test_memory_chat.py",
+      "summary": "Test file with 2 test classes and 43 test functions for memory_chat.",
+      "tags": [
+        "test",
+        "memory",
+        "chat"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:tests/test_memory_chat.py:FakeAgent",
+      "type": "class",
+      "name": "FakeAgent",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        118,
+        128
+      ],
+      "summary": "Test class with 2 test methods.",
+      "tags": [
+        "test-class",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:FakeAgent.__init__",
+      "type": "function",
+      "name": "__init__",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        118,
+        128
+      ],
+      "summary": "Test method validating   init  .",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:FakeAgent.run",
+      "type": "function",
+      "name": "run",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        118,
+        128
+      ],
+      "summary": "Test method validating run.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_memory_chat.py:TestCliSystemPrompt",
+      "type": "class",
+      "name": "TestCliSystemPrompt",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        730,
+        774
+      ],
+      "summary": "Test class with 6 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:TestCliSystemPrompt.test_prepends_static_system_message_first",
+      "type": "function",
+      "name": "test_prepends_static_system_message_first",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        730,
+        774
+      ],
+      "summary": "Test method validating prepends static system message first.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:TestCliSystemPrompt.test_input_sequence_is_not_mutated",
+      "type": "function",
+      "name": "test_input_sequence_is_not_mutated",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        730,
+        774
+      ],
+      "summary": "Test method validating input sequence is not mutated.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:TestCliSystemPrompt.test_existing_system_message_is_never_duplicated",
+      "type": "function",
+      "name": "test_existing_system_message_is_never_duplicated",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        730,
+        774
+      ],
+      "summary": "Test method validating existing system message is never duplicated.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:TestCliSystemPrompt.test_prompt_keeps_untrusted_reference_blocks_informational",
+      "type": "function",
+      "name": "test_prompt_keeps_untrusted_reference_blocks_informational",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        730,
+        774
+      ],
+      "summary": "Test method validating prompt keeps untrusted reference blocks informational.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:TestCliSystemPrompt.test_prompt_directs_tool_use_and_honest_answers",
+      "type": "function",
+      "name": "test_prompt_directs_tool_use_and_honest_answers",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        730,
+        774
+      ],
+      "summary": "Test method validating prompt directs tool use and honest answers.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:TestCliSystemPrompt.test_prepend_keeps_extra_messages_in_original_order",
+      "type": "function",
+      "name": "test_prepend_keeps_extra_messages_in_original_order",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        730,
+        774
+      ],
+      "summary": "Test method validating prepend keeps extra messages in original order.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:service",
+      "type": "function",
+      "name": "service",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        78,
+        83
+      ],
+      "summary": "Helper function for service.",
+      "tags": [
+        "test-function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:_add",
+      "type": "function",
+      "name": "_add",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        86,
+        111
+      ],
+      "summary": "Helper function for  add.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:_chat",
+      "type": "function",
+      "name": "_chat",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        114,
+        115
+      ],
+      "summary": "Helper function for  chat.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_memory_context_is_always_untrusted",
+      "type": "function",
+      "name": "test_memory_context_is_always_untrusted",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        136,
+        139
+      ],
+      "summary": "Test function for memory context is always untrusted.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_memory_context_has_no_executable_policy_surface",
+      "type": "function",
+      "name": "test_memory_context_has_no_executable_policy_surface",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        142,
+        146
+      ],
+      "summary": "Test function for memory context has no executable policy surface.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_prompt_block_marked_untrusted_and_never_authoritative",
+      "type": "function",
+      "name": "test_prompt_block_marked_untrusted_and_never_authoritative",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        149,
+        164
+      ],
+      "summary": "Test function for prompt block marked untrusted and never authoritative.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_empty_context_block_is_bounded_and_labeled",
+      "type": "function",
+      "name": "test_empty_context_block_is_bounded_and_labeled",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        167,
+        170
+      ],
+      "summary": "Test function for empty context block is bounded and labeled.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_memory_context_to_dict_serializes",
+      "type": "function",
+      "name": "test_memory_context_to_dict_serializes",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        173,
+        179
+      ],
+      "summary": "Test function for memory context to dict serializes.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_bounded_query_normalizes_whitespace",
+      "type": "function",
+      "name": "test_bounded_query_normalizes_whitespace",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        187,
+        188
+      ],
+      "summary": "Test function for bounded query normalizes whitespace.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_bounded_query_truncates_at_200_chars",
+      "type": "function",
+      "name": "test_bounded_query_truncates_at_200_chars",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        191,
+        194
+      ],
+      "summary": "Test function for bounded query truncates at 200 chars.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_recall_uses_bounded_query_not_full_message",
+      "type": "function",
+      "name": "test_recall_uses_bounded_query_not_full_message",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        197,
+        211
+      ],
+      "summary": "Test function for recall uses bounded query not full message.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_tokenless_message_returns_empty_context",
+      "type": "function",
+      "name": "test_tokenless_message_returns_empty_context",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        214,
+        223
+      ],
+      "summary": "Test function for tokenless message returns empty context.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_blank_message_returns_empty_context",
+      "type": "function",
+      "name": "test_blank_message_returns_empty_context",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        226,
+        229
+      ],
+      "summary": "Test function for blank message returns empty context.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_scope_derivation_global_default",
+      "type": "function",
+      "name": "test_scope_derivation_global_default",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        232,
+        233
+      ],
+      "summary": "Test function for scope derivation global default.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_scope_derivation_only_trusted_context",
+      "type": "function",
+      "name": "test_scope_derivation_only_trusted_context",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        236,
+        246
+      ],
+      "summary": "Test function for scope derivation only trusted context.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_chat_limit_validation",
+      "type": "function",
+      "name": "test_chat_limit_validation",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        249,
+        253
+      ],
+      "summary": "Test function for chat limit validation.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_recall_bounds_result_count",
+      "type": "function",
+      "name": "test_recall_bounds_result_count",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        261,
+        268
+      ],
+      "summary": "Test function for recall bounds result count.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_recall_is_deterministic",
+      "type": "function",
+      "name": "test_recall_is_deterministic",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        271,
+        281
+      ],
+      "summary": "Test function for recall is deterministic.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_irrelevant_memories_are_not_included",
+      "type": "function",
+      "name": "test_irrelevant_memories_are_not_included",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        284,
+        290
+      ],
+      "summary": "Test function for irrelevant memories are not included.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_recall_respects_explicit_execution_scope",
+      "type": "function",
+      "name": "test_recall_respects_explicit_execution_scope",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        293,
+        324
+      ],
+      "summary": "Test function for recall respects explicit execution scope.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_recall_min_relevance_filter",
+      "type": "function",
+      "name": "test_recall_min_relevance_filter",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        327,
+        332
+      ],
+      "summary": "Test function for recall min relevance filter.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_recall_never_returns_archived_deleted_expired",
+      "type": "function",
+      "name": "test_recall_never_returns_archived_deleted_expired",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        335,
+        349
+      ],
+      "summary": "Test function for recall never returns archived deleted expired.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_chat_message_construction_appends_untrusted_block_below_user",
+      "type": "function",
+      "name": "test_chat_message_construction_appends_untrusted_block_below_user",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        357,
+        374
+      ],
+      "summary": "Test function for chat message construction appends untrusted block below user.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_chat_message_construction_without_matches_is_unchanged",
+      "type": "function",
+      "name": "test_chat_message_construction_without_matches_is_unchanged",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        377,
+        383
+      ],
+      "summary": "Test function for chat message construction without matches is unchanged.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_chat_messages_input_is_not_mutated",
+      "type": "function",
+      "name": "test_chat_messages_input_is_not_mutated",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        386,
+        391
+      ],
+      "summary": "Test function for chat messages input is not mutated.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_complete_chat_injects_bounded_context_with_provenance",
+      "type": "function",
+      "name": "test_complete_chat_injects_bounded_context_with_provenance",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        394,
+        420
+      ],
+      "summary": "Test function for complete chat injects bounded context with provenance.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_complete_chat_without_memory_passes_through_unchanged",
+      "type": "function",
+      "name": "test_complete_chat_without_memory_passes_through_unchanged",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        423,
+        433
+      ],
+      "summary": "Test function for complete chat without memory passes through unchanged.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_complete_chat_with_no_memory_hits_omits_memory_used",
+      "type": "function",
+      "name": "test_complete_chat_with_no_memory_hits_omits_memory_used",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        436,
+        447
+      ],
+      "summary": "Test function for complete chat with no memory hits omits memory used.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_provenance_never_leaks_content_or_query",
+      "type": "function",
+      "name": "test_provenance_never_leaks_content_or_query",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        450,
+        467
+      ],
+      "summary": "Test function for provenance never leaks content or query.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_build_response_omits_memory_used_when_none",
+      "type": "function",
+      "name": "test_build_response_omits_memory_used_when_none",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        470,
+        480
+      ],
+      "summary": "Test function for build response omits memory used when none.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_malicious_memory_is_inert_bounded_context",
+      "type": "function",
+      "name": "test_malicious_memory_is_inert_bounded_context",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        489,
+        501
+      ],
+      "summary": "Test function for malicious memory is inert bounded context.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_malicious_memories_do_not_change_policy",
+      "type": "function",
+      "name": "test_malicious_memories_do_not_change_policy",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        504,
+        523
+      ],
+      "summary": "Test function for malicious memories do not change policy.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_no_memory_does_not_relax_policy",
+      "type": "function",
+      "name": "test_no_memory_does_not_relax_policy",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        526,
+        541
+      ],
+      "summary": "Test function for no memory does not relax policy.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:_snapshot",
+      "type": "function",
+      "name": "_snapshot",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        544,
+        553
+      ],
+      "summary": "Helper function for  snapshot.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_automatic_recall_is_read_only",
+      "type": "function",
+      "name": "test_automatic_recall_is_read_only",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        556,
+        565
+      ],
+      "summary": "Test function for automatic recall is read only.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_automatic_recall_does_not_touch_execution_approvals",
+      "type": "function",
+      "name": "test_automatic_recall_does_not_touch_execution_approvals",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        568,
+        578
+      ],
+      "summary": "Test function for automatic recall does not touch execution approvals.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_chat_memory_survives_database_restart",
+      "type": "function",
+      "name": "test_chat_memory_survives_database_restart",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        586,
+        611
+      ],
+      "summary": "Test function for chat memory survives database restart.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:_make_memory_app",
+      "type": "function",
+      "name": "_make_memory_app",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        619,
+        640
+      ],
+      "summary": "Helper function for  make memory app.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:_memory_conn",
+      "type": "function",
+      "name": "_memory_conn",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        643,
+        646
+      ],
+      "summary": "Helper function for  memory conn.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_http_chat_route_includes_safe_memory_provenance",
+      "type": "function",
+      "name": "test_http_chat_route_includes_safe_memory_provenance",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        649,
+        670
+      ],
+      "summary": "Test function for http chat route includes safe memory provenance.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_http_chat_route_without_memory_has_no_memory_used",
+      "type": "function",
+      "name": "test_http_chat_route_without_memory_has_no_memory_used",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        673,
+        693
+      ],
+      "summary": "Test function for http chat route without memory has no memory used.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_http_chat_route_closes_memory_database_on_shutdown",
+      "type": "function",
+      "name": "test_http_chat_route_closes_memory_database_on_shutdown",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        696,
+        708
+      ],
+      "summary": "Test function for http chat route closes memory database on shutdown.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_chat.py:test_complete_chat_model_unavailable_still_respects_memory",
+      "type": "function",
+      "name": "test_complete_chat_model_unavailable_still_respects_memory",
+      "filePath": "tests/test_memory_chat.py",
+      "lineRange": [
+        711,
+        727
+      ],
+      "summary": "Test function for complete chat model unavailable still respects memory.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_memory_control_plane.py",
+      "type": "file",
+      "name": "test_memory_control_plane.py",
+      "filePath": "tests/test_memory_control_plane.py",
+      "summary": "Test module with 6 test functions for memory_control_plane.",
+      "tags": [
+        "test",
+        "memory",
+        "control-plane"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_memory_control_plane.py:_memory_plane",
+      "type": "function",
+      "name": "_memory_plane",
+      "filePath": "tests/test_memory_control_plane.py",
+      "lineRange": [
+        39,
+        60
+      ],
+      "summary": "Helper function for  memory plane.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_control_plane.py:test_without_memory_execution_works_and_memory_raises",
+      "type": "function",
+      "name": "test_without_memory_execution_works_and_memory_raises",
+      "filePath": "tests/test_memory_control_plane.py",
+      "lineRange": [
+        63,
+        80
+      ],
+      "summary": "Test function for without memory execution works and memory raises.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_control_plane.py:test_with_memory_full_surface",
+      "type": "function",
+      "name": "test_with_memory_full_surface",
+      "filePath": "tests/test_memory_control_plane.py",
+      "lineRange": [
+        83,
+        121
+      ],
+      "summary": "Test function for with memory full surface.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_memory_control_plane.py:test_memory_scoped_search_via_plane",
+      "type": "function",
+      "name": "test_memory_scoped_search_via_plane",
+      "filePath": "tests/test_memory_control_plane.py",
+      "lineRange": [
+        124,
+        133
+      ],
+      "summary": "Test function for memory scoped search via plane.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_control_plane.py:test_memory_service_requires_explicit_provenance",
+      "type": "function",
+      "name": "test_memory_service_requires_explicit_provenance",
+      "filePath": "tests/test_memory_control_plane.py",
+      "lineRange": [
+        136,
+        139
+      ],
+      "summary": "Test function for memory service requires explicit provenance.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_control_plane.py:test_memory_option_is_backward_compatible_slot",
+      "type": "function",
+      "name": "test_memory_option_is_backward_compatible_slot",
+      "filePath": "tests/test_memory_control_plane.py",
+      "lineRange": [
+        142,
+        147
+      ],
+      "summary": "Test function for memory option is backward compatible slot.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "class:tests/test_memory_chat.py:FakeAgent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "class:tests/test_memory_chat.py:FakeAgent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_memory_chat.py:FakeAgent",
+      "target": "function:tests/test_memory_chat.py:FakeAgent.__init__",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_chat.py:FakeAgent",
+      "target": "function:tests/test_memory_chat.py:FakeAgent.run",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "class:tests/test_memory_chat.py:TestCliSystemPrompt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "class:tests/test_memory_chat.py:TestCliSystemPrompt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_memory_chat.py:TestCliSystemPrompt",
+      "target": "function:tests/test_memory_chat.py:TestCliSystemPrompt.test_prepends_static_system_message_first",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_chat.py:TestCliSystemPrompt",
+      "target": "function:tests/test_memory_chat.py:TestCliSystemPrompt.test_input_sequence_is_not_mutated",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_chat.py:TestCliSystemPrompt",
+      "target": "function:tests/test_memory_chat.py:TestCliSystemPrompt.test_existing_system_message_is_never_duplicated",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_chat.py:TestCliSystemPrompt",
+      "target": "function:tests/test_memory_chat.py:TestCliSystemPrompt.test_prompt_keeps_untrusted_reference_blocks_informational",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_chat.py:TestCliSystemPrompt",
+      "target": "function:tests/test_memory_chat.py:TestCliSystemPrompt.test_prompt_directs_tool_use_and_honest_answers",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_chat.py:TestCliSystemPrompt",
+      "target": "function:tests/test_memory_chat.py:TestCliSystemPrompt.test_prepend_keeps_extra_messages_in_original_order",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:service",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:service",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:_add",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:_add",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:_chat",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:_chat",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_memory_context_is_always_untrusted",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_memory_context_is_always_untrusted",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_memory_context_has_no_executable_policy_surface",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_memory_context_has_no_executable_policy_surface",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_prompt_block_marked_untrusted_and_never_authoritative",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_prompt_block_marked_untrusted_and_never_authoritative",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_empty_context_block_is_bounded_and_labeled",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_empty_context_block_is_bounded_and_labeled",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_memory_context_to_dict_serializes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_memory_context_to_dict_serializes",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_bounded_query_normalizes_whitespace",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_bounded_query_normalizes_whitespace",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_bounded_query_truncates_at_200_chars",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_bounded_query_truncates_at_200_chars",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_recall_uses_bounded_query_not_full_message",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_recall_uses_bounded_query_not_full_message",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_tokenless_message_returns_empty_context",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_tokenless_message_returns_empty_context",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_blank_message_returns_empty_context",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_blank_message_returns_empty_context",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_scope_derivation_global_default",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_scope_derivation_global_default",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_scope_derivation_only_trusted_context",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_scope_derivation_only_trusted_context",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_chat_limit_validation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_chat_limit_validation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_recall_bounds_result_count",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_recall_bounds_result_count",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_recall_is_deterministic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_recall_is_deterministic",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_irrelevant_memories_are_not_included",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_irrelevant_memories_are_not_included",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_recall_respects_explicit_execution_scope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_recall_respects_explicit_execution_scope",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_recall_min_relevance_filter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_recall_min_relevance_filter",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_recall_never_returns_archived_deleted_expired",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_recall_never_returns_archived_deleted_expired",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_chat_message_construction_appends_untrusted_block_below_user",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_chat_message_construction_appends_untrusted_block_below_user",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_chat_message_construction_without_matches_is_unchanged",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_chat_message_construction_without_matches_is_unchanged",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_chat_messages_input_is_not_mutated",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_chat_messages_input_is_not_mutated",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_complete_chat_injects_bounded_context_with_provenance",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_complete_chat_injects_bounded_context_with_provenance",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_complete_chat_without_memory_passes_through_unchanged",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_complete_chat_without_memory_passes_through_unchanged",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_complete_chat_with_no_memory_hits_omits_memory_used",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_complete_chat_with_no_memory_hits_omits_memory_used",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_provenance_never_leaks_content_or_query",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_provenance_never_leaks_content_or_query",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_build_response_omits_memory_used_when_none",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_build_response_omits_memory_used_when_none",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_malicious_memory_is_inert_bounded_context",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_malicious_memory_is_inert_bounded_context",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_malicious_memories_do_not_change_policy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_malicious_memories_do_not_change_policy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_no_memory_does_not_relax_policy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_no_memory_does_not_relax_policy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:_snapshot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:_snapshot",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_automatic_recall_is_read_only",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_automatic_recall_is_read_only",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_automatic_recall_does_not_touch_execution_approvals",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_automatic_recall_does_not_touch_execution_approvals",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_chat_memory_survives_database_restart",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_chat_memory_survives_database_restart",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:_make_memory_app",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:_make_memory_app",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:_memory_conn",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:_memory_conn",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_http_chat_route_includes_safe_memory_provenance",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_http_chat_route_includes_safe_memory_provenance",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_http_chat_route_without_memory_has_no_memory_used",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_http_chat_route_without_memory_has_no_memory_used",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_http_chat_route_closes_memory_database_on_shutdown",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_http_chat_route_closes_memory_database_on_shutdown",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_complete_chat_model_unavailable_still_respects_memory",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_chat.py",
+      "target": "function:tests/test_memory_chat.py:test_complete_chat_model_unavailable_still_respects_memory",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_control_plane.py",
+      "target": "function:tests/test_memory_control_plane.py:_memory_plane",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_control_plane.py",
+      "target": "function:tests/test_memory_control_plane.py:_memory_plane",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_control_plane.py",
+      "target": "function:tests/test_memory_control_plane.py:test_without_memory_execution_works_and_memory_raises",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_control_plane.py",
+      "target": "function:tests/test_memory_control_plane.py:test_without_memory_execution_works_and_memory_raises",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_control_plane.py",
+      "target": "function:tests/test_memory_control_plane.py:test_with_memory_full_surface",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_control_plane.py",
+      "target": "function:tests/test_memory_control_plane.py:test_with_memory_full_surface",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_control_plane.py",
+      "target": "function:tests/test_memory_control_plane.py:test_memory_scoped_search_via_plane",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_control_plane.py",
+      "target": "function:tests/test_memory_control_plane.py:test_memory_scoped_search_via_plane",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_control_plane.py",
+      "target": "function:tests/test_memory_control_plane.py:test_memory_service_requires_explicit_provenance",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_control_plane.py",
+      "target": "function:tests/test_memory_control_plane.py:test_memory_service_requires_explicit_provenance",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_control_plane.py",
+      "target": "function:tests/test_memory_control_plane.py:test_memory_option_is_backward_compatible_slot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_control_plane.py",
+      "target": "function:tests/test_memory_control_plane.py:test_memory_option_is_backward_compatible_slot",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

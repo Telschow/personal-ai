@@ -1,0 +1,890 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_docker_config.py",
+      "type": "file",
+      "name": "test_docker_config.py",
+      "filePath": "tests/test_docker_config.py",
+      "summary": "Test file with 3 test classes and 1 test functions for docker_config.",
+      "tags": [
+        "test",
+        "docker",
+        "config"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_docker_config.py:TestDockerfile",
+      "type": "class",
+      "name": "TestDockerfile",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        40,
+        61
+      ],
+      "summary": "Test class with 6 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestDockerfile.test_builds_from_python_314_runtime",
+      "type": "function",
+      "name": "test_builds_from_python_314_runtime",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        40,
+        61
+      ],
+      "summary": "Test method validating builds from python 314 runtime.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestDockerfile.test_installs_dependencies_speculatively_from_lockfile",
+      "type": "function",
+      "name": "test_installs_dependencies_speculatively_from_lockfile",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        40,
+        61
+      ],
+      "summary": "Test method validating installs dependencies speculatively from lockfile.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestDockerfile.test_runs_existing_module_entrypoint",
+      "type": "function",
+      "name": "test_runs_existing_module_entrypoint",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        40,
+        61
+      ],
+      "summary": "Test method validating runs existing module entrypoint.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestDockerfile.test_listens_on_all_interfaces_for_the_docker_network",
+      "type": "function",
+      "name": "test_listens_on_all_interfaces_for_the_docker_network",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        40,
+        61
+      ],
+      "summary": "Test method validating listens on all interfaces for the docker network.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestDockerfile.test_does_not_install_test_or_dev_tooling",
+      "type": "function",
+      "name": "test_does_not_install_test_or_dev_tooling",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        40,
+        61
+      ],
+      "summary": "Test method validating does not install or dev tooling.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestDockerfile.test_does_not_copy_private_data_or_tests",
+      "type": "function",
+      "name": "test_does_not_copy_private_data_or_tests",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        40,
+        61
+      ],
+      "summary": "Test method validating does not copy private data or tests.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_docker_config.py:TestDockerignore",
+      "type": "class",
+      "name": "TestDockerignore",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        64,
+        86
+      ],
+      "summary": "Test class with 3 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestDockerignore.test_private_personal_data_is_excluded",
+      "type": "function",
+      "name": "test_private_personal_data_is_excluded",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        64,
+        86
+      ],
+      "summary": "Test method validating private personal data is excluded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestDockerignore.test_local_runtime_and_dev_artifacts_are_excluded",
+      "type": "function",
+      "name": "test_local_runtime_and_dev_artifacts_are_excluded",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        64,
+        86
+      ],
+      "summary": "Test method validating local runtime and dev artifacts are excluded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestDockerignore.test_build_critical_files_are_kept",
+      "type": "function",
+      "name": "test_build_critical_files_are_kept",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        64,
+        86
+      ],
+      "summary": "Test method validating build critical files are kept.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_docker_config.py:TestCompose",
+      "type": "class",
+      "name": "TestCompose",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        89,
+        130
+      ],
+      "summary": "Test class with 10 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestCompose.test_service_joins_external_open_webui_network",
+      "type": "function",
+      "name": "test_service_joins_external_open_webui_network",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        89,
+        130
+      ],
+      "summary": "Test method validating service joins external open webui network.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestCompose.test_service_joins_external_ollama_network",
+      "type": "function",
+      "name": "test_service_joins_external_ollama_network",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        89,
+        130
+      ],
+      "summary": "Test method validating service joins external ollama network.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestCompose.test_host_port_is_exposed",
+      "type": "function",
+      "name": "test_host_port_is_exposed",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        89,
+        130
+      ],
+      "summary": "Test method validating host port is exposed.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestCompose.test_healthcheck_uses_models_endpoint",
+      "type": "function",
+      "name": "test_healthcheck_uses_models_endpoint",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        89,
+        130
+      ],
+      "summary": "Test method validating healthcheck uses models endpoint.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestCompose.test_database_and_workspace_are_runtime_mounts",
+      "type": "function",
+      "name": "test_database_and_workspace_are_runtime_mounts",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        89,
+        130
+      ],
+      "summary": "Test method validating database and workspace are runtime mounts.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestCompose.test_ollama_endpoint_is_configurable_per_network",
+      "type": "function",
+      "name": "test_ollama_endpoint_is_configurable_per_network",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        89,
+        130
+      ],
+      "summary": "Test method validating ollama endpoint is configurable per network.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestCompose.test_build_context_and_dockerfile_reference_the_repo",
+      "type": "function",
+      "name": "test_build_context_and_dockerfile_reference_the_repo",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        89,
+        130
+      ],
+      "summary": "Test method validating build context and dockerfile reference the repo.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestCompose.test_chat_model_is_environment_overridable",
+      "type": "function",
+      "name": "test_chat_model_is_environment_overridable",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        89,
+        130
+      ],
+      "summary": "Test method validating chat model is environment overridable.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestCompose.test_retrieval_mode_is_compose_defaulted_and_overridable",
+      "type": "function",
+      "name": "test_retrieval_mode_is_compose_defaulted_and_overridable",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        89,
+        130
+      ],
+      "summary": "Test method validating retrieval mode is compose defaulted and overridable.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:TestCompose.test_embedding_model_is_compose_defaulted",
+      "type": "function",
+      "name": "test_embedding_model_is_compose_defaulted",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        89,
+        130
+      ],
+      "summary": "Test method validating embedding model is compose defaulted.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_docker_config.py:_exclusion_lines",
+      "type": "function",
+      "name": "_exclusion_lines",
+      "filePath": "tests/test_docker_config.py",
+      "lineRange": [
+        35,
+        37
+      ],
+      "summary": "Helper function for  exclusion lines.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_documents.py",
+      "type": "file",
+      "name": "test_documents.py",
+      "filePath": "tests/test_documents.py",
+      "summary": "Test module with 10 test functions for documents.",
+      "tags": [
+        "test",
+        "document",
+        "model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_documents.py:test_content_hash_is_deterministic_sha256",
+      "type": "function",
+      "name": "test_content_hash_is_deterministic_sha256",
+      "filePath": "tests/test_documents.py",
+      "lineRange": [
+        11,
+        16
+      ],
+      "summary": "Test function for content hash is deterministic sha256.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_documents.py:test_content_hash_differs_for_different_content",
+      "type": "function",
+      "name": "test_content_hash_differs_for_different_content",
+      "filePath": "tests/test_documents.py",
+      "lineRange": [
+        19,
+        20
+      ],
+      "summary": "Test function for content hash differs for different content.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_documents.py:test_document_id_is_stable_for_identical_inputs",
+      "type": "function",
+      "name": "test_document_id_is_stable_for_identical_inputs",
+      "filePath": "tests/test_documents.py",
+      "lineRange": [
+        23,
+        27
+      ],
+      "summary": "Test function for document id is stable for identical inputs.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_documents.py:test_document_id_differs_when_any_component_differs",
+      "type": "function",
+      "name": "test_document_id_differs_when_any_component_differs",
+      "filePath": "tests/test_documents.py",
+      "lineRange": [
+        30,
+        35
+      ],
+      "summary": "Test function for document id differs when any component differs.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_documents.py:test_document_id_components_cannot_merge_ambiguously",
+      "type": "function",
+      "name": "test_document_id_components_cannot_merge_ambiguously",
+      "filePath": "tests/test_documents.py",
+      "lineRange": [
+        38,
+        42
+      ],
+      "summary": "Test function for document id components cannot merge ambiguously.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_documents.py:make_document",
+      "type": "function",
+      "name": "make_document",
+      "filePath": "tests/test_documents.py",
+      "lineRange": [
+        45,
+        57
+      ],
+      "summary": "Helper function for make document.",
+      "tags": [
+        "test-function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_documents.py:test_document_optional_fields_default_to_none",
+      "type": "function",
+      "name": "test_document_optional_fields_default_to_none",
+      "filePath": "tests/test_documents.py",
+      "lineRange": [
+        60,
+        66
+      ],
+      "summary": "Test function for document optional fields default to none.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_documents.py:test_document_metadata_defaults_are_not_shared",
+      "type": "function",
+      "name": "test_document_metadata_defaults_are_not_shared",
+      "filePath": "tests/test_documents.py",
+      "lineRange": [
+        69,
+        75
+      ],
+      "summary": "Test function for document metadata defaults are not shared.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_documents.py:test_chunk_defaults",
+      "type": "function",
+      "name": "test_chunk_defaults",
+      "filePath": "tests/test_documents.py",
+      "lineRange": [
+        78,
+        82
+      ],
+      "summary": "Test function for chunk defaults.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_documents.py:test_chunk_metadata_defaults_are_not_shared",
+      "type": "function",
+      "name": "test_chunk_metadata_defaults_are_not_shared",
+      "filePath": "tests/test_documents.py",
+      "lineRange": [
+        85,
+        91
+      ],
+      "summary": "Test function for chunk metadata defaults are not shared.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_docker_config.py",
+      "target": "class:tests/test_docker_config.py:TestDockerfile",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_docker_config.py",
+      "target": "class:tests/test_docker_config.py:TestDockerfile",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestDockerfile",
+      "target": "function:tests/test_docker_config.py:TestDockerfile.test_builds_from_python_314_runtime",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestDockerfile",
+      "target": "function:tests/test_docker_config.py:TestDockerfile.test_installs_dependencies_speculatively_from_lockfile",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestDockerfile",
+      "target": "function:tests/test_docker_config.py:TestDockerfile.test_runs_existing_module_entrypoint",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestDockerfile",
+      "target": "function:tests/test_docker_config.py:TestDockerfile.test_listens_on_all_interfaces_for_the_docker_network",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestDockerfile",
+      "target": "function:tests/test_docker_config.py:TestDockerfile.test_does_not_install_test_or_dev_tooling",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestDockerfile",
+      "target": "function:tests/test_docker_config.py:TestDockerfile.test_does_not_copy_private_data_or_tests",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_docker_config.py",
+      "target": "class:tests/test_docker_config.py:TestDockerignore",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_docker_config.py",
+      "target": "class:tests/test_docker_config.py:TestDockerignore",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestDockerignore",
+      "target": "function:tests/test_docker_config.py:TestDockerignore.test_private_personal_data_is_excluded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestDockerignore",
+      "target": "function:tests/test_docker_config.py:TestDockerignore.test_local_runtime_and_dev_artifacts_are_excluded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestDockerignore",
+      "target": "function:tests/test_docker_config.py:TestDockerignore.test_build_critical_files_are_kept",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_docker_config.py",
+      "target": "class:tests/test_docker_config.py:TestCompose",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_docker_config.py",
+      "target": "class:tests/test_docker_config.py:TestCompose",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestCompose",
+      "target": "function:tests/test_docker_config.py:TestCompose.test_service_joins_external_open_webui_network",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestCompose",
+      "target": "function:tests/test_docker_config.py:TestCompose.test_service_joins_external_ollama_network",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestCompose",
+      "target": "function:tests/test_docker_config.py:TestCompose.test_host_port_is_exposed",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestCompose",
+      "target": "function:tests/test_docker_config.py:TestCompose.test_healthcheck_uses_models_endpoint",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestCompose",
+      "target": "function:tests/test_docker_config.py:TestCompose.test_database_and_workspace_are_runtime_mounts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestCompose",
+      "target": "function:tests/test_docker_config.py:TestCompose.test_ollama_endpoint_is_configurable_per_network",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestCompose",
+      "target": "function:tests/test_docker_config.py:TestCompose.test_build_context_and_dockerfile_reference_the_repo",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestCompose",
+      "target": "function:tests/test_docker_config.py:TestCompose.test_chat_model_is_environment_overridable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestCompose",
+      "target": "function:tests/test_docker_config.py:TestCompose.test_retrieval_mode_is_compose_defaulted_and_overridable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_docker_config.py:TestCompose",
+      "target": "function:tests/test_docker_config.py:TestCompose.test_embedding_model_is_compose_defaulted",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_docker_config.py",
+      "target": "function:tests/test_docker_config.py:_exclusion_lines",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_docker_config.py",
+      "target": "function:tests/test_docker_config.py:_exclusion_lines",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_content_hash_is_deterministic_sha256",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_content_hash_is_deterministic_sha256",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_content_hash_differs_for_different_content",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_content_hash_differs_for_different_content",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_document_id_is_stable_for_identical_inputs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_document_id_is_stable_for_identical_inputs",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_document_id_differs_when_any_component_differs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_document_id_differs_when_any_component_differs",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_document_id_components_cannot_merge_ambiguously",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_document_id_components_cannot_merge_ambiguously",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:make_document",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:make_document",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_document_optional_fields_default_to_none",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_document_optional_fields_default_to_none",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_document_metadata_defaults_are_not_shared",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_document_metadata_defaults_are_not_shared",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_chunk_defaults",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_chunk_defaults",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_chunk_metadata_defaults_are_not_shared",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_documents.py",
+      "target": "function:tests/test_documents.py:test_chunk_metadata_defaults_are_not_shared",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

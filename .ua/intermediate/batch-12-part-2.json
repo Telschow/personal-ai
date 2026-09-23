@@ -1,0 +1,1559 @@
+{
+  "nodes": [
+    {
+      "id": "file:scripts/validate_pdf_ingestion.py",
+      "type": "file",
+      "name": "validate_pdf_ingestion.py",
+      "filePath": "scripts/validate_pdf_ingestion.py",
+      "summary": "Standalone validation script for PDF ingestion: builds an in-memory index with a dry-run structured extractor, ingests a sample PDF, and verifies document, chunk, and embedding persistence plus text search hits.",
+      "tags": [
+        "script",
+        "validation",
+        "ingestion",
+        "pdf"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/validate_retrieval.py",
+      "type": "file",
+      "name": "validate_retrieval.py",
+      "filePath": "scripts/validate_retrieval.py",
+      "summary": "Standalone validation script for retrieval: smoke-tests store health, then builds derived fields and embeddings for stored documents and validates semantic search returns ranked cross-kind hits.",
+      "tags": [
+        "script",
+        "validation",
+        "retrieval",
+        "search"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/validate_structured_extraction.py",
+      "type": "file",
+      "name": "validate_structured_extraction.py",
+      "filePath": "scripts/validate_structured_extraction.py",
+      "summary": "Standalone validation script for structured extraction: identifies text-heavy PDFs, runs smoke and full extraction paths against an in-memory index using an Ollama structured extractor, and validates field mapping and source attribution.",
+      "tags": [
+        "script",
+        "validation",
+        "extraction",
+        "ollama"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/validate_temporal_keyword.py",
+      "type": "file",
+      "name": "validate_temporal_keyword.py",
+      "filePath": "scripts/validate_temporal_keyword.py",
+      "summary": "Standalone validation script for temporal keyword search: ingests a deterministic corpus and validates time-range filters, filtered-subset semantics, and keyword result alignment for the temporal search API.",
+      "tags": [
+        "script",
+        "validation",
+        "temporal",
+        "keyword"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/validate_temporal_queries.py",
+      "type": "file",
+      "name": "validate_temporal_queries.py",
+      "filePath": "scripts/validate_temporal_queries.py",
+      "summary": "Standalone validation script for temporal query features: ingests a deterministic corpus and validates aggregation consistency, time-filter correctness, and result printing across temporal search modes.",
+      "tags": [
+        "script",
+        "validation",
+        "temporal",
+        "queries"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/validate_youtube_ingestion.py",
+      "type": "file",
+      "name": "validate_youtube_ingestion.py",
+      "filePath": "scripts/validate_youtube_ingestion.py",
+      "summary": "Standalone validation script for YouTube export ingestion: discovers YouTube event JSON files, ingests them into the event store, and validates stored event counts, skip reasons, and idempotent re-ingestion.",
+      "tags": [
+        "script",
+        "validation",
+        "ingestion",
+        "youtube"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/personal_ai/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/personal_ai/__init__.py",
+      "summary": "Empty package marker for the personal_ai package; declares no exports.",
+      "tags": [
+        "package",
+        "init"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/agent.py",
+      "type": "file",
+      "name": "agent.py",
+      "filePath": "src/personal_ai/agent.py",
+      "summary": "Core Agent class driving the tool loop: builds tool schemas, runs chat rounds with a client, executes tool calls with argument sanitization and result bounding, and notifies an observer with timing.",
+      "tags": [
+        "agent",
+        "core",
+        "tool-loop"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/personal_ai/agents/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/personal_ai/agents/__init__.py",
+      "summary": "Package init for the agents subpackage; re-exports registries and registry types without adding local definitions.",
+      "tags": [
+        "package",
+        "init",
+        "agents"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/agents/defs.py",
+      "type": "file",
+      "name": "defs.py",
+      "filePath": "src/personal_ai/agents/defs.py",
+      "summary": "Agent definition helpers: builds read-only agent access policies and assembles the default agent registry from the defined agent spec.",
+      "tags": [
+        "agent",
+        "definitions",
+        "registry"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/personal_ai/agents/models.py",
+      "type": "file",
+      "name": "models.py",
+      "filePath": "src/personal_ai/agents/models.py",
+      "summary": "Agent domain model: autonomy and risk levels, permission grant types, per-tool metadata, access policies, skill definitions, and the Agent dataclass that ties them together.",
+      "tags": [
+        "models",
+        "agent",
+        "policy",
+        "domain"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/personal_ai/agents/policy.py",
+      "type": "file",
+      "name": "policy.py",
+      "filePath": "src/personal_ai/agents/policy.py",
+      "summary": "Policy engine enforcing agent tool access: records decisions, checks tools against effective permissions, throws denial or approval-required errors, and executes approved handlers.",
+      "tags": [
+        "policy",
+        "security",
+        "access-control",
+        "agent"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:scripts/validate_pdf_ingestion.py:DryRunStructuredExtractor",
+      "type": "class",
+      "name": "DryRunStructuredExtractor",
+      "filePath": "scripts/validate_pdf_ingestion.py",
+      "lineRange": [
+        27,
+        38
+      ],
+      "summary": "Test double extractor that records calls and returns a canned structured result instead of calling the real extractor.",
+      "tags": [
+        "validation",
+        "fixture",
+        "extractor"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate_pdf_ingestion.py:run",
+      "type": "function",
+      "name": "run",
+      "filePath": "scripts/validate_pdf_ingestion.py",
+      "lineRange": [
+        41,
+        119
+      ],
+      "summary": "Builds an in-memory index, discovers the sample PDFs directory, ingests a PDF with the dry-run extractor, and asserts document, chunk, and embedding persistence plus text search.",
+      "tags": [
+        "validation",
+        "ingestion",
+        "pdf"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_retrieval.py:smoke_test",
+      "type": "function",
+      "name": "smoke_test",
+      "filePath": "scripts/validate_retrieval.py",
+      "lineRange": [
+        25,
+        36
+      ],
+      "summary": "Opens the database and runs quick store count and search queries to confirm retrieval services are healthy.",
+      "tags": [
+        "validation",
+        "smoke-test"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate_retrieval.py:run_validation",
+      "type": "function",
+      "name": "run_validation",
+      "filePath": "scripts/validate_retrieval.py",
+      "lineRange": [
+        39,
+        136
+      ],
+      "summary": "Derives fields and embeddings for stored documents and validates semantic search returns ranked cross-kind hits from the retrieval service.",
+      "tags": [
+        "validation",
+        "retrieval",
+        "search"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_retrieval.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/validate_retrieval.py",
+      "lineRange": [
+        139,
+        150
+      ],
+      "summary": "Parses CLI flags including an optional database path and dispatches smoke_test then run_validation.",
+      "tags": [
+        "cli",
+        "entry-point",
+        "script"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate_structured_extraction.py:identify_text_heavy_pdfs",
+      "type": "function",
+      "name": "identify_text_heavy_pdfs",
+      "filePath": "scripts/validate_structured_extraction.py",
+      "lineRange": [
+        35,
+        43
+      ],
+      "summary": "Samples the source directory and classifies which PDFs are text-heavy, returning those candidates for extraction validation.",
+      "tags": [
+        "validation",
+        "pdf",
+        "classification"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate_structured_extraction.py:run_smoke_test",
+      "type": "function",
+      "name": "run_smoke_test",
+      "filePath": "scripts/validate_structured_extraction.py",
+      "lineRange": [
+        46,
+        86
+      ],
+      "summary": "Runs a lightweight extraction pass against the in-memory index to confirm extraction wiring works before full validation.",
+      "tags": [
+        "validation",
+        "smoke-test",
+        "extraction"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_structured_extraction.py:run_full_extraction",
+      "type": "function",
+      "name": "run_full_extraction",
+      "filePath": "scripts/validate_structured_extraction.py",
+      "lineRange": [
+        89,
+        227
+      ],
+      "summary": "Ingests text-heavy PDFs with an Ollama structured extractor and validates extracted fields, source attribution, and store persistence across documents.",
+      "tags": [
+        "validation",
+        "extraction",
+        "ollama"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:scripts/validate_structured_extraction.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/validate_structured_extraction.py",
+      "lineRange": [
+        230,
+        259
+      ],
+      "summary": "Parses CLI flags and dispatches smoke test and full structured extraction validation.",
+      "tags": [
+        "cli",
+        "entry-point",
+        "script"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate_temporal_keyword.py:smoke_test",
+      "type": "function",
+      "name": "smoke_test",
+      "filePath": "scripts/validate_temporal_keyword.py",
+      "lineRange": [
+        60,
+        69
+      ],
+      "summary": "Opens the database and runs a quick keyword search to confirm the temporal store is healthy.",
+      "tags": [
+        "validation",
+        "smoke-test",
+        "temporal"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate_temporal_keyword.py:_ingest",
+      "type": "function",
+      "name": "_ingest",
+      "filePath": "scripts/validate_temporal_keyword.py",
+      "lineRange": [
+        72,
+        86
+      ],
+      "summary": "Ingests the deterministic keyword test corpus into the store.",
+      "tags": [
+        "validation",
+        "ingestion",
+        "temporal"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate_temporal_keyword.py:_run_deterministic",
+      "type": "function",
+      "name": "_run_deterministic",
+      "filePath": "scripts/validate_temporal_keyword.py",
+      "lineRange": [
+        89,
+        119
+      ],
+      "summary": "Runs deterministic keyword searches against the corpus and returns results used by the validation helpers.",
+      "tags": [
+        "validation",
+        "keyword",
+        "temporal"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_temporal_keyword.py:_filtered_is_subset",
+      "type": "function",
+      "name": "_filtered_is_subset",
+      "filePath": "scripts/validate_temporal_keyword.py",
+      "lineRange": [
+        122,
+        141
+      ],
+      "summary": "Verifies that filtered keyword results are a subset of the unfiltered matches.",
+      "tags": [
+        "validation",
+        "keyword",
+        "temporal"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_temporal_keyword.py:_time_range_check",
+      "type": "function",
+      "name": "_time_range_check",
+      "filePath": "scripts/validate_temporal_keyword.py",
+      "lineRange": [
+        144,
+        166
+      ],
+      "summary": "Asserts keyword results respect the queried time range bounds.",
+      "tags": [
+        "validation",
+        "time-range",
+        "temporal"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_temporal_keyword.py:_print_keyword_results",
+      "type": "function",
+      "name": "_print_keyword_results",
+      "filePath": "scripts/validate_temporal_keyword.py",
+      "lineRange": [
+        169,
+        190
+      ],
+      "summary": "Prints the keyword results for manual review.",
+      "tags": [
+        "validation",
+        "reporting"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_temporal_keyword.py:run_validation",
+      "type": "function",
+      "name": "run_validation",
+      "filePath": "scripts/validate_temporal_keyword.py",
+      "lineRange": [
+        193,
+        215
+      ],
+      "summary": "Runs the deterministic keyword validations against the database, reporting pass or failure per check.",
+      "tags": [
+        "validation",
+        "keyword",
+        "temporal"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_temporal_keyword.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/validate_temporal_keyword.py",
+      "lineRange": [
+        218,
+        238
+      ],
+      "summary": "Parses CLI flags including an optional database path and dispatches smoke_test then run_validation.",
+      "tags": [
+        "cli",
+        "entry-point",
+        "script"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate_temporal_queries.py:smoke_test",
+      "type": "function",
+      "name": "smoke_test",
+      "filePath": "scripts/validate_temporal_queries.py",
+      "lineRange": [
+        54,
+        66
+      ],
+      "summary": "Opens the database and runs a quick temporal query to confirm the temporal store is healthy.",
+      "tags": [
+        "validation",
+        "smoke-test",
+        "temporal"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate_temporal_queries.py:_ingest",
+      "type": "function",
+      "name": "_ingest",
+      "filePath": "scripts/validate_temporal_queries.py",
+      "lineRange": [
+        69,
+        83
+      ],
+      "summary": "Ingests the deterministic temporal query test corpus into the store.",
+      "tags": [
+        "validation",
+        "ingestion",
+        "temporal"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate_temporal_queries.py:_run_aggregations",
+      "type": "function",
+      "name": "_run_aggregations",
+      "filePath": "scripts/validate_temporal_queries.py",
+      "lineRange": [
+        86,
+        121
+      ],
+      "summary": "Runs temporal aggregations over the corpus and returns computed totals.",
+      "tags": [
+        "validation",
+        "aggregation",
+        "temporal"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_temporal_queries.py:_consistency_checks",
+      "type": "function",
+      "name": "_consistency_checks",
+      "filePath": "scripts/validate_temporal_queries.py",
+      "lineRange": [
+        124,
+        159
+      ],
+      "summary": "Asserts aggregation results are internally consistent with stored totals.",
+      "tags": [
+        "validation",
+        "consistency",
+        "temporal"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_temporal_queries.py:_time_filter_check",
+      "type": "function",
+      "name": "_time_filter_check",
+      "filePath": "scripts/validate_temporal_queries.py",
+      "lineRange": [
+        162,
+        190
+      ],
+      "summary": "Verifies time-filtered query results respect the requested bounds.",
+      "tags": [
+        "validation",
+        "time-filter",
+        "temporal"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_temporal_queries.py:_print_results",
+      "type": "function",
+      "name": "_print_results",
+      "filePath": "scripts/validate_temporal_queries.py",
+      "lineRange": [
+        193,
+        242
+      ],
+      "summary": "Renders temporal query results and validation outcomes for manual review.",
+      "tags": [
+        "validation",
+        "reporting"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_temporal_queries.py:run_validation",
+      "type": "function",
+      "name": "run_validation",
+      "filePath": "scripts/validate_temporal_queries.py",
+      "lineRange": [
+        245,
+        266
+      ],
+      "summary": "Runs the temporal aggregation and time-filter validations against the database.",
+      "tags": [
+        "validation",
+        "temporal"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_temporal_queries.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/validate_temporal_queries.py",
+      "lineRange": [
+        269,
+        289
+      ],
+      "summary": "Parses CLI flags including an optional database path and dispatches smoke_test then run_validation.",
+      "tags": [
+        "cli",
+        "entry-point",
+        "script"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate_youtube_ingestion.py:smoke_test",
+      "type": "function",
+      "name": "smoke_test",
+      "filePath": "scripts/validate_youtube_ingestion.py",
+      "lineRange": [
+        40,
+        48
+      ],
+      "summary": "Opens the database and runs a quick event count query to confirm the event store is healthy.",
+      "tags": [
+        "validation",
+        "smoke-test",
+        "youtube"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/validate_youtube_ingestion.py:_report_and_validate",
+      "type": "function",
+      "name": "_report_and_validate",
+      "filePath": "scripts/validate_youtube_ingestion.py",
+      "lineRange": [
+        56,
+        129
+      ],
+      "summary": "Reports stored event totals and asserts counts, skip reasons, and idempotent re-ingestion behavior.",
+      "tags": [
+        "validation",
+        "ingestion",
+        "youtube"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_youtube_ingestion.py:run_validation",
+      "type": "function",
+      "name": "run_validation",
+      "filePath": "scripts/validate_youtube_ingestion.py",
+      "lineRange": [
+        132,
+        174
+      ],
+      "summary": "Ingests YouTube event JSON files into the event store and validates stored counts and skip reasons.",
+      "tags": [
+        "validation",
+        "ingestion",
+        "youtube"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/validate_youtube_ingestion.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/validate_youtube_ingestion.py",
+      "lineRange": [
+        177,
+        197
+      ],
+      "summary": "Parses CLI flags including an optional database path and dispatches smoke_test then run_validation.",
+      "tags": [
+        "cli",
+        "entry-point",
+        "script"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agent.py:AgentError",
+      "type": "class",
+      "name": "AgentError",
+      "filePath": "src/personal_ai/agent.py",
+      "lineRange": [
+        20,
+        21
+      ],
+      "summary": "Base exception type for agent failures.",
+      "tags": [
+        "error",
+        "exception"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agent.py:MaxToolRoundsError",
+      "type": "class",
+      "name": "MaxToolRoundsError",
+      "filePath": "src/personal_ai/agent.py",
+      "lineRange": [
+        24,
+        25
+      ],
+      "summary": "Exception raised when the agent exceeds its configured tool-call round limit.",
+      "tags": [
+        "error",
+        "exception",
+        "tool-loop"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/agent.py:_sanitize_arguments",
+      "type": "function",
+      "name": "_sanitize_arguments",
+      "filePath": "src/personal_ai/agent.py",
+      "lineRange": [
+        56,
+        67
+      ],
+      "summary": "Serializes and truncates tool argument values so logged or notified arguments never carry full payloads.",
+      "tags": [
+        "privacy",
+        "sanitization",
+        "tool-args"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agent.py:Agent",
+      "type": "class",
+      "name": "Agent",
+      "filePath": "src/personal_ai/agent.py",
+      "lineRange": [
+        70,
+        164
+      ],
+      "summary": "Agent loop that builds tool schemas, runs chat rounds, executes tool calls with sanitized arguments and bounded results, and notifies an observer with per-round timing.",
+      "tags": [
+        "agent",
+        "core",
+        "tool-loop"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/personal_ai/agents/defs.py:_read_only",
+      "type": "function",
+      "name": "_read_only",
+      "filePath": "src/personal_ai/agents/defs.py",
+      "lineRange": [
+        20,
+        61
+      ],
+      "summary": "Builds a read-only access policy allowing a fixed set of non-mutating tools with no approvals required.",
+      "tags": [
+        "policy",
+        "access-control",
+        "read-only"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/personal_ai/agents/defs.py:build_default_agent_registry",
+      "type": "function",
+      "name": "build_default_agent_registry",
+      "filePath": "src/personal_ai/agents/defs.py",
+      "lineRange": [
+        241,
+        245
+      ],
+      "summary": "Assembles the default AgentRegistry and registers the built-in agent definitions.",
+      "tags": [
+        "registry",
+        "bootstrap",
+        "agent"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agents/models.py:AutonomyLevel",
+      "type": "class",
+      "name": "AutonomyLevel",
+      "filePath": "src/personal_ai/agents/models.py",
+      "lineRange": [
+        27,
+        39
+      ],
+      "summary": "Enum of agent autonomy levels from fully supervised to autonomous.",
+      "tags": [
+        "enum",
+        "autonomy",
+        "model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agents/models.py:RiskLevel",
+      "type": "class",
+      "name": "RiskLevel",
+      "filePath": "src/personal_ai/agents/models.py",
+      "lineRange": [
+        42,
+        50
+      ],
+      "summary": "Enum of tool risk levels used to classify operations.",
+      "tags": [
+        "enum",
+        "risk",
+        "model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agents/models.py:Permission",
+      "type": "class",
+      "name": "Permission",
+      "filePath": "src/personal_ai/agents/models.py",
+      "lineRange": [
+        53,
+        85
+      ],
+      "summary": "A permission grant allowing a named tool, optionally scoped to actions and paths.",
+      "tags": [
+        "permission",
+        "model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agents/models.py:PolicyDecision",
+      "type": "class",
+      "name": "PolicyDecision",
+      "filePath": "src/personal_ai/agents/models.py",
+      "lineRange": [
+        88,
+        93
+      ],
+      "summary": "Outcome type returned by access-policy evaluation.",
+      "tags": [
+        "policy",
+        "model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agents/models.py:AgentTool",
+      "type": "class",
+      "name": "AgentTool",
+      "filePath": "src/personal_ai/agents/models.py",
+      "lineRange": [
+        97,
+        115
+      ],
+      "summary": "Tool definition carrying name, description, associated permissions, and risk and side-effect flags.",
+      "tags": [
+        "tool",
+        "model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agents/models.py:AccessPolicy",
+      "type": "class",
+      "name": "AccessPolicy",
+      "filePath": "src/personal_ai/agents/models.py",
+      "lineRange": [
+        119,
+        152
+      ],
+      "summary": "Named policy deciding tool access: allowed and denied sets, approval requirements, and autonomy level.",
+      "tags": [
+        "policy",
+        "access-control",
+        "model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/personal_ai/agents/models.py:Skill",
+      "type": "class",
+      "name": "Skill",
+      "filePath": "src/personal_ai/agents/models.py",
+      "lineRange": [
+        156,
+        171
+      ],
+      "summary": "Skill definition with purpose, instructions, required tools and permissions, and preferred model capability.",
+      "tags": [
+        "skill",
+        "model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agents/models.py:Agent",
+      "type": "class",
+      "name": "Agent",
+      "filePath": "src/personal_ai/agents/models.py",
+      "lineRange": [
+        175,
+        194
+      ],
+      "summary": "Agent configuration binding skills, tools, permissions, policy, and runtime limits to an id and role.",
+      "tags": [
+        "agent",
+        "model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/personal_ai/agents/policy.py:PolicyEnforcementError",
+      "type": "class",
+      "name": "PolicyEnforcementError",
+      "filePath": "src/personal_ai/agents/policy.py",
+      "lineRange": [
+        30,
+        31
+      ],
+      "summary": "Base exception for policy enforcement failures.",
+      "tags": [
+        "error",
+        "exception",
+        "policy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agents/policy.py:PolicyDenialError",
+      "type": "class",
+      "name": "PolicyDenialError",
+      "filePath": "src/personal_ai/agents/policy.py",
+      "lineRange": [
+        34,
+        35
+      ],
+      "summary": "Exception raised when a policy denies a tool execution.",
+      "tags": [
+        "error",
+        "exception",
+        "policy",
+        "denial"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agents/policy.py:ApprovalRequiredError",
+      "type": "class",
+      "name": "ApprovalRequiredError",
+      "filePath": "src/personal_ai/agents/policy.py",
+      "lineRange": [
+        38,
+        39
+      ],
+      "summary": "Exception raised when a tool requires human approval that was not granted.",
+      "tags": [
+        "error",
+        "exception",
+        "policy",
+        "approval"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agents/policy.py:PolicyCheck",
+      "type": "class",
+      "name": "PolicyCheck",
+      "filePath": "src/personal_ai/agents/policy.py",
+      "lineRange": [
+        43,
+        51
+      ],
+      "summary": "Record of a single policy decision for a tool and agent, with allowed flag and detail.",
+      "tags": [
+        "policy",
+        "model",
+        "decision"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/agents/policy.py:PolicyEngine",
+      "type": "class",
+      "name": "PolicyEngine",
+      "filePath": "src/personal_ai/agents/policy.py",
+      "lineRange": [
+        54,
+        159
+      ],
+      "summary": "Enforces tool access: compiles registries, checks tools against effective permissions with approval delegation, records decisions, and executes approved tool handlers.",
+      "tags": [
+        "policy",
+        "security",
+        "access-control",
+        "engine"
+      ],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:scripts/validate_pdf_ingestion.py",
+      "target": "class:scripts/validate_pdf_ingestion.py:DryRunStructuredExtractor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_pdf_ingestion.py",
+      "target": "function:scripts/validate_pdf_ingestion.py:run",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_pdf_ingestion.py",
+      "target": "class:scripts/validate_pdf_ingestion.py:DryRunStructuredExtractor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_pdf_ingestion.py",
+      "target": "function:scripts/validate_pdf_ingestion.py:run",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_retrieval.py",
+      "target": "function:scripts/validate_retrieval.py:smoke_test",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_retrieval.py",
+      "target": "function:scripts/validate_retrieval.py:run_validation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_retrieval.py",
+      "target": "function:scripts/validate_retrieval.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_retrieval.py",
+      "target": "function:scripts/validate_retrieval.py:smoke_test",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_retrieval.py",
+      "target": "function:scripts/validate_retrieval.py:run_validation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_retrieval.py",
+      "target": "function:scripts/validate_retrieval.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_structured_extraction.py",
+      "target": "function:scripts/validate_structured_extraction.py:identify_text_heavy_pdfs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_structured_extraction.py",
+      "target": "function:scripts/validate_structured_extraction.py:run_smoke_test",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_structured_extraction.py",
+      "target": "function:scripts/validate_structured_extraction.py:run_full_extraction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_structured_extraction.py",
+      "target": "function:scripts/validate_structured_extraction.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_structured_extraction.py",
+      "target": "function:scripts/validate_structured_extraction.py:identify_text_heavy_pdfs",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_structured_extraction.py",
+      "target": "function:scripts/validate_structured_extraction.py:run_smoke_test",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_structured_extraction.py",
+      "target": "function:scripts/validate_structured_extraction.py:run_full_extraction",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_structured_extraction.py",
+      "target": "function:scripts/validate_structured_extraction.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_temporal_keyword.py",
+      "target": "function:scripts/validate_temporal_keyword.py:smoke_test",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_keyword.py",
+      "target": "function:scripts/validate_temporal_keyword.py:_ingest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_keyword.py",
+      "target": "function:scripts/validate_temporal_keyword.py:_run_deterministic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_keyword.py",
+      "target": "function:scripts/validate_temporal_keyword.py:_filtered_is_subset",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_keyword.py",
+      "target": "function:scripts/validate_temporal_keyword.py:_time_range_check",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_keyword.py",
+      "target": "function:scripts/validate_temporal_keyword.py:_print_keyword_results",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_keyword.py",
+      "target": "function:scripts/validate_temporal_keyword.py:run_validation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_keyword.py",
+      "target": "function:scripts/validate_temporal_keyword.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_keyword.py",
+      "target": "function:scripts/validate_temporal_keyword.py:smoke_test",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_temporal_keyword.py",
+      "target": "function:scripts/validate_temporal_keyword.py:run_validation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_temporal_keyword.py",
+      "target": "function:scripts/validate_temporal_keyword.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_temporal_queries.py",
+      "target": "function:scripts/validate_temporal_queries.py:smoke_test",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_queries.py",
+      "target": "function:scripts/validate_temporal_queries.py:_ingest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_queries.py",
+      "target": "function:scripts/validate_temporal_queries.py:_run_aggregations",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_queries.py",
+      "target": "function:scripts/validate_temporal_queries.py:_consistency_checks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_queries.py",
+      "target": "function:scripts/validate_temporal_queries.py:_time_filter_check",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_queries.py",
+      "target": "function:scripts/validate_temporal_queries.py:_print_results",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_queries.py",
+      "target": "function:scripts/validate_temporal_queries.py:run_validation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_queries.py",
+      "target": "function:scripts/validate_temporal_queries.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_temporal_queries.py",
+      "target": "function:scripts/validate_temporal_queries.py:smoke_test",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_temporal_queries.py",
+      "target": "function:scripts/validate_temporal_queries.py:run_validation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_temporal_queries.py",
+      "target": "function:scripts/validate_temporal_queries.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_youtube_ingestion.py",
+      "target": "function:scripts/validate_youtube_ingestion.py:smoke_test",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_youtube_ingestion.py",
+      "target": "function:scripts/validate_youtube_ingestion.py:_report_and_validate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_youtube_ingestion.py",
+      "target": "function:scripts/validate_youtube_ingestion.py:run_validation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_youtube_ingestion.py",
+      "target": "function:scripts/validate_youtube_ingestion.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/validate_youtube_ingestion.py",
+      "target": "function:scripts/validate_youtube_ingestion.py:smoke_test",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_youtube_ingestion.py",
+      "target": "function:scripts/validate_youtube_ingestion.py:run_validation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/validate_youtube_ingestion.py",
+      "target": "function:scripts/validate_youtube_ingestion.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agent.py",
+      "target": "class:src/personal_ai/agent.py:AgentError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agent.py",
+      "target": "class:src/personal_ai/agent.py:MaxToolRoundsError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agent.py",
+      "target": "function:src/personal_ai/agent.py:_sanitize_arguments",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agent.py",
+      "target": "class:src/personal_ai/agent.py:Agent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agent.py",
+      "target": "class:src/personal_ai/agent.py:AgentError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agent.py",
+      "target": "class:src/personal_ai/agent.py:MaxToolRoundsError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agent.py",
+      "target": "class:src/personal_ai/agent.py:Agent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/defs.py",
+      "target": "function:src/personal_ai/agents/defs.py:_read_only",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/defs.py",
+      "target": "function:src/personal_ai/agents/defs.py:build_default_agent_registry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/defs.py",
+      "target": "function:src/personal_ai/agents/defs.py:build_default_agent_registry",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:AutonomyLevel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:RiskLevel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:Permission",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:PolicyDecision",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:AgentTool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:AccessPolicy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:Skill",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:Agent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:AutonomyLevel",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:RiskLevel",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:Permission",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:PolicyDecision",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:AgentTool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:AccessPolicy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:Skill",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/models.py",
+      "target": "class:src/personal_ai/agents/models.py:Agent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/policy.py",
+      "target": "class:src/personal_ai/agents/policy.py:PolicyEnforcementError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/policy.py",
+      "target": "class:src/personal_ai/agents/policy.py:PolicyDenialError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/policy.py",
+      "target": "class:src/personal_ai/agents/policy.py:ApprovalRequiredError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/policy.py",
+      "target": "class:src/personal_ai/agents/policy.py:PolicyCheck",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/policy.py",
+      "target": "class:src/personal_ai/agents/policy.py:PolicyEngine",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/agents/policy.py",
+      "target": "class:src/personal_ai/agents/policy.py:PolicyEnforcementError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/policy.py",
+      "target": "class:src/personal_ai/agents/policy.py:PolicyDenialError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/policy.py",
+      "target": "class:src/personal_ai/agents/policy.py:ApprovalRequiredError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/policy.py",
+      "target": "class:src/personal_ai/agents/policy.py:PolicyCheck",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/agents/policy.py",
+      "target": "class:src/personal_ai/agents/policy.py:PolicyEngine",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

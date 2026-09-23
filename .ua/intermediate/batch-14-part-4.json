@@ -1,0 +1,829 @@
+{
+ "nodes": [
+  {
+   "id": "file:src/personal_ai/memory/corpus.py",
+   "type": "file",
+   "name": "corpus.py",
+   "filePath": "src/personal_ai/memory/corpus.py",
+   "summary": "Deterministic bounded corpus-layer memory ingestion turning already-ingested structured material into memories: intent/domain extraction, workout routine and activity pattern detection with outcome tallying.",
+   "tags": [
+    "memory"
+   ],
+   "complexity": "high",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "class:src/personal_ai/memory/corpus.py:OutcomeTally",
+   "type": "class",
+   "name": "OutcomeTally",
+   "filePath": "src/personal_ai/memory/corpus.py",
+   "lineRange": [
+    115,
+    175
+   ],
+   "summary": "Count-only outcomes for one run, source, or candidate set.",
+   "tags": [
+    "python",
+    "memory",
+    "corpus",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/corpus.py:CorpusIngestionReport",
+   "type": "class",
+   "name": "CorpusIngestionReport",
+   "filePath": "src/personal_ai/memory/corpus.py",
+   "lineRange": [
+    179,
+    193
+   ],
+   "summary": "Aggregate-only outcome of one corpus ingestion pass.",
+   "tags": [
+    "python",
+    "memory",
+    "corpus",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/memory/corpus.py:extract_workout_routine",
+   "type": "function",
+   "name": "extract_workout_routine",
+   "filePath": "src/personal_ai/memory/corpus.py",
+   "lineRange": [
+    213,
+    262
+   ],
+   "summary": "Propose a recurring workout habit from a bounded set of workout logs.",
+   "tags": [
+    "python",
+    "memory",
+    "corpus"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:src/personal_ai/memory/corpus.py:_aggregate_domains",
+   "type": "function",
+   "name": "_aggregate_domains",
+   "filePath": "src/personal_ai/memory/corpus.py",
+   "lineRange": [
+    293,
+    328
+   ],
+   "summary": "Defines _aggregate_domains in corpus.py.",
+   "tags": [
+    "python",
+    "memory",
+    "corpus"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:src/personal_ai/memory/corpus.py:extract_activity_patterns",
+   "type": "function",
+   "name": "extract_activity_patterns",
+   "filePath": "src/personal_ai/memory/corpus.py",
+   "lineRange": [
+    331,
+    382
+   ],
+   "summary": "Propose recurring ``interest`` candidates from URL-visit events.",
+   "tags": [
+    "python",
+    "memory",
+    "corpus"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "class:src/personal_ai/memory/corpus.py:CorpusMemoryIngestor",
+   "type": "class",
+   "name": "CorpusMemoryIngestor",
+   "filePath": "src/personal_ai/memory/corpus.py",
+   "lineRange": [
+    385,
+    503
+   ],
+   "summary": "Runs bounded, deterministic corpus extraction into the memory pipeline.",
+   "tags": [
+    "python",
+    "memory",
+    "corpus",
+    "class"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "file:src/personal_ai/memory/corpus_audit.py",
+   "type": "file",
+   "name": "corpus_audit.py",
+   "filePath": "src/personal_ai/memory/corpus_audit.py",
+   "summary": "Bounded aggregate-only real-corpus audit validating multilingual, Unicode-safe deterministic extraction: token classification, language/security/provenance/unicode checks and seed-and-run idempotency.",
+   "tags": [
+    "memory"
+   ],
+   "complexity": "high",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "function:src/personal_ai/memory/corpus_audit.py:_classify_zero_token",
+   "type": "function",
+   "name": "_classify_zero_token",
+   "filePath": "src/personal_ai/memory/corpus_audit.py",
+   "lineRange": [
+    99,
+    141
+   ],
+   "summary": "Classify a zero-token user message into a content-free bucket.",
+   "tags": [
+    "python",
+    "memory",
+    "corpus"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "class:src/personal_ai/memory/corpus_audit.py:AuditUnicodeStats",
+   "type": "class",
+   "name": "AuditUnicodeStats",
+   "filePath": "src/personal_ai/memory/corpus_audit.py",
+   "lineRange": [
+    191,
+    209
+   ],
+   "summary": "Unicode/tokenization health tallies.",
+   "tags": [
+    "python",
+    "memory",
+    "corpus",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/corpus_audit.py:CorpusAuditReport",
+   "type": "class",
+   "name": "CorpusAuditReport",
+   "filePath": "src/personal_ai/memory/corpus_audit.py",
+   "lineRange": [
+    240,
+    317
+   ],
+   "summary": "Aggregate-only outcome of a bounded real-corpus audit.",
+   "tags": [
+    "python",
+    "memory",
+    "corpus",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/memory/corpus_audit.py:_audit_unicode",
+   "type": "function",
+   "name": "_audit_unicode",
+   "filePath": "src/personal_ai/memory/corpus_audit.py",
+   "lineRange": [
+    526,
+    584
+   ],
+   "summary": "Measure Unicode handling: non-ASCII, umlauts, zero-token gaps.",
+   "tags": [
+    "python",
+    "memory",
+    "corpus"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:src/personal_ai/memory/corpus_audit.py:run_corpus_audit",
+   "type": "function",
+   "name": "run_corpus_audit",
+   "filePath": "src/personal_ai/memory/corpus_audit.py",
+   "lineRange": [
+    676,
+    746
+   ],
+   "summary": "Run a bounded, aggregate-only audit over raw conversation exports.",
+   "tags": [
+    "python",
+    "memory",
+    "corpus"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "file:src/personal_ai/memory/curation.py",
+   "type": "file",
+   "name": "curation.py",
+   "filePath": "src/personal_ai/memory/curation.py",
+   "summary": "Durable, resumable, policy-gated full-corpus memory curation: resumable runs over conversation/window units, dry-run tallying, review table persistence, and a configurable adapter registry.",
+   "tags": [
+    "memory"
+   ],
+   "complexity": "high",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "class:src/personal_ai/memory/curation.py:CurationConfig",
+   "type": "class",
+   "name": "CurationConfig",
+   "filePath": "src/personal_ai/memory/curation.py",
+   "lineRange": [
+    150,
+    209
+   ],
+   "summary": "Bounded, validated settings for one curation run.",
+   "tags": [
+    "python",
+    "memory",
+    "curation",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/curation.py:ConversationCurationAdapter",
+   "type": "class",
+   "name": "ConversationCurationAdapter",
+   "filePath": "src/personal_ai/memory/curation.py",
+   "lineRange": [
+    340,
+    445
+   ],
+   "summary": "Bounded conversation adapter for both deterministic and LLM modes.",
+   "tags": [
+    "python",
+    "memory",
+    "curation",
+    "class"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "class:src/personal_ai/memory/curation.py:CurationStore",
+   "type": "class",
+   "name": "CurationStore",
+   "filePath": "src/personal_ai/memory/curation.py",
+   "lineRange": [
+    532,
+    1283
+   ],
+   "summary": "SQLite checkpoints for runs, units, and the explicit review queue.",
+   "tags": [
+    "python",
+    "memory",
+    "curation",
+    "class"
+   ],
+   "complexity": "high"
+  },
+  {
+   "id": "class:src/personal_ai/memory/curation.py:RunCounters",
+   "type": "class",
+   "name": "RunCounters",
+   "filePath": "src/personal_ai/memory/curation.py",
+   "lineRange": [
+    1365,
+    1407
+   ],
+   "summary": "Observability counters for one run; no content ever.",
+   "tags": [
+    "python",
+    "memory",
+    "curation",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/curation.py:DryRunTally",
+   "type": "class",
+   "name": "DryRunTally",
+   "filePath": "src/personal_ai/memory/curation.py",
+   "lineRange": [
+    1411,
+    1458
+   ],
+   "summary": "Count-only view of what a dry run *would* do (no writes at all).",
+   "tags": [
+    "python",
+    "memory",
+    "curation",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/curation.py:MemoryStats",
+   "type": "class",
+   "name": "MemoryStats",
+   "filePath": "src/personal_ai/memory/curation.py",
+   "lineRange": [
+    1462,
+    1511
+   ],
+   "summary": "Aggregate, content-free memory and review statistics.",
+   "tags": [
+    "python",
+    "memory",
+    "curation",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/curation.py:CurationReport",
+   "type": "class",
+   "name": "CurationReport",
+   "filePath": "src/personal_ai/memory/curation.py",
+   "lineRange": [
+    1515,
+    1559
+   ],
+   "summary": "Aggregate-only outcome of one curation run.",
+   "tags": [
+    "python",
+    "memory",
+    "curation",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/curation.py:MemoryCurationRunner",
+   "type": "class",
+   "name": "MemoryCurationRunner",
+   "filePath": "src/personal_ai/memory/curation.py",
+   "lineRange": [
+    1567,
+    2035
+   ],
+   "summary": "Runs bounded, resumable curation through the policy-gated write path.",
+   "tags": [
+    "python",
+    "memory",
+    "curation",
+    "class"
+   ],
+   "complexity": "high"
+  },
+  {
+   "id": "file:src/personal_ai/memory/orchestration.py",
+   "type": "file",
+   "name": "orchestration.py",
+   "filePath": "src/personal_ai/memory/orchestration.py",
+   "summary": "Phase 18 production corpus-wide curation orchestration: bounded run over corpus curation configs with per-source outcomes and failure classification.",
+   "tags": [
+    "memory"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "class:src/personal_ai/memory/orchestration.py:CorpusCurationConfig",
+   "type": "class",
+   "name": "CorpusCurationConfig",
+   "filePath": "src/personal_ai/memory/orchestration.py",
+   "lineRange": [
+    85,
+    143
+   ],
+   "summary": "Bounded settings shared by every per-source run of an orchestration.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/orchestration.py:SourceOutcome",
+   "type": "class",
+   "name": "SourceOutcome",
+   "filePath": "src/personal_ai/memory/orchestration.py",
+   "lineRange": [
+    147,
+    207
+   ],
+   "summary": "Aggregate-only outcome of one source within an orchestration.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/orchestration.py:CorpusCurationReport",
+   "type": "class",
+   "name": "CorpusCurationReport",
+   "filePath": "src/personal_ai/memory/orchestration.py",
+   "lineRange": [
+    227,
+    278
+   ],
+   "summary": "Aggregate-only outcome of one corpus-wide orchestration.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/orchestration.py:CorpusCurationOrchestrator",
+   "type": "class",
+   "name": "CorpusCurationOrchestrator",
+   "filePath": "src/personal_ai/memory/orchestration.py",
+   "lineRange": [
+    281,
+    394
+   ],
+   "summary": "Sequences bounded per-source curation over the full adapter registry.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "moderate"
+  }
+ ],
+ "edges": [
+  {
+   "source": "file:src/personal_ai/memory/corpus.py",
+   "target": "class:src/personal_ai/memory/corpus.py:OutcomeTally",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus.py",
+   "target": "class:src/personal_ai/memory/corpus.py:OutcomeTally",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus.py",
+   "target": "class:src/personal_ai/memory/corpus.py:CorpusIngestionReport",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus.py",
+   "target": "class:src/personal_ai/memory/corpus.py:CorpusIngestionReport",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus.py",
+   "target": "function:src/personal_ai/memory/corpus.py:extract_workout_routine",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus.py",
+   "target": "function:src/personal_ai/memory/corpus.py:extract_workout_routine",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus.py",
+   "target": "function:src/personal_ai/memory/corpus.py:_aggregate_domains",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus.py",
+   "target": "function:src/personal_ai/memory/corpus.py:_aggregate_domains",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus.py",
+   "target": "function:src/personal_ai/memory/corpus.py:extract_activity_patterns",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus.py",
+   "target": "function:src/personal_ai/memory/corpus.py:extract_activity_patterns",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus.py",
+   "target": "class:src/personal_ai/memory/corpus.py:CorpusMemoryIngestor",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus.py",
+   "target": "class:src/personal_ai/memory/corpus.py:CorpusMemoryIngestor",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus_audit.py",
+   "target": "function:src/personal_ai/memory/corpus_audit.py:_classify_zero_token",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus_audit.py",
+   "target": "function:src/personal_ai/memory/corpus_audit.py:_classify_zero_token",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus_audit.py",
+   "target": "class:src/personal_ai/memory/corpus_audit.py:AuditUnicodeStats",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus_audit.py",
+   "target": "class:src/personal_ai/memory/corpus_audit.py:AuditUnicodeStats",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus_audit.py",
+   "target": "class:src/personal_ai/memory/corpus_audit.py:CorpusAuditReport",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus_audit.py",
+   "target": "class:src/personal_ai/memory/corpus_audit.py:CorpusAuditReport",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus_audit.py",
+   "target": "function:src/personal_ai/memory/corpus_audit.py:_audit_unicode",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus_audit.py",
+   "target": "function:src/personal_ai/memory/corpus_audit.py:_audit_unicode",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus_audit.py",
+   "target": "function:src/personal_ai/memory/corpus_audit.py:run_corpus_audit",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/corpus_audit.py",
+   "target": "function:src/personal_ai/memory/corpus_audit.py:run_corpus_audit",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:CurationConfig",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:CurationConfig",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:ConversationCurationAdapter",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:ConversationCurationAdapter",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:CurationStore",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:CurationStore",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:RunCounters",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:RunCounters",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:DryRunTally",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:DryRunTally",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:MemoryStats",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:MemoryStats",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:CurationReport",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:CurationReport",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:MemoryCurationRunner",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/curation.py",
+   "target": "class:src/personal_ai/memory/curation.py:MemoryCurationRunner",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/orchestration.py",
+   "target": "class:src/personal_ai/memory/orchestration.py:CorpusCurationConfig",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/orchestration.py",
+   "target": "class:src/personal_ai/memory/orchestration.py:CorpusCurationConfig",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/orchestration.py",
+   "target": "class:src/personal_ai/memory/orchestration.py:SourceOutcome",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/orchestration.py",
+   "target": "class:src/personal_ai/memory/orchestration.py:SourceOutcome",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/orchestration.py",
+   "target": "class:src/personal_ai/memory/orchestration.py:CorpusCurationReport",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/orchestration.py",
+   "target": "class:src/personal_ai/memory/orchestration.py:CorpusCurationReport",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/orchestration.py",
+   "target": "class:src/personal_ai/memory/orchestration.py:CorpusCurationOrchestrator",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/orchestration.py",
+   "target": "class:src/personal_ai/memory/orchestration.py:CorpusCurationOrchestrator",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:src/personal_ai/memory/corpus.py:extract_activity_patterns",
+   "target": "function:src/personal_ai/memory/corpus.py:_aggregate_domains",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:src/personal_ai/memory/corpus_audit.py:_audit_unicode",
+   "target": "function:src/personal_ai/memory/corpus_audit.py:_classify_zero_token",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:src/personal_ai/memory/corpus_audit.py:_audit_unicode",
+   "target": "class:src/personal_ai/memory/corpus_audit.py:AuditUnicodeStats",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:src/personal_ai/memory/corpus_audit.py:run_corpus_audit",
+   "target": "function:src/personal_ai/memory/corpus_audit.py:_audit_unicode",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:src/personal_ai/memory/corpus_audit.py:run_corpus_audit",
+   "target": "class:src/personal_ai/memory/corpus_audit.py:CorpusAuditReport",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/orchestration.py",
+   "target": "file:src/personal_ai/memory/curation.py",
+   "type": "related",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:src/personal_ai/memory/orchestration.py",
+   "target": "file:src/personal_ai/memory/corpus.py",
+   "type": "related",
+   "direction": "forward",
+   "weight": 0.5
+  }
+ ]
+}

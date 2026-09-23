@@ -7,6 +7,12 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from .career_direction import CareerDirection
+from .role_archetypes import RoleArchetype
+
+Decision = Literal["reject", "review", "strong"]
+
+
 Decision = Literal["reject", "review", "strong"]
 JobStatus = Literal["active", "stale", "closed", "duplicate"]
 UserJobStatus = Literal["NEW", "SAVED", "REJECTED", "APPLIED"]
@@ -32,11 +38,19 @@ class Job(BaseModel):
     salary_min: float | None = None
     salary_max: float | None = None
     salary_currency: str | None = None
+    salary_period: str | None = None
+    salary_source: str | None = None
+    salary_confidence: float = 0.0
+    compensation_status: str = "unknown"
     salary_min_eur: float | None = None
     salary_max_eur: float | None = None
     salary_converted: bool = False
     canonical_key: str | None = None
     status: JobStatus | None = None
+    run_id: str | None = None
+    discovery_source: str | None = None
+    company_radar_id: str | None = None
+    provider_native_id: str | None = None
     closed_at: str | None = None
     discovered_at: str | None = None
     last_seen: str | None = None
@@ -47,6 +61,23 @@ class Job(BaseModel):
     # M3: user-facing status (distinct from system lifecycle status)
     user_status: UserJobStatus = "NEW"
     user_status_updated_at: str | None = None
+    # M12: role archetypes
+    role_archetypes: list[RoleArchetype] = Field(default_factory=list)
+
+    # M12: career direction
+    career_direction: CareerDirection | None = None
+    # M4: role classification
+    role_family: str | None = None
+    role_classification_confidence: float = 0.0
+    role_classification_reason: str | None = None
+    # M4: location classification
+    location_city: str | None = None
+    location_country: str | None = None
+    location_scope: str | None = None
+    location_score: float = 0.0
+    location_reason: str | None = None
+    # M12: search priority
+    search_priority: float = 0.5
 
 
 class Score(BaseModel):
@@ -85,3 +116,6 @@ class SourceRate(BaseModel):
     source: str
     avg_duration_seconds: float = 5.0
     recent_count: int = 0
+
+# Rebuild models to resolve forward references (RoleArchetype, CareerDirection)
+Job.model_rebuild()

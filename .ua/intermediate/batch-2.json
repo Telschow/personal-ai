@@ -1,0 +1,80 @@
+{
+  "nodes": [
+    {
+      "id": "service:job_agent/Dockerfile",
+      "type": "service",
+      "name": "Dockerfile",
+      "filePath": "job_agent/Dockerfile",
+      "summary": "Single-stage Python 3.12-slim image that builds the job-agent CLI: copies the package, profile data, templates, and example config, installs via pip, and runs `job-agent scan` as the container command.",
+      "tags": ["containerization", "infrastructure", "deployment"],
+      "complexity": "simple",
+      "languageNotes": "Single-stage build with full `pip install -e .` at runtime, no multi-stage size optimization."
+    },
+    {
+      "id": "service:job_agent/Dockerfile:python",
+      "type": "service",
+      "name": "python",
+      "filePath": "job_agent/Dockerfile",
+      "lineRange": [1, 10],
+      "summary": "Build stage based on python:3.12-slim that installs the job-agent package and launches the job scanner as the default command with a config file.",
+      "tags": ["containerization", "build-system"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:job_agent/docker-compose.yml",
+      "type": "service",
+      "name": "docker-compose.yml",
+      "filePath": "job_agent/docker-compose.yml",
+      "summary": "Docker Compose orchestration for the job-agent service: builds from the local Dockerfile, mounts output/profile/config/templates volumes, and adds host.docker.internal so the container can reach local Ollama.",
+      "tags": ["orchestration", "infrastructure", "deployment"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:job_agent/docker-compose.yml:job-agent",
+      "type": "service",
+      "name": "job-agent",
+      "filePath": "job_agent/docker-compose.yml",
+      "lineRange": [2, 11],
+      "summary": "Compose service that builds the job-agent image from the local Dockerfile and runs it with a writable output volume plus read-only mounts for profile, config, and templates.",
+      "tags": ["orchestration", "deployment"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "service:job_agent/Dockerfile",
+      "target": "service:job_agent/Dockerfile:python",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "service:job_agent/docker-compose.yml",
+      "target": "service:job_agent/docker-compose.yml:job-agent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "service:job_agent/docker-compose.yml",
+      "target": "service:job_agent/Dockerfile",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "service:job_agent/Dockerfile",
+      "target": "file:job_agent/job_agent/cli.py",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "service:job_agent/docker-compose.yml",
+      "target": "file:job_agent/job_agent/cli.py",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

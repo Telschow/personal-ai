@@ -9,6 +9,7 @@ policy, or any other source — failures are isolated per source by the caller.
 from __future__ import annotations
 
 import json
+import time
 from datetime import datetime
 from enum import StrEnum
 from urllib.parse import urlparse
@@ -21,7 +22,7 @@ from .models import Job
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130 Safari/537.36 PersonalJobAgent/0.2"
 
 MAX_RESPONSE_BYTES = 5_000_000
-DEFAULT_TIMEOUT = httpx.Timeout(20.0, connect=10.0)
+DEFAULT_TIMEOUT = httpx.Timeout(20.0, connect=10.0, read=20.0)
 
 
 class SourceKind(StrEnum):
@@ -98,27 +99,45 @@ class GreenhouseSource(AtsBoardSource):
         self.token = token
 
     def fetch(self) -> list[Job]:
-        url = f"https://boards-api.greenhouse.io/v1/boards/{self.token}/jobs?content=true"
-        data = self._get_json(url)
-        jobs_dict = data if isinstance(data, dict) else {}
+        per_page = 100
+        page = 1
         out: list[Job] = []
-        for x in jobs_dict.get("jobs") or []:
-            location = (x.get("location") or {}).get("name", "") if isinstance(x.get("location"), dict) else ""
-            out.append(
-                Job(
-                    id=f"gh:{x['id']}",
-                    title=x.get("title", ""),
-                    company=self.token,
-                    url=x.get("absolute_url", ""),
-                    apply_url=x.get("absolute_url"),
-                    source=self.name,
-                    source_type=self.kind.value,
-                    location=location or "",
-                    date_posted=_dt(x.get("updated_at")),
-                    description=_html(x.get("content", "")),
-                    raw=x,
+        seen_ids = set()
+        while True:
+            url = f"https://boards-api.greenhouse.io/v1/boards/{self.token}/jobs?content=true&per_page={per_page}&page={page}"
+            data = self._get_json(url)
+            jobs_dict = data if isinstance(data, dict) else {}
+            jobs = jobs_dict.get("jobs") or []
+            if not jobs:
+                break
+            for x in jobs:
+                jid = x.get("id")
+                if jid is None:
+                    continue
+                # deduplicate within same fetch
+                if jid in seen_ids:
+                    continue
+                seen_ids.add(jid)
+                location = (x.get("location") or {}).get("name", "") if isinstance(x.get("location"), dict) else ""
+                out.append(
+                    Job(
+                        id=f"gh:{jid}",
+                        title=x.get("title", ""),
+                        company=self.token,
+                        url=x.get("absolute_url", ""),
+                        apply_url=x.get("absolute_url"),
+                        source=self.name,
+                        source_type=self.kind.value,
+                        location=location or "",
+                        date_posted=_dt(x.get("updated_at")),
+                        description=_html(x.get("content", "")),
+                        raw=x,
+                    )
                 )
-            )
+            # stop if less than a full page
+            if len(jobs) < per_page:
+                break
+            page += 1
         return out
 
 
@@ -159,30 +178,47 @@ class AshbySource(AtsBoardSource):
         self.board = board
 
     def fetch(self) -> list[Job]:
-        url = f"https://api.ashbyhq.com/posting-api/job-board/{self.board}?includeCompensation=true"
-        data = self._get_json(url)
-        items = data.get("jobs", []) if isinstance(data, dict) else []
+        limit = 100
+        offset = 0
         out: list[Job] = []
-        for x in items:
-            comp = x.get("compensation") or {}
-            jid = x.get("jobUrl") or x.get("applyUrl") or x.get("title")
-            out.append(
-                Job(
-                    id=f"ashby:{jid}",
-                    title=x.get("title", ""),
-                    company=self.board,
-                    url=x.get("jobUrl", ""),
-                    apply_url=x.get("applyUrl"),
-                    source=self.name,
-                    source_type=self.kind.value,
-                    location=x.get("location", "") or "",
-                    description=x.get("descriptionPlain", "") or _html(x.get("descriptionHtml", "")),
-                    salary_min=_num(comp.get("minValue")),
-                    salary_max=_num(comp.get("maxValue")),
-                    salary_currency=comp.get("currencyCode"),
-                    raw=x,
+        seen = set()
+        while True:
+            url = f"https://api.ashbyhq.com/posting-api/job-board/{self.board}?includeCompensation=true&limit={limit}&offset={offset}"
+            data = self._get_json(url)
+            items = data.get("jobs", []) if isinstance(data, dict) else []
+            if not items:
+                break
+            for x in items:
+                comp = x.get("compensation") or {}
+                jid = x.get("jobUrl") or x.get("applyUrl") or x.get("title")
+                job_id = f"ashby:{jid}"
+                if job_id in seen:
+                    continue
+                seen.add(job_id)
+                out.append(
+                    Job(
+                        id=job_id,
+                        title=x.get("title", ""),
+                        company=self.board,
+                        url=x.get("jobUrl", ""),
+                        apply_url=x.get("applyUrl"),
+                        source=self.name,
+                        source_type=self.kind.value,
+                        location=x.get("location", "") or "",
+                        description=x.get("descriptionPlain", "") or _html(x.get("descriptionHtml", "")),
+                        salary_min=_num(comp.get("minValue")),
+                        salary_max=_num(comp.get("maxValue")),
+                        salary_currency=comp.get("currencyCode"),
+                        raw=x,
+                    )
                 )
-            )
+            # stop if we received fewer than limit items and no more pages
+            if len(items) < limit:
+                break
+            offset += limit
+            # safety guard against infinite loops
+            if offset > 10000:
+                break
         return out
 
 
@@ -275,10 +311,31 @@ class DirectPageSource(StructuredPageSource):
 
     def fetch(self) -> list[Job]:
         headers = {"User-Agent": UA}
-        resp = httpx.get(self.url, headers=headers, timeout=DEFAULT_TIMEOUT, follow_redirects=True)
-        resp.raise_for_status()
-        if len(resp.content) > MAX_RESPONSE_BYTES:
-            raise SourceError(f"{self.name}: page too large")
+        max_attempts = 3
+        backoff_factor = 0.5
+        for attempt in range(max_attempts):
+            try:
+                resp = httpx.get(self.url, headers=headers, timeout=DEFAULT_TIMEOUT, follow_redirects=True)
+                resp.raise_for_status()
+                if len(resp.content) > MAX_RESPONSE_BYTES:
+                    raise SourceError(f"{self.name}: page too large")
+                break
+            except (httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
+                if attempt == max_attempts - 1:
+                    raise
+                sleep_time = backoff_factor * (2 ** attempt)
+                time.sleep(sleep_time)
+                continue
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code in (502, 503, 504) and attempt < max_attempts - 1:
+                    sleep_time = backoff_factor * (2 ** attempt)
+                    time.sleep(sleep_time)
+                    continue
+                raise
+        else:
+            # This block runs if we didn't break (i.e., all attempts failed)
+            # Should not happen because we raise in the last attempt
+            raise
         soup = BeautifulSoup(resp.text, "html.parser")
         out: list[Job] = []
         for node in soup.find_all("script", type="application/ld+json"):

@@ -1,0 +1,1592 @@
+{
+  "nodes": [
+    {
+      "id": "file:job_agent/job_agent/location.py",
+      "type": "file",
+      "name": "location.py",
+      "filePath": "job_agent/job_agent/location.py",
+      "summary": "Location normalization and fit scoring: location tiers, remote scope enums, structured location parsing, per-tier weight model, and fit scoring between job locations and preferred locations.",
+      "tags": [
+        "location",
+        "normalization",
+        "scoring",
+        "data-model"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:job_agent/job_agent/location.py:normalize_location",
+      "type": "function",
+      "name": "normalize_location",
+      "filePath": "job_agent/job_agent/location.py",
+      "lineRange": [
+        473,
+        485
+      ],
+      "summary": "Normalizes a location string into canonical terms.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/location.py:_pattern",
+      "type": "function",
+      "name": "_pattern",
+      "filePath": "job_agent/job_agent/location.py",
+      "lineRange": [
+        491,
+        496
+      ],
+      "summary": "Builds a compiled matcher for a location pattern.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/location.py:_match_group",
+      "type": "function",
+      "name": "_match_group",
+      "filePath": "job_agent/job_agent/location.py",
+      "lineRange": [
+        499,
+        506
+      ],
+      "summary": "Extracts a named group from a match.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/location.py:_detect_remote",
+      "type": "function",
+      "name": "_detect_remote",
+      "filePath": "job_agent/job_agent/location.py",
+      "lineRange": [
+        509,
+        510
+      ],
+      "summary": "Flags remote descriptors in location text.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/location.py:parse_location",
+      "type": "function",
+      "name": "parse_location",
+      "filePath": "job_agent/job_agent/location.py",
+      "lineRange": [
+        513,
+        577
+      ],
+      "summary": "Parses a free-text location into structured LocationParse.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:job_agent/job_agent/location.py:tier_weight",
+      "type": "function",
+      "name": "tier_weight",
+      "filePath": "job_agent/job_agent/location.py",
+      "lineRange": [
+        580,
+        590
+      ],
+      "summary": "Returns the fit weight for a location tier.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/location.py:location_fit",
+      "type": "function",
+      "name": "location_fit",
+      "filePath": "job_agent/job_agent/location.py",
+      "lineRange": [
+        593,
+        611
+      ],
+      "summary": "Scores how well a job location fits the preferred/remote scope.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/location.py:preferred_location_terms",
+      "type": "function",
+      "name": "preferred_location_terms",
+      "filePath": "job_agent/job_agent/location.py",
+      "lineRange": [
+        614,
+        633
+      ],
+      "summary": "Expands preferred city/region/remote settings into normalized search terms.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:job_agent/job_agent/location.py:LocationTier",
+      "type": "class",
+      "name": "LocationTier",
+      "filePath": "job_agent/job_agent/location.py",
+      "lineRange": [
+        24,
+        33
+      ],
+      "summary": "Location tier enum (exact/region/national/worldwide/remote/na).",
+      "tags": [
+        "class",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:job_agent/job_agent/location.py:RemoteScope",
+      "type": "class",
+      "name": "RemoteScope",
+      "filePath": "job_agent/job_agent/location.py",
+      "lineRange": [
+        48,
+        53
+      ],
+      "summary": "Remote preference enum (any/remote_ok/na).",
+      "tags": [
+        "class",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:job_agent/job_agent/location.py:LocationWeights",
+      "type": "class",
+      "name": "LocationWeights",
+      "filePath": "job_agent/job_agent/location.py",
+      "lineRange": [
+        56,
+        66
+      ],
+      "summary": "Weights per tier plus remote bonus used by scoring.",
+      "tags": [
+        "class",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:job_agent/job_agent/location.py:LocationParse",
+      "type": "class",
+      "name": "LocationParse",
+      "filePath": "job_agent/job_agent/location.py",
+      "lineRange": [
+        70,
+        79
+      ],
+      "summary": "Structured parse result (city, region, country, tier, remote).",
+      "tags": [
+        "class",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:job_agent/job_agent/models.py",
+      "type": "file",
+      "name": "models.py",
+      "filePath": "job_agent/job_agent/models.py",
+      "summary": "Core pydantic domain models shared across the batch: Job and its score/match/stats/rate companions.",
+      "tags": [
+        "data-model",
+        "pydantic",
+        "domain"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:job_agent/job_agent/models.py:Job",
+      "type": "class",
+      "name": "Job",
+      "filePath": "job_agent/job_agent/models.py",
+      "lineRange": [
+        16,
+        49
+      ],
+      "summary": "Core job domain model (title, company, location, salary, description, URLs).",
+      "tags": [
+        "class",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:job_agent/job_agent/models.py:Score",
+      "type": "class",
+      "name": "Score",
+      "filePath": "job_agent/job_agent/models.py",
+      "lineRange": [
+        52,
+        64
+      ],
+      "summary": "Scoring result model (overall score, component scores, reasons).",
+      "tags": [
+        "class",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:job_agent/job_agent/models.py:JobMatch",
+      "type": "class",
+      "name": "JobMatch",
+      "filePath": "job_agent/job_agent/models.py",
+      "lineRange": [
+        67,
+        69
+      ],
+      "summary": "Job+score pair emitted by the pipeline.",
+      "tags": [
+        "class",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:job_agent/job_agent/models.py:SourceStats",
+      "type": "class",
+      "name": "SourceStats",
+      "filePath": "job_agent/job_agent/models.py",
+      "lineRange": [
+        72,
+        79
+      ],
+      "summary": "Per-source statistics.",
+      "tags": [
+        "class",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:job_agent/job_agent/models.py:SourceRate",
+      "type": "class",
+      "name": "SourceRate",
+      "filePath": "job_agent/job_agent/models.py",
+      "lineRange": [
+        82,
+        87
+      ],
+      "summary": "Per-source rate limit info.",
+      "tags": [
+        "class",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:job_agent/job_agent/normalizer.py",
+      "type": "file",
+      "name": "normalizer.py",
+      "filePath": "job_agent/job_agent/normalizer.py",
+      "summary": "Job normalization: remote-mode classification/normalization, location token mapping, salary info, and normalization of raw job records into canonical Job models.",
+      "tags": [
+        "normalization",
+        "pipeline",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/normalizer.py:normalize_remote_mode",
+      "type": "function",
+      "name": "normalize_remote_mode",
+      "filePath": "job_agent/job_agent/normalizer.py",
+      "lineRange": [
+        16,
+        24
+      ],
+      "summary": "Normalizes remote flags into a canonical remote mode.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/normalizer.py:normalized_location_tokens",
+      "type": "function",
+      "name": "normalized_location_tokens",
+      "filePath": "job_agent/job_agent/normalizer.py",
+      "lineRange": [
+        27,
+        28
+      ],
+      "summary": "Splits normalized location into tokens.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/normalizer.py:normalize_job",
+      "type": "function",
+      "name": "normalize_job",
+      "filePath": "job_agent/job_agent/normalizer.py",
+      "lineRange": [
+        31,
+        58
+      ],
+      "summary": "Normalizes a raw job record into a canonical Job model.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/normalizer.py:classify_remote_mode",
+      "type": "function",
+      "name": "classify_remote_mode",
+      "filePath": "job_agent/job_agent/normalizer.py",
+      "lineRange": [
+        61,
+        74
+      ],
+      "summary": "Classifies a job as remote/hybrid/on-site.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/normalizer.py:salary_info",
+      "type": "function",
+      "name": "salary_info",
+      "filePath": "job_agent/job_agent/normalizer.py",
+      "lineRange": [
+        77,
+        78
+      ],
+      "summary": "Extracts or normalizes salary info from a job.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:job_agent/job_agent/salary.py",
+      "type": "file",
+      "name": "salary.py",
+      "filePath": "job_agent/job_agent/salary.py",
+      "summary": "Salary normalization to EUR: amount parsing, currency alias handling, FX conversion, target/floor comparisons, and the SalaryInfo result model.",
+      "tags": [
+        "salary",
+        "normalization",
+        "data-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:job_agent/job_agent/salary.py:_parse_amount",
+      "type": "function",
+      "name": "_parse_amount",
+      "filePath": "job_agent/job_agent/salary.py",
+      "lineRange": [
+        55,
+        85
+      ],
+      "summary": "Parses a raw amount (currency symbols, K, thousands) to a number.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/salary.py:normalize_salary",
+      "type": "function",
+      "name": "normalize_salary",
+      "filePath": "job_agent/job_agent/salary.py",
+      "lineRange": [
+        88,
+        137
+      ],
+      "summary": "Normalizes min/max salary into EUR with FX conversion and uncertainty reasons.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:job_agent/job_agent/salary.py:salary_reaches_target",
+      "type": "function",
+      "name": "salary_reaches_target",
+      "filePath": "job_agent/job_agent/salary.py",
+      "lineRange": [
+        140,
+        145
+      ],
+      "summary": "Checks whether normalized salary reaches the target EUR.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/salary.py:salary_exceeds_floor",
+      "type": "function",
+      "name": "salary_exceeds_floor",
+      "filePath": "job_agent/job_agent/salary.py",
+      "lineRange": [
+        148,
+        151
+      ],
+      "summary": "Checks whether normalized salary exceeds a minimum EUR floor.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:job_agent/job_agent/salary.py:SalaryNormalizationError",
+      "type": "class",
+      "name": "SalaryNormalizationError",
+      "filePath": "job_agent/job_agent/salary.py",
+      "lineRange": [
+        38,
+        39
+      ],
+      "summary": "Raised when salary cannot be normalized.",
+      "tags": [
+        "class",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:job_agent/job_agent/salary.py:SalaryInfo",
+      "type": "class",
+      "name": "SalaryInfo",
+      "filePath": "job_agent/job_agent/salary.py",
+      "lineRange": [
+        43,
+        52
+      ],
+      "summary": "Normalized salary result (min/max EUR, currency, converted flags, uncertainty).",
+      "tags": [
+        "class",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:job_agent/job_agent/scoring.py",
+      "type": "file",
+      "name": "scoring.py",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "summary": "Deterministic job scoring: weighted heuristics (role fit, AI relevance, leadership, purpose, work-life balance, salary, location) with hard-fail negative keywords and a policy version hash.",
+      "tags": [
+        "scoring",
+        "heuristics",
+        "ranking",
+        "policy"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:normalize_text",
+      "type": "function",
+      "name": "normalize_text",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        34,
+        35
+      ],
+      "summary": "Casefold + whitespace collapse for scoring comparisons.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:_tokens",
+      "type": "function",
+      "name": "_tokens",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        38,
+        44
+      ],
+      "summary": "Tokenizes text on non-word boundaries.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:contains_negative_keyword",
+      "type": "function",
+      "name": "contains_negative_keyword",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        47,
+        59
+      ],
+      "summary": "Detects hard-fail negative keywords (seniority/contract boosters).",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:title_like",
+      "type": "function",
+      "name": "title_like",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        62,
+        67
+      ],
+      "summary": "Token-set similarity between job title and target roles.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:skill_similarity",
+      "type": "function",
+      "name": "skill_similarity",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        70,
+        73
+      ],
+      "summary": "Mean token-set similarity between job text and skills.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:ai_relevance",
+      "type": "function",
+      "name": "ai_relevance",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        76,
+        85
+      ],
+      "summary": "AI-term weighted relevance score of a job.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:leadership_score",
+      "type": "function",
+      "name": "leadership_score",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        88,
+        110
+      ],
+      "summary": "Leadership/management signal score.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:purpose_score",
+      "type": "function",
+      "name": "purpose_score",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        113,
+        137
+      ],
+      "summary": "Purpose/industry fit score.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:wlb_score",
+      "type": "function",
+      "name": "wlb_score",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        140,
+        156
+      ],
+      "summary": "Work-life-balance keyword score.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:scoring_policy_from_config",
+      "type": "function",
+      "name": "scoring_policy_from_config",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        204,
+        237
+      ],
+      "summary": "Builds a ScoringPolicy from raw config dict.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:score",
+      "type": "function",
+      "name": "score",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        240,
+        361
+      ],
+      "summary": "Full deterministic job scoring: weighted components, hard filters, reasons, confidence.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:_salary_score",
+      "type": "function",
+      "name": "_salary_score",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        364,
+        382
+      ],
+      "summary": "Scaled salary score from min/target.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/scoring.py:_confidence",
+      "type": "function",
+      "name": "_confidence",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        385,
+        394
+      ],
+      "summary": "Confidence in the total score from component coverage.",
+      "tags": [
+        "function",
+        "logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:job_agent/job_agent/scoring.py:ScoringPolicy",
+      "type": "class",
+      "name": "ScoringPolicy",
+      "filePath": "job_agent/job_agent/scoring.py",
+      "lineRange": [
+        160,
+        201
+      ],
+      "summary": "Scoring weights/settings with a version() hash for cache invalidation.",
+      "tags": [
+        "class",
+        "data-model"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:normalize_location",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:normalize_location",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:_pattern",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:_pattern",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:_match_group",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:_match_group",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:_detect_remote",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:_detect_remote",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:parse_location",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:parse_location",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:tier_weight",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:tier_weight",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:location_fit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:location_fit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:preferred_location_terms",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "function:job_agent/job_agent/location.py:preferred_location_terms",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "class:job_agent/job_agent/location.py:LocationTier",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "class:job_agent/job_agent/location.py:LocationTier",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "class:job_agent/job_agent/location.py:RemoteScope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "class:job_agent/job_agent/location.py:RemoteScope",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "class:job_agent/job_agent/location.py:LocationWeights",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "class:job_agent/job_agent/location.py:LocationWeights",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "class:job_agent/job_agent/location.py:LocationParse",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/location.py",
+      "target": "class:job_agent/job_agent/location.py:LocationParse",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "class:job_agent/job_agent/models.py:Job",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "class:job_agent/job_agent/models.py:Job",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "class:job_agent/job_agent/models.py:Score",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "class:job_agent/job_agent/models.py:Score",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "class:job_agent/job_agent/models.py:JobMatch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "class:job_agent/job_agent/models.py:JobMatch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "class:job_agent/job_agent/models.py:SourceStats",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "class:job_agent/job_agent/models.py:SourceStats",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "class:job_agent/job_agent/models.py:SourceRate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "class:job_agent/job_agent/models.py:SourceRate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/normalizer.py",
+      "target": "function:job_agent/job_agent/normalizer.py:normalize_remote_mode",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/normalizer.py",
+      "target": "function:job_agent/job_agent/normalizer.py:normalize_remote_mode",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/normalizer.py",
+      "target": "function:job_agent/job_agent/normalizer.py:normalized_location_tokens",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/normalizer.py",
+      "target": "function:job_agent/job_agent/normalizer.py:normalized_location_tokens",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/normalizer.py",
+      "target": "function:job_agent/job_agent/normalizer.py:normalize_job",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/normalizer.py",
+      "target": "function:job_agent/job_agent/normalizer.py:normalize_job",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/normalizer.py",
+      "target": "function:job_agent/job_agent/normalizer.py:classify_remote_mode",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/normalizer.py",
+      "target": "function:job_agent/job_agent/normalizer.py:classify_remote_mode",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/normalizer.py",
+      "target": "function:job_agent/job_agent/normalizer.py:salary_info",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/normalizer.py",
+      "target": "function:job_agent/job_agent/normalizer.py:salary_info",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/salary.py",
+      "target": "function:job_agent/job_agent/salary.py:_parse_amount",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/salary.py",
+      "target": "function:job_agent/job_agent/salary.py:_parse_amount",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/salary.py",
+      "target": "function:job_agent/job_agent/salary.py:normalize_salary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/salary.py",
+      "target": "function:job_agent/job_agent/salary.py:normalize_salary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/salary.py",
+      "target": "function:job_agent/job_agent/salary.py:salary_reaches_target",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/salary.py",
+      "target": "function:job_agent/job_agent/salary.py:salary_reaches_target",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/salary.py",
+      "target": "function:job_agent/job_agent/salary.py:salary_exceeds_floor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/salary.py",
+      "target": "function:job_agent/job_agent/salary.py:salary_exceeds_floor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/salary.py",
+      "target": "class:job_agent/job_agent/salary.py:SalaryNormalizationError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/salary.py",
+      "target": "class:job_agent/job_agent/salary.py:SalaryNormalizationError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/salary.py",
+      "target": "class:job_agent/job_agent/salary.py:SalaryInfo",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/salary.py",
+      "target": "class:job_agent/job_agent/salary.py:SalaryInfo",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:normalize_text",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:normalize_text",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:_tokens",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:_tokens",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:contains_negative_keyword",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:contains_negative_keyword",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:title_like",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:title_like",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:skill_similarity",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:skill_similarity",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:ai_relevance",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:ai_relevance",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:leadership_score",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:leadership_score",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:purpose_score",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:purpose_score",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:wlb_score",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:wlb_score",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:scoring_policy_from_config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:scoring_policy_from_config",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:score",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:score",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:_salary_score",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:_salary_score",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:_confidence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "function:job_agent/job_agent/scoring.py:_confidence",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "class:job_agent/job_agent/scoring.py:ScoringPolicy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:job_agent/job_agent/scoring.py",
+      "target": "class:job_agent/job_agent/scoring.py:ScoringPolicy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/location.py:location_fit",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/salary.py:salary_reaches_target",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/salary.py:salary_exceeds_floor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "class:job_agent/job_agent/salary.py:SalaryInfo",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "class:job_agent/job_agent/models.py:Score",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/scoring.py:_salary_score",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/scoring.py:_confidence",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/scoring.py:title_like",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/scoring.py:skill_similarity",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/scoring.py:ai_relevance",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/scoring.py:leadership_score",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/scoring.py:purpose_score",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/scoring.py:wlb_score",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/scoring.py:contains_negative_keyword",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:score",
+      "target": "function:job_agent/job_agent/scoring.py:normalize_text",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:scoring_policy_from_config",
+      "target": "class:job_agent/job_agent/scoring.py:ScoringPolicy",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:scoring_policy_from_config",
+      "target": "class:job_agent/job_agent/location.py:LocationWeights",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:contains_negative_keyword",
+      "target": "function:job_agent/job_agent/scoring.py:_tokens",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:_tokens",
+      "target": "function:job_agent/job_agent/scoring.py:normalize_text",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:title_like",
+      "target": "function:job_agent/job_agent/scoring.py:normalize_text",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:skill_similarity",
+      "target": "function:job_agent/job_agent/scoring.py:normalize_text",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:ai_relevance",
+      "target": "function:job_agent/job_agent/scoring.py:normalize_text",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:leadership_score",
+      "target": "function:job_agent/job_agent/scoring.py:normalize_text",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:purpose_score",
+      "target": "function:job_agent/job_agent/scoring.py:normalize_text",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/scoring.py:wlb_score",
+      "target": "function:job_agent/job_agent/scoring.py:normalize_text",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/normalizer.py:normalize_job",
+      "target": "function:job_agent/job_agent/salary.py:normalize_salary",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/normalizer.py:normalize_job",
+      "target": "class:job_agent/job_agent/models.py:Job",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/normalizer.py:salary_info",
+      "target": "class:job_agent/job_agent/salary.py:SalaryInfo",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/salary.py:normalize_salary",
+      "target": "function:job_agent/job_agent/salary.py:_parse_amount",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/salary.py:normalize_salary",
+      "target": "class:job_agent/job_agent/salary.py:SalaryInfo",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/salary.py:salary_exceeds_floor",
+      "target": "function:job_agent/job_agent/salary.py:normalize_salary",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/salary.py:salary_reaches_target",
+      "target": "function:job_agent/job_agent/salary.py:normalize_salary",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/location.py:location_fit",
+      "target": "function:job_agent/job_agent/location.py:parse_location",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/location.py:location_fit",
+      "target": "function:job_agent/job_agent/location.py:tier_weight",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/location.py:location_fit",
+      "target": "function:job_agent/job_agent/location.py:normalize_location",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/location.py:preferred_location_terms",
+      "target": "function:job_agent/job_agent/location.py:normalize_location",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:job_agent/job_agent/location.py:parse_location",
+      "target": "function:job_agent/job_agent/location.py:_detect_remote",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

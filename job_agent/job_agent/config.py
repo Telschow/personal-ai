@@ -133,6 +133,15 @@ class DiscoveryBudgets(BaseModel):
     max_results_per_query: int = 25
 
 
+class DiscoverySettings(BaseModel):
+    """Discovery execution settings."""
+
+    provider_only: bool = False
+    skip_search_engines: bool = False
+    max_provider_requests: int = 500
+    min_jobs_per_provider_request: int = 10
+
+
 class CareerLlmSettings(BaseModel):
     enabled: bool = False
     model: str = ""  # empty => reuse llm.model
@@ -149,6 +158,7 @@ class CareerSettings(BaseModel):
     tracks: CareerTracksSettings = Field(default_factory=CareerTracksSettings)
     location: LocationSettings = Field(default_factory=LocationSettings)
     discovery: DiscoveryBudgets = Field(default_factory=DiscoveryBudgets)
+    discovery_settings: DiscoverySettings = Field(default_factory=DiscoverySettings)
     pacing: DiscoveryPacing = Field(default_factory=DiscoveryPacing)
 
 

@@ -1,0 +1,643 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_cli_search.py",
+      "type": "file",
+      "name": "test_cli_search.py",
+      "filePath": "tests/test_cli_search.py",
+      "summary": "Tests CLI search command with limit truncation and ranked results.",
+      "tags": [
+        "test",
+        "cli",
+        "command-line"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_cli_search.py:knowledge_db",
+      "type": "function",
+      "name": "knowledge_db",
+      "filePath": "tests/test_cli_search.py",
+      "lineRange": [
+        13,
+        42
+      ],
+      "summary": "Function knowledge_db with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_search.py:run_cli",
+      "type": "function",
+      "name": "run_cli",
+      "filePath": "tests/test_cli_search.py",
+      "lineRange": [
+        45,
+        47
+      ],
+      "summary": "Function run_cli with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_search.py:test_parse_args_search_mode_without_workspace",
+      "type": "function",
+      "name": "test_parse_args_search_mode_without_workspace",
+      "filePath": "tests/test_cli_search.py",
+      "lineRange": [
+        50,
+        70
+      ],
+      "summary": "Test: parse args search mode without workspace.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_search.py:test_parse_args_search_respects_explicit_limit",
+      "type": "function",
+      "name": "test_parse_args_search_respects_explicit_limit",
+      "filePath": "tests/test_cli_search.py",
+      "lineRange": [
+        73,
+        90
+      ],
+      "summary": "Test: parse args search respects explicit limit.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_search.py:test_search_requires_database",
+      "type": "function",
+      "name": "test_search_requires_database",
+      "filePath": "tests/test_cli_search.py",
+      "lineRange": [
+        93,
+        101
+      ],
+      "summary": "Test: search requires database.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_search.py:test_agent_mode_still_requires_prompt",
+      "type": "function",
+      "name": "test_agent_mode_still_requires_prompt",
+      "filePath": "tests/test_cli_search.py",
+      "lineRange": [
+        104,
+        113
+      ],
+      "summary": "Test: agent mode still requires prompt.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_search.py:test_main_search_prints_ranked_hits",
+      "type": "function",
+      "name": "test_main_search_prints_ranked_hits",
+      "filePath": "tests/test_cli_search.py",
+      "lineRange": [
+        116,
+        138
+      ],
+      "summary": "Test: main search prints ranked hits.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_search.py:test_main_search_limit_truncates_results",
+      "type": "function",
+      "name": "test_main_search_limit_truncates_results",
+      "filePath": "tests/test_cli_search.py",
+      "lineRange": [
+        141,
+        159
+      ],
+      "summary": "Test: main search limit truncates results.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_search.py:test_main_search_without_match_prints_friendly_message",
+      "type": "function",
+      "name": "test_main_search_without_match_prints_friendly_message",
+      "filePath": "tests/test_cli_search.py",
+      "lineRange": [
+        162,
+        175
+      ],
+      "summary": "Test: main search without match prints friendly message.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_search.py:test_run_search_closes_the_database_connection",
+      "type": "function",
+      "name": "test_run_search_closes_the_database_connection",
+      "filePath": "tests/test_cli_search.py",
+      "lineRange": [
+        178,
+        187
+      ],
+      "summary": "Test: run search closes the database connection.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_cli_wiring.py",
+      "type": "file",
+      "name": "test_cli_wiring.py",
+      "filePath": "tests/test_cli_wiring.py",
+      "summary": "Tests CLI agent registry wiring and verbose mode.",
+      "tags": [
+        "test",
+        "cli",
+        "command-line"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_cli_wiring.py:_source_record",
+      "type": "function",
+      "name": "_source_record",
+      "filePath": "tests/test_cli_wiring.py",
+      "lineRange": [
+        39,
+        48
+      ],
+      "summary": "Helper function: _source_record.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_wiring.py:_watch_event",
+      "type": "function",
+      "name": "_watch_event",
+      "filePath": "tests/test_cli_wiring.py",
+      "lineRange": [
+        68,
+        80
+      ],
+      "summary": "Helper function: _watch_event.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_cli_wiring.py:FakeStructuredExtractor",
+      "type": "class",
+      "name": "FakeStructuredExtractor",
+      "filePath": "tests/test_cli_wiring.py",
+      "lineRange": [
+        51,
+        65
+      ],
+      "summary": "Class FakeStructuredExtractor with 1 methods.",
+      "tags": [
+        "helper-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_cli_wiring.py:TestConnectAgentRegistry",
+      "type": "class",
+      "name": "TestConnectAgentRegistry",
+      "filePath": "tests/test_cli_wiring.py",
+      "lineRange": [
+        83,
+        240
+      ],
+      "summary": "Test class TestConnectAgentRegistry with 2 methods.",
+      "tags": [
+        "test-class",
+        "exported"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_cli_wiring.py:TestMainWithDatabase",
+      "type": "class",
+      "name": "TestMainWithDatabase",
+      "filePath": "tests/test_cli_wiring.py",
+      "lineRange": [
+        243,
+        361
+      ],
+      "summary": "Test class TestMainWithDatabase with 2 methods.",
+      "tags": [
+        "test-class",
+        "exported"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_cli_wiring.py:TestVerboseMode",
+      "type": "class",
+      "name": "TestVerboseMode",
+      "filePath": "tests/test_cli_wiring.py",
+      "lineRange": [
+        364,
+        434
+      ],
+      "summary": "Test class TestVerboseMode with 3 methods.",
+      "tags": [
+        "test-class",
+        "exported"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_config_retrieval.py",
+      "type": "file",
+      "name": "test_config_retrieval.py",
+      "filePath": "tests/test_config_retrieval.py",
+      "summary": "Tests retrieval settings configuration.",
+      "tags": [
+        "test",
+        "config",
+        "settings"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_config_retrieval.py:TestRetrievalSettings",
+      "type": "class",
+      "name": "TestRetrievalSettings",
+      "filePath": "tests/test_config_retrieval.py",
+      "lineRange": [
+        15,
+        62
+      ],
+      "summary": "Test class TestRetrievalSettings with 7 methods.",
+      "tags": [
+        "test-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:knowledge_db",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:knowledge_db",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:run_cli",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:run_cli",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_parse_args_search_mode_without_workspace",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_parse_args_search_mode_without_workspace",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_parse_args_search_respects_explicit_limit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_parse_args_search_respects_explicit_limit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_search_requires_database",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_search_requires_database",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_agent_mode_still_requires_prompt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_agent_mode_still_requires_prompt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_main_search_prints_ranked_hits",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_main_search_prints_ranked_hits",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_main_search_limit_truncates_results",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_main_search_limit_truncates_results",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_main_search_without_match_prints_friendly_message",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_main_search_without_match_prints_friendly_message",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_run_search_closes_the_database_connection",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_search.py",
+      "target": "function:tests/test_cli_search.py:test_run_search_closes_the_database_connection",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_search.py:test_main_search_prints_ranked_hits",
+      "target": "function:tests/test_cli_search.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_search.py:test_main_search_limit_truncates_results",
+      "target": "function:tests/test_cli_search.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_search.py:test_main_search_without_match_prints_friendly_message",
+      "target": "function:tests/test_cli_search.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_search.py:test_run_search_closes_the_database_connection",
+      "target": "function:tests/test_cli_search.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_wiring.py",
+      "target": "function:tests/test_cli_wiring.py:_source_record",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_wiring.py",
+      "target": "function:tests/test_cli_wiring.py:_source_record",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_wiring.py",
+      "target": "function:tests/test_cli_wiring.py:_watch_event",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_wiring.py",
+      "target": "function:tests/test_cli_wiring.py:_watch_event",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_wiring.py",
+      "target": "class:tests/test_cli_wiring.py:FakeStructuredExtractor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_wiring.py",
+      "target": "class:tests/test_cli_wiring.py:FakeStructuredExtractor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_wiring.py",
+      "target": "class:tests/test_cli_wiring.py:TestConnectAgentRegistry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_wiring.py",
+      "target": "class:tests/test_cli_wiring.py:TestConnectAgentRegistry",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_wiring.py",
+      "target": "class:tests/test_cli_wiring.py:TestMainWithDatabase",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_wiring.py",
+      "target": "class:tests/test_cli_wiring.py:TestMainWithDatabase",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_wiring.py",
+      "target": "class:tests/test_cli_wiring.py:TestVerboseMode",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_wiring.py",
+      "target": "class:tests/test_cli_wiring.py:TestVerboseMode",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_wiring.py:TestConnectAgentRegistry",
+      "target": "function:tests/test_cli_wiring.py:_source_record",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_wiring.py:TestConnectAgentRegistry",
+      "target": "function:tests/test_cli_wiring.py:_watch_event",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_wiring.py:TestConnectAgentRegistry",
+      "target": "function:tests/test_cli_wiring.py:_watch_event",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_wiring.py:TestMainWithDatabase",
+      "target": "function:tests/test_cli_wiring.py:_watch_event",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_config_retrieval.py",
+      "target": "class:tests/test_config_retrieval.py:TestRetrievalSettings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_config_retrieval.py",
+      "target": "class:tests/test_config_retrieval.py:TestRetrievalSettings",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/cli.py",
+      "target": "file:tests/test_cli_search.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/retrieval.py",
+      "target": "file:tests/test_cli_search.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/cli.py",
+      "target": "file:tests/test_cli_wiring.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/config.py",
+      "target": "file:tests/test_config_retrieval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

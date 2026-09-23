@@ -1,0 +1,111 @@
+{
+  "nodes": [
+    {
+      "id": "document:job_agent/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "job_agent/README.md",
+      "summary": "Overview and usage guide for the Personal Job Agent, a local-first career intelligence agent that discovers, normalizes, scores, tailors, and tracks jobs against a structured career profile with human approval gates. Covers 14 sections: profile policy (€120k salary floor), concepts (sources, normalization, scoring, lifecycle, digest, career fit/documents/tailoring), the M3-local web UI with API endpoints, CLI commands, configuration, and safety guarantees; declares the MVP working and ready for real-world usage.",
+      "tags": ["documentation", "entry-point", "overview", "career-agents"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:job_agent/config.example.yaml",
+      "type": "config",
+      "name": "config.example.yaml",
+      "filePath": "job_agent/config.example.yaml",
+      "summary": "Template configuration for the job agent that users copy to config.yaml and edit. Declares profile/database/report paths, the Ollama LLM client settings, global search bounds, salary floor (€120k) and target (€150k), ranking weights, digest output, career knowledge/weights/LLM narrative settings, and placeholder sources whose 'example' tokens are skipped by discovery so a fresh checkout never hits the network.",
+      "tags": ["configuration", "template", "career-agents", "reference"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:job_agent/config.yaml",
+      "type": "config",
+      "name": "config.yaml",
+      "filePath": "job_agent/config.yaml",
+      "summary": "Live runtime configuration for the job agent: Ollama LLM endpoint (qwen3.5:9b), aggressive global search across DE/AT/CH/NL/DK/SE/NO/ES/UK locations and target product-program roles with positive/negative keyword filters, salary floor and target, scoring weights prioritizing similarity, compensation and leadership, and a curated sources list (example placeholders plus three direct-company domains).",
+      "tags": ["configuration", "runtime", "career-agents", "search"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:job_agent/pyproject.toml",
+      "type": "config",
+      "name": "pyproject.toml",
+      "filePath": "job_agent/pyproject.toml",
+      "summary": "Packaging and tooling metadata for the personal-job-agent package: core dependencies (httpx, pydantic, PyYAML, rapidfuzz, trafilatura, python-docx, pypdf), optional extras (llm, playwright, discovery, dev, all), the `job-agent` console script, plus pytest, ruff, and mypy configuration that relaxes strictness for latent pre-Slice-1 modules and the external parent personal_ai package.",
+      "tags": ["configuration", "build-system", "python", "tooling"],
+      "complexity": "moderate",
+      "languageNotes": "Setuptools-based single package layout with per-file ruff ignores and mypy overrides for unwired legacy modules kept out of strict checking."
+    },
+    {
+      "id": "document:job_agent/requirements.txt",
+      "type": "document",
+      "name": "requirements.txt",
+      "filePath": "job_agent/requirements.txt",
+      "summary": "Single-line requirements file containing `-e .`, installing the personal-job-agent package in editable mode with dependencies resolved from pyproject.toml.",
+      "tags": ["documentation", "dependencies", "python", "build-system"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:job_agent/sources_catalog.yaml",
+      "type": "config",
+      "name": "sources_catalog.yaml",
+      "filePath": "job_agent/sources_catalog.yaml",
+      "summary": "Versioned, provenance-tracked inventory of 42 job sources the job agent may discover through, categorized by source type (9 ATS platforms, 13 structured-data, 12 search engines, 8 restricted/browser-automation). Each entry declares discovery method, query host, rate-limit class, priority, and enabled flag; disabled entries retain a reason so bot-hostile or ToS-bound sites are never probed, and selection by career track is deterministic via catalog.py.",
+      "tags": ["configuration", "data-catalog", "career-agents", "source-registry", "data"],
+      "complexity": "complex",
+      "languageNotes": "Data-heavy YAML registry with a governing header documenting field semantics and CC0 provenance from the emredurukn/awesome-job-boards index."
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:job_agent/README.md",
+      "target": "config:job_agent/config.yaml",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/README.md",
+      "target": "file:job_agent/job_agent/cli.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:job_agent/config.example.yaml",
+      "target": "config:job_agent/config.yaml",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:job_agent/config.yaml",
+      "target": "file:job_agent/job_agent/config.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:job_agent/pyproject.toml",
+      "target": "file:job_agent/job_agent/cli.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:job_agent/requirements.txt",
+      "target": "config:job_agent/pyproject.toml",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:job_agent/sources_catalog.yaml",
+      "target": "file:job_agent/job_agent/catalog.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

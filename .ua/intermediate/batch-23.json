@@ -1,0 +1,176 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_tool_knowledge_conversations.py",
+      "type": "file",
+      "name": "test_tool_knowledge_conversations.py",
+      "filePath": "tests/test_tool_knowledge_conversations.py",
+      "summary": "Tests for knowledge search tool conversation result formatting and provenance handling.",
+      "tags": ["test", "knowledge-search", "conversations", "provenance"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_tool_registry.py",
+      "type": "file",
+      "name": "test_tool_registry.py",
+      "filePath": "tests/test_tool_registry.py",
+      "summary": "Comprehensive tests for ToolRegistry schema generation, registration, execution, and error handling.",
+      "tags": ["test", "tool-registry", "schema", "execution"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_tool_search.py",
+      "type": "file",
+      "name": "test_tool_search.py",
+      "filePath": "tests/test_tool_search.py",
+      "summary": "Tests for search tool registration, query execution, filter handling, and result serialization.",
+      "tags": ["test", "search-tool", "filtering", "registry"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_vision_configuration.py",
+      "type": "file",
+      "name": "test_vision_configuration.py",
+      "filePath": "tests/test_vision_configuration.py",
+      "summary": "Tests for VisionSettings configuration loading, environment variable handling, and default values.",
+      "tags": ["test", "vision", "configuration", "settings"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_vision_extractor.py",
+      "type": "file",
+      "name": "test_vision_extractor.py",
+      "filePath": "tests/test_vision_extractor.py",
+      "summary": "Tests for OllamaVisionExtractor protocol compliance, image rendering, and error handling.",
+      "tags": ["test", "vision", "extractor", "ollama", "protocol"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_vision_ingestion.py",
+      "type": "file",
+      "name": "test_vision_ingestion.py",
+      "filePath": "tests/test_vision_ingestion.py",
+      "summary": "End-to-end tests for vision ingestion pipeline including caching, model changes, and page-level failure handling.",
+      "tags": ["test", "vision", "ingestion", "caching", "e2e"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/test_vision_prompt_v2.py",
+      "type": "file",
+      "name": "test_vision_prompt_v2.py",
+      "filePath": "tests/test_vision_prompt_v2.py",
+      "summary": "Tests for V2 vision prompt contract, cache invalidation on prompt version change, and provenance tracking.",
+      "tags": ["test", "vision", "prompt", "cache", "provenance"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_vision_source_pipeline.py",
+      "type": "file",
+      "name": "test_vision_source_pipeline.py",
+      "filePath": "tests/test_vision_source_pipeline.py",
+      "summary": "Tests for raster image detection, classification, vision ingestion pipeline, and text file handling.",
+      "tags": ["test", "vision", "pipeline", "detection", "classification"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/test_vision_storage.py",
+      "type": "file",
+      "name": "test_vision_storage.py",
+      "filePath": "tests/test_vision_storage.py",
+      "summary": "Tests for VisionStore save/get round-trips, compound primary key, and page-level keying.",
+      "tags": ["test", "vision", "storage", "sqlite"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_vision_structured_extraction.py",
+      "type": "file",
+      "name": "test_vision_structured_extraction.py",
+      "filePath": "tests/test_vision_structured_extraction.py",
+      "summary": "Tests for vision structured extraction normalization, gating, persistence, and failure handling.",
+      "tags": ["test", "vision", "structured-extraction", "normalization", "pipeline"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/test_workouts_cli.py",
+      "type": "file",
+      "name": "test_workouts_cli.py",
+      "filePath": "tests/test_workouts_cli.py",
+      "summary": "CLI tests for workouts import, list, show, exercises commands with JSON output and filtering.",
+      "tags": ["test", "workouts", "cli", "import", "json"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_workouts_parser.py",
+      "type": "file",
+      "name": "test_workouts_parser.py",
+      "filePath": "tests/test_workouts_parser.py",
+      "summary": "Tests for BoostCamp CSV parser: source detection, timestamp normalization, set parsing, and warning handling.",
+      "tags": ["test", "workouts", "parser", "csv", "boostcamp"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_workouts_query.py",
+      "type": "file",
+      "name": "test_workouts_query.py",
+      "filePath": "tests/test_workouts_query.py",
+      "summary": "Tests for WorkoutQueryService: workout retrieval, listing, filtering, exercise/set queries, and summary aggregation.",
+      "tags": ["test", "workouts", "query", "filtering", "aggregation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_workouts_search.py",
+      "type": "file",
+      "name": "test_workouts_search.py",
+      "filePath": "tests/test_workouts_search.py",
+      "summary": "Tests for workout search: token matching, case insensitivity, ordering, limits, and stats consistency.",
+      "tags": ["test", "workouts", "search", "token-matching", "stats"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_workouts_store.py",
+      "type": "file",
+      "name": "test_workouts_store.py",
+      "filePath": "tests/test_workouts_store.py",
+      "summary": "Tests for WorkoutStore: table creation, import idempotency, updates, directory discovery, and manifest recording.",
+      "tags": ["test", "workouts", "store", "import", "manifest"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_youtube_history.py",
+      "type": "file",
+      "name": "test_youtube_history.py",
+      "filePath": "tests/test_youtube_history.py",
+      "summary": "Tests for YouTube history parsing: timestamp conversion, watch/search event extraction, deduplication, and export discovery.",
+      "tags": ["test", "youtube", "history", "parsing", "events"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_youtube_history_loader.py",
+      "type": "file",
+      "name": "test_youtube_history_loader.py",
+      "filePath": "tests/test_youtube_history_loader.py",
+      "summary": "Tests for YouTubeHistoryLoader file discovery and loading with skipped record counting.",
+      "tags": ["test", "youtube", "loader", "discovery", "loading"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_youtube_ingestion.py",
+      "type": "file",
+      "name": "test_youtube_ingestion.py",
+      "filePath": "tests/test_youtube_ingestion.py",
+      "summary": "Tests for YouTube history ingestion: idempotency, deduplication, skipped records, and event querying.",
+      "tags": ["test", "youtube", "ingestion", "idempotency", "deduplication"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/workouts_fixtures.py",
+      "type": "file",
+      "name": "workouts_fixtures.py",
+      "filePath": "tests/workouts_fixtures.py",
+      "summary": "Test fixture builders for workout sets, exercises, and CSV generation.",
+      "tags": ["test", "workouts", "fixtures", "builders", "csv"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": []
+}

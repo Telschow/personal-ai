@@ -1,0 +1,79 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_semantic_chunk_index.py",
+      "type": "file",
+      "name": "test_semantic_chunk_index.py",
+      "filePath": "tests/test_semantic_chunk_index.py",
+      "summary": "Tests for semantic chunk index covering embedding-based similarity search, vector operations, and semantic retrieval quality.",
+      "tags": ["test", "semantic", "chunk", "index", "embedding", "vector", "similarity"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_server.py",
+      "type": "file",
+      "name": "test_server.py",
+      "filePath": "tests/test_server.py",
+      "summary": "Core server tests covering FastAPI application lifecycle, route registration, middleware, and health endpoints.",
+      "tags": ["test", "server", "fastapi", "lifecycle", "health", "middleware"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_server_gateway.py",
+      "type": "file",
+      "name": "test_server_gateway.py",
+      "filePath": "tests/test_server_gateway.py",
+      "summary": "Server gateway tests covering API gateway routing, request/response transformation, authentication forwarding, and rate limiting.",
+      "tags": ["test", "server", "gateway", "routing", "auth", "rate-limiting"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_server_job_agent.py",
+      "type": "file",
+      "name": "test_server_job_agent.py",
+      "filePath": "tests/test_server_job_agent.py",
+      "summary": "Tests for job agent server integration covering job discovery endpoints, application management, and career artifact APIs.",
+      "tags": ["test", "server", "job-agent", "discovery", "application", "career"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_source_filesystem.py",
+      "type": "file",
+      "name": "test_source_filesystem.py",
+      "filePath": "tests/test_source_filesystem.py",
+      "summary": "Tests for filesystem source adapter covering file discovery, content ingestion, change detection, and idempotent re-ingestion.",
+      "tags": ["test", "source", "filesystem", "ingestion", "discovery", "idempotency"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_server.py",
+      "target": "file:tests/test_server_gateway.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/test_server.py",
+      "target": "file:tests/test_server_job_agent.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/test_source_filesystem.py",
+      "target": "file:tests/test_pdf_ingestion_e2e.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/test_source_filesystem.py",
+      "target": "file:tests/test_personal_ai_v1_readiness.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

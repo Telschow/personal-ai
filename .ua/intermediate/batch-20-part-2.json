@@ -1,0 +1,618 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_memory_review_service.py",
+      "type": "file",
+      "name": "test_memory_review_service.py",
+      "filePath": "tests/test_memory_review_service.py",
+      "summary": "Test suite for memory review service module.",
+      "tags": [
+        "test",
+        "memory",
+        "pytest"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/test_memory_review_transaction.py",
+      "type": "file",
+      "name": "test_memory_review_transaction.py",
+      "filePath": "tests/test_memory_review_transaction.py",
+      "summary": "Test suite for memory review transaction module.",
+      "tags": [
+        "test",
+        "memory",
+        "pytest"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:tests/test_memory_review_transaction.py:Harness",
+      "type": "class",
+      "name": "Harness",
+      "filePath": "tests/test_memory_review_transaction.py",
+      "lineRange": [
+        111,
+        127
+      ],
+      "summary": "Test class Harness with 2 test methods for memory review transaction.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_memory_security.py",
+      "type": "file",
+      "name": "test_memory_security.py",
+      "filePath": "tests/test_memory_security.py",
+      "summary": "Test suite for memory security module.",
+      "tags": [
+        "test",
+        "memory",
+        "pytest"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:tests/test_memory_security.py:_EngineerPlanner",
+      "type": "class",
+      "name": "_EngineerPlanner",
+      "filePath": "tests/test_memory_security.py",
+      "lineRange": [
+        73,
+        113
+      ],
+      "summary": "Test class _EngineerPlanner with 2 test methods for memory security.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_memory_store.py",
+      "type": "file",
+      "name": "test_memory_store.py",
+      "filePath": "tests/test_memory_store.py",
+      "summary": "Test suite for memory store module.",
+      "tags": [
+        "test",
+        "memory",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_memory_tool.py",
+      "type": "file",
+      "name": "test_memory_tool.py",
+      "filePath": "tests/test_memory_tool.py",
+      "summary": "Test suite for memory tool module.",
+      "tags": [
+        "test",
+        "memory",
+        "pytest"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:tests/test_memory_tool.py:_MemoryResearchPlanner",
+      "type": "class",
+      "name": "_MemoryResearchPlanner",
+      "filePath": "tests/test_memory_tool.py",
+      "lineRange": [
+        590,
+        651
+      ],
+      "summary": "Test class _MemoryResearchPlanner with 2 test methods for memory tool.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_memory_unicode_tokenization.py",
+      "type": "file",
+      "name": "test_memory_unicode_tokenization.py",
+      "filePath": "tests/test_memory_unicode_tokenization.py",
+      "summary": "Test suite for memory unicode tokenization module.",
+      "tags": [
+        "test",
+        "memory",
+        "pytest"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/test_ollama_client.py",
+      "type": "file",
+      "name": "test_ollama_client.py",
+      "filePath": "tests/test_ollama_client.py",
+      "summary": "Test suite for ollama client module.",
+      "tags": [
+        "test",
+        "memory",
+        "pytest"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/test_ollama_configuration.py",
+      "type": "file",
+      "name": "test_ollama_configuration.py",
+      "filePath": "tests/test_ollama_configuration.py",
+      "summary": "Test suite for ollama configuration module.",
+      "tags": [
+        "test",
+        "memory",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_ollama_configuration.py:TestOllamaSettings",
+      "type": "class",
+      "name": "TestOllamaSettings",
+      "filePath": "tests/test_ollama_configuration.py",
+      "lineRange": [
+        17,
+        40
+      ],
+      "summary": "Test class TestOllamaSettings with 5 test methods for ollama configuration.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_ollama_configuration.py:TestBuildAgentOllamaBaseUrl",
+      "type": "class",
+      "name": "TestBuildAgentOllamaBaseUrl",
+      "filePath": "tests/test_ollama_configuration.py",
+      "lineRange": [
+        43,
+        87
+      ],
+      "summary": "Test class TestBuildAgentOllamaBaseUrl with 2 test methods for ollama configuration.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_ollama_embeddings.py",
+      "type": "file",
+      "name": "test_ollama_embeddings.py",
+      "filePath": "tests/test_ollama_embeddings.py",
+      "summary": "Test suite for ollama embeddings module.",
+      "tags": [
+        "test",
+        "memory",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_ollama_structured.py",
+      "type": "file",
+      "name": "test_ollama_structured.py",
+      "filePath": "tests/test_ollama_structured.py",
+      "summary": "Test suite for ollama structured module.",
+      "tags": [
+        "test",
+        "memory",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_orchestration.py",
+      "type": "file",
+      "name": "test_orchestration.py",
+      "filePath": "tests/test_orchestration.py",
+      "summary": "Test suite for orchestration module.",
+      "tags": [
+        "test",
+        "memory",
+        "pytest"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:tests/test_orchestration.py:FakeStructuredExtractor",
+      "type": "class",
+      "name": "FakeStructuredExtractor",
+      "filePath": "tests/test_orchestration.py",
+      "lineRange": [
+        44,
+        50
+      ],
+      "summary": "Test class FakeStructuredExtractor with 2 test methods for orchestration.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_orchestration.py:ScriptedFailingExtractor",
+      "type": "class",
+      "name": "ScriptedFailingExtractor",
+      "filePath": "tests/test_orchestration.py",
+      "lineRange": [
+        53,
+        63
+      ],
+      "summary": "Test class ScriptedFailingExtractor with 2 test methods for orchestration.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_orchestration.py:FakeSourceAdapter",
+      "type": "class",
+      "name": "FakeSourceAdapter",
+      "filePath": "tests/test_orchestration.py",
+      "lineRange": [
+        66,
+        80
+      ],
+      "summary": "Test class FakeSourceAdapter with 3 test methods for orchestration.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_orchestration.py:IngestorSpy",
+      "type": "class",
+      "name": "IngestorSpy",
+      "filePath": "tests/test_orchestration.py",
+      "lineRange": [
+        83,
+        92
+      ],
+      "summary": "Test class IngestorSpy with 2 test methods for orchestration.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_orchestration.py:TestGenericOrchestration",
+      "type": "class",
+      "name": "TestGenericOrchestration",
+      "filePath": "tests/test_orchestration.py",
+      "lineRange": [
+        120,
+        202
+      ],
+      "summary": "Test class TestGenericOrchestration with 6 test methods for orchestration.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_orchestration.py:TestRealAdaptersThroughTheSamePath",
+      "type": "class",
+      "name": "TestRealAdaptersThroughTheSamePath",
+      "filePath": "tests/test_orchestration.py",
+      "lineRange": [
+        205,
+        280
+      ],
+      "summary": "Test class TestRealAdaptersThroughTheSamePath with 4 test methods for orchestration.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_pdf_extraction.py",
+      "type": "file",
+      "name": "test_pdf_extraction.py",
+      "filePath": "tests/test_pdf_extraction.py",
+      "summary": "Test suite for pdf extraction module.",
+      "tags": [
+        "test",
+        "memory",
+        "pytest"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:tests/test_pdf_extraction.py:TestTwoPageTextPDF",
+      "type": "class",
+      "name": "TestTwoPageTextPDF",
+      "filePath": "tests/test_pdf_extraction.py",
+      "lineRange": [
+        107,
+        166
+      ],
+      "summary": "Test class TestTwoPageTextPDF with 6 test methods for pdf extraction.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_pdf_extraction.py:TestPageAwareChunking",
+      "type": "class",
+      "name": "TestPageAwareChunking",
+      "filePath": "tests/test_pdf_extraction.py",
+      "lineRange": [
+        174,
+        257
+      ],
+      "summary": "Test class TestPageAwareChunking with 7 test methods for pdf extraction.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_pdf_extraction.py:TestImageOnlyPDF",
+      "type": "class",
+      "name": "TestImageOnlyPDF",
+      "filePath": "tests/test_pdf_extraction.py",
+      "lineRange": [
+        265,
+        309
+      ],
+      "summary": "Test class TestImageOnlyPDF with 5 test methods for pdf extraction.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_pdf_extraction.py:TestMixedPDF",
+      "type": "class",
+      "name": "TestMixedPDF",
+      "filePath": "tests/test_pdf_extraction.py",
+      "lineRange": [
+        317,
+        355
+      ],
+      "summary": "Test class TestMixedPDF with 4 test methods for pdf extraction.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_pdf_extraction.py:TestMalformedInput",
+      "type": "class",
+      "name": "TestMalformedInput",
+      "filePath": "tests/test_pdf_extraction.py",
+      "lineRange": [
+        363,
+        401
+      ],
+      "summary": "Test class TestMalformedInput with 5 test methods for pdf extraction.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_pdf_extraction.py:TestNonPDFRegression",
+      "type": "class",
+      "name": "TestNonPDFRegression",
+      "filePath": "tests/test_pdf_extraction.py",
+      "lineRange": [
+        409,
+        490
+      ],
+      "summary": "Test class TestNonPDFRegression with 5 test methods for pdf extraction.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_pdf_extraction.py:TestPDFDetection",
+      "type": "class",
+      "name": "TestPDFDetection",
+      "filePath": "tests/test_pdf_extraction.py",
+      "lineRange": [
+        498,
+        543
+      ],
+      "summary": "Test class TestPDFDetection with 4 test methods for pdf extraction.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_pdf_extraction.py:TestPDFClassification",
+      "type": "class",
+      "name": "TestPDFClassification",
+      "filePath": "tests/test_pdf_extraction.py",
+      "lineRange": [
+        551,
+        586
+      ],
+      "summary": "Test class TestPDFClassification with 3 test methods for pdf extraction.",
+      "tags": [
+        "test",
+        "pytest",
+        "test-class"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_memory_review_transaction.py",
+      "target": "class:tests/test_memory_review_transaction.py:Harness",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_security.py",
+      "target": "class:tests/test_memory_security.py:_EngineerPlanner",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_tool.py",
+      "target": "class:tests/test_memory_tool.py:_MemoryResearchPlanner",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ollama_configuration.py",
+      "target": "class:tests/test_ollama_configuration.py:TestOllamaSettings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ollama_configuration.py",
+      "target": "class:tests/test_ollama_configuration.py:TestBuildAgentOllamaBaseUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_orchestration.py",
+      "target": "class:tests/test_orchestration.py:FakeStructuredExtractor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_orchestration.py",
+      "target": "class:tests/test_orchestration.py:ScriptedFailingExtractor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_orchestration.py",
+      "target": "class:tests/test_orchestration.py:FakeSourceAdapter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_orchestration.py",
+      "target": "class:tests/test_orchestration.py:IngestorSpy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_orchestration.py",
+      "target": "class:tests/test_orchestration.py:TestGenericOrchestration",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_orchestration.py",
+      "target": "class:tests/test_orchestration.py:TestRealAdaptersThroughTheSamePath",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_extraction.py",
+      "target": "class:tests/test_pdf_extraction.py:TestTwoPageTextPDF",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_extraction.py",
+      "target": "class:tests/test_pdf_extraction.py:TestPageAwareChunking",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_extraction.py",
+      "target": "class:tests/test_pdf_extraction.py:TestImageOnlyPDF",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_extraction.py",
+      "target": "class:tests/test_pdf_extraction.py:TestMixedPDF",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_extraction.py",
+      "target": "class:tests/test_pdf_extraction.py:TestMalformedInput",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_extraction.py",
+      "target": "class:tests/test_pdf_extraction.py:TestNonPDFRegression",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_extraction.py",
+      "target": "class:tests/test_pdf_extraction.py:TestPDFDetection",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_extraction.py",
+      "target": "class:tests/test_pdf_extraction.py:TestPDFClassification",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    }
+  ]
+}

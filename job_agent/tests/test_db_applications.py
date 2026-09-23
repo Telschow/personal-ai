@@ -103,6 +103,7 @@ def test_provider_run_never_stores_content(conn) -> None:
 def test_record_and_read_discovery_run(conn) -> None:
     db.record_discovery_run(
         conn,
+        run_id="testrun",
         planned_queries=10,
         candidates_found=12,
         jobs_persisted=5,

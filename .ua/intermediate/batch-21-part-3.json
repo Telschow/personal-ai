@@ -1,0 +1,372 @@
+{
+  "nodes": [
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestScenarioAExactDecision",
+      "type": "class",
+      "name": "TestScenarioAExactDecision",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [355, 431],
+      "summary": "Tests for exact decision retrieval verifying direct tool path returns decision as top hit, agent grounds answer on retrieved decision, and observer records search path.",
+      "tags": ["test", "retrieval", "decision", "agent", "observer"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestScenarioBParaphrase",
+      "type": "class",
+      "name": "TestScenarioBParaphrase",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [437, 490],
+      "summary": "Tests for paraphrase handling verifying content term retention finds decision, zero overlap honestly returns no matches, and identical queries are deterministic.",
+      "tags": ["test", "retrieval", "paraphrase", "determinism"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestScenarioCFilterByProjectScope",
+      "type": "class",
+      "name": "TestScenarioCFilterByProjectScope",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [496, 568],
+      "summary": "Tests for project scope filtering verifying unfiltered queries match multiple documents, date windows isolate projects, MIME filters work positively and negatively, and source type filters include open sources.",
+      "tags": ["test", "retrieval", "filtering", "project-scope", "date", "mime"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestScenarioDRestart",
+      "type": "class",
+      "name": "TestScenarioDRestart",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [574, 621],
+      "summary": "Tests for restart persistence verifying data persists across close/reopen and registry on reopened database answers identically.",
+      "tags": ["test", "persistence", "restart", "database"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestScenarioERetrievalFailure",
+      "type": "class",
+      "name": "TestScenarioERetrievalFailure",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [627, 656],
+      "summary": "Tests for retrieval failure handling verifying failing index yields error envelope and empty queries return no matches.",
+      "tags": ["test", "retrieval", "failure", "error-handling"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestReadOnlyInvariant",
+      "type": "class",
+      "name": "TestReadOnlyInvariant",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [662, 706],
+      "summary": "Tests for read-only invariants verifying search battery leaves database unchanged and get document does not mutate database.",
+      "tags": ["test", "read-only", "invariant", "database"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestMemoryIsolation",
+      "type": "class",
+      "name": "TestMemoryIsolation",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [712, 753],
+      "summary": "Tests for memory isolation verifying registry without memory has no memory tools, memory service enables fetch but never write, and search never writes memory.",
+      "tags": ["test", "memory", "isolation", "read-only"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestErrorHandling",
+      "type": "class",
+      "name": "TestErrorHandling",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [759, 804],
+      "summary": "Tests for error handling verifying invalid filter dates raise, non-string queries raise, boolean/negative limits raise, and unknown arguments raise.",
+      "tags": ["test", "error-handling", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestConsumerToolSurface",
+      "type": "class",
+      "name": "TestConsumerToolSurface",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [810, 899],
+      "summary": "Tests for consumer tool surface verifying search documents registered when chunks exist, limit bounds results and marks truncated, keyword default survives, search knowledge unifies documents, and get document fetches with chunk window.",
+      "tags": ["test", "tool", "consumer", "search", "document"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestIdentityAndDeterminism",
+      "type": "class",
+      "name": "TestIdentityAndDeterminism",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [905, 951],
+      "summary": "Tests for identity and determinism verifying document identity is stable, chunk listing is deterministic and ordered, and corpus identity and provenance are preserved.",
+      "tags": ["test", "identity", "determinism", "provenance"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestConfigurationDefaults",
+      "type": "class",
+      "name": "TestConfigurationDefaults",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [957, 970],
+      "summary": "Tests for configuration defaults verifying Ollama and chat defaults and embedding model defaults to none.",
+      "tags": ["test", "configuration", "defaults", "ollama"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestCLISearch",
+      "type": "class",
+      "name": "TestCLISearch",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [976, 1001],
+      "summary": "Tests for CLI search command verifying run search prints decision hit and handles no matches.",
+      "tags": ["test", "cli", "search", "command"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestEndToEndIngestion",
+      "type": "class",
+      "name": "TestEndToEndIngestion",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [1007, 1098],
+      "summary": "End-to-end ingestion tests verifying workspace files become searchable and reingestion is idempotent.",
+      "tags": ["test", "ingestion", "e2e", "idempotency", "filesystem"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:TestFixtureCorpusScale",
+      "type": "class",
+      "name": "TestFixtureCorpusScale",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [1105, 1122],
+      "summary": "Tests for fixture corpus scale verifying corpus meets scale target and every seeded document is chunked.",
+      "tags": ["test", "corpus", "scale", "chunking"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_personal_context.py",
+      "type": "file",
+      "name": "test_personal_context.py",
+      "filePath": "tests/test_personal_context.py",
+      "summary": "Tests for personal context service covering overview domain reporting, memory/workout/document/activity aggregates, unknown domain rejection, determinism, empty database zeros, service availability, tool registration with/without service, tool execution through registry, read-only overview, memory content isolation, no action surface, no hidden internals, and chat agent integration with personal context tool.",
+      "tags": ["test", "personal-context", "overview", "tool", "agent", "registry", "chat"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_personal_context.py:_now",
+      "type": "function",
+      "name": "_now",
+      "filePath": "tests/test_personal_context.py",
+      "lineRange": [61, 62],
+      "summary": "Returns current UTC timestamp in ISO format for test seeding.",
+      "tags": ["test-helper", "time", "fixture"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_personal_context.py:_seed_documents",
+      "type": "function",
+      "name": "_seed_documents",
+      "filePath": "tests/test_personal_context.py",
+      "lineRange": [65, 80],
+      "summary": "Seeds test documents into the database for personal context testing.",
+      "tags": ["test-helper", "fixture", "documents", "seeding"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_personal_context.py:_seed_events",
+      "type": "function",
+      "name": "_seed_events",
+      "filePath": "tests/test_personal_context.py",
+      "lineRange": [83, 110],
+      "summary": "Seeds test events into the database for personal context testing.",
+      "tags": ["test-helper", "fixture", "events", "seeding"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_personal_context.py:_seed_workouts",
+      "type": "function",
+      "name": "_seed_workouts",
+      "filePath": "tests/test_personal_context.py",
+      "lineRange": [113, 118],
+      "summary": "Seeds test workout data from CSV fixture into the database.",
+      "tags": ["test-helper", "fixture", "workouts", "seeding"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_personal_context.py:_seed_memories",
+      "type": "function",
+      "name": "_seed_memories",
+      "filePath": "tests/test_personal_context.py",
+      "lineRange": [121, 154],
+      "summary": "Seeds test memories into the database for personal context testing.",
+      "tags": ["test-helper", "fixture", "memories", "seeding"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_personal_context.py:services",
+      "type": "function",
+      "name": "services",
+      "filePath": "tests/test_personal_context.py",
+      "lineRange": [158, 185],
+      "summary": "Provides a fully configured PersonalContextService fixture with all domain services and seeded test data.",
+      "tags": ["test-helper", "fixture", "service", "personal-context"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_context.py:_FakeOllama",
+      "type": "class",
+      "name": "_FakeOllama",
+      "filePath": "tests/test_personal_context.py",
+      "lineRange": [388, 405],
+      "summary": "Mock Ollama client for testing chat agent integration with personal context tool.",
+      "tags": ["test-double", "mock", "ollama", "chat", "agent"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestScenarioAExactDecision",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestScenarioBParaphrase",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestScenarioCFilterByProjectScope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestScenarioDRestart",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestScenarioERetrievalFailure",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestReadOnlyInvariant",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestMemoryIsolation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestErrorHandling",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestConsumerToolSurface",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestIdentityAndDeterminism",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestConfigurationDefaults",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestCLISearch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestEndToEndIngestion",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:TestFixtureCorpusScale",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_context.py",
+      "target": "function:tests/test_personal_context.py:_now",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_context.py",
+      "target": "function:tests/test_personal_context.py:_seed_documents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_context.py",
+      "target": "function:tests/test_personal_context.py:_seed_events",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_context.py",
+      "target": "function:tests/test_personal_context.py:_seed_workouts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_context.py",
+      "target": "function:tests/test_personal_context.py:_seed_memories",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_context.py",
+      "target": "function:tests/test_personal_context.py:services",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_context.py",
+      "target": "class:tests/test_personal_context.py:_FakeOllama",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    }
+  ]
+}

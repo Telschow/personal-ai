@@ -104,6 +104,7 @@ async function loadJobs() {
     const params = new URLSearchParams({
         limit: PAGE_SIZE,
         offset: (currentPage - 1) * PAGE_SIZE,
+        sort: currentSort,
     });
 
     if (currentFilters.user_status) params.append('user_status', currentFilters.user_status);

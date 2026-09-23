@@ -1,0 +1,169 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_phase49_retrieval.py",
+      "type": "file",
+      "name": "test_phase49_retrieval.py",
+      "filePath": "tests/test_phase49_retrieval.py",
+      "summary": "Phase 49 retrieval tests covering search tool registration, permission scoping, query validation, result bounding, grounded answers, cross-domain drill-down, empty corpus handling, no-match envelopes, policy enforcement, malicious content isolation, credential leakage prevention, mutation freedom, round bounding, and streaming correctness.",
+      "tags": ["test", "phase49", "retrieval", "search", "policy", "security", "permissions"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_registry.py",
+      "type": "file",
+      "name": "test_registry.py",
+      "filePath": "tests/test_registry.py",
+      "summary": "Tests for agent/skill/tool registry covering registration, duplicate prevention, unknown entry handling, and effective permission computation.",
+      "tags": ["test", "registry", "agent", "skill", "tool", "permissions"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_retrieval.py",
+      "type": "file",
+      "name": "test_retrieval.py",
+      "filePath": "tests/test_retrieval.py",
+      "fileCategory": "code",
+      "summary": "Core retrieval tests covering search functionality, result ranking, filters, and edge cases.",
+      "tags": ["test", "retrieval", "search", "ranking"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_retrieval_aggregation.py",
+      "type": "file",
+      "name": "test_retrieval_aggregation.py",
+      "filePath": "tests/test_retrieval_aggregation.py",
+      "summary": "Tests for retrieval aggregation covering result merging, deduplication, and cross-source ranking.",
+      "tags": ["test", "retrieval", "aggregation", "deduplication", "ranking"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_retrieval_chunk_index.py",
+      "type": "file",
+      "name": "test_retrieval_chunk_index.py",
+      "filePath": "tests/test_retrieval_chunk_index.py",
+      "summary": "Tests for chunk index operations covering chunk listing, document-chunk relationships, and index consistency.",
+      "tags": ["test", "retrieval", "chunk", "index", "document"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_retrieval_conversations.py",
+      "type": "file",
+      "name": "test_retrieval_conversations.py",
+      "filePath": "tests/test_retrieval_conversations.py",
+      "summary": "Tests for conversation retrieval covering message search, thread reconstruction, and context windowing.",
+      "tags": ["test", "retrieval", "conversation", "message", "context"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_retrieval_evaluation.py",
+      "type": "file",
+      "name": "test_retrieval_evaluation.py",
+      "filePath": "tests/test_retrieval_evaluation.py",
+      "summary": "Comprehensive retrieval evaluation tests covering precision, recall, ranking quality, and benchmark scenarios.",
+      "tags": ["test", "retrieval", "evaluation", "precision", "recall", "benchmark"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/test_retrieval_factory.py",
+      "type": "file",
+      "name": "test_retrieval_factory.py",
+      "filePath": "tests/test_retrieval_factory.py",
+      "summary": "Tests for retrieval service factory covering service creation, configuration wiring, and dependency injection.",
+      "tags": ["test", "retrieval", "factory", "service", "configuration"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_retrieval_keyword.py",
+      "type": "file",
+      "name": "test_retrieval_keyword.py",
+      "filePath": "tests/test_retrieval_keyword.py",
+      "summary": "Tests for keyword-based retrieval covering term matching, TF-IDF scoring, and exact phrase search.",
+      "tags": ["test", "retrieval", "keyword", "tfidf", "exact-match"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_retrieval_mode_wiring.py",
+      "type": "file",
+      "name": "test_retrieval_mode_wiring.py",
+      "filePath": "tests/test_retrieval_mode_wiring.py",
+      "summary": "Tests for retrieval mode configuration wiring covering mode switching, fallback behavior, and provider selection.",
+      "tags": ["test", "retrieval", "mode", "wiring", "configuration", "fallback"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_retrieval_service.py",
+      "type": "file",
+      "name": "test_retrieval_service.py",
+      "filePath": "tests/test_retrieval_service.py",
+      "summary": "Tests for RetrievalService core operations covering search, document fetching, and result formatting.",
+      "tags": ["test", "retrieval", "service", "search", "document"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_phase49_retrieval.py",
+      "target": "file:tests/test_registry.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/test_retrieval.py",
+      "target": "file:tests/test_retrieval_aggregation.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/test_retrieval.py",
+      "target": "file:tests/test_retrieval_chunk_index.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/test_retrieval.py",
+      "target": "file:tests/test_retrieval_conversations.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/test_retrieval.py",
+      "target": "file:tests/test_retrieval_evaluation.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/test_retrieval.py",
+      "target": "file:tests/test_retrieval_factory.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/test_retrieval.py",
+      "target": "file:tests/test_retrieval_keyword.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/test_retrieval.py",
+      "target": "file:tests/test_retrieval_mode_wiring.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/test_retrieval.py",
+      "target": "file:tests/test_retrieval_service.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

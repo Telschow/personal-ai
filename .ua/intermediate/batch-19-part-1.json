@@ -1,0 +1,1171 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_conversation_models.py",
+      "type": "file",
+      "name": "test_conversation_models.py",
+      "filePath": "tests/test_conversation_models.py",
+      "summary": "Test suite with 6 test classes covering conversation_models functionality.",
+      "tags": [
+        "test",
+        "conversation-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_conversation_models.py:TestComputeConversationId",
+      "type": "class",
+      "name": "TestComputeConversationId",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        13,
+        32
+      ],
+      "summary": "Test class with 4 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestComputeConversationId.test_deterministic",
+      "type": "function",
+      "name": "test_deterministic",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        13,
+        32
+      ],
+      "summary": "Test method validating deterministic.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestComputeConversationId.test_different_inputs_differ",
+      "type": "function",
+      "name": "test_different_inputs_differ",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        13,
+        32
+      ],
+      "summary": "Test method validating different inputs differ.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestComputeConversationId.test_different_source_types_differ",
+      "type": "function",
+      "name": "test_different_source_types_differ",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        13,
+        32
+      ],
+      "summary": "Test method validating different source types differ.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestComputeConversationId.test_produces_hex_digest",
+      "type": "function",
+      "name": "test_produces_hex_digest",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        13,
+        32
+      ],
+      "summary": "Test method validating produces hex digest.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_conversation_models.py:TestComputeMessageId",
+      "type": "class",
+      "name": "TestComputeMessageId",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        35,
+        54
+      ],
+      "summary": "Test class with 4 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestComputeMessageId.test_deterministic",
+      "type": "function",
+      "name": "test_deterministic",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        35,
+        54
+      ],
+      "summary": "Test method validating deterministic.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestComputeMessageId.test_different_indices_differ",
+      "type": "function",
+      "name": "test_different_indices_differ",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        35,
+        54
+      ],
+      "summary": "Test method validating different indices differ.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestComputeMessageId.test_different_conversations_differ",
+      "type": "function",
+      "name": "test_different_conversations_differ",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        35,
+        54
+      ],
+      "summary": "Test method validating different conversations differ.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestComputeMessageId.test_produces_hex_digest",
+      "type": "function",
+      "name": "test_produces_hex_digest",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        35,
+        54
+      ],
+      "summary": "Test method validating produces hex digest.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_conversation_models.py:TestConversation",
+      "type": "class",
+      "name": "TestConversation",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        57,
+        80
+      ],
+      "summary": "Test class with 2 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestConversation.test_frozen",
+      "type": "function",
+      "name": "test_frozen",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        57,
+        80
+      ],
+      "summary": "Test method validating frozen.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestConversation.test_metadata_default_empty",
+      "type": "function",
+      "name": "test_metadata_default_empty",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        57,
+        80
+      ],
+      "summary": "Test method validating metadata default empty.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_conversation_models.py:TestConversationMessage",
+      "type": "class",
+      "name": "TestConversationMessage",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        83,
+        111
+      ],
+      "summary": "Test class with 2 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestConversationMessage.test_defaults",
+      "type": "function",
+      "name": "test_defaults",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        83,
+        111
+      ],
+      "summary": "Test method validating defaults.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestConversationMessage.test_frozen",
+      "type": "function",
+      "name": "test_frozen",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        83,
+        111
+      ],
+      "summary": "Test method validating frozen.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_conversation_models.py:TestComputeAttachmentId",
+      "type": "class",
+      "name": "TestComputeAttachmentId",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        114,
+        133
+      ],
+      "summary": "Test class with 4 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestComputeAttachmentId.test_deterministic",
+      "type": "function",
+      "name": "test_deterministic",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        114,
+        133
+      ],
+      "summary": "Test method validating deterministic.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestComputeAttachmentId.test_different_indices_differ",
+      "type": "function",
+      "name": "test_different_indices_differ",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        114,
+        133
+      ],
+      "summary": "Test method validating different indices differ.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestComputeAttachmentId.test_different_messages_differ",
+      "type": "function",
+      "name": "test_different_messages_differ",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        114,
+        133
+      ],
+      "summary": "Test method validating different messages differ.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestComputeAttachmentId.test_produces_hex_digest",
+      "type": "function",
+      "name": "test_produces_hex_digest",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        114,
+        133
+      ],
+      "summary": "Test method validating produces hex digest.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_conversation_models.py:TestConversationAttachment",
+      "type": "class",
+      "name": "TestConversationAttachment",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        136,
+        182
+      ],
+      "summary": "Test class with 4 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestConversationAttachment.test_defaults",
+      "type": "function",
+      "name": "test_defaults",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        136,
+        182
+      ],
+      "summary": "Test method validating defaults.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestConversationAttachment.test_frozen",
+      "type": "function",
+      "name": "test_frozen",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        136,
+        182
+      ],
+      "summary": "Test method validating frozen.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestConversationAttachment.test_with_blob_path",
+      "type": "function",
+      "name": "test_with_blob_path",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        136,
+        182
+      ],
+      "summary": "Test method validating with blob path.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_conversation_models.py:TestConversationAttachment.test_with_metadata",
+      "type": "function",
+      "name": "test_with_metadata",
+      "filePath": "tests/test_conversation_models.py",
+      "lineRange": [
+        136,
+        182
+      ],
+      "summary": "Test method validating with metadata.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_corpus_unified_e2e.py",
+      "type": "file",
+      "name": "test_corpus_unified_e2e.py",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "summary": "Test file with 2 test classes and 7 test functions for corpus_unified_e2e.",
+      "tags": [
+        "test",
+        "corpus",
+        "e2e"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:tests/test_corpus_unified_e2e.py:UnifiedCorpusHarness",
+      "type": "class",
+      "name": "UnifiedCorpusHarness",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        78,
+        96
+      ],
+      "summary": "Test class with 2 test methods.",
+      "tags": [
+        "test-class",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:UnifiedCorpusHarness.__init__",
+      "type": "function",
+      "name": "__init__",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        78,
+        96
+      ],
+      "summary": "Test method validating   init  .",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:UnifiedCorpusHarness.close",
+      "type": "function",
+      "name": "close",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        78,
+        96
+      ],
+      "summary": "Test method validating close.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E",
+      "type": "class",
+      "name": "TestUnifiedCorpusE2E",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        143,
+        320
+      ],
+      "summary": "Test class with 8 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_all_sources_land_in_one_searchable_corpus",
+      "type": "function",
+      "name": "test_all_sources_land_in_one_searchable_corpus",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        143,
+        320
+      ],
+      "summary": "Test method validating all sources land in one searchable corpus.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_result_provenance_carries_source_and_source_type",
+      "type": "function",
+      "name": "test_result_provenance_carries_source_and_source_type",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        143,
+        320
+      ],
+      "summary": "Test method validating result provenance carries source and source type.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_email_without_subject_falls_back_to_source_identity",
+      "type": "function",
+      "name": "test_email_without_subject_falls_back_to_source_identity",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        143,
+        320
+      ],
+      "summary": "Test method validating email without subject falls back to source identity.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_mime_filter_isolates_pdf_documents",
+      "type": "function",
+      "name": "test_mime_filter_isolates_pdf_documents",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        143,
+        320
+      ],
+      "summary": "Test method validating mime filter isolates pdf documents.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_source_and_mime_filters_combine",
+      "type": "function",
+      "name": "test_source_and_mime_filters_combine",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        143,
+        320
+      ],
+      "summary": "Test method validating source and mime filters combine.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_source_types_pdf_is_not_the_pdf_representation",
+      "type": "function",
+      "name": "test_source_types_pdf_is_not_the_pdf_representation",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        143,
+        320
+      ],
+      "summary": "Test method validating source types pdf is not the pdf representation.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_search_documents_tool_output_includes_provenance",
+      "type": "function",
+      "name": "test_search_documents_tool_output_includes_provenance",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        143,
+        320
+      ],
+      "summary": "Test method validating search documents tool output includes provenance.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_search_knowledge_tool_output_includes_provenance",
+      "type": "function",
+      "name": "test_search_knowledge_tool_output_includes_provenance",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        143,
+        320
+      ],
+      "summary": "Test method validating search knowledge tool output includes provenance.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:_make_pdf_bytes",
+      "type": "function",
+      "name": "_make_pdf_bytes",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        41,
+        48
+      ],
+      "summary": "Helper function for  make pdf bytes.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:_make_email",
+      "type": "function",
+      "name": "_make_email",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        51,
+        66
+      ],
+      "summary": "Helper function for  make email.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:_write_mbox",
+      "type": "function",
+      "name": "_write_mbox",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        69,
+        75
+      ],
+      "summary": "Helper function for  write mbox.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:workspace",
+      "type": "function",
+      "name": "workspace",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        100,
+        119
+      ],
+      "summary": "Helper function for workspace.",
+      "tags": [
+        "test-function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:harness",
+      "type": "function",
+      "name": "harness",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        123,
+        126
+      ],
+      "summary": "Helper function for harness.",
+      "tags": [
+        "test-function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:_ingest",
+      "type": "function",
+      "name": "_ingest",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        129,
+        134
+      ],
+      "summary": "Helper function for  ingest.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_corpus_unified_e2e.py:_service",
+      "type": "function",
+      "name": "_service",
+      "filePath": "tests/test_corpus_unified_e2e.py",
+      "lineRange": [
+        137,
+        140
+      ],
+      "summary": "Helper function for  service.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_conversation_models.py",
+      "target": "class:tests/test_conversation_models.py:TestComputeConversationId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_conversation_models.py",
+      "target": "class:tests/test_conversation_models.py:TestComputeConversationId",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestComputeConversationId",
+      "target": "function:tests/test_conversation_models.py:TestComputeConversationId.test_deterministic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestComputeConversationId",
+      "target": "function:tests/test_conversation_models.py:TestComputeConversationId.test_different_inputs_differ",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestComputeConversationId",
+      "target": "function:tests/test_conversation_models.py:TestComputeConversationId.test_different_source_types_differ",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestComputeConversationId",
+      "target": "function:tests/test_conversation_models.py:TestComputeConversationId.test_produces_hex_digest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_conversation_models.py",
+      "target": "class:tests/test_conversation_models.py:TestComputeMessageId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_conversation_models.py",
+      "target": "class:tests/test_conversation_models.py:TestComputeMessageId",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestComputeMessageId",
+      "target": "function:tests/test_conversation_models.py:TestComputeMessageId.test_deterministic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestComputeMessageId",
+      "target": "function:tests/test_conversation_models.py:TestComputeMessageId.test_different_indices_differ",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestComputeMessageId",
+      "target": "function:tests/test_conversation_models.py:TestComputeMessageId.test_different_conversations_differ",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestComputeMessageId",
+      "target": "function:tests/test_conversation_models.py:TestComputeMessageId.test_produces_hex_digest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_conversation_models.py",
+      "target": "class:tests/test_conversation_models.py:TestConversation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_conversation_models.py",
+      "target": "class:tests/test_conversation_models.py:TestConversation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestConversation",
+      "target": "function:tests/test_conversation_models.py:TestConversation.test_frozen",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestConversation",
+      "target": "function:tests/test_conversation_models.py:TestConversation.test_metadata_default_empty",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_conversation_models.py",
+      "target": "class:tests/test_conversation_models.py:TestConversationMessage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_conversation_models.py",
+      "target": "class:tests/test_conversation_models.py:TestConversationMessage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestConversationMessage",
+      "target": "function:tests/test_conversation_models.py:TestConversationMessage.test_defaults",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestConversationMessage",
+      "target": "function:tests/test_conversation_models.py:TestConversationMessage.test_frozen",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_conversation_models.py",
+      "target": "class:tests/test_conversation_models.py:TestComputeAttachmentId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_conversation_models.py",
+      "target": "class:tests/test_conversation_models.py:TestComputeAttachmentId",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestComputeAttachmentId",
+      "target": "function:tests/test_conversation_models.py:TestComputeAttachmentId.test_deterministic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestComputeAttachmentId",
+      "target": "function:tests/test_conversation_models.py:TestComputeAttachmentId.test_different_indices_differ",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestComputeAttachmentId",
+      "target": "function:tests/test_conversation_models.py:TestComputeAttachmentId.test_different_messages_differ",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestComputeAttachmentId",
+      "target": "function:tests/test_conversation_models.py:TestComputeAttachmentId.test_produces_hex_digest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_conversation_models.py",
+      "target": "class:tests/test_conversation_models.py:TestConversationAttachment",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_conversation_models.py",
+      "target": "class:tests/test_conversation_models.py:TestConversationAttachment",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestConversationAttachment",
+      "target": "function:tests/test_conversation_models.py:TestConversationAttachment.test_defaults",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestConversationAttachment",
+      "target": "function:tests/test_conversation_models.py:TestConversationAttachment.test_frozen",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestConversationAttachment",
+      "target": "function:tests/test_conversation_models.py:TestConversationAttachment.test_with_blob_path",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_conversation_models.py:TestConversationAttachment",
+      "target": "function:tests/test_conversation_models.py:TestConversationAttachment.test_with_metadata",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "class:tests/test_corpus_unified_e2e.py:UnifiedCorpusHarness",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "class:tests/test_corpus_unified_e2e.py:UnifiedCorpusHarness",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_corpus_unified_e2e.py:UnifiedCorpusHarness",
+      "target": "function:tests/test_corpus_unified_e2e.py:UnifiedCorpusHarness.__init__",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_corpus_unified_e2e.py:UnifiedCorpusHarness",
+      "target": "function:tests/test_corpus_unified_e2e.py:UnifiedCorpusHarness.close",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "class:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "class:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E",
+      "target": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_all_sources_land_in_one_searchable_corpus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E",
+      "target": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_result_provenance_carries_source_and_source_type",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E",
+      "target": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_email_without_subject_falls_back_to_source_identity",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E",
+      "target": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_mime_filter_isolates_pdf_documents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E",
+      "target": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_source_and_mime_filters_combine",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E",
+      "target": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_source_types_pdf_is_not_the_pdf_representation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E",
+      "target": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_search_documents_tool_output_includes_provenance",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E",
+      "target": "function:tests/test_corpus_unified_e2e.py:TestUnifiedCorpusE2E.test_search_knowledge_tool_output_includes_provenance",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:_make_pdf_bytes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:_make_pdf_bytes",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:_make_email",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:_make_email",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:_write_mbox",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:_write_mbox",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:workspace",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:workspace",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:harness",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:harness",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:_ingest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:_ingest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:_service",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_corpus_unified_e2e.py",
+      "target": "function:tests/test_corpus_unified_e2e.py:_service",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

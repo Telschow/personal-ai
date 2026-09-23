@@ -93,6 +93,7 @@ def run_sources(
     sources: Iterable[Source],
     profile: dict,
     policy: ScoringPolicy,
+    run_id: str | None = None,
     on_progress: ProgressCallback | None = None,
 ) -> ScanResult:
     result = ScanResult()
@@ -114,6 +115,8 @@ def run_sources(
         else:
             for job in raw_jobs:
                 norm = normalize_job(job, source_type=src.kind.value)
+                if run_id:
+                    norm.run_id = run_id
                 existing = db.find_duplicate_of(conn, norm)
                 if existing is not None:
                     result.total_duplicates += 1
@@ -165,6 +168,7 @@ def ingest_global_jobs(
     *,
     provenance: list[Provenance] | None = None,
     run_started_at: str | None = None,
+    run_id: str | None = None,
 ) -> ScanResult:
     """Persist jobs discovered by the global search layer with the same
     normalize/dedup/evaluate path, but without per-source scan-run rows.
@@ -181,6 +185,8 @@ def ingest_global_jobs(
     profile_version = _profile_version(profile)
     for index, job in enumerate(jobs):
         norm = normalize_job(job, source_type="structured_page")
+        if run_id:
+            norm.run_id = run_id
         source_id = provenance[index].source_id if provenance and index < len(provenance) else None
         existing = db.find_duplicate_of(conn, norm)
         if existing is not None:

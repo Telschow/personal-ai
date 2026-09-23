@@ -1,0 +1,557 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_filesystem_tools.py",
+      "type": "file",
+      "name": "test_filesystem_tools.py",
+      "filePath": "tests/test_filesystem_tools.py",
+      "summary": "Test module with 7 test functions for filesystem_tools.",
+      "tags": [
+        "test",
+        "filesystem",
+        "tools"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_filesystem_tools.py:test_list_directory_returns_files_and_directories",
+      "type": "function",
+      "name": "test_list_directory_returns_files_and_directories",
+      "filePath": "tests/test_filesystem_tools.py",
+      "lineRange": [
+        13,
+        26
+      ],
+      "summary": "Test function for list directory returns files and directories.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_filesystem_tools.py:test_list_directory_accepts_relative_path",
+      "type": "function",
+      "name": "test_list_directory_accepts_relative_path",
+      "filePath": "tests/test_filesystem_tools.py",
+      "lineRange": [
+        29,
+        38
+      ],
+      "summary": "Test function for list directory accepts relative path.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_filesystem_tools.py:test_parent_traversal_cannot_escape_workspace",
+      "type": "function",
+      "name": "test_parent_traversal_cannot_escape_workspace",
+      "filePath": "tests/test_filesystem_tools.py",
+      "lineRange": [
+        41,
+        45
+      ],
+      "summary": "Test function for parent traversal cannot escape workspace.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_filesystem_tools.py:test_absolute_path_outside_workspace_is_rejected",
+      "type": "function",
+      "name": "test_absolute_path_outside_workspace_is_rejected",
+      "filePath": "tests/test_filesystem_tools.py",
+      "lineRange": [
+        48,
+        52
+      ],
+      "summary": "Test function for absolute path outside workspace is rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_filesystem_tools.py:test_missing_directory_raises",
+      "type": "function",
+      "name": "test_missing_directory_raises",
+      "filePath": "tests/test_filesystem_tools.py",
+      "lineRange": [
+        55,
+        59
+      ],
+      "summary": "Test function for missing directory raises.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_filesystem_tools.py:test_file_is_not_a_directory",
+      "type": "function",
+      "name": "test_file_is_not_a_directory",
+      "filePath": "tests/test_filesystem_tools.py",
+      "lineRange": [
+        62,
+        68
+      ],
+      "summary": "Test function for file is not a directory.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_filesystem_tools.py:test_non_string_path_is_rejected",
+      "type": "function",
+      "name": "test_non_string_path_is_rejected",
+      "filePath": "tests/test_filesystem_tools.py",
+      "lineRange": [
+        71,
+        75
+      ],
+      "summary": "Test function for non string path is rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_financial_ingestion_e2e.py",
+      "type": "file",
+      "name": "test_financial_ingestion_e2e.py",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "summary": "Test file with 1 test classes and 5 test functions for financial_ingestion_e2e.",
+      "tags": [
+        "test",
+        "financial",
+        "ingestion",
+        "e2e"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E",
+      "type": "class",
+      "name": "TestFinancialIngestionE2E",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "lineRange": [
+        214,
+        360
+      ],
+      "summary": "Test class with 6 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E.test_full_pipeline_ingests_financial_csvs",
+      "type": "function",
+      "name": "test_full_pipeline_ingests_financial_csvs",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "lineRange": [
+        214,
+        360
+      ],
+      "summary": "Test method validating full pipeline ingests financial csvs.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E.test_search_finds_safe_fields_but_never_sensitive_tokens",
+      "type": "function",
+      "name": "test_search_finds_safe_fields_but_never_sensitive_tokens",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "lineRange": [
+        214,
+        360
+      ],
+      "summary": "Test method validating search finds safe fields but never sensitive tokens.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E.test_embedded_ref_reference_in_purpose_not_searchable",
+      "type": "function",
+      "name": "test_embedded_ref_reference_in_purpose_not_searchable",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "lineRange": [
+        214,
+        360
+      ],
+      "summary": "Test method validating embedded ref reference in purpose not searchable.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E.test_second_ingest_is_idempotent",
+      "type": "function",
+      "name": "test_second_ingest_is_idempotent",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "lineRange": [
+        214,
+        360
+      ],
+      "summary": "Test method validating second ingest is idempotent.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E.test_rename_does_not_create_duplicate_document",
+      "type": "function",
+      "name": "test_rename_does_not_create_duplicate_document",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "lineRange": [
+        214,
+        360
+      ],
+      "summary": "Test method validating rename does not create duplicate document.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E.test_discovery_is_deterministic_across_runs",
+      "type": "function",
+      "name": "test_discovery_is_deterministic_across_runs",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "lineRange": [
+        214,
+        360
+      ],
+      "summary": "Test method validating discovery is deterministic across runs.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_financial_ingestion_e2e.py:_render",
+      "type": "function",
+      "name": "_render",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "lineRange": [
+        164,
+        167
+      ],
+      "summary": "Helper function for  render.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_financial_ingestion_e2e.py:_built_bank_csv",
+      "type": "function",
+      "name": "_built_bank_csv",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "lineRange": [
+        170,
+        175
+      ],
+      "summary": "Helper function for  built bank csv.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_financial_ingestion_e2e.py:_built_bank_csv_with",
+      "type": "function",
+      "name": "_built_bank_csv_with",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "lineRange": [
+        178,
+        183
+      ],
+      "summary": "Helper function for  built bank csv with.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_financial_ingestion_e2e.py:make_corpus",
+      "type": "function",
+      "name": "make_corpus",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "lineRange": [
+        186,
+        201
+      ],
+      "summary": "Helper function for make corpus.",
+      "tags": [
+        "test-function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_financial_ingestion_e2e.py:make_ingestor",
+      "type": "function",
+      "name": "make_ingestor",
+      "filePath": "tests/test_financial_ingestion_e2e.py",
+      "lineRange": [
+        204,
+        211
+      ],
+      "summary": "Helper function for make ingestor.",
+      "tags": [
+        "test-function"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_list_directory_returns_files_and_directories",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_list_directory_returns_files_and_directories",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_list_directory_accepts_relative_path",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_list_directory_accepts_relative_path",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_parent_traversal_cannot_escape_workspace",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_parent_traversal_cannot_escape_workspace",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_absolute_path_outside_workspace_is_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_absolute_path_outside_workspace_is_rejected",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_missing_directory_raises",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_missing_directory_raises",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_file_is_not_a_directory",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_file_is_not_a_directory",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_non_string_path_is_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_filesystem_tools.py",
+      "target": "function:tests/test_filesystem_tools.py:test_non_string_path_is_rejected",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_financial_ingestion_e2e.py",
+      "target": "class:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_financial_ingestion_e2e.py",
+      "target": "class:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E",
+      "target": "function:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E.test_full_pipeline_ingests_financial_csvs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E",
+      "target": "function:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E.test_search_finds_safe_fields_but_never_sensitive_tokens",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E",
+      "target": "function:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E.test_embedded_ref_reference_in_purpose_not_searchable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E",
+      "target": "function:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E.test_second_ingest_is_idempotent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E",
+      "target": "function:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E.test_rename_does_not_create_duplicate_document",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E",
+      "target": "function:tests/test_financial_ingestion_e2e.py:TestFinancialIngestionE2E.test_discovery_is_deterministic_across_runs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_financial_ingestion_e2e.py",
+      "target": "function:tests/test_financial_ingestion_e2e.py:_render",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_financial_ingestion_e2e.py",
+      "target": "function:tests/test_financial_ingestion_e2e.py:_render",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_financial_ingestion_e2e.py",
+      "target": "function:tests/test_financial_ingestion_e2e.py:_built_bank_csv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_financial_ingestion_e2e.py",
+      "target": "function:tests/test_financial_ingestion_e2e.py:_built_bank_csv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_financial_ingestion_e2e.py",
+      "target": "function:tests/test_financial_ingestion_e2e.py:_built_bank_csv_with",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_financial_ingestion_e2e.py",
+      "target": "function:tests/test_financial_ingestion_e2e.py:_built_bank_csv_with",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_financial_ingestion_e2e.py",
+      "target": "function:tests/test_financial_ingestion_e2e.py:make_corpus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_financial_ingestion_e2e.py",
+      "target": "function:tests/test_financial_ingestion_e2e.py:make_corpus",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_financial_ingestion_e2e.py",
+      "target": "function:tests/test_financial_ingestion_e2e.py:make_ingestor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_financial_ingestion_e2e.py",
+      "target": "function:tests/test_financial_ingestion_e2e.py:make_ingestor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

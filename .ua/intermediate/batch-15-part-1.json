@@ -1,0 +1,1006 @@
+{
+ "nodes": [
+  {
+   "id": "file:src/personal_ai/memory/retriever.py",
+   "type": "file",
+   "name": "retriever.py",
+   "filePath": "src/personal_ai/memory/retriever.py",
+   "summary": "Ranked memory search engine: scores stored memories by scope fit, token relevance, and recency, returning ranked MemoryHit results for the retrieval API.",
+   "tags": [
+    "service",
+    "search",
+    "ranking",
+    "memory"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "class:src/personal_ai/memory/retriever.py:ScopeFilter",
+   "type": "class",
+   "name": "ScopeFilter",
+   "filePath": "src/personal_ai/memory/retriever.py",
+   "lineRange": [
+    72,
+    91
+   ],
+   "summary": "Validates and normalizes a memory scope filter into a MemoryScope enum set, raising MemorySearchError on invalid values.",
+   "tags": [
+    "data-model",
+    "validation"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/retriever.py:MemoryHit",
+   "type": "class",
+   "name": "MemoryHit",
+   "filePath": "src/personal_ai/memory/retriever.py",
+   "lineRange": [
+    95,
+    109
+   ],
+   "summary": "Scored search hit wrapping a memory with relevance, recency-derived score, and rank; serializes via to_dict.",
+   "tags": [
+    "data-model",
+    "search"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/retriever.py:MemoryRetriever",
+   "type": "class",
+   "name": "MemoryRetriever",
+   "filePath": "src/personal_ai/memory/retriever.py",
+   "lineRange": [
+    112,
+    180
+   ],
+   "summary": "Performs ranked memory search over store listings by filtering scope/expiry candidates, scoring relevance and recency, and sorting hits.",
+   "tags": [
+    "service",
+    "search",
+    "ranking"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "file:src/personal_ai/memory/review.py",
+   "type": "file",
+   "name": "review.py",
+   "filePath": "src/personal_ai/memory/review.py",
+   "summary": "Memory review and adjudication workflow: lists pending candidates, approves/rejects them inside guarded transactions, evaluates policies, and appends audit records.",
+   "tags": [
+    "service",
+    "review-workflow",
+    "adjudication",
+    "audit"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "class:src/personal_ai/memory/review.py:_AdjudicationConnection",
+   "type": "class",
+   "name": "_AdjudicationConnection",
+   "filePath": "src/personal_ai/memory/review.py",
+   "lineRange": [
+    102,
+    140
+   ],
+   "summary": "Thin wrapper over a raw DB connection exposing transaction semantics (commit, rollback, close) for adjudication steps.",
+   "tags": [
+    "transaction",
+    "database"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/memory/review.py:_adjudication_transaction",
+   "type": "function",
+   "name": "_adjudication_transaction",
+   "filePath": "src/personal_ai/memory/review.py",
+   "lineRange": [
+    144,
+    179
+   ],
+   "summary": "Context manager running one adjudication step inside a transaction, executing SQL and raising MemoryReviewTransactionError on failure.",
+   "tags": [
+    "transaction",
+    "workflow"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "class:src/personal_ai/memory/review.py:MemoryReviewService",
+   "type": "class",
+   "name": "MemoryReviewService",
+   "filePath": "src/personal_ai/memory/review.py",
+   "lineRange": [
+    182,
+    613
+   ],
+   "summary": "Memory review service: pending counts and listings, audit trails, guarded approve/reject flows with curator resolution and conflict rejection.",
+   "tags": [
+    "service",
+    "review-workflow",
+    "audit"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "file:src/personal_ai/memory/service.py",
+   "type": "file",
+   "name": "service.py",
+   "filePath": "src/personal_ai/memory/service.py",
+   "summary": "Memory application service facade: memory CRUD, search, evidence and provenance queries, candidate application, status lifecycle, and statistics.",
+   "tags": [
+    "service",
+    "crud",
+    "memory",
+    "data-model"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "class:src/personal_ai/memory/service.py:MemoryConflictError",
+   "type": "class",
+   "name": "MemoryConflictError",
+   "filePath": "src/personal_ai/memory/service.py",
+   "lineRange": [
+    44,
+    54
+   ],
+   "summary": "Raised when applying a candidate conflicts with existing memories, carrying reconciliation context.",
+   "tags": [
+    "error-handling"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/service.py:MemoryService",
+   "type": "class",
+   "name": "MemoryService",
+   "filePath": "src/personal_ai/memory/service.py",
+   "lineRange": [
+    57,
+    410
+   ],
+   "summary": "Coordinates MemoryStore and MemoryRetriever to expose the full memory lifecycle: create, get, list, search, evidence, provenance, apply candidate, update, archive, supersede, delete, purge, record access.",
+   "tags": [
+    "service",
+    "crud",
+    "memory"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "file:src/personal_ai/memory/store.py",
+   "type": "file",
+   "name": "store.py",
+   "filePath": "src/personal_ai/memory/store.py",
+   "summary": "SQLite persistence for memories, memory events, and evidence with schema auto-migration, row mapping helpers, and a store factory.",
+   "tags": [
+    "data-access",
+    "sqlite",
+    "persistence",
+    "memory"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "class:src/personal_ai/memory/store.py:MemoryStore",
+   "type": "class",
+   "name": "MemoryStore",
+   "filePath": "src/personal_ai/memory/store.py",
+   "lineRange": [
+    121,
+    356
+   ],
+   "summary": "SQLite-backed store implementing save, get, list, counts, statistics, access recording, purge, event append, and evidence add/query with lazy column migration.",
+   "tags": [
+    "data-access",
+    "sqlite",
+    "persistence"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:src/personal_ai/memory/store.py:_memory_to_row",
+   "type": "function",
+   "name": "_memory_to_row",
+   "filePath": "src/personal_ai/memory/store.py",
+   "lineRange": [
+    359,
+    377
+   ],
+   "summary": "Serializes a Memory object into a row dict for SQLite insert.",
+   "tags": [
+    "serialization"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/memory/store.py:_row_to_memory",
+   "type": "function",
+   "name": "_row_to_memory",
+   "filePath": "src/personal_ai/memory/store.py",
+   "lineRange": [
+    380,
+    401
+   ],
+   "summary": "Rehydrates a Memory domain object from a raw SQLite row, reconstructing temporal scope.",
+   "tags": [
+    "serialization"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/memory/store.py:open_memory_store",
+   "type": "function",
+   "name": "open_memory_store",
+   "filePath": "src/personal_ai/memory/store.py",
+   "lineRange": [
+    411,
+    421
+   ],
+   "summary": "Opens a database connection via connect_database and returns a configured MemoryStore.",
+   "tags": [
+    "factory",
+    "data-access"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:src/personal_ai/memory/tokenizer.py",
+   "type": "file",
+   "name": "tokenizer.py",
+   "filePath": "src/personal_ai/memory/tokenizer.py",
+   "summary": "Unicode text normalization and tokenization helpers: NFKC folding, variation selector stripping, and letter/mark/number token splitting.",
+   "tags": [
+    "utility",
+    "tokenization",
+    "unicode",
+    "normalization"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:src/personal_ai/memory/tokenizer.py:normalize_for_tokenize",
+   "type": "function",
+   "name": "normalize_for_tokenize",
+   "filePath": "src/personal_ai/memory/tokenizer.py",
+   "lineRange": [
+    66,
+    72
+   ],
+   "summary": "NFKC-normalizes and casefolds text, then strips variation selectors for stable matching.",
+   "tags": [
+    "utility",
+    "normalization"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/memory/tokenizer.py:tokenize",
+   "type": "function",
+   "name": "tokenize",
+   "filePath": "src/personal_ai/memory/tokenizer.py",
+   "lineRange": [
+    75,
+    77
+   ],
+   "summary": "Splits normalized text into letter/mark/number tokens.",
+   "tags": [
+    "utility",
+    "tokenization"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:src/personal_ai/ollama_client.py",
+   "type": "file",
+   "name": "ollama_client.py",
+   "filePath": "src/personal_ai/ollama_client.py",
+   "summary": "Ollama infrastructure-boundary client: chat and embedding HTTP calls with typed payloads, tool-call parsing, and error classification.",
+   "tags": [
+    "provider-boundary",
+    "client",
+    "api-handler",
+    "ollama"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "class:src/personal_ai/ollama_client.py:ToolCall",
+   "type": "class",
+   "name": "ToolCall",
+   "filePath": "src/personal_ai/ollama_client.py",
+   "lineRange": [
+    91,
+    96
+   ],
+   "summary": "Typed tool call result with id, name, and parsed arguments.",
+   "tags": [
+    "data-model",
+    "type-definition"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/ollama_client.py:ChatMessage",
+   "type": "class",
+   "name": "ChatMessage",
+   "filePath": "src/personal_ai/ollama_client.py",
+   "lineRange": [
+    100,
+    111
+   ],
+   "summary": "Chat message model carrying role, content, tool calls, and optional images.",
+   "tags": [
+    "data-model",
+    "type-definition"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/ollama_client.py:ChatResponse",
+   "type": "class",
+   "name": "ChatResponse",
+   "filePath": "src/personal_ai/ollama_client.py",
+   "lineRange": [
+    115,
+    119
+   ],
+   "summary": "Typed chat completion response with content, model, done flag, and tool calls.",
+   "tags": [
+    "data-model"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/ollama_client.py:EmbedResponse",
+   "type": "class",
+   "name": "EmbedResponse",
+   "filePath": "src/personal_ai/ollama_client.py",
+   "lineRange": [
+    123,
+    131
+   ],
+   "summary": "Typed embedding response with model name and embedding vectors.",
+   "tags": [
+    "data-model"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/ollama_client.py:_parse_tool_calls",
+   "type": "function",
+   "name": "_parse_tool_calls",
+   "filePath": "src/personal_ai/ollama_client.py",
+   "lineRange": [
+    38,
+    48
+   ],
+   "summary": "Extracts and validates the tool call list from a raw chat message payload.",
+   "tags": [
+    "parsing",
+    "validation"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/ollama_client.py:_parse_tool_call",
+   "type": "function",
+   "name": "_parse_tool_call",
+   "filePath": "src/personal_ai/ollama_client.py",
+   "lineRange": [
+    51,
+    70
+   ],
+   "summary": "Parses a single raw tool call into a ToolCall, validating shape or raising OllamaResponseError.",
+   "tags": [
+    "parsing",
+    "validation"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/ollama_client.py:_serialize_message",
+   "type": "function",
+   "name": "_serialize_message",
+   "filePath": "src/personal_ai/ollama_client.py",
+   "lineRange": [
+    73,
+    87
+   ],
+   "summary": "Serializes a ChatMessage into the Ollama chat API payload shape.",
+   "tags": [
+    "serialization"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/ollama_client.py:OllamaClient",
+   "type": "class",
+   "name": "OllamaClient",
+   "filePath": "src/personal_ai/ollama_client.py",
+   "lineRange": [
+    134,
+    257
+   ],
+   "summary": "HTTP client wrapping Ollama chat/embed endpoints with connection and HTTP status error mapping and typed response parsing.",
+   "tags": [
+    "provider-boundary",
+    "client",
+    "api-handler"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "file:src/personal_ai/ollama_embeddings.py",
+   "type": "file",
+   "name": "ollama_embeddings.py",
+   "filePath": "src/personal_ai/ollama_embeddings.py",
+   "summary": "Embedding provider wiring: OllamaEmbedder adapter, factory from settings, and backend probe producing an EmbeddingBackendReport.",
+   "tags": [
+    "provider-boundary",
+    "embeddings",
+    "factory",
+    "ollama"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "class:src/personal_ai/ollama_embeddings.py:OllamaEmbedder",
+   "type": "class",
+   "name": "OllamaEmbedder",
+   "filePath": "src/personal_ai/ollama_embeddings.py",
+   "lineRange": [
+    22,
+    45
+   ],
+   "summary": "Embedding adapter delegating to OllamaClient with a configured model.",
+   "tags": [
+    "provider-boundary",
+    "embeddings"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/ollama_embeddings.py:EmbeddingBackendReport",
+   "type": "class",
+   "name": "EmbeddingBackendReport",
+   "filePath": "src/personal_ai/ollama_embeddings.py",
+   "lineRange": [
+    79,
+    91
+   ],
+   "summary": "Probe report describing embedding backend reachability, support, model readiness, and vector dimensions.",
+   "tags": [
+    "data-model",
+    "monitoring"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/ollama_embeddings.py:create_embedder",
+   "type": "function",
+   "name": "create_embedder",
+   "filePath": "src/personal_ai/ollama_embeddings.py",
+   "lineRange": [
+    56,
+    75
+   ],
+   "summary": "Builds an OllamaEmbedder from settings or raises EmbeddingModelNotConfiguredError when no model is set.",
+   "tags": [
+    "factory",
+    "provider-boundary"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/ollama_embeddings.py:probe_embedding_backend",
+   "type": "function",
+   "name": "probe_embedding_backend",
+   "filePath": "src/personal_ai/ollama_embeddings.py",
+   "lineRange": [
+    106,
+    134
+   ],
+   "summary": "Probes the Ollama embedding backend by embedding a test string and classifies failures into an EmbeddingBackendReport.",
+   "tags": [
+    "diagnostics",
+    "provider-boundary"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:src/personal_ai/ollama_structured.py",
+   "type": "file",
+   "name": "ollama_structured.py",
+   "filePath": "src/personal_ai/ollama_structured.py",
+   "summary": "Structured JSON extraction from Ollama chat output, stripping markdown fences and decoding payloads.",
+   "tags": [
+    "provider-boundary",
+    "extraction",
+    "parsing",
+    "ollama"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "class:src/personal_ai/ollama_structured.py:OllamaStructuredExtractor",
+   "type": "class",
+   "name": "OllamaStructuredExtractor",
+   "filePath": "src/personal_ai/ollama_structured.py",
+   "lineRange": [
+    48,
+    72
+   ],
+   "summary": "Prompts Ollama chat for JSON and decodes an object matching an expected schema, raising on malformed output.",
+   "tags": [
+    "provider-boundary",
+    "extraction"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:src/personal_ai/ollama_vision.py",
+   "type": "file",
+   "name": "ollama_vision.py",
+   "filePath": "src/personal_ai/ollama_vision.py",
+   "summary": "Vision extractor sending base64-encoded images to Ollama chat for content description.",
+   "tags": [
+    "provider-boundary",
+    "vision",
+    "extraction",
+    "ollama"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/ollama_vision.py:OllamaVisionExtractor",
+   "type": "class",
+   "name": "OllamaVisionExtractor",
+   "filePath": "src/personal_ai/ollama_vision.py",
+   "lineRange": [
+    13,
+    42
+   ],
+   "summary": "Sends an image plus prompt to Ollama chat and returns the vision description text.",
+   "tags": [
+    "provider-boundary",
+    "vision"
+   ],
+   "complexity": "simple"
+  }
+ ],
+ "edges": [
+  {
+   "source": "file:src/personal_ai/memory/retriever.py",
+   "target": "class:src/personal_ai/memory/retriever.py:ScopeFilter",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/retriever.py",
+   "target": "class:src/personal_ai/memory/retriever.py:ScopeFilter",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/retriever.py",
+   "target": "class:src/personal_ai/memory/retriever.py:MemoryHit",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/retriever.py",
+   "target": "class:src/personal_ai/memory/retriever.py:MemoryHit",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/retriever.py",
+   "target": "class:src/personal_ai/memory/retriever.py:MemoryRetriever",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/retriever.py",
+   "target": "class:src/personal_ai/memory/retriever.py:MemoryRetriever",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/review.py",
+   "target": "class:src/personal_ai/memory/review.py:_AdjudicationConnection",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/review.py",
+   "target": "function:src/personal_ai/memory/review.py:_adjudication_transaction",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/review.py",
+   "target": "class:src/personal_ai/memory/review.py:MemoryReviewService",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/review.py",
+   "target": "class:src/personal_ai/memory/review.py:MemoryReviewService",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/service.py",
+   "target": "class:src/personal_ai/memory/service.py:MemoryConflictError",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/service.py",
+   "target": "class:src/personal_ai/memory/service.py:MemoryConflictError",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/service.py",
+   "target": "class:src/personal_ai/memory/service.py:MemoryService",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/service.py",
+   "target": "class:src/personal_ai/memory/service.py:MemoryService",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "class:src/personal_ai/memory/service.py:MemoryService",
+   "target": "class:src/personal_ai/memory/retriever.py:MemoryRetriever",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "class:src/personal_ai/memory/service.py:MemoryService",
+   "target": "class:src/personal_ai/memory/store.py:MemoryStore",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/store.py",
+   "target": "class:src/personal_ai/memory/store.py:MemoryStore",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/store.py",
+   "target": "function:src/personal_ai/memory/store.py:_memory_to_row",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/store.py",
+   "target": "function:src/personal_ai/memory/store.py:_row_to_memory",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/store.py",
+   "target": "function:src/personal_ai/memory/store.py:open_memory_store",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/store.py",
+   "target": "class:src/personal_ai/memory/store.py:MemoryStore",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/store.py",
+   "target": "function:src/personal_ai/memory/store.py:open_memory_store",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:src/personal_ai/memory/store.py:open_memory_store",
+   "target": "class:src/personal_ai/memory/store.py:MemoryStore",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "class:src/personal_ai/memory/review.py:MemoryReviewService",
+   "target": "class:src/personal_ai/memory/store.py:MemoryStore",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "class:src/personal_ai/memory/review.py:MemoryReviewService",
+   "target": "class:src/personal_ai/memory/service.py:MemoryService",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/tokenizer.py",
+   "target": "function:src/personal_ai/memory/tokenizer.py:normalize_for_tokenize",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/tokenizer.py",
+   "target": "function:src/personal_ai/memory/tokenizer.py:normalize_for_tokenize",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/tokenizer.py",
+   "target": "function:src/personal_ai/memory/tokenizer.py:tokenize",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/memory/tokenizer.py",
+   "target": "function:src/personal_ai/memory/tokenizer.py:tokenize",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "class:src/personal_ai/ollama_client.py:ToolCall",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "class:src/personal_ai/ollama_client.py:ChatMessage",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "class:src/personal_ai/ollama_client.py:ChatResponse",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "class:src/personal_ai/ollama_client.py:EmbedResponse",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "class:src/personal_ai/ollama_client.py:OllamaClient",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "function:src/personal_ai/ollama_client.py:_parse_tool_calls",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "function:src/personal_ai/ollama_client.py:_parse_tool_call",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "function:src/personal_ai/ollama_client.py:_serialize_message",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "class:src/personal_ai/ollama_client.py:ToolCall",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "class:src/personal_ai/ollama_client.py:ChatMessage",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "class:src/personal_ai/ollama_client.py:ChatResponse",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "class:src/personal_ai/ollama_client.py:EmbedResponse",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ollama_client.py",
+   "target": "class:src/personal_ai/ollama_client.py:OllamaClient",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ollama_embeddings.py",
+   "target": "class:src/personal_ai/ollama_embeddings.py:OllamaEmbedder",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_embeddings.py",
+   "target": "class:src/personal_ai/ollama_embeddings.py:OllamaEmbedder",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ollama_embeddings.py",
+   "target": "class:src/personal_ai/ollama_embeddings.py:EmbeddingBackendReport",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_embeddings.py",
+   "target": "class:src/personal_ai/ollama_embeddings.py:EmbeddingBackendReport",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ollama_embeddings.py",
+   "target": "function:src/personal_ai/ollama_embeddings.py:create_embedder",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_embeddings.py",
+   "target": "function:src/personal_ai/ollama_embeddings.py:create_embedder",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ollama_embeddings.py",
+   "target": "function:src/personal_ai/ollama_embeddings.py:probe_embedding_backend",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_embeddings.py",
+   "target": "function:src/personal_ai/ollama_embeddings.py:probe_embedding_backend",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "class:src/personal_ai/ollama_embeddings.py:OllamaEmbedder",
+   "target": "class:src/personal_ai/ollama_client.py:OllamaClient",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:src/personal_ai/ollama_embeddings.py:create_embedder",
+   "target": "class:src/personal_ai/ollama_client.py:OllamaClient",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:src/personal_ai/ollama_embeddings.py:probe_embedding_backend",
+   "target": "class:src/personal_ai/ollama_client.py:OllamaClient",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ollama_structured.py",
+   "target": "class:src/personal_ai/ollama_structured.py:OllamaStructuredExtractor",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_structured.py",
+   "target": "class:src/personal_ai/ollama_structured.py:OllamaStructuredExtractor",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "class:src/personal_ai/ollama_structured.py:OllamaStructuredExtractor",
+   "target": "class:src/personal_ai/ollama_client.py:OllamaClient",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "class:src/personal_ai/ollama_structured.py:OllamaStructuredExtractor",
+   "target": "class:src/personal_ai/ollama_client.py:ChatMessage",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ollama_vision.py",
+   "target": "class:src/personal_ai/ollama_vision.py:OllamaVisionExtractor",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1
+  },
+  {
+   "source": "file:src/personal_ai/ollama_vision.py",
+   "target": "class:src/personal_ai/ollama_vision.py:OllamaVisionExtractor",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "class:src/personal_ai/ollama_vision.py:OllamaVisionExtractor",
+   "target": "class:src/personal_ai/ollama_client.py:OllamaClient",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "class:src/personal_ai/ollama_vision.py:OllamaVisionExtractor",
+   "target": "class:src/personal_ai/ollama_client.py:ChatMessage",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  }
+ ]
+}

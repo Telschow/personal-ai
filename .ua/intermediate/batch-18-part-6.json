@@ -1,0 +1,2668 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_cli_execution.py",
+      "type": "file",
+      "name": "test_cli_execution.py",
+      "filePath": "tests/test_cli_execution.py",
+      "summary": "Tests CLI execution commands: research, list, board, approve, reject, retry.",
+      "tags": [
+        "test",
+        "cli",
+        "command-line"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:_tmp_corpus",
+      "type": "function",
+      "name": "_tmp_corpus",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        41,
+        45
+      ],
+      "summary": "Helper function: _tmp_corpus.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:_create_execution",
+      "type": "function",
+      "name": "_create_execution",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        48,
+        63
+      ],
+      "summary": "Helper function: _create_execution.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:_gated_work",
+      "type": "function",
+      "name": "_gated_work",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        109,
+        128
+      ],
+      "summary": "Helper function: _gated_work.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:_gated_control_plane",
+      "type": "function",
+      "name": "_gated_control_plane",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        131,
+        155
+      ],
+      "summary": "Helper function: _gated_control_plane.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:test_cli_requires_database",
+      "type": "function",
+      "name": "test_cli_requires_database",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        158,
+        160
+      ],
+      "summary": "Test: cli requires database.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:test_cli_research_reports_plan_and_events",
+      "type": "function",
+      "name": "test_cli_research_reports_plan_and_events",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        163,
+        178
+      ],
+      "summary": "Test: cli research reports plan and events.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:test_cli_research_json_contract",
+      "type": "function",
+      "name": "test_cli_research_json_contract",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        181,
+        201
+      ],
+      "summary": "Test: cli research json contract.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:test_cli_execution_list_show_events_board",
+      "type": "function",
+      "name": "test_cli_execution_list_show_events_board",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        204,
+        233
+      ],
+      "summary": "Test: cli execution list show events board.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:test_cli_execution_retry_resume_cancel",
+      "type": "function",
+      "name": "test_cli_execution_retry_resume_cancel",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        236,
+        271
+      ],
+      "summary": "Test: cli execution retry resume cancel.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:_run_json",
+      "type": "function",
+      "name": "_run_json",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        274,
+        276
+      ],
+      "summary": "Helper function: _run_json.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:test_cli_approve_reject_on_unknown_request_exits",
+      "type": "function",
+      "name": "test_cli_approve_reject_on_unknown_request_exits",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        279,
+        298
+      ],
+      "summary": "Test: cli approve reject on unknown request exits.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:_paused_execution",
+      "type": "function",
+      "name": "_paused_execution",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        301,
+        308
+      ],
+      "summary": "Helper function: _paused_execution.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:test_cli_approve_and_reject_success_paths",
+      "type": "function",
+      "name": "test_cli_approve_and_reject_success_paths",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        311,
+        350
+      ],
+      "summary": "Test: cli approve and reject success paths.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_execution.py:test_cli_unknown_execution_exits_cleanly",
+      "type": "function",
+      "name": "test_cli_unknown_execution_exits_cleanly",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        353,
+        359
+      ],
+      "summary": "Test: cli unknown execution exits cleanly.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_cli_execution.py:_GatedPlanner",
+      "type": "class",
+      "name": "_GatedPlanner",
+      "filePath": "tests/test_cli_execution.py",
+      "lineRange": [
+        66,
+        106
+      ],
+      "summary": "Test class _GatedPlanner with 2 methods.",
+      "tags": [
+        "helper-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_cli_ingest.py",
+      "type": "file",
+      "name": "test_cli_ingest.py",
+      "filePath": "tests/test_cli_ingest.py",
+      "summary": "Tests CLI ingest command: files, PDFs, emails, images with idempotency.",
+      "tags": [
+        "test",
+        "cli",
+        "command-line"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:gemini_export",
+      "type": "function",
+      "name": "gemini_export",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        31,
+        46
+      ],
+      "summary": "Function gemini_export with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:faked_model",
+      "type": "function",
+      "name": "faked_model",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        98,
+        102
+      ],
+      "summary": "Function faked_model with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "function",
+      "name": "run_cli",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        105,
+        107
+      ],
+      "summary": "Function run_cli with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:table_counts",
+      "type": "function",
+      "name": "table_counts",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        110,
+        122
+      ],
+      "summary": "Function table_counts with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:conversation_counts",
+      "type": "function",
+      "name": "conversation_counts",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        125,
+        139
+      ],
+      "summary": "Function conversation_counts with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:ingest_argv",
+      "type": "function",
+      "name": "ingest_argv",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        142,
+        149
+      ],
+      "summary": "Function ingest_argv with 2 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_creates_database_and_prints_summary",
+      "type": "function",
+      "name": "test_ingest_creates_database_and_prints_summary",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        152,
+        173
+      ],
+      "summary": "Test: ingest creates database and prints summary.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_second_invocation_is_idempotent",
+      "type": "function",
+      "name": "test_second_invocation_is_idempotent",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        176,
+        202
+      ],
+      "summary": "Test: second invocation is idempotent.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingested_database_is_immediately_searchable",
+      "type": "function",
+      "name": "test_ingested_database_is_immediately_searchable",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        205,
+        223
+      ],
+      "summary": "Test: ingested database is immediately searchable.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_file_source_discovers_and_chunks_text_files",
+      "type": "function",
+      "name": "test_ingest_file_source_discovers_and_chunks_text_files",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        226,
+        245
+      ],
+      "summary": "Test: ingest file source discovers and chunks text files.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_file_discovers_nested_supported_files",
+      "type": "function",
+      "name": "test_ingest_file_discovers_nested_supported_files",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        248,
+        267
+      ],
+      "summary": "Test: ingest file discovers nested supported files.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:_write_single_page_pdf",
+      "type": "function",
+      "name": "_write_single_page_pdf",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        270,
+        276
+      ],
+      "summary": "Helper function: _write_single_page_pdf.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:_write_image_only_pdf",
+      "type": "function",
+      "name": "_write_image_only_pdf",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        279,
+        287
+      ],
+      "summary": "Helper function: _write_image_only_pdf.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_pdf_file_source",
+      "type": "function",
+      "name": "test_ingest_pdf_file_source",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        290,
+        309
+      ],
+      "summary": "Test: ingest pdf file source.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_mixed_pdf_is_chunked_without_model_calls",
+      "type": "function",
+      "name": "test_ingest_mixed_pdf_is_chunked_without_model_calls",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        312,
+        343
+      ],
+      "summary": "Test: ingest mixed pdf is chunked without model calls.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_file_workspace_rerun_is_idempotent",
+      "type": "function",
+      "name": "test_ingest_file_workspace_rerun_is_idempotent",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        346,
+        366
+      ],
+      "summary": "Test: ingest file workspace rerun is idempotent.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_unknown_source_exits_without_creating_database",
+      "type": "function",
+      "name": "test_unknown_source_exits_without_creating_database",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        369,
+        393
+      ],
+      "summary": "Test: unknown source exits without creating database.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_missing_source_path_exits_without_creating_database",
+      "type": "function",
+      "name": "test_missing_source_path_exits_without_creating_database",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        396,
+        420
+      ],
+      "summary": "Test: missing source path exits without creating database.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_existing_database_is_reused_not_overwritten",
+      "type": "function",
+      "name": "test_existing_database_is_reused_not_overwritten",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        423,
+        457
+      ],
+      "summary": "Test: existing database is reused not overwritten.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_connection_is_released_after_ingestion",
+      "type": "function",
+      "name": "test_connection_is_released_after_ingestion",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        460,
+        481
+      ],
+      "summary": "Test: connection is released after ingestion.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_search_and_ingest_are_mutually_exclusive",
+      "type": "function",
+      "name": "test_search_and_ingest_are_mutually_exclusive",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        484,
+        506
+      ],
+      "summary": "Test: search and ingest are mutually exclusive.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_requires_database",
+      "type": "function",
+      "name": "test_ingest_requires_database",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        509,
+        520
+      ],
+      "summary": "Test: ingest requires database.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_agent_mode_unchanged_by_ingest_mode",
+      "type": "function",
+      "name": "test_agent_mode_unchanged_by_ingest_mode",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        523,
+        533
+      ],
+      "summary": "Test: agent mode unchanged by ingest mode.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:write_mbox",
+      "type": "function",
+      "name": "write_mbox",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        536,
+        545
+      ],
+      "summary": "Function write_mbox with 3 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:make_text_email",
+      "type": "function",
+      "name": "make_text_email",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        548,
+        564
+      ],
+      "summary": "Function make_text_email with 4 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:make_html_email",
+      "type": "function",
+      "name": "make_html_email",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        567,
+        582
+      ],
+      "summary": "Function make_html_email with 4 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:email_export",
+      "type": "function",
+      "name": "email_export",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        586,
+        618
+      ],
+      "summary": "Function email_export with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:email_ingest_argv",
+      "type": "function",
+      "name": "email_ingest_argv",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        628,
+        635
+      ],
+      "summary": "Function email_ingest_argv with 2 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:content_counts",
+      "type": "function",
+      "name": "content_counts",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        638,
+        650
+      ],
+      "summary": "Function content_counts with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_email_never_invokes_structured_extraction",
+      "type": "function",
+      "name": "test_ingest_email_never_invokes_structured_extraction",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        653,
+        673
+      ],
+      "summary": "Test: ingest email never invokes structured extraction.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingested_email_database_is_immediately_searchable",
+      "type": "function",
+      "name": "test_ingested_email_database_is_immediately_searchable",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        676,
+        704
+      ],
+      "summary": "Test: ingested email database is immediately searchable.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingested_email_rerun_is_idempotent",
+      "type": "function",
+      "name": "test_ingested_email_rerun_is_idempotent",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        707,
+        724
+      ],
+      "summary": "Test: ingested email rerun is idempotent.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_email_deduplicates_identical_missing_id_copies",
+      "type": "function",
+      "name": "test_ingest_email_deduplicates_identical_missing_id_copies",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        727,
+        747
+      ],
+      "summary": "Test: ingest email deduplicates identical missing id copies.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:_enable_vision_cli",
+      "type": "function",
+      "name": "_enable_vision_cli",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        750,
+        758
+      ],
+      "summary": "Helper function: _enable_vision_cli.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_pdf_runs_vision_when_configured",
+      "type": "function",
+      "name": "test_ingest_image_heavy_pdf_runs_vision_when_configured",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        761,
+        793
+      ],
+      "summary": "Test: ingest image heavy pdf runs vision when configured.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_becomes_searchable_after_vision",
+      "type": "function",
+      "name": "test_ingest_image_heavy_becomes_searchable_after_vision",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        796,
+        821
+      ],
+      "summary": "Test: ingest image heavy becomes searchable after vision.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_vision_rerun_is_idempotent",
+      "type": "function",
+      "name": "test_ingest_image_heavy_vision_rerun_is_idempotent",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        824,
+        845
+      ],
+      "summary": "Test: ingest image heavy vision rerun is idempotent.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_without_vision_stays_unchunked",
+      "type": "function",
+      "name": "test_ingest_image_heavy_without_vision_stays_unchunked",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        848,
+        865
+      ],
+      "summary": "Test: ingest image heavy without vision stays unchunked.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_ingest.py:test_email_ingest_never_constructs_vision_extractor",
+      "type": "function",
+      "name": "test_email_ingest_never_constructs_vision_extractor",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        868,
+        884
+      ],
+      "summary": "Test: email ingest never constructs vision extractor.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_cli_ingest.py:FakeOllamaClient",
+      "type": "class",
+      "name": "FakeOllamaClient",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        49,
+        63
+      ],
+      "summary": "Class FakeOllamaClient with 3 methods.",
+      "tags": [
+        "helper-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_cli_ingest.py:FakeStructuredExtractor",
+      "type": "class",
+      "name": "FakeStructuredExtractor",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        66,
+        72
+      ],
+      "summary": "Class FakeStructuredExtractor with 2 methods.",
+      "tags": [
+        "helper-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_cli_ingest.py:FakeVisionExtractor",
+      "type": "class",
+      "name": "FakeVisionExtractor",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        75,
+        87
+      ],
+      "summary": "Class FakeVisionExtractor with 2 methods.",
+      "tags": [
+        "helper-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_cli_ingest.py:ExplodingVisionExtractor",
+      "type": "class",
+      "name": "ExplodingVisionExtractor",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        90,
+        94
+      ],
+      "summary": "Class ExplodingVisionExtractor with 1 methods.",
+      "tags": [
+        "helper-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_cli_ingest.py:ExplodingOllamaClient",
+      "type": "class",
+      "name": "ExplodingOllamaClient",
+      "filePath": "tests/test_cli_ingest.py",
+      "lineRange": [
+        621,
+        625
+      ],
+      "summary": "Class ExplodingOllamaClient with 1 methods.",
+      "tags": [
+        "helper-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_cli_memory.py",
+      "type": "file",
+      "name": "test_cli_memory.py",
+      "filePath": "tests/test_cli_memory.py",
+      "summary": "Tests CLI memory commands: add, search, list, delete, purge.",
+      "tags": [
+        "test",
+        "cli",
+        "command-line"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_cli_memory.py:test_cli_requires_database",
+      "type": "function",
+      "name": "test_cli_requires_database",
+      "filePath": "tests/test_cli_memory.py",
+      "lineRange": [
+        18,
+        20
+      ],
+      "summary": "Test: cli requires database.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_memory.py:test_cli_memory_add_and_show_roundtrip",
+      "type": "function",
+      "name": "test_cli_memory_add_and_show_roundtrip",
+      "filePath": "tests/test_cli_memory.py",
+      "lineRange": [
+        23,
+        33
+      ],
+      "summary": "Test: cli memory add and show roundtrip.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_memory.py:test_cli_memory_add_with_options",
+      "type": "function",
+      "name": "test_cli_memory_add_with_options",
+      "filePath": "tests/test_cli_memory.py",
+      "lineRange": [
+        36,
+        57
+      ],
+      "summary": "Test: cli memory add with options.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_memory.py:test_cli_memory_search_and_json_scores",
+      "type": "function",
+      "name": "test_cli_memory_search_and_json_scores",
+      "filePath": "tests/test_cli_memory.py",
+      "lineRange": [
+        60,
+        78
+      ],
+      "summary": "Test: cli memory search and json scores.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_memory.py:test_cli_memory_scoped_search",
+      "type": "function",
+      "name": "test_cli_memory_scoped_search",
+      "filePath": "tests/test_cli_memory.py",
+      "lineRange": [
+        81,
+        112
+      ],
+      "summary": "Test: cli memory scoped search.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_memory.py:test_cli_memory_list_status_filter",
+      "type": "function",
+      "name": "test_cli_memory_list_status_filter",
+      "filePath": "tests/test_cli_memory.py",
+      "lineRange": [
+        115,
+        126
+      ],
+      "summary": "Test: cli memory list status filter.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_memory.py:test_cli_memory_delete_and_purge",
+      "type": "function",
+      "name": "test_cli_memory_delete_and_purge",
+      "filePath": "tests/test_cli_memory.py",
+      "lineRange": [
+        129,
+        141
+      ],
+      "summary": "Test: cli memory delete and purge.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_memory.py:test_cli_memory_unknown_memory_clean_exit",
+      "type": "function",
+      "name": "test_cli_memory_unknown_memory_clean_exit",
+      "filePath": "tests/test_cli_memory.py",
+      "lineRange": [
+        144,
+        148
+      ],
+      "summary": "Test: cli memory unknown memory clean exit.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_memory.py:test_cli_memory_and_execution_share_database",
+      "type": "function",
+      "name": "test_cli_memory_and_execution_share_database",
+      "filePath": "tests/test_cli_memory.py",
+      "lineRange": [
+        151,
+        174
+      ],
+      "summary": "Test: cli memory and execution share database.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_memory.py:test_cli_memory_add_requires_single_content_arg",
+      "type": "function",
+      "name": "test_cli_memory_add_requires_single_content_arg",
+      "filePath": "tests/test_cli_memory.py",
+      "lineRange": [
+        177,
+        181
+      ],
+      "summary": "Test: cli memory add requires single content arg.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:_tmp_corpus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:_tmp_corpus",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:_create_execution",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:_create_execution",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:_gated_work",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:_gated_work",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:_gated_control_plane",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:_gated_control_plane",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_requires_database",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_requires_database",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_research_reports_plan_and_events",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_research_reports_plan_and_events",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_research_json_contract",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_research_json_contract",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_execution_list_show_events_board",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_execution_list_show_events_board",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_execution_retry_resume_cancel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_execution_retry_resume_cancel",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:_run_json",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:_run_json",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_approve_reject_on_unknown_request_exits",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_approve_reject_on_unknown_request_exits",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:_paused_execution",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:_paused_execution",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_approve_and_reject_success_paths",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_approve_and_reject_success_paths",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_unknown_execution_exits_cleanly",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "function:tests/test_cli_execution.py:test_cli_unknown_execution_exits_cleanly",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "class:tests/test_cli_execution.py:_GatedPlanner",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_execution.py",
+      "target": "class:tests/test_cli_execution.py:_GatedPlanner",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_execution.py:_create_execution",
+      "target": "function:tests/test_cli_execution.py:_tmp_corpus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_execution.py:test_cli_research_reports_plan_and_events",
+      "target": "function:tests/test_cli_execution.py:_tmp_corpus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_execution.py:test_cli_research_json_contract",
+      "target": "function:tests/test_cli_execution.py:_tmp_corpus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_execution.py:test_cli_execution_list_show_events_board",
+      "target": "function:tests/test_cli_execution.py:_create_execution",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_execution.py:test_cli_execution_retry_resume_cancel",
+      "target": "function:tests/test_cli_execution.py:_create_execution",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_execution.py:test_cli_execution_retry_resume_cancel",
+      "target": "function:tests/test_cli_execution.py:_run_json",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_execution.py:test_cli_approve_reject_on_unknown_request_exits",
+      "target": "function:tests/test_cli_execution.py:_create_execution",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_execution.py:test_cli_approve_and_reject_success_paths",
+      "target": "function:tests/test_cli_execution.py:_gated_control_plane",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_execution.py:test_cli_approve_and_reject_success_paths",
+      "target": "function:tests/test_cli_execution.py:_paused_execution",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_execution.py:test_cli_approve_and_reject_success_paths",
+      "target": "function:tests/test_cli_execution.py:_gated_control_plane",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_execution.py:test_cli_approve_and_reject_success_paths",
+      "target": "function:tests/test_cli_execution.py:_paused_execution",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_execution.py:test_cli_unknown_execution_exits_cleanly",
+      "target": "function:tests/test_cli_execution.py:_create_execution",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:gemini_export",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:gemini_export",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:faked_model",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:faked_model",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:table_counts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:table_counts",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:conversation_counts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:conversation_counts",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:ingest_argv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:ingest_argv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_creates_database_and_prints_summary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_creates_database_and_prints_summary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_second_invocation_is_idempotent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_second_invocation_is_idempotent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingested_database_is_immediately_searchable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingested_database_is_immediately_searchable",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_file_source_discovers_and_chunks_text_files",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_file_source_discovers_and_chunks_text_files",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_file_discovers_nested_supported_files",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_file_discovers_nested_supported_files",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:_write_single_page_pdf",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:_write_single_page_pdf",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:_write_image_only_pdf",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:_write_image_only_pdf",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_pdf_file_source",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_pdf_file_source",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_mixed_pdf_is_chunked_without_model_calls",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_mixed_pdf_is_chunked_without_model_calls",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_file_workspace_rerun_is_idempotent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_file_workspace_rerun_is_idempotent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_unknown_source_exits_without_creating_database",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_unknown_source_exits_without_creating_database",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_missing_source_path_exits_without_creating_database",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_missing_source_path_exits_without_creating_database",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_existing_database_is_reused_not_overwritten",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_existing_database_is_reused_not_overwritten",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_connection_is_released_after_ingestion",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_connection_is_released_after_ingestion",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_search_and_ingest_are_mutually_exclusive",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_search_and_ingest_are_mutually_exclusive",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_requires_database",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_requires_database",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_agent_mode_unchanged_by_ingest_mode",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_agent_mode_unchanged_by_ingest_mode",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:write_mbox",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:write_mbox",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:make_text_email",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:make_text_email",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:make_html_email",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:make_html_email",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:email_export",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:email_export",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:email_ingest_argv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:email_ingest_argv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:content_counts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:content_counts",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_email_never_invokes_structured_extraction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_email_never_invokes_structured_extraction",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingested_email_database_is_immediately_searchable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingested_email_database_is_immediately_searchable",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingested_email_rerun_is_idempotent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingested_email_rerun_is_idempotent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_email_deduplicates_identical_missing_id_copies",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_email_deduplicates_identical_missing_id_copies",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:_enable_vision_cli",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:_enable_vision_cli",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_pdf_runs_vision_when_configured",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_pdf_runs_vision_when_configured",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_becomes_searchable_after_vision",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_becomes_searchable_after_vision",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_vision_rerun_is_idempotent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_vision_rerun_is_idempotent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_without_vision_stays_unchunked",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_without_vision_stays_unchunked",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_email_ingest_never_constructs_vision_extractor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "function:tests/test_cli_ingest.py:test_email_ingest_never_constructs_vision_extractor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "class:tests/test_cli_ingest.py:FakeOllamaClient",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "class:tests/test_cli_ingest.py:FakeOllamaClient",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "class:tests/test_cli_ingest.py:FakeStructuredExtractor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "class:tests/test_cli_ingest.py:FakeStructuredExtractor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "class:tests/test_cli_ingest.py:FakeVisionExtractor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "class:tests/test_cli_ingest.py:FakeVisionExtractor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "class:tests/test_cli_ingest.py:ExplodingVisionExtractor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "class:tests/test_cli_ingest.py:ExplodingVisionExtractor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "class:tests/test_cli_ingest.py:ExplodingOllamaClient",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_ingest.py",
+      "target": "class:tests/test_cli_ingest.py:ExplodingOllamaClient",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_creates_database_and_prints_summary",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_creates_database_and_prints_summary",
+      "target": "function:tests/test_cli_ingest.py:ingest_argv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_creates_database_and_prints_summary",
+      "target": "function:tests/test_cli_ingest.py:conversation_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_second_invocation_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:ingest_argv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_second_invocation_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_second_invocation_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_second_invocation_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:conversation_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingested_database_is_immediately_searchable",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingested_database_is_immediately_searchable",
+      "target": "function:tests/test_cli_ingest.py:ingest_argv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_file_source_discovers_and_chunks_text_files",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_file_source_discovers_and_chunks_text_files",
+      "target": "function:tests/test_cli_ingest.py:table_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_file_discovers_nested_supported_files",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_file_discovers_nested_supported_files",
+      "target": "function:tests/test_cli_ingest.py:table_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_pdf_file_source",
+      "target": "function:tests/test_cli_ingest.py:_write_single_page_pdf",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_pdf_file_source",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_pdf_file_source",
+      "target": "function:tests/test_cli_ingest.py:table_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_mixed_pdf_is_chunked_without_model_calls",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_mixed_pdf_is_chunked_without_model_calls",
+      "target": "function:tests/test_cli_ingest.py:table_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_file_workspace_rerun_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_file_workspace_rerun_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_file_workspace_rerun_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:table_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_existing_database_is_reused_not_overwritten",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_existing_database_is_reused_not_overwritten",
+      "target": "function:tests/test_cli_ingest.py:ingest_argv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_connection_is_released_after_ingestion",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_connection_is_released_after_ingestion",
+      "target": "function:tests/test_cli_ingest.py:ingest_argv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:email_export",
+      "target": "function:tests/test_cli_ingest.py:make_text_email",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:email_export",
+      "target": "function:tests/test_cli_ingest.py:make_text_email",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:email_export",
+      "target": "function:tests/test_cli_ingest.py:make_text_email",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:email_export",
+      "target": "function:tests/test_cli_ingest.py:make_html_email",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:email_export",
+      "target": "function:tests/test_cli_ingest.py:write_mbox",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:email_export",
+      "target": "function:tests/test_cli_ingest.py:write_mbox",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_email_never_invokes_structured_extraction",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_email_never_invokes_structured_extraction",
+      "target": "function:tests/test_cli_ingest.py:email_ingest_argv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_email_never_invokes_structured_extraction",
+      "target": "function:tests/test_cli_ingest.py:content_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingested_email_database_is_immediately_searchable",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingested_email_database_is_immediately_searchable",
+      "target": "function:tests/test_cli_ingest.py:email_ingest_argv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingested_email_rerun_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:email_ingest_argv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingested_email_rerun_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingested_email_rerun_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingested_email_rerun_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:content_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_email_deduplicates_identical_missing_id_copies",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_email_deduplicates_identical_missing_id_copies",
+      "target": "function:tests/test_cli_ingest.py:email_ingest_argv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_pdf_runs_vision_when_configured",
+      "target": "function:tests/test_cli_ingest.py:_write_image_only_pdf",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_pdf_runs_vision_when_configured",
+      "target": "function:tests/test_cli_ingest.py:_enable_vision_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_pdf_runs_vision_when_configured",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_pdf_runs_vision_when_configured",
+      "target": "function:tests/test_cli_ingest.py:table_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_becomes_searchable_after_vision",
+      "target": "function:tests/test_cli_ingest.py:_write_image_only_pdf",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_becomes_searchable_after_vision",
+      "target": "function:tests/test_cli_ingest.py:_enable_vision_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_becomes_searchable_after_vision",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_vision_rerun_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:_write_image_only_pdf",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_vision_rerun_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:_enable_vision_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_vision_rerun_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_vision_rerun_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_vision_rerun_is_idempotent",
+      "target": "function:tests/test_cli_ingest.py:table_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_without_vision_stays_unchunked",
+      "target": "function:tests/test_cli_ingest.py:_write_image_only_pdf",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_ingest_image_heavy_without_vision_stays_unchunked",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_email_ingest_never_constructs_vision_extractor",
+      "target": "function:tests/test_cli_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_email_ingest_never_constructs_vision_extractor",
+      "target": "function:tests/test_cli_ingest.py:email_ingest_argv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_ingest.py:test_email_ingest_never_constructs_vision_extractor",
+      "target": "function:tests/test_cli_ingest.py:content_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_requires_database",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_requires_database",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_add_and_show_roundtrip",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_add_and_show_roundtrip",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_add_with_options",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_add_with_options",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_search_and_json_scores",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_search_and_json_scores",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_scoped_search",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_scoped_search",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_list_status_filter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_list_status_filter",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_delete_and_purge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_delete_and_purge",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_unknown_memory_clean_exit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_unknown_memory_clean_exit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_and_execution_share_database",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_and_execution_share_database",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_add_requires_single_content_arg",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_memory.py",
+      "target": "function:tests/test_cli_memory.py:test_cli_memory_add_requires_single_content_arg",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "file:tests/test_cli_execution.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/cli.py",
+      "target": "file:tests/test_cli_ingest.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/ingestion.py",
+      "target": "file:tests/test_cli_ingest.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/cli.py",
+      "target": "file:tests/test_cli_memory.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/memory/service.py",
+      "target": "file:tests/test_cli_memory.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

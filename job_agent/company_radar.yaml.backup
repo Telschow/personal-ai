@@ -1,0 +1,26 @@
+companies:
+  - name: Helsinger
+    location: Munich
+    industry: ["AI", "Autonomous Systems", "DeepTech"]
+    greenhouse: helsing
+    ashby: null
+    lever: null
+  - name: Databricks
+    location: Mountain View
+    industry: ["Data Engineering", "AI"]
+    greenhouse: databricks
+    ashby: null
+    lever: null
+  - name: Snowflake
+    location: Santa Clara
+    industry: ["Data Platform"]
+    greenhouse: null
+    ashby: snowflake
+    lever: null
+  - name: Google
+    location: Mountain View
+    industry: ["Search Index"]
+    greenhouse: null
+    ashby: null
+    lever: null
+    smartrecruiters: google

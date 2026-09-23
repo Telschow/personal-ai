@@ -1,0 +1,1438 @@
+{
+  "nodes": [
+    {
+      "id": "file:job_agent/job_agent/tailor.py",
+      "type": "file",
+      "name": "tailor.py",
+      "filePath": "job_agent/job_agent/tailor.py",
+      "summary": "CV tailoring pipeline for a single job. tailor_to_docx takes an Ollama config, the career profile and a job, generates tailored materials and writes a docx artifact keyed by job id.",
+      "tags": [
+        "career-artifacts",
+        "tailoring",
+        "docx",
+        "llm"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:job_agent/job_agent/validate.py",
+      "type": "file",
+      "name": "validate.py",
+      "filePath": "job_agent/job_agent/validate.py",
+      "summary": "Validates generated CV/cover materials against the career profile. validate_materials flags numbers in content that are not backed by the profile data (companies or quantifiable claims) and returns structured error messages.",
+      "tags": [
+        "career-artifacts",
+        "validation",
+        "quality-gate"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:job_agent/profile/profile.yaml",
+      "type": "config",
+      "name": "profile.yaml",
+      "filePath": "job_agent/profile/profile.yaml",
+      "summary": "Career profile data used by the job agent: name, location, languages, education, experience history, skills, values and constraints. Loaded directly by career modules and by the test suite under job_agent/profile/profile.yaml.",
+      "tags": [
+        "profile",
+        "career-data",
+        "configuration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:job_agent/tests/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "job_agent/tests/__init__.py",
+      "summary": "Package marker for the job_agent test suite.",
+      "tags": [
+        "package-marker"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:job_agent/tests/fixtures/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "job_agent/tests/fixtures/__init__.py",
+      "summary": "Package marker for the test fixtures subpackage.",
+      "tags": [
+        "package-marker"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:job_agent/tests/fixtures/mapping_eval_cases.py",
+      "type": "file",
+      "name": "mapping_eval_cases.py",
+      "filePath": "job_agent/tests/fixtures/mapping_eval_cases.py",
+      "summary": "Labeled evaluation dataset MAPPING_EVAL_CASES for the career requirements mapper: 44 cases spanning all evidence categories with expected coverage outcomes. Pure data, no functions; consumed by test_career_mapping_eval.py to enforce an offline accuracy floor.",
+      "tags": [
+        "fixture",
+        "eval-set",
+        "testing-data"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:job_agent/tests/test_application.py",
+      "type": "file",
+      "name": "test_application.py",
+      "filePath": "job_agent/tests/test_application.py",
+      "summary": "Unit tests for the career application lifecycle state machine (M12-15): stage ordering, valid/unknown stage guards, forward transition legality, terminal stages, timestamp stamps, with_fields copies and normalization of company and job title.",
+      "tags": [
+        "tests",
+        "states",
+        "application-lifecycle"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:job_agent/tests/test_canonical.py",
+      "type": "file",
+      "name": "test_canonical.py",
+      "filePath": "job_agent/tests/test_canonical.py",
+      "summary": "Unit tests for canonical key normalization: stripping legal suffixes and m/w/d gender markers from titles, location synonyms (Muenchen to Munich, DE to Germany), split_locations and deterministic canonical_key construction including None handling.",
+      "tags": [
+        "tests",
+        "canonicalization",
+        "normalization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_artifacts_versioning.py",
+      "type": "file",
+      "name": "test_career_artifacts_versioning.py",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Persistence and versioning tests for career artifacts: SQLite migration v4 to v5 preserving data, version column and unique (job_id, version) index, save/get/list by version, snapshots with mapping and validation, per-version evidence links and approval marking on latest or specific versions.",
+      "tags": [
+        "tests",
+        "artifacts",
+        "versioning",
+        "db-migration"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_cv_llm.py",
+      "type": "file",
+      "name": "test_career_cv_llm.py",
+      "filePath": "job_agent/tests/test_career_cv_llm.py",
+      "summary": "Unit tests for the CV proposal LLM layer: fail-closed parse_tailoring with evidence allow-list, length caps, schema version, OllamaCV client format and failure behavior, and LlmCallLog recording of tailor success/retry/error outcomes.",
+      "tags": [
+        "tests",
+        "llm",
+        "cv-proposal",
+        "fail-closed"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_cv_llm_retries.py",
+      "type": "file",
+      "name": "test_career_cv_llm_retries.py",
+      "filePath": "job_agent/tests/test_career_cv_llm_retries.py",
+      "summary": "Retry behavior tests for OllamaCvClient.generate_proposal: transient HTTP errors retried then succeeding, persistent transients failing closed after bounded retries, client errors and malformed success not retried, and retries disabled at max_retries zero.",
+      "tags": [
+        "tests",
+        "llm",
+        "retries",
+        "fail-closed"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_documents.py",
+      "type": "file",
+      "name": "test_career_documents.py",
+      "filePath": "job_agent/tests/test_career_documents.py",
+      "summary": "Document ingestion tests: text/markdown/docx/pdf extraction, stable content hash and deterministic document ids, rejection of unsupported, missing, binary, invalid UTF-8, oversized and empty documents, docx/pdf round trips, multipage page refs and injection text treated as inert data.",
+      "tags": [
+        "tests",
+        "document-ingestion",
+        "security",
+        "docx",
+        "pdf"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_evidence.py",
+      "type": "file",
+      "name": "test_career_evidence.py",
+      "filePath": "job_agent/tests/test_career_evidence.py",
+      "summary": "Unit tests for career evidence ranking and classification: level_index ordering, stable evidence ids, profile-derived evidence (verified, covering skills/experience, no inferred promotion), rank_evidence order/dedup/limit, and classify_categories for product/AI roles.",
+      "tags": [
+        "tests",
+        "evidence",
+        "classification"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_fit.py",
+      "type": "file",
+      "name": "test_career_fit.py",
+      "filePath": "job_agent/tests/test_career_fit.py",
+      "summary": "Fit-scoring tests: strong jobs score high, weak score low, deterministic output, coverage requires evidence, upside bounded by coverage, gap listing, salary floor and people-management risk, credibility-only effect of document-level coverage, match helper functions and default weight sanity.",
+      "tags": [
+        "tests",
+        "fit-scoring",
+        "risk"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_knowledge.py",
+      "type": "file",
+      "name": "test_career_knowledge.py",
+      "filePath": "job_agent/tests/test_career_knowledge.py",
+      "summary": "Career knowledge provider tests: NullCareerKnowledge health/search behavior, build_knowledge none/missing-db/validated paths, PersonalAiCareerKnowledge adapter on a read-only SQLite connection with memory and corpus search and memory-kind filtering.",
+      "tags": [
+        "tests",
+        "knowledge",
+        "db-adapter"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_llm.py",
+      "type": "file",
+      "name": "test_career_llm.py",
+      "filePath": "job_agent/tests/test_career_llm.py",
+      "summary": "LLM narrative layer tests: parse_narrative validation and caps, injection in the JD not changing the schema payload, OllamaJsonClient with evidence allow-list, think flag defaults, LlmCallLog recording/capping/aggregation, fail-closed on HTTP error or malformed content and FitNarrative length caps.",
+      "tags": [
+        "tests",
+        "llm",
+        "narrative",
+        "fail-closed",
+        "injection"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_mapping.py",
+      "type": "file",
+      "name": "test_career_mapping.py",
+      "filePath": "job_agent/tests/test_career_mapping.py",
+      "summary": "Requirement-mapping tests: one row per concept, empty concepts, direct evidence strong, candidate evidence partial, negative evidence as gap, transferable distinct from gap, evidence ids or gap invariant, unknown on sparse profiles, deterministic ordering and bounded confidence.",
+      "tags": [
+        "tests",
+        "requirements-mapping",
+        "coverage"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_mapping_eval.py",
+      "type": "file",
+      "name": "test_career_mapping_eval.py",
+      "filePath": "job_agent/tests/test_career_mapping_eval.py",
+      "summary": "Runs the labeled eval set from tests/fixtures/mapping_eval_cases.py against the requirements mapper: enforces 44 cases across categories, an accuracy floor, bounded square confusion matrix, all failures referencing known cases, and gap behavior with and without direct hints.",
+      "tags": [
+        "tests",
+        "eval",
+        "accuracy-floor",
+        "regression"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_positioning_plan.py",
+      "type": "file",
+      "name": "test_career_positioning_plan.py",
+      "filePath": "job_agent/tests/test_career_positioning_plan.py",
+      "summary": "Positioning-plan tests: achievements require action or number, ordered by trust then metric, capped and deduped, no fabricated numbers; headline from strong evidence, evidence id references, gap and negative-evidence listing and no invented metrics.",
+      "tags": [
+        "tests",
+        "positioning",
+        "achievements"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_profile.py",
+      "type": "file",
+      "name": "test_career_profile.py",
+      "filePath": "job_agent/tests/test_career_profile.py",
+      "summary": "Career-profile derivation tests: target families include current by default, explicit targets kept with current inserted first, inferred targets tracked, leadership direction inferred from latest title, constraints back stated values, empty profile safe and determinism.",
+      "tags": [
+        "tests",
+        "profile",
+        "role-families"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_reconcile.py",
+      "type": "file",
+      "name": "test_career_reconcile.py",
+      "filePath": "job_agent/tests/test_career_reconcile.py",
+      "summary": "Evidence reconciliation tests: candidate evidence from documents (documented level, deduped lines, heading skipping, bounds, normalized facts), exact/add/conflict reconcile outcomes keeping existing on conflict, idempotency, higher-level profile evidence preserved, heading strings never entering facts and injection text inert.",
+      "tags": [
+        "tests",
+        "reconcile",
+        "evidence",
+        "security"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_requirements.py",
+      "type": "file",
+      "name": "test_career_requirements.py",
+      "filePath": "job_agent/tests/test_career_requirements.py",
+      "summary": "Extract_job_attributes tests: product management and engineering attributes, leadership title, ranked seniority, security clearance detection, bounded typed concepts, industry detection, agentic-AI signal, stage detection and empty-description safety.",
+      "tags": [
+        "tests",
+        "requirements-extraction",
+        "attrs"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:job_agent/tests/test_career_retrieval.py",
+      "type": "file",
+      "name": "test_career_retrieval.py",
+      "filePath": "job_agent/tests/test_career_retrieval.py",
+      "summary": "Retrieval-plan tests: templates used instead of raw JD text, bounded deterministic plans, concept coverage matches keywords and is capped and deduped, NullCareerKnowledge does not crash collection, compact_evidence bounded and never carrying secret-like fields.",
+      "tags": [
+        "tests",
+        "retrieval",
+        "concept-coverage"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "service:job_agent/systemd/personal-job-agent.service",
+      "type": "service",
+      "name": "personal-job-agent.service",
+      "filePath": "job_agent/systemd/personal-job-agent.service",
+      "summary": "systemd oneshot unit running the job agent scan via ~/personal-job-agent/.venv/bin/job-agent scan. Executes once per timer trigger; companion to personal-job-agent.timer.",
+      "tags": [
+        "systemd",
+        "oneshot",
+        "scheduler"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:job_agent/systemd/personal-job-agent.timer",
+      "type": "service",
+      "name": "personal-job-agent.timer",
+      "filePath": "job_agent/systemd/personal-job-agent.timer",
+      "summary": "systemd timer activating the job-agent scan daily at 18:30 with a 600-second random delay and persistent catch-up, wanted by timers.target.",
+      "tags": [
+        "systemd",
+        "timer",
+        "schedule"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:job_agent/job_agent/tailor.py:tailor_to_docx",
+      "type": "function",
+      "name": "tailor_to_docx",
+      "filePath": "job_agent/job_agent/tailor.py",
+      "summary": "Generates tailored CV/cover materials for a job via Ollama and writes a docx artifact whose id derives from the job id.",
+      "tags": [
+        "tailoring",
+        "docx",
+        "llm"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 11,
+        "endLine": 28,
+        "params": [
+          "cfg",
+          "profile",
+          "job"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/job_agent/validate.py:validate_materials",
+      "type": "function",
+      "name": "validate_materials",
+      "filePath": "job_agent/job_agent/validate.py",
+      "summary": "Compares numbers appearing in generated materials against company and profile fields, collecting an error list of unverifiable claims, and returns joined error messages.",
+      "tags": [
+        "validation",
+        "quality-gate"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 6,
+        "endLine": 23,
+        "params": [
+          "data",
+          "profile"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_application.py:test_stages_in_expected_order",
+      "type": "function",
+      "name": "test_stages_in_expected_order",
+      "filePath": "job_agent/tests/test_application.py",
+      "summary": "Asserts the application stage list follows the expected career pipeline order.",
+      "tags": [
+        "tests",
+        "states"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 27,
+        "endLine": 41,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_application.py:test_enter_advances_and_stamps_timestamps",
+      "type": "function",
+      "name": "test_enter_advances_and_stamps_timestamps",
+      "filePath": "job_agent/tests/test_application.py",
+      "summary": "Walks an Application through several enter() transitions verifying stage advance and timestamp stamping at each step.",
+      "tags": [
+        "tests",
+        "states"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 98,
+        "endLine": 114,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_artifacts_versioning.py:_ev",
+      "type": "function",
+      "name": "_ev",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Fixture helper constructing a CareerEvidence with a stable evidence id from a claim string.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 25,
+        "endLine": 35,
+        "params": [
+          "claim",
+          "eid"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_artifacts_versioning.py:_art",
+      "type": "function",
+      "name": "_art",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Fixture helper persisting two evidence items and constructing a CVArtifact whose bullets reference them.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 38,
+        "endLine": 53,
+        "params": [
+          "conn",
+          "job_id",
+          "artifact_id"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_artifacts_versioning.py:test_migration_v4_to_v5_preserves_data",
+      "type": "function",
+      "name": "test_migration_v4_to_v5_preserves_data",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Creates a raw v4 schema in SQLite, migrates to the head, and asserts career artifact rows survive migration intact.",
+      "tags": [
+        "tests",
+        "db-migration"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 61,
+        "endLine": 96,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_artifacts_versioning.py:test_v5_unique_index_enforces_job_version",
+      "type": "function",
+      "name": "test_v5_unique_index_enforces_job_version",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Asserts the unique (job_id, version) index rejects a duplicate artifact version with an IntegrityError.",
+      "tags": [
+        "tests",
+        "db-index"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 109,
+        "endLine": 125,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_artifacts_versioning.py:test_double_tailor_creates_two_versions",
+      "type": "function",
+      "name": "test_double_tailor_creates_two_versions",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Saves the same artifact twice and asserts two distinct versions are listed.",
+      "tags": [
+        "tests",
+        "versioning"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 133,
+        "endLine": 144,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_artifacts_versioning.py:test_snapshot_with_mapping_and_validation",
+      "type": "function",
+      "name": "test_snapshot_with_mapping_and_validation",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Persists a snapshot artifact that embeds a serialized RequirementMap result together with validation output.",
+      "tags": [
+        "tests",
+        "snapshot",
+        "mapping"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 216,
+        "endLine": 237,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_artifacts_versioning.py:test_artifact_evidence_links_per_version",
+      "type": "function",
+      "name": "test_artifact_evidence_links_per_version",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Verifies each artifact version carries its own link set in career_artifact_evidence.",
+      "tags": [
+        "tests",
+        "versioning",
+        "evidence-links"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 240,
+        "endLine": 250,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_artifacts_versioning.py:test_require_approval_marks_latest",
+      "type": "function",
+      "name": "test_require_approval_marks_latest",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Marks an artifact as requiring approval and asserts the approval flag lands on the latest version.",
+      "tags": [
+        "tests",
+        "approval"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 258,
+        "endLine": 267,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_artifacts_versioning.py:test_require_approval_marks_specific_version",
+      "type": "function",
+      "name": "test_require_approval_marks_specific_version",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Marks a non-latest specific version as requiring approval and asserts only that version is flagged.",
+      "tags": [
+        "tests",
+        "approval"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 270,
+        "endLine": 279,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm.py:test_parse_valid_proposal",
+      "type": "function",
+      "name": "test_parse_valid_proposal",
+      "filePath": "job_agent/tests/test_career_cv_llm.py",
+      "summary": "Parses a valid proposal payload and checks that allow-listed bullets are preserved with their evidence ids.",
+      "tags": [
+        "tests",
+        "llm",
+        "parse"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 17,
+        "endLine": 30,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm.py:test_parse_drops_non_allowlisted_evidence",
+      "type": "function",
+      "name": "test_parse_drops_non_allowlisted_evidence",
+      "filePath": "job_agent/tests/test_career_cv_llm.py",
+      "summary": "Asserts bullets referencing evidence outside the allow list are dropped during parsing.",
+      "tags": [
+        "tests",
+        "llm",
+        "allow-list"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 33,
+        "endLine": 45,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm.py:test_parse_raises_when_no_bullets_survive",
+      "type": "function",
+      "name": "test_parse_raises_when_no_bullets_survive",
+      "filePath": "job_agent/tests/test_career_cv_llm.py",
+      "summary": "Asserts parsing a proposal where every bullet is filtered out raises instead of returning empty content.",
+      "tags": [
+        "tests",
+        "llm",
+        "fail-closed"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 48,
+        "endLine": 57,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm.py:test_parse_caps_lengths",
+      "type": "function",
+      "name": "test_parse_caps_lengths",
+      "filePath": "job_agent/tests/test_career_cv_llm.py",
+      "summary": "Asserts headline, summary and bullet lists are capped to configured maximum lengths.",
+      "tags": [
+        "tests",
+        "llm",
+        "bounds"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 76,
+        "endLine": 87,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm.py:test_ollama_client_uses_format_and_fails_closed",
+      "type": "function",
+      "name": "test_ollama_client_uses_format_and_fails_closed",
+      "filePath": "job_agent/tests/test_career_cv_llm.py",
+      "summary": "Exercises OllamaCvClient.generate_proposal against a mocked transport, asserting the schema format is sent and HTTP failures return None rather than raising.",
+      "tags": [
+        "tests",
+        "llm",
+        "client",
+        "fail-closed"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 94,
+        "endLine": 122,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm.py:test_call_log_records_tailor_success_and_retries",
+      "type": "function",
+      "name": "test_call_log_records_tailor_success_and_retries",
+      "filePath": "job_agent/tests/test_career_cv_llm.py",
+      "summary": "Records several tailor calls including a retry into LlmCallLog and asserts outcome counts and duration aggregates.",
+      "tags": [
+        "tests",
+        "llm",
+        "call-log"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 125,
+        "endLine": 169,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm.py:test_call_log_records_tailor_http_error_fail_closed",
+      "type": "function",
+      "name": "test_call_log_records_tailor_http_error_fail_closed",
+      "filePath": "job_agent/tests/test_career_cv_llm.py",
+      "summary": "Asserts an HTTP error during tailoring is recorded as a failure outcome in LlmCallLog.",
+      "tags": [
+        "tests",
+        "llm",
+        "call-log",
+        "fail-closed"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 172,
+        "endLine": 193,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm_retries.py:_proposal_bytes",
+      "type": "function",
+      "name": "_proposal_bytes",
+      "filePath": "job_agent/tests/test_career_cv_llm_retries.py",
+      "summary": "Builds a byte-encoded Ollama response payload wrapping a minimal tailoring proposal.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 10,
+        "endLine": 23,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm_retries.py:_make_client",
+      "type": "function",
+      "name": "_make_client",
+      "filePath": "job_agent/tests/test_career_cv_llm_retries.py",
+      "summary": "Builds an OllamaCvClient wired to an httpx MockTransport around the given handler, optionally with retry kwargs.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 26,
+        "endLine": 40,
+        "params": [
+          "handler",
+          "**kwargs"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm_retries.py:test_transient_then_success_retries_and_succeeds",
+      "type": "function",
+      "name": "test_transient_then_success_retries_and_succeeds",
+      "filePath": "job_agent/tests/test_career_cv_llm_retries.py",
+      "summary": "Simulates a transient HTTP error followed by success and asserts the client retries and returns a proposal.",
+      "tags": [
+        "tests",
+        "llm",
+        "retries"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 47,
+        "endLine": 60,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_documents.py:test_docx_roundtrip_text_extraction",
+      "type": "function",
+      "name": "test_docx_roundtrip_text_extraction",
+      "filePath": "job_agent/tests/test_career_documents.py",
+      "summary": "Creates a .docx with python-docx, ingests it and asserts the extracted text preserves headings and paragraphs.",
+      "tags": [
+        "tests",
+        "docx",
+        "ingestion"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 122,
+        "endLine": 138,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_documents.py:test_docx_deterministic_despite_metadata",
+      "type": "function",
+      "name": "test_docx_deterministic_despite_metadata",
+      "filePath": "job_agent/tests/test_career_documents.py",
+      "summary": "Asserts document identity stays deterministic regardless of differing docx metadata.",
+      "tags": [
+        "tests",
+        "docx",
+        "determinism"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 141,
+        "endLine": 151,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_documents.py:_minimal_pdf",
+      "type": "function",
+      "name": "_minimal_pdf",
+      "filePath": "job_agent/tests/test_career_documents.py",
+      "summary": "Hand-assembles a minimal valid PDF byte stream containing the given text.",
+      "tags": [
+        "tests",
+        "fixture-helper",
+        "pdf"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 154,
+        "endLine": 175,
+        "params": [
+          "text"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_documents.py:test_pdf_multipage_keeps_page_refs",
+      "type": "function",
+      "name": "test_pdf_multipage_keeps_page_refs",
+      "filePath": "job_agent/tests/test_career_documents.py",
+      "summary": "Ingests a two-page minimal PDF and asserts per-section page references survive extraction.",
+      "tags": [
+        "tests",
+        "pdf",
+        "page-refs"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 200,
+        "endLine": 238,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_evidence.py:_ev",
+      "type": "function",
+      "name": "_ev",
+      "filePath": "job_agent/tests/test_career_evidence.py",
+      "summary": "Fixture helper constructing a CareerEvidence with a stable evidence id from a claim.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 26,
+        "endLine": 35,
+        "params": [
+          "claim",
+          "level",
+          "source",
+          "eid"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_fit.py:_job",
+      "type": "function",
+      "name": "_job",
+      "filePath": "job_agent/tests/test_career_fit.py",
+      "summary": "Fixture helper building a Job record from a title and description with optional salary minimum.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 38,
+        "endLine": 48,
+        "params": [
+          "description",
+          "title",
+          "salary_min"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_fit.py:test_people_management_risk",
+      "type": "function",
+      "name": "test_people_management_risk",
+      "filePath": "job_agent/tests/test_career_fit.py",
+      "summary": "Asserts jobs requiring people management surface as a risk when profile evidence lacks management claims.",
+      "tags": [
+        "tests",
+        "fit-risk"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 117,
+        "endLine": 132,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_fit.py:test_evidence_coverage_document_level_modulates_credibility_only",
+      "type": "function",
+      "name": "test_evidence_coverage_document_level_modulates_credibility_only",
+      "filePath": "job_agent/tests/test_career_fit.py",
+      "summary": "Compares fits with and without document-level coverage, asserting coverage changes credibility but not the headline score.",
+      "tags": [
+        "tests",
+        "fit-credibility"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 135,
+        "endLine": 149,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_fit.py:test_fit_bounds_all_ranges",
+      "type": "function",
+      "name": "test_fit_bounds_all_ranges",
+      "filePath": "job_agent/tests/test_career_fit.py",
+      "summary": "Runs analyze_fit over many profiles asserting every numeric field stays within its documented range.",
+      "tags": [
+        "tests",
+        "fit-bounds"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 164,
+        "endLine": 174,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_knowledge.py:_new_personal_db",
+      "type": "function",
+      "name": "_new_personal_db",
+      "filePath": "job_agent/tests/test_career_knowledge.py",
+      "summary": "Builds a SQLite backing database with a document, chunks and a memory using the personal-ai stores, returning the connection string.",
+      "tags": [
+        "tests",
+        "fixture-helper",
+        "db"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 20,
+        "endLine": 83,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_knowledge.py:test_adapter_memory_and_corpus_search",
+      "type": "function",
+      "name": "test_adapter_memory_and_corpus_search",
+      "filePath": "job_agent/tests/test_career_knowledge.py",
+      "summary": "Asserts PersonalAiCareerKnowledge performs health, memory_search and corpus_search against the built database.",
+      "tags": [
+        "tests",
+        "knowledge-adapter"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 110,
+        "endLine": 125,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_llm.py:_schema_payload",
+      "type": "function",
+      "name": "_schema_payload",
+      "filePath": "job_agent/tests/test_career_llm.py",
+      "summary": "Builds a schema-conformant narrative JSON payload with optional overrides.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 13,
+        "endLine": 23,
+        "params": [
+          "**overrides"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:job_agent/job_agent/career/evidence.py",
+      "target": "file:job_agent/tests/test_career_artifacts_versioning.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:job_agent/job_agent/career/cv_llm.py",
+      "target": "file:job_agent/tests/test_career_cv_llm.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/career/cv_llm.py",
+      "target": "file:job_agent/tests/test_career_cv_llm_retries.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/career/documents.py",
+      "target": "file:job_agent/tests/test_career_documents.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/career/documents.py",
+      "target": "file:job_agent/tests/test_career_reconcile.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:job_agent/job_agent/career/evidence.py",
+      "target": "file:job_agent/tests/test_career_evidence.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/career/profile.py",
+      "target": "file:job_agent/tests/test_career_evidence.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:job_agent/job_agent/career/__init__.py",
+      "target": "file:job_agent/tests/test_career_fit.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "file:job_agent/job_agent/career/evidence.py",
+      "target": "file:job_agent/tests/test_career_fit.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:job_agent/job_agent/career/fit.py",
+      "target": "file:job_agent/tests/test_career_fit.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/career/profile.py",
+      "target": "file:job_agent/tests/test_career_fit.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:job_agent/job_agent/career/requirements.py",
+      "target": "file:job_agent/tests/test_career_fit.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "file:job_agent/tests/test_career_fit.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "file:job_agent/job_agent/career/knowledge.py",
+      "target": "file:job_agent/tests/test_career_knowledge.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/career/llm.py",
+      "target": "file:job_agent/tests/test_career_llm.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/career/llm_log.py",
+      "target": "file:job_agent/tests/test_career_llm.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:job_agent/job_agent/career/evidence.py",
+      "target": "file:job_agent/tests/test_career_mapping.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:job_agent/job_agent/career/mapping.py",
+      "target": "file:job_agent/tests/test_career_mapping.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/career/profile.py",
+      "target": "file:job_agent/tests/test_career_mapping.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:job_agent/job_agent/career/requirements.py",
+      "target": "file:job_agent/tests/test_career_mapping.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "file:job_agent/tests/test_career_mapping.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "file:job_agent/job_agent/career/eval.py",
+      "target": "file:job_agent/tests/test_career_mapping_eval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/career/evidence.py",
+      "target": "file:job_agent/tests/test_career_mapping_eval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "file:job_agent/job_agent/career/mapping.py",
+      "target": "file:job_agent/tests/test_career_mapping_eval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:job_agent/job_agent/career/requirements.py",
+      "target": "file:job_agent/tests/test_career_mapping_eval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "file:job_agent/tests/test_career_mapping_eval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "file:job_agent/job_agent/career/achievements.py",
+      "target": "file:job_agent/tests/test_career_positioning_plan.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/career/evidence.py",
+      "target": "file:job_agent/tests/test_career_positioning_plan.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:job_agent/job_agent/career/mapping.py",
+      "target": "file:job_agent/tests/test_career_positioning_plan.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:job_agent/job_agent/career/positioning_plan.py",
+      "target": "file:job_agent/tests/test_career_positioning_plan.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/career/profile.py",
+      "target": "file:job_agent/tests/test_career_positioning_plan.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:job_agent/job_agent/career/requirements.py",
+      "target": "file:job_agent/tests/test_career_positioning_plan.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "file:job_agent/tests/test_career_positioning_plan.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "file:job_agent/job_agent/career/profile.py",
+      "target": "file:job_agent/tests/test_career_profile.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/career/evidence.py",
+      "target": "file:job_agent/tests/test_career_reconcile.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:job_agent/job_agent/career/profile.py",
+      "target": "file:job_agent/tests/test_career_reconcile.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:job_agent/job_agent/career/reconcile.py",
+      "target": "file:job_agent/tests/test_career_reconcile.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/career/requirements.py",
+      "target": "file:job_agent/tests/test_career_requirements.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "file:job_agent/tests/test_career_requirements.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "file:job_agent/job_agent/career/__init__.py",
+      "target": "file:job_agent/tests/test_career_retrieval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "file:job_agent/job_agent/career/evidence.py",
+      "target": "file:job_agent/tests/test_career_retrieval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:job_agent/job_agent/career/knowledge.py",
+      "target": "file:job_agent/tests/test_career_retrieval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:job_agent/job_agent/career/profile.py",
+      "target": "file:job_agent/tests/test_career_retrieval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:job_agent/job_agent/career/requirements.py",
+      "target": "file:job_agent/tests/test_career_retrieval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:job_agent/job_agent/career/retrieval.py",
+      "target": "file:job_agent/tests/test_career_retrieval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/models.py",
+      "target": "file:job_agent/tests/test_career_retrieval.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "file:job_agent/job_agent/application.py",
+      "target": "file:job_agent/tests/test_application.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/canonical.py",
+      "target": "file:job_agent/tests/test_canonical.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/job_agent/career/artifacts.py",
+      "target": "file:job_agent/tests/test_career_artifacts_versioning.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/career/mapping.py",
+      "target": "file:job_agent/tests/test_career_artifacts_versioning.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:job_agent/job_agent/db.py",
+      "target": "file:job_agent/tests/test_career_artifacts_versioning.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/migrations.py",
+      "target": "file:job_agent/tests/test_career_artifacts_versioning.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:job_agent/job_agent/career/llm_log.py",
+      "target": "file:job_agent/tests/test_career_cv_llm.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:job_agent/tests/test_career_mapping_eval.py",
+      "target": "file:job_agent/tests/fixtures/mapping_eval_cases.py",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:job_agent/tests/test_career_evidence.py",
+      "target": "config:job_agent/profile/profile.yaml",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:job_agent/tests/test_career_fit.py",
+      "target": "config:job_agent/profile/profile.yaml",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:job_agent/tests/test_career_mapping.py",
+      "target": "config:job_agent/profile/profile.yaml",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:job_agent/tests/test_career_positioning_plan.py",
+      "target": "config:job_agent/profile/profile.yaml",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:job_agent/tests/test_career_retrieval.py",
+      "target": "config:job_agent/profile/profile.yaml",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:job_agent/tests/test_career_reconcile.py",
+      "target": "config:job_agent/profile/profile.yaml",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "function:job_agent/job_agent/tailor.py:tailor_to_docx",
+      "target": "file:job_agent/job_agent/tailor.py",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "function:job_agent/job_agent/validate.py:validate_materials",
+      "target": "file:job_agent/job_agent/validate.py",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.3
+    }
+  ]
+}

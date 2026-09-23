@@ -1,0 +1,859 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/personal_ai/event_ingestion.py",
+      "type": "file",
+      "name": "event_ingestion.py",
+      "filePath": "src/personal_ai/event_ingestion.py",
+      "summary": "Orchestrates idempotent ingestion of Chrome history and YouTube history exports into EventStore via source loaders, with typed summary objects and skip diagnostics.",
+      "tags": [
+        "ingestion",
+        "events",
+        "idempotency",
+        "orchestration"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/personal_ai/events/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/personal_ai/events/__init__.py",
+      "summary": "Barrel re-exporting the temporal Event model, canonical event-type constants, and the deterministic event-id helper.",
+      "tags": [
+        "barrel",
+        "events",
+        "re-export"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/events/models.py",
+      "type": "file",
+      "name": "models.py",
+      "filePath": "src/personal_ai/events/models.py",
+      "summary": "Temporal Event domain model with canonical event-type constants and a stable deterministic event-id helper that anchors idempotent event ingestion.",
+      "tags": [
+        "data-model",
+        "events",
+        "identity",
+        "domain"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/execution/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/personal_ai/execution/__init__.py",
+      "summary": "Barrel re-export of the orchestration runtime: models, events, planner, executor, verifier, workflows, orchestrator, storage, approval, board and control plane.",
+      "tags": [
+        "barrel",
+        "orchestration",
+        "execution",
+        "re-export"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/execution/approval.py",
+      "type": "file",
+      "name": "approval.py",
+      "filePath": "src/personal_ai/execution/approval.py",
+      "summary": "Task- and permission-scoped durable ApprovalContext that serves as the PolicyEngine approver, consulting the persisted orchestration_approvals table so approvals survive restarts.",
+      "tags": [
+        "approval",
+        "policy",
+        "security",
+        "durable-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/execution/board.py",
+      "type": "file",
+      "name": "board.py",
+      "filePath": "src/personal_ai/execution/board.py",
+      "summary": "Kanban read projection (backlog/ready/running/waiting_approval/verifying/done/failed) over durable orchestration state, mapping TaskStatus to columns deterministically.",
+      "tags": [
+        "board",
+        "read-model",
+        "kanban",
+        "projection"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/personal_ai/execution/cli.py",
+      "type": "file",
+      "name": "cli.py",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "summary": "Thin argparse CLI over the ControlPlane for the execution lifecycle (research, approve/reject, resume/pause/cancel/retry), read projections (list/show/events/board), and durable memory, with JSON output for machine consumers.",
+      "tags": [
+        "entry-point",
+        "cli",
+        "orchestration",
+        "execution"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/personal_ai/event_ingestion.py:ingest_chrome_history",
+      "type": "function",
+      "name": "ingest_chrome_history",
+      "filePath": "src/personal_ai/event_ingestion.py",
+      "lineRange": [
+        51,
+        93
+      ],
+      "summary": "Ingests a Chrome history export directory into the EventStore via the loader and returns a typed summary.",
+      "tags": [
+        "ingestion",
+        "events",
+        "chrome",
+        "orchestration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/event_ingestion.py:ingest_youtube_history",
+      "type": "function",
+      "name": "ingest_youtube_history",
+      "filePath": "src/personal_ai/event_ingestion.py",
+      "lineRange": [
+        118,
+        160
+      ],
+      "summary": "Ingests a YouTube history export directory into the EventStore via the loader and returns a typed summary.",
+      "tags": [
+        "ingestion",
+        "events",
+        "youtube",
+        "orchestration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/events/models.py:compute_event_id",
+      "type": "function",
+      "name": "compute_event_id",
+      "filePath": "src/personal_ai/events/models.py",
+      "lineRange": [
+        25,
+        42
+      ],
+      "summary": "Derives a stable deterministic event id from source, type, timestamp and url using NUL-separated components.",
+      "tags": [
+        "utility",
+        "identity",
+        "events"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/board.py:_column_for",
+      "type": "function",
+      "name": "_column_for",
+      "filePath": "src/personal_ai/execution/board.py",
+      "lineRange": [
+        150,
+        151
+      ],
+      "summary": "Maps a TaskStatus to its Kanban column name via the status-to-column table.",
+      "tags": [
+        "utility",
+        "kanban",
+        "mapping"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:run_research",
+      "type": "function",
+      "name": "run_research",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        138,
+        158
+      ],
+      "summary": "Runs the research plan command against the ControlPlane and prints the plan and its event stream.",
+      "tags": [
+        "cli",
+        "execution",
+        "research"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:run_list",
+      "type": "function",
+      "name": "run_list",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        161,
+        171
+      ],
+      "summary": "Lists executions with human or JSON output.",
+      "tags": [
+        "cli",
+        "execution",
+        "listing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:run_show",
+      "type": "function",
+      "name": "run_show",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        174,
+        185
+      ],
+      "summary": "Shows one execution's tasks, artifacts, evidence and approvals.",
+      "tags": [
+        "cli",
+        "execution",
+        "inspection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:run_events",
+      "type": "function",
+      "name": "run_events",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        188,
+        201
+      ],
+      "summary": "Prints the orchestration event stream for an execution, optionally filtered by type.",
+      "tags": [
+        "cli",
+        "execution",
+        "events"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:run_board",
+      "type": "function",
+      "name": "run_board",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        204,
+        220
+      ],
+      "summary": "Prints the Kanban board projection for an execution.",
+      "tags": [
+        "cli",
+        "execution",
+        "board"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:run_approve",
+      "type": "function",
+      "name": "run_approve",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        223,
+        230
+      ],
+      "summary": "Approves the pending tool permission for a gated task.",
+      "tags": [
+        "cli",
+        "execution",
+        "approval"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:run_reject",
+      "type": "function",
+      "name": "run_reject",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        233,
+        240
+      ],
+      "summary": "Rejects the pending approval for a gated task.",
+      "tags": [
+        "cli",
+        "execution",
+        "rejection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:run_memory_add",
+      "type": "function",
+      "name": "run_memory_add",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        317,
+        332
+      ],
+      "summary": "Adds a durable memory entry with kind and content or scope through the ControlPlane.",
+      "tags": [
+        "cli",
+        "memory",
+        "write"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:run_memory_list",
+      "type": "function",
+      "name": "run_memory_list",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        335,
+        341
+      ],
+      "summary": "Lists durable memories for the current execution.",
+      "tags": [
+        "cli",
+        "memory",
+        "listing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:run_memory_show",
+      "type": "function",
+      "name": "run_memory_show",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        344,
+        358
+      ],
+      "summary": "Shows one durable memory entry by id.",
+      "tags": [
+        "cli",
+        "memory",
+        "inspection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:run_memory_search",
+      "type": "function",
+      "name": "run_memory_search",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        361,
+        380
+      ],
+      "summary": "Searches durable memories by query text with scope filtering.",
+      "tags": [
+        "cli",
+        "memory",
+        "search"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:parse_args",
+      "type": "function",
+      "name": "parse_args",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        411,
+        577
+      ],
+      "summary": "Builds the flat argparse CLI: global --database/--corpus options plus research and execution/memory subcommands with --json output.",
+      "tags": [
+        "cli",
+        "argument-parsing",
+        "entry-point"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/personal_ai/execution/cli.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "src/personal_ai/execution/cli.py",
+      "lineRange": [
+        580,
+        600
+      ],
+      "summary": "Program entry point wiring the ControlPlane to args via _build_corpora and dispatching subcommands.",
+      "tags": [
+        "entry-point",
+        "cli",
+        "main"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/event_ingestion.py:ChromeHistoryIngestionSummary",
+      "type": "class",
+      "name": "ChromeHistoryIngestionSummary",
+      "filePath": "src/personal_ai/event_ingestion.py",
+      "lineRange": [
+        31,
+        48
+      ],
+      "summary": "Typed outcome of Chrome history ingestion with discovery, storage, and per-reason skip diagnostics.",
+      "tags": [
+        "data-model",
+        "summary",
+        "ingestion"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/event_ingestion.py:YouTubeHistoryIngestionSummary",
+      "type": "class",
+      "name": "YouTubeHistoryIngestionSummary",
+      "filePath": "src/personal_ai/event_ingestion.py",
+      "lineRange": [
+        97,
+        115
+      ],
+      "summary": "Typed outcome of YouTube history ingestion with discovery, storage, and skip diagnostics.",
+      "tags": [
+        "data-model",
+        "summary",
+        "ingestion"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/events/models.py:Event",
+      "type": "class",
+      "name": "Event",
+      "filePath": "src/personal_ai/events/models.py",
+      "lineRange": [
+        46,
+        66
+      ],
+      "summary": "Single temporal event with stable deterministic id, canonical ISO UTC timestamp, and nullable source-specific fields for heterogeneous event types.",
+      "tags": [
+        "data-model",
+        "events",
+        "domain-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/execution/approval.py:ApprovalContext",
+      "type": "class",
+      "name": "ApprovalContext",
+      "filePath": "src/personal_ai/execution/approval.py",
+      "lineRange": [
+        21,
+        50
+      ],
+      "summary": "Carries the currently executing task to the PolicyEngine approver and grants only the current task+permission when a durable approval record exists.",
+      "tags": [
+        "approval",
+        "policy",
+        "durable-state",
+        "security"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/personal_ai/execution/board.py:ExecutionBoard",
+      "type": "class",
+      "name": "ExecutionBoard",
+      "filePath": "src/personal_ai/execution/board.py",
+      "lineRange": [
+        53,
+        147
+      ],
+      "summary": "Builds the deterministic Kanban projection of one execution from durable task/event/artifact/evidence state.",
+      "tags": [
+        "board",
+        "read-model",
+        "kanban",
+        "projection"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/personal_ai/event_ingestion.py",
+      "target": "function:src/personal_ai/event_ingestion.py:ingest_chrome_history",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/event_ingestion.py",
+      "target": "function:src/personal_ai/event_ingestion.py:ingest_chrome_history",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/event_ingestion.py",
+      "target": "function:src/personal_ai/event_ingestion.py:ingest_youtube_history",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/event_ingestion.py",
+      "target": "function:src/personal_ai/event_ingestion.py:ingest_youtube_history",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/events/models.py",
+      "target": "function:src/personal_ai/events/models.py:compute_event_id",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/events/models.py",
+      "target": "function:src/personal_ai/events/models.py:compute_event_id",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/board.py",
+      "target": "function:src/personal_ai/execution/board.py:_column_for",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_research",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_research",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_list",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_list",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_show",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_show",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_events",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_events",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_board",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_board",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_approve",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_approve",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_reject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_reject",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_memory_add",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_memory_add",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_memory_list",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_memory_list",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_memory_show",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_memory_show",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_memory_search",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:run_memory_search",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:parse_args",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:parse_args",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/execution/cli.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/event_ingestion.py",
+      "target": "class:src/personal_ai/event_ingestion.py:ChromeHistoryIngestionSummary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/event_ingestion.py",
+      "target": "class:src/personal_ai/event_ingestion.py:ChromeHistoryIngestionSummary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/event_ingestion.py",
+      "target": "class:src/personal_ai/event_ingestion.py:YouTubeHistoryIngestionSummary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/event_ingestion.py",
+      "target": "class:src/personal_ai/event_ingestion.py:YouTubeHistoryIngestionSummary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/events/models.py",
+      "target": "class:src/personal_ai/events/models.py:Event",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/events/models.py",
+      "target": "class:src/personal_ai/events/models.py:Event",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/approval.py",
+      "target": "class:src/personal_ai/execution/approval.py:ApprovalContext",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/approval.py",
+      "target": "class:src/personal_ai/execution/approval.py:ApprovalContext",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/board.py",
+      "target": "class:src/personal_ai/execution/board.py:ExecutionBoard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/execution/board.py",
+      "target": "class:src/personal_ai/execution/board.py:ExecutionBoard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/agents/tools.py:build_default_agent_tools",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "class:src/personal_ai/execution/control_plane.py:ControlPlane",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/cli.py",
+      "target": "function:src/personal_ai/config.py:load_ollama_settings",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/approval.py",
+      "target": "class:src/personal_ai/execution/storage.py:OrchestrationStore",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/event_ingestion.py",
+      "target": "class:src/personal_ai/storage/events.py:EventStore",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/event_ingestion.py",
+      "target": "class:src/personal_ai/sources/chrome_history_loader.py:ChromeHistoryLoader",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/event_ingestion.py",
+      "target": "class:src/personal_ai/sources/youtube_history_loader.py:YouTubeHistoryLoader",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/execution/board.py",
+      "target": "file:src/personal_ai/agents/registry.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/events/__init__.py",
+      "target": "file:src/personal_ai/events/models.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/execution/__init__.py",
+      "target": "file:src/personal_ai/execution/approval.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/execution/__init__.py",
+      "target": "file:src/personal_ai/execution/board.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

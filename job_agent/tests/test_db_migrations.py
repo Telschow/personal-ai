@@ -146,6 +146,7 @@ def test_application_and_run_inserts_roundtrip_after_migration(tmp_path) -> None
     )
     db.record_discovery_run(
         conn,
+        run_id="migration-test",
         planned_queries=1,
         candidates_found=1,
         jobs_persisted=1,

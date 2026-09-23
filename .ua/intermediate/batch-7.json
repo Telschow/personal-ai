@@ -1,0 +1,318 @@
+{
+  "nodes": [
+    {
+      "id": "document:job_agent/docs/APPROVAL_MODEL.md",
+      "type": "document",
+      "name": "APPROVAL_MODEL.md",
+      "filePath": "job_agent/docs/APPROVAL_MODEL.md",
+      "summary": "Defines the human-approval model and hard guarantees for the job agent: nothing is ever submitted automatically, no config value enables auto submission, and approval is per-application with a reviewable package (job, tailored CV, cover letter, evidence provenance).",
+      "tags": ["documentation", "security", "approval", "policy"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:job_agent/docs/ARCHITECTURE.md",
+      "type": "document",
+      "name": "ARCHITECTURE.md",
+      "filePath": "job_agent/docs/ARCHITECTURE.md",
+      "summary": "Architecture reference for the job agent: strict downward layering, career fit and document/tailoring layer diagrams, per-module responsibilities, the v5 SQLite data model, key decisions (deterministic scoring authoritative, fail-closed LLM), and non-goals.",
+      "tags": ["documentation", "architecture", "design"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:job_agent/docs/CAREER.md",
+      "type": "document",
+      "name": "CAREER.md",
+      "filePath": "job_agent/docs/CAREER.md",
+      "summary": "Design document for the career-intelligence slice: two-axis fit scoring (current_fit vs career_upside) with evidence provenance levels, optional fail-closed LLM narrative, bounded document ingestion and reconciliation, and proposal-only appendix-versioned tailored CV artifacts.",
+      "tags": ["documentation", "career", "design", "evidence"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:job_agent/docs/IMPLEMENTATION_PLAN.md",
+      "type": "document",
+      "name": "IMPLEMENTATION_PLAN.md",
+      "filePath": "job_agent/docs/IMPLEMENTATION_PLAN.md",
+      "summary": "Working contract for incremental implementation slices (1 through 3.7): audit findings, per-slice scope/non-goals/definition-of-done, migration strategies, and post-implementation reports with measured results, verification commands, and remaining work for the personal job agent.",
+      "tags": ["documentation", "planning", "roadmap", "implementation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:job_agent/docs/PROJECT_STATE.md",
+      "type": "document",
+      "name": "PROJECT_STATE.md",
+      "filePath": "job_agent/docs/PROJECT_STATE.md",
+      "summary": "Current project status checkpoint marking an operational MVP: engineering history, M3.2 provider-track and career-workflow summary, final broad-discovery benchmark results with zero-yield analysis, verification runs, known deferred limitations, and future work.",
+      "tags": ["documentation", "status", "benchmark", "overview"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:job_agent/docs/PROVIDERS.md",
+      "type": "document",
+      "name": "PROVIDERS.md",
+      "filePath": "job_agent/docs/PROVIDERS.md",
+      "summary": "Documents the native provider track (RemoteOK/Remotive) that augments the DDGS search fallback: the ProviderResult contract, ProviderStatus values, registry/fallback/health behavior, how to add a provider, testing, and comparison against the Career-Ops Node approach.",
+      "tags": ["documentation", "providers", "api", "integration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:job_agent/docs/ROADMAP.md",
+      "type": "document",
+      "name": "ROADMAP.md",
+      "filePath": "job_agent/docs/ROADMAP.md",
+      "summary": "Version roadmap v0.2 through v1.0 for the job agent: foundation hardening, catalog-driven multi-track discovery, observability, provider track, career intelligence, application factory/execution, and final Personal-AI/RAG integration, with implemented status markers.",
+      "tags": ["documentation", "roadmap", "planning"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:job_agent/docs/SECURITY.md",
+      "type": "document",
+      "name": "SECURITY.md",
+      "filePath": "job_agent/docs/SECURITY.md",
+      "summary": "Threat model and mitigations for the job agent: sandbox-only allowed sources, model output never executable, hard-blocked auto-submit/auto-publish, secrets inventory, bounded network behavior, content-free logging rules, and reporting.",
+      "tags": ["documentation", "security", "threat-model", "privacy"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:job_agent/docs/SOURCES.md",
+      "type": "document",
+      "name": "SOURCES.md",
+      "filePath": "job_agent/docs/SOURCES.md",
+      "summary": "Source taxonomy and configuration reference: SourceKind taxonomy, per-adapter details (Greenhouse/Lever/Ashby/SmartRecruiters/Workable/direct/RSS), catalog-driven discovery, error model, and how to add a source.",
+      "tags": ["documentation", "sources", "configuration", "taxonomy"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:job_agent/docs/APPROVAL_MODEL.md",
+      "target": "file:job_agent/job_agent/config.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/APPROVAL_MODEL.md",
+      "target": "file:job_agent/job_agent/cli.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/ARCHITECTURE.md",
+      "target": "file:job_agent/job_agent/cli.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/ARCHITECTURE.md",
+      "target": "file:job_agent/job_agent/config.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/ARCHITECTURE.md",
+      "target": "file:job_agent/job_agent/db.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/ARCHITECTURE.md",
+      "target": "file:job_agent/job_agent/migrations.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/ARCHITECTURE.md",
+      "target": "file:job_agent/job_agent/career/fit.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/ARCHITECTURE.md",
+      "target": "file:job_agent/job_agent/career/mapping.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/ARCHITECTURE.md",
+      "target": "file:job_agent/job_agent/career/documents.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/CAREER.md",
+      "target": "file:job_agent/job_agent/career/fit.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/CAREER.md",
+      "target": "file:job_agent/job_agent/career/evidence.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/CAREER.md",
+      "target": "file:job_agent/job_agent/career/knowledge.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/CAREER.md",
+      "target": "file:job_agent/job_agent/career/retrieval.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/CAREER.md",
+      "target": "file:job_agent/job_agent/career/llm.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/CAREER.md",
+      "target": "file:job_agent/job_agent/career/documents.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/CAREER.md",
+      "target": "file:job_agent/job_agent/career/mapping.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/CAREER.md",
+      "target": "file:job_agent/job_agent/career/validation.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/CAREER.md",
+      "target": "file:job_agent/job_agent/career/cv_llm.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/CAREER.md",
+      "target": "file:job_agent/job_agent/career/tailoring.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/CAREER.md",
+      "target": "file:job_agent/job_agent/career/artifacts.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/IMPLEMENTATION_PLAN.md",
+      "target": "file:job_agent/job_agent/cli.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/IMPLEMENTATION_PLAN.md",
+      "target": "file:job_agent/job_agent/db.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/IMPLEMENTATION_PLAN.md",
+      "target": "file:job_agent/job_agent/migrations.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/PROJECT_STATE.md",
+      "target": "file:job_agent/job_agent/providers.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/PROJECT_STATE.md",
+      "target": "file:job_agent/job_agent/application.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/PROJECT_STATE.md",
+      "target": "file:job_agent/job_agent/cli.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/PROJECT_STATE.md",
+      "target": "file:src/personal_ai/server.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/PROVIDERS.md",
+      "target": "file:job_agent/job_agent/providers.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/SECURITY.md",
+      "target": "file:job_agent/job_agent/config.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/SOURCES.md",
+      "target": "file:job_agent/job_agent/sources.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/SOURCES.md",
+      "target": "file:job_agent/job_agent/catalog.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/PROJECT_STATE.md",
+      "target": "document:job_agent/docs/ROADMAP.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:job_agent/docs/ROADMAP.md",
+      "target": "document:job_agent/docs/IMPLEMENTATION_PLAN.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

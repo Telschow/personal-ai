@@ -1,0 +1,2740 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_memory_conversations.py",
+      "type": "file",
+      "name": "test_memory_conversations.py",
+      "filePath": "tests/test_memory_conversations.py",
+      "summary": "Test module with 91 test functions for memory_conversations.",
+      "tags": [
+        "test",
+        "conversation-model"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:_service",
+      "type": "function",
+      "name": "_service",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        43,
+        44
+      ],
+      "summary": "Helper function for  service.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:_conv",
+      "type": "function",
+      "name": "_conv",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        47,
+        62
+      ],
+      "summary": "Helper function for  conv.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:_msg",
+      "type": "function",
+      "name": "_msg",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        65,
+        86
+      ],
+      "summary": "Helper function for  msg.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:_extract",
+      "type": "function",
+      "name": "_extract",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        89,
+        93
+      ],
+      "summary": "Helper function for  extract.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_work_current",
+      "type": "function",
+      "name": "test_work_current",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        99,
+        103
+      ],
+      "summary": "Test function for work current.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_work_historical",
+      "type": "function",
+      "name": "test_work_historical",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        106,
+        109
+      ],
+      "summary": "Test function for work historical.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_goal_never_becomes_achieved_fact",
+      "type": "function",
+      "name": "test_goal_never_becomes_achieved_fact",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        112,
+        118
+      ],
+      "summary": "Test function for goal never becomes achieved fact.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_habit_regular_timeframe",
+      "type": "function",
+      "name": "test_habit_regular_timeframe",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        121,
+        126
+      ],
+      "summary": "Test function for habit regular timeframe.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_identity_name",
+      "type": "function",
+      "name": "test_identity_name",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        129,
+        133
+      ],
+      "summary": "Test function for identity name.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_biography",
+      "type": "function",
+      "name": "test_biography",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        136,
+        140
+      ],
+      "summary": "Test function for biography.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_education",
+      "type": "function",
+      "name": "test_education",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        143,
+        146
+      ],
+      "summary": "Test function for education.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_location_current_and_historical",
+      "type": "function",
+      "name": "test_location_current_and_historical",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        149,
+        154
+      ],
+      "summary": "Test function for location current and historical.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_skill_learning",
+      "type": "function",
+      "name": "test_skill_learning",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        157,
+        160
+      ],
+      "summary": "Test function for skill learning.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_interest",
+      "type": "function",
+      "name": "test_interest",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        163,
+        166
+      ],
+      "summary": "Test function for interest.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_preference",
+      "type": "function",
+      "name": "test_preference",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        169,
+        172
+      ],
+      "summary": "Test function for preference.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_relationship",
+      "type": "function",
+      "name": "test_relationship",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        175,
+        178
+      ],
+      "summary": "Test function for relationship.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_personal_fact_ownership",
+      "type": "function",
+      "name": "test_personal_fact_ownership",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        181,
+        184
+      ],
+      "summary": "Test function for personal fact ownership.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_gemini_source_type_is_supported",
+      "type": "function",
+      "name": "test_gemini_source_type_is_supported",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        187,
+        191
+      ],
+      "summary": "Test function for gemini source type is supported.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_conversation_source_types_are_exactly_chatgpt_and_gemini",
+      "type": "function",
+      "name": "test_conversation_source_types_are_exactly_chatgpt_and_gemini",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        194,
+        195
+      ],
+      "summary": "Test function for conversation source types are exactly chatgpt and gemini.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_unsupported_source_type_yields_nothing",
+      "type": "function",
+      "name": "test_unsupported_source_type_yields_nothing",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        198,
+        200
+      ],
+      "summary": "Test function for unsupported source type yields nothing.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_assistant_messages_never_yield_candidates",
+      "type": "function",
+      "name": "test_assistant_messages_never_yield_candidates",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        206,
+        209
+      ],
+      "summary": "Test function for assistant messages never yield candidates.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_inactive_branch_messages_are_skipped",
+      "type": "function",
+      "name": "test_inactive_branch_messages_are_skipped",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        212,
+        215
+      ],
+      "summary": "Test function for inactive branch messages are skipped.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_non_first_person_is_ignored",
+      "type": "function",
+      "name": "test_non_first_person_is_ignored",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        218,
+        221
+      ],
+      "summary": "Test function for non first person is ignored.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_negation_is_never_a_fact",
+      "type": "function",
+      "name": "test_negation_is_never_a_fact",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        224,
+        232
+      ],
+      "summary": "Test function for negation is never a fact.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_questions_are_skipped",
+      "type": "function",
+      "name": "test_questions_are_skipped",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        235,
+        238
+      ],
+      "summary": "Test function for questions are skipped.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_requests_directed_at_the_model_are_skipped",
+      "type": "function",
+      "name": "test_requests_directed_at_the_model_are_skipped",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        241,
+        248
+      ],
+      "summary": "Test function for requests directed at the model are skipped.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_statements_turned_toward_you_are_skipped",
+      "type": "function",
+      "name": "test_statements_turned_toward_you_are_skipped",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        251,
+        254
+      ],
+      "summary": "Test function for statements turned toward you are skipped.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_quoted_content_is_skipped",
+      "type": "function",
+      "name": "test_quoted_content_is_skipped",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        257,
+        260
+      ],
+      "summary": "Test function for quoted content is skipped.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_sensitive_keywords_are_never_proposed",
+      "type": "function",
+      "name": "test_sensitive_keywords_are_never_proposed",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        263,
+        266
+      ],
+      "summary": "Test function for sensitive keywords are never proposed.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_sensitive_forms_are_never_proposed",
+      "type": "function",
+      "name": "test_sensitive_forms_are_never_proposed",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        269,
+        276
+      ],
+      "summary": "Test function for sensitive forms are never proposed.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_credential_shaped_sentinels_are_never_proposed",
+      "type": "function",
+      "name": "test_credential_shaped_sentinels_are_never_proposed",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        279,
+        284
+      ],
+      "summary": "Test function for credential shaped sentinels are never proposed.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_overlong_statements_are_skipped",
+      "type": "function",
+      "name": "test_overlong_statements_are_skipped",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        290,
+        293
+      ],
+      "summary": "Test function for overlong statements are skipped.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_repeated_fact_within_conversation_collapses",
+      "type": "function",
+      "name": "test_repeated_fact_within_conversation_collapses",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        296,
+        304
+      ],
+      "summary": "Test function for repeated fact within conversation collapses.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_max_candidates_bounds",
+      "type": "function",
+      "name": "test_max_candidates_bounds",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        307,
+        321
+      ],
+      "summary": "Test function for max candidates bounds.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_max_messages_bounds",
+      "type": "function",
+      "name": "test_max_messages_bounds",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        324,
+        332
+      ],
+      "summary": "Test function for max messages bounds.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_empty_and_whitespace_messages_yield_nothing",
+      "type": "function",
+      "name": "test_empty_and_whitespace_messages_yield_nothing",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        335,
+        338
+      ],
+      "summary": "Test function for empty and whitespace messages yield nothing.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_evidence_points_at_the_message_without_content",
+      "type": "function",
+      "name": "test_evidence_points_at_the_message_without_content",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        344,
+        365
+      ],
+      "summary": "Test function for evidence points at the message without content.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_gemini_evidence_falls_back_to_conversation_timestamp",
+      "type": "function",
+      "name": "test_gemini_evidence_falls_back_to_conversation_timestamp",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        368,
+        381
+      ],
+      "summary": "Test function for gemini evidence falls back to conversation timestamp.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:_store",
+      "type": "function",
+      "name": "_store",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        387,
+        393
+      ],
+      "summary": "Helper function for  store.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:_chatgpt_work_pair",
+      "type": "function",
+      "name": "_chatgpt_work_pair",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        396,
+        400
+      ],
+      "summary": "Helper function for  chatgpt work pair.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_ingestor_rejects_unsupported_source",
+      "type": "function",
+      "name": "test_ingestor_rejects_unsupported_source",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        403,
+        410
+      ],
+      "summary": "Test function for ingestor rejects unsupported source.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_ingestor_applies_accepted_candidate_and_is_idempotent",
+      "type": "function",
+      "name": "test_ingestor_applies_accepted_candidate_and_is_idempotent",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        413,
+        442
+      ],
+      "summary": "Test function for ingestor applies accepted candidate and is idempotent.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_run_scans_only_the_requested_source_type",
+      "type": "function",
+      "name": "test_run_scans_only_the_requested_source_type",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        445,
+        468
+      ],
+      "summary": "Test function for run scans only the requested source type.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_denied_gate_raises_and_never_writes",
+      "type": "function",
+      "name": "test_denied_gate_raises_and_never_writes",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        471,
+        484
+      ],
+      "summary": "Test function for denied gate raises and never writes.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_report_is_aggregate_only_and_content_free",
+      "type": "function",
+      "name": "test_report_is_aggregate_only_and_content_free",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        487,
+        500
+      ],
+      "summary": "Test function for report is aggregate only and content free.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_ingestor_reads_are_bounded",
+      "type": "function",
+      "name": "test_ingestor_reads_are_bounded",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        503,
+        518
+      ],
+      "summary": "Test function for ingestor reads are bounded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:_conv_de",
+      "type": "function",
+      "name": "_conv_de",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        524,
+        539
+      ],
+      "summary": "Helper function for  conv de.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:_conv_es",
+      "type": "function",
+      "name": "_conv_es",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        542,
+        557
+      ],
+      "summary": "Helper function for  conv es.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_identity_extraction",
+      "type": "function",
+      "name": "test_german_identity_extraction",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        560,
+        566
+      ],
+      "summary": "Test function for german identity extraction.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_unknown_language_extraction_uses_english_rules",
+      "type": "function",
+      "name": "test_unknown_language_extraction_uses_english_rules",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        569,
+        581
+      ],
+      "summary": "Test function for unknown language extraction uses english rules.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_unknown_language_canonical_statement_falls_back_to_english",
+      "type": "function",
+      "name": "test_unknown_language_canonical_statement_falls_back_to_english",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        584,
+        589
+      ],
+      "summary": "Test function for unknown language canonical statement falls back to english.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_work_current",
+      "type": "function",
+      "name": "test_german_work_current",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        592,
+        598
+      ],
+      "summary": "Test function for german work current.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_work_historical",
+      "type": "function",
+      "name": "test_german_work_historical",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        601,
+        606
+      ],
+      "summary": "Test function for german work historical.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_location_current",
+      "type": "function",
+      "name": "test_german_location_current",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        609,
+        615
+      ],
+      "summary": "Test function for german location current.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_location_historical",
+      "type": "function",
+      "name": "test_german_location_historical",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        618,
+        623
+      ],
+      "summary": "Test function for german location historical.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_goal",
+      "type": "function",
+      "name": "test_german_goal",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        626,
+        634
+      ],
+      "summary": "Test function for german goal.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_skill_language",
+      "type": "function",
+      "name": "test_german_skill_language",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        637,
+        642
+      ],
+      "summary": "Test function for german skill language.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_habit_recurring",
+      "type": "function",
+      "name": "test_german_habit_recurring",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        645,
+        650
+      ],
+      "summary": "Test function for german habit recurring.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_education_current",
+      "type": "function",
+      "name": "test_german_education_current",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        653,
+        658
+      ],
+      "summary": "Test function for german education current.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_negation_excluded",
+      "type": "function",
+      "name": "test_german_negation_excluded",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        661,
+        670
+      ],
+      "summary": "Test function for german negation excluded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_questions_excluded",
+      "type": "function",
+      "name": "test_german_questions_excluded",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        673,
+        681
+      ],
+      "summary": "Test function for german questions excluded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_requests_excluded",
+      "type": "function",
+      "name": "test_german_requests_excluded",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        684,
+        691
+      ],
+      "summary": "Test function for german requests excluded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_identity_extraction",
+      "type": "function",
+      "name": "test_spanish_identity_extraction",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        694,
+        700
+      ],
+      "summary": "Test function for spanish identity extraction.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_work_current",
+      "type": "function",
+      "name": "test_spanish_work_current",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        703,
+        708
+      ],
+      "summary": "Test function for spanish work current.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_work_historical",
+      "type": "function",
+      "name": "test_spanish_work_historical",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        711,
+        716
+      ],
+      "summary": "Test function for spanish work historical.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_location_current",
+      "type": "function",
+      "name": "test_spanish_location_current",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        719,
+        724
+      ],
+      "summary": "Test function for spanish location current.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_goal",
+      "type": "function",
+      "name": "test_spanish_goal",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        727,
+        732
+      ],
+      "summary": "Test function for spanish goal.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_skill_language",
+      "type": "function",
+      "name": "test_spanish_skill_language",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        735,
+        739
+      ],
+      "summary": "Test function for spanish skill language.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_habit_recurring",
+      "type": "function",
+      "name": "test_spanish_habit_recurring",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        742,
+        747
+      ],
+      "summary": "Test function for spanish habit recurring.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_english_weekday_recurring",
+      "type": "function",
+      "name": "test_english_weekday_recurring",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        750,
+        760
+      ],
+      "summary": "Test function for english weekday recurring.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_english_single_day_is_not_a_habit",
+      "type": "function",
+      "name": "test_english_single_day_is_not_a_habit",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        763,
+        770
+      ],
+      "summary": "Test function for english single day is not a habit.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_weekday_recurring",
+      "type": "function",
+      "name": "test_german_weekday_recurring",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        773,
+        783
+      ],
+      "summary": "Test function for german weekday recurring.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_single_day_is_not_a_habit",
+      "type": "function",
+      "name": "test_german_single_day_is_not_a_habit",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        786,
+        793
+      ],
+      "summary": "Test function for german single day is not a habit.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_weekday_recurring",
+      "type": "function",
+      "name": "test_spanish_weekday_recurring",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        796,
+        805
+      ],
+      "summary": "Test function for spanish weekday recurring.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_single_day_is_not_a_habit",
+      "type": "function",
+      "name": "test_spanish_single_day_is_not_a_habit",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        808,
+        822
+      ],
+      "summary": "Test function for spanish single day is not a habit.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_education_current",
+      "type": "function",
+      "name": "test_spanish_education_current",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        825,
+        830
+      ],
+      "summary": "Test function for spanish education current.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_negation_excluded",
+      "type": "function",
+      "name": "test_spanish_negation_excluded",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        833,
+        841
+      ],
+      "summary": "Test function for spanish negation excluded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_questions_excluded",
+      "type": "function",
+      "name": "test_spanish_questions_excluded",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        844,
+        851
+      ],
+      "summary": "Test function for spanish questions excluded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_requests_excluded",
+      "type": "function",
+      "name": "test_spanish_requests_excluded",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        854,
+        861
+      ],
+      "summary": "Test function for spanish requests excluded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_mixed_language_conversation",
+      "type": "function",
+      "name": "test_mixed_language_conversation",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        864,
+        877
+      ],
+      "summary": "Test function for mixed language conversation.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_sensitive_rejected",
+      "type": "function",
+      "name": "test_german_sensitive_rejected",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        880,
+        888
+      ],
+      "summary": "Test function for german sensitive rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_sensitive_rejected",
+      "type": "function",
+      "name": "test_spanish_sensitive_rejected",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        891,
+        899
+      ],
+      "summary": "Test function for spanish sensitive rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_quoted_content_typographic_marks_are_skipped",
+      "type": "function",
+      "name": "test_quoted_content_typographic_marks_are_skipped",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        922,
+        929
+      ],
+      "summary": "Test function for quoted content typographic marks are skipped.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_third_party_narratives_never_become_user_memories",
+      "type": "function",
+      "name": "test_german_third_party_narratives_never_become_user_memories",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        932,
+        944
+      ],
+      "summary": "Test function for german third party narratives never become user memories.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_first_person_possessive_relationships_are_relationship_kind",
+      "type": "function",
+      "name": "test_first_person_possessive_relationships_are_relationship_kind",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        947,
+        962
+      ],
+      "summary": "Test function for first person possessive relationships are relationship kind.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_third_party_narratives_never_become_user_memories",
+      "type": "function",
+      "name": "test_spanish_third_party_narratives_never_become_user_memories",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        965,
+        973
+      ],
+      "summary": "Test function for spanish third party narratives never become user memories.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_candidate_handoff_persists_unchanged_with_original_evidence",
+      "type": "function",
+      "name": "test_german_candidate_handoff_persists_unchanged_with_original_evidence",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        976,
+        1008
+      ],
+      "summary": "Test function for german candidate handoff persists unchanged with original evidence.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_candidate_handoff_persists_unchanged_with_original_evidence",
+      "type": "function",
+      "name": "test_spanish_candidate_handoff_persists_unchanged_with_original_evidence",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        1011,
+        1034
+      ],
+      "summary": "Test function for spanish candidate handoff persists unchanged with original evidence.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_german_idempotent_rerun_accumulates_evidence_not_duplicate",
+      "type": "function",
+      "name": "test_german_idempotent_rerun_accumulates_evidence_not_duplicate",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        1037,
+        1056
+      ],
+      "summary": "Test function for german idempotent rerun accumulates evidence not duplicate.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_spanish_idempotent_rerun_accumulates_evidence_not_duplicate",
+      "type": "function",
+      "name": "test_spanish_idempotent_rerun_accumulates_evidence_not_duplicate",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        1059,
+        1076
+      ],
+      "summary": "Test function for spanish idempotent rerun accumulates evidence not duplicate.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_conversations.py:test_mixed_language_message_splits_per_sentence",
+      "type": "function",
+      "name": "test_mixed_language_message_splits_per_sentence",
+      "filePath": "tests/test_memory_conversations.py",
+      "lineRange": [
+        1079,
+        1093
+      ],
+      "summary": "Test function for mixed language message splits per sentence.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_service",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_service",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_conv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_conv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_msg",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_msg",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_extract",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_extract",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_work_current",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_work_current",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_work_historical",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_work_historical",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_goal_never_becomes_achieved_fact",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_goal_never_becomes_achieved_fact",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_habit_regular_timeframe",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_habit_regular_timeframe",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_identity_name",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_identity_name",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_biography",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_biography",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_education",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_education",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_location_current_and_historical",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_location_current_and_historical",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_skill_learning",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_skill_learning",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_interest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_interest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_preference",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_preference",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_relationship",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_relationship",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_personal_fact_ownership",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_personal_fact_ownership",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_gemini_source_type_is_supported",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_gemini_source_type_is_supported",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_conversation_source_types_are_exactly_chatgpt_and_gemini",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_conversation_source_types_are_exactly_chatgpt_and_gemini",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_unsupported_source_type_yields_nothing",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_unsupported_source_type_yields_nothing",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_assistant_messages_never_yield_candidates",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_assistant_messages_never_yield_candidates",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_inactive_branch_messages_are_skipped",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_inactive_branch_messages_are_skipped",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_non_first_person_is_ignored",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_non_first_person_is_ignored",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_negation_is_never_a_fact",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_negation_is_never_a_fact",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_questions_are_skipped",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_questions_are_skipped",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_requests_directed_at_the_model_are_skipped",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_requests_directed_at_the_model_are_skipped",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_statements_turned_toward_you_are_skipped",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_statements_turned_toward_you_are_skipped",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_quoted_content_is_skipped",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_quoted_content_is_skipped",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_sensitive_keywords_are_never_proposed",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_sensitive_keywords_are_never_proposed",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_sensitive_forms_are_never_proposed",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_sensitive_forms_are_never_proposed",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_credential_shaped_sentinels_are_never_proposed",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_credential_shaped_sentinels_are_never_proposed",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_overlong_statements_are_skipped",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_overlong_statements_are_skipped",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_repeated_fact_within_conversation_collapses",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_repeated_fact_within_conversation_collapses",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_max_candidates_bounds",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_max_candidates_bounds",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_max_messages_bounds",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_max_messages_bounds",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_empty_and_whitespace_messages_yield_nothing",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_empty_and_whitespace_messages_yield_nothing",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_evidence_points_at_the_message_without_content",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_evidence_points_at_the_message_without_content",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_gemini_evidence_falls_back_to_conversation_timestamp",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_gemini_evidence_falls_back_to_conversation_timestamp",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_store",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_store",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_chatgpt_work_pair",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_chatgpt_work_pair",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_ingestor_rejects_unsupported_source",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_ingestor_rejects_unsupported_source",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_ingestor_applies_accepted_candidate_and_is_idempotent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_ingestor_applies_accepted_candidate_and_is_idempotent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_run_scans_only_the_requested_source_type",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_run_scans_only_the_requested_source_type",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_denied_gate_raises_and_never_writes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_denied_gate_raises_and_never_writes",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_report_is_aggregate_only_and_content_free",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_report_is_aggregate_only_and_content_free",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_ingestor_reads_are_bounded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_ingestor_reads_are_bounded",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_conv_de",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_conv_de",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_conv_es",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:_conv_es",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_identity_extraction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_identity_extraction",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_unknown_language_extraction_uses_english_rules",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_unknown_language_extraction_uses_english_rules",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_unknown_language_canonical_statement_falls_back_to_english",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_unknown_language_canonical_statement_falls_back_to_english",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_work_current",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_work_current",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_work_historical",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_work_historical",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_location_current",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_location_current",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_location_historical",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_location_historical",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_goal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_goal",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_skill_language",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_skill_language",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_habit_recurring",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_habit_recurring",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_education_current",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_education_current",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_negation_excluded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_negation_excluded",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_questions_excluded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_questions_excluded",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_requests_excluded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_requests_excluded",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_identity_extraction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_identity_extraction",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_work_current",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_work_current",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_work_historical",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_work_historical",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_location_current",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_location_current",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_goal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_goal",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_skill_language",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_skill_language",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_habit_recurring",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_habit_recurring",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_english_weekday_recurring",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_english_weekday_recurring",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_english_single_day_is_not_a_habit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_english_single_day_is_not_a_habit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_weekday_recurring",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_weekday_recurring",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_single_day_is_not_a_habit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_single_day_is_not_a_habit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_weekday_recurring",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_weekday_recurring",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_single_day_is_not_a_habit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_single_day_is_not_a_habit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_education_current",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_education_current",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_negation_excluded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_negation_excluded",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_questions_excluded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_questions_excluded",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_requests_excluded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_requests_excluded",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_mixed_language_conversation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_mixed_language_conversation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_sensitive_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_sensitive_rejected",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_sensitive_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_sensitive_rejected",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_quoted_content_typographic_marks_are_skipped",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_quoted_content_typographic_marks_are_skipped",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_third_party_narratives_never_become_user_memories",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_third_party_narratives_never_become_user_memories",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_first_person_possessive_relationships_are_relationship_kind",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_first_person_possessive_relationships_are_relationship_kind",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_third_party_narratives_never_become_user_memories",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_third_party_narratives_never_become_user_memories",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_candidate_handoff_persists_unchanged_with_original_evidence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_candidate_handoff_persists_unchanged_with_original_evidence",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_candidate_handoff_persists_unchanged_with_original_evidence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_candidate_handoff_persists_unchanged_with_original_evidence",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_idempotent_rerun_accumulates_evidence_not_duplicate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_german_idempotent_rerun_accumulates_evidence_not_duplicate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_idempotent_rerun_accumulates_evidence_not_duplicate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_spanish_idempotent_rerun_accumulates_evidence_not_duplicate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_mixed_language_message_splits_per_sentence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_conversations.py",
+      "target": "function:tests/test_memory_conversations.py:test_mixed_language_message_splits_per_sentence",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

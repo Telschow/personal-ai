@@ -107,15 +107,83 @@ application:
 
 sources:
   greenhouse:
-    - token: example-company
-  lever:
-    - site: example-company
+    - token: helsing
+    - token: databricks
+    - token: aurora
+    - token: zoox
+  lever: []
   ashby:
-    - board: example-company
+    - board: snowflake
+    - board: aurora
+    - board: zoox
   smartrecruiters:
-    - company: example-company
-  workable:
-    - subdomain: example-company
+    - company: google
+    - company: microsoft
+    - company: amazon
+    - company: apple
+    - company: meta
+    - company: netflix
+    - company: uber
+    - company: lyft
+    - company: airbnb
+    - company: adobe
+    - company: salesforce
+    - company: oracle
+    - company: ibm
+    - company: cisco
+    - company: paloaltonetworks
+    - company: crowdstrike
+    - company: stripe
+    - company: paypal
+    - company: block
+    - company: robinhood
+    - company: coinbase
+    - company: spotify
+    - company: tiktok
+    - company: twitter
+    - company: linkedin
+    - company: atlassian
+    - company: github
+    - company: gitlab
+    - company: docker
+    - company: hashicorp
+    - company: sap
+    - company: siemens
+    - company: bosch
+    - company: continental
+    - company: zf
+    - company: infineon
+    - company: bmwgroup
+    - company: mercedes-benz
+    - company: volkswagen
+    - company: audi
+    - company: porsche
+    - company: sap
+    - company: siemens
+    - company: bosch
+    - company: continental
+    - company: zf
+    - company: infineon
+    - company: bmwgroup
+    - company: mercedes-benz
+    - company: volkswagen
+    - company: audi
+    - company: porsche
+    - company: adidas
+    - company: puma
+    - company: deliveryhero
+    - company: hellofresh
+    - company: zalando
+    - company: rocketinternet
+    - company: blablacar
+    - company: doctolib
+    - company: personio
+    - company: flixbus
+    - company: flixtrain
+    - company: trivago
+    - company: auto1group
+    - company: aboutyou
+  workable: []
   rss_json: []
   sitemap: []
   direct_company_domains:
@@ -123,3 +191,71 @@ sources:
     - https://www.quantumsystems.com
     - https://www.rohde-schwarz.com
     - https://www.helsing.ai
+    - https://www.aurora.tech
+    - https://zoox.com
+    - https://www.cruise.com
+    - https://waymo.com
+    - https://www.mobileye.com
+    - https://www.nvidia.com
+    - https://www.intel.com
+    - https://www.qualcomm.com
+    - https://www.sap.com
+    - https://www.siemens.com
+    - https://www.bosch.com
+    - https://www.continental.com
+    - https://www.zf.com
+    - https://www.infineon.com
+    - https://www.microsoft.com
+    - https://www.amazon.com
+    - https://www.apple.com
+    - https://www.meta.com
+    - https://www.netflix.com
+    - https://www.uber.com
+    - https://www.lyft.com
+    - https://www.airbnb.com
+    - https://www.adobe.com
+    - https://www.salesforce.com
+    - https://www.oracle.com
+    - https://www.ibm.com
+    - https://www.cisco.com
+    - https://www.paloaltonetworks.com
+    - https://www.crowdstrike.com
+    - https://stripe.com
+    - https://www.paypal.com
+    - https://block.xyz
+    - https://www.robinhood.com
+    - https://www.coinbase.com
+    - https://www.spotify.com
+    - https://www.tiktok.com
+    - https://www.twitter.com
+    - https://www.linkedin.com
+    - https://www.atlassian.com
+    - https://www.github.com
+    - https://www.gitlab.com
+    - https://www.docker.com
+    - https://www.hashicorp.com
+    - https://www.sap.com
+    - https://www.siemens.com
+    - https://www.bosch.com
+    - https://www.continental.com
+    - https://www.zf.com
+    - https://www.infineon.com
+    - https://www.bmwgroup.com
+    - https://www.mercedes-benz.com
+    - https://www.volkswagen.com
+    - https://www.audi.com
+    - https://www.porsche.com
+    - https://www.adidas.com
+    - https://www.puma.com
+    - https://www.deliveryhero.com
+    - https://www.hellofresh.com
+    - https://www.zalando.de
+    - https://www.rocket-internet.de
+    - https://www.blablacar.com
+    - https://www.doctolib.fr
+    - https://www.personio.de
+    - https://www.flixbus.com
+    - https://www.flixtrain.com
+    - https://www.trivago.com
+    - https://www.auto1-group.com
+    - https://www.aboutyou.de

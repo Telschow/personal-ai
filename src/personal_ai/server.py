@@ -50,6 +50,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
@@ -84,11 +85,16 @@ from personal_ai.workouts import WorkoutQueryService, WorkoutStore
 
 # M3: Job-Agent imports
 try:
+    from job_agent.db import _job_from_row
+    from job_agent.models import Job
+
     from job_agent import db as job_db
 
     JOB_AGENT_AVAILABLE = True
 except ImportError:
     JOB_AGENT_AVAILABLE = False
+    _job_from_row = None  # type: ignore
+    Job = None  # type: ignore
 
 DEFAULT_WORKSPACE_ENV = "PERSONAL_AI_WORKSPACE"
 DEFAULT_DATABASE_ENV = "PERSONAL_AI_DATABASE"
@@ -1378,6 +1384,7 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
         source: str | None = None,
         system_status: str | None = None,
         analyzed: bool | None = None,
+        sort: str = "fit_score_desc",
         limit: int = 50,
         offset: int = 0,
     ) -> JSONResponse:
@@ -1385,22 +1392,73 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
 
         system_status filters by the lifecycle status (active/stale/closed/duplicate).
         If not specified, defaults to "active" unless source filter is used.
+
+        sort: "fit_score_desc" (default), "fit_score_asc", "date_desc", "date_asc", "company_asc"
         """
         job_db_conn = _gateway_job_db(app)
 
+        # Validate sort parameter
+        valid_sorts = {
+            "fit_score_desc",
+            "fit_score_asc",
+            "date_desc",
+            "date_asc",
+            "company_asc",
+        }
+        if sort not in valid_sorts:
+            sort = "fit_score_desc"
+
+        # Build WHERE clause
+        where_clauses: list[str] = []
+        params: list[Any] = []
+
         if user_status:
-            jobs = job_db.get_jobs_by_user_status(
-                job_db_conn, user_status, limit=limit, offset=offset
-            )
+            where_clauses.append("j.user_status = ?")
+            params.append(user_status)
         else:
             effective_status = system_status or (None if source else "active")
-            jobs = job_db.get_jobs(
-                job_db_conn, status=effective_status, source=source, limit=limit, offset=offset
-            )
+            if effective_status:
+                where_clauses.append("j.status = ?")
+                params.append(effective_status)
+        if source:
+            where_clauses.append("j.source = ?")
+            params.append(source)
 
-        # Apply filters
-        filtered = []
-        for job in jobs:
+        where_sql = (" WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
+        # Determine ORDER BY clause
+        if sort == "fit_score_desc":
+            order_sql = "ORDER BY e.total DESC NULLS LAST, j.last_seen DESC"
+        elif sort == "fit_score_asc":
+            order_sql = "ORDER BY e.total ASC NULLS FIRST, j.last_seen DESC"
+        elif sort == "date_desc":
+            order_sql = "ORDER BY j.date_posted DESC NULLS LAST, j.last_seen DESC"
+        elif sort == "date_asc":
+            order_sql = "ORDER BY j.date_posted ASC NULLS FIRST, j.last_seen DESC"
+        elif sort == "company_asc":
+            order_sql = "ORDER BY j.company ASC, j.last_seen DESC"
+        else:
+            order_sql = "ORDER BY e.total DESC NULLS LAST, j.last_seen DESC"
+
+        # Fetch jobs with LEFT JOIN on evaluations for sorting
+        query = f"""
+            SELECT j.*, e.total AS e_total, e.decision AS e_decision
+            FROM jobs j
+            LEFT JOIN evaluations e ON e.job_id = j.id
+            {where_sql}
+            {order_sql}
+            LIMIT ? OFFSET ?
+        """
+        params.extend([limit, offset])
+
+        rows = job_db_conn.execute(query, params).fetchall()
+
+        # Apply remaining filters that can't be done in SQL easily
+        filtered_jobs: list[Job] = []
+        for row in rows:
+            job = _job_from_row(row)
+            if job is None:
+                continue
             if track:
                 from job_agent.career_tracks import classify_track
 
@@ -1410,14 +1468,12 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
             if location and location.lower() not in (job.location or "").lower():
                 continue
             if min_fit is not None:
-                # Check if job has evaluation with sufficient score.
-                # ``min_fit`` is on the API 0..1 scale while the stored
-                # ``evaluations.total`` is 0..100.
-                row = job_db_conn.execute(
+                # Check if job has evaluation with sufficient score
+                eval_row = job_db_conn.execute(
                     "SELECT total FROM evaluations WHERE job_id=? AND total >= ?",
                     (job.id, min_fit * 100),
                 ).fetchone()
-                if not row:
+                if not eval_row:
                     continue
             if analyzed is not None:
                 has_eval = job_db_conn.execute(
@@ -1427,35 +1483,41 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
                     continue
                 if not analyzed and has_eval:
                     continue
-            filtered.append(job)
+            filtered_jobs.append(job)
 
-        # Batch-load evaluation totals and per-job track so the table renders
-        # both columns (fit_score on the API 0..1 scale).
-        pending = [job.id for job in filtered]
-        totals: dict[str, float] = {}
-        if pending:
-            placeholders = ",".join("?" * len(pending))
-            for row in job_db_conn.execute(
-                f"SELECT job_id, total FROM evaluations WHERE job_id IN ({placeholders})",
-                pending,
-            ):
-                totals[row["job_id"]] = row["total"] / 100.0
-
+        # Batch-load evaluation totals for the response (already have e_total from query)
         from job_agent.career_tracks import classify_track
 
         jobs_out = []
-        for job in filtered:
+        for job in filtered_jobs:
             item = _job_with_score_dict(job)
-            item["fit_score"] = totals.get(job.id)
+            # Use e_total from the query if available, otherwise fetch
+            eval_total = None
+            for row in rows:
+                if row["id"] == job.id and row["e_total"] is not None:
+                    eval_total = row["e_total"] / 100.0
+                    break
+            if eval_total is None:
+                eval_total = None
+            item["fit_score"] = eval_total
             t = classify_track(job.title, job.description)
             item["track"] = t.track_id if t else None
             jobs_out.append(item)
+
+        # Get total count for pagination (without limit/offset)
+        count_query = f"""
+            SELECT COUNT(*)
+            FROM jobs j
+            LEFT JOIN evaluations e ON e.job_id = j.id
+            {where_sql}
+        """
+        total_count = job_db_conn.execute(count_query, params[:-2]).fetchone()[0]
 
         return JSONResponse(
             status_code=200,
             content={
                 "jobs": jobs_out,
-                "count": len(filtered),
+                "count": total_count,
                 "limit": limit,
                 "offset": offset,
             },

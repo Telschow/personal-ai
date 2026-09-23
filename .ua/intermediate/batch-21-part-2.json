@@ -1,0 +1,220 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_people_extract.py",
+      "type": "file",
+      "name": "test_people_extract.py",
+      "filePath": "tests/test_people_extract.py",
+      "summary": "Tests for person reference extraction from email and financial sources covering sender/CC parsing, stable document IDs, bare address filtering, non-person name filtering, deduplication, name cleaning, and unsupported source handling.",
+      "tags": ["test", "people", "extraction", "email", "financial", "deduplication"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_people_extract.py:make_email_record",
+      "type": "function",
+      "name": "make_email_record",
+      "filePath": "tests/test_people_extract.py",
+      "lineRange": [16, 40],
+      "summary": "Creates an email SourceRecord fixture with configurable sender, recipients, and content hash for testing person extraction.",
+      "tags": ["test-helper", "fixture", "email"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_people_extract.py:make_financial_record",
+      "type": "function",
+      "name": "make_financial_record",
+      "filePath": "tests/test_people_extract.py",
+      "lineRange": [43, 56],
+      "summary": "Creates a financial SourceRecord fixture with payload, source key, and content hash for testing person extraction.",
+      "tags": ["test-helper", "fixture", "financial"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_people_store.py",
+      "type": "file",
+      "name": "test_people_store.py",
+      "filePath": "tests/test_people_store.py",
+      "summary": "Tests for PersonStore CRUD operations covering upsert/get roundtrips, casefold identity normalization, accent preservation, display name selection, aggregate sorting/deduplication, evidence tracking, search functionality, pagination, and connection persistence.",
+      "tags": ["test", "people", "store", "crud", "search", "pagination"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_people_store.py:make_reference",
+      "type": "function",
+      "name": "make_reference",
+      "filePath": "tests/test_people_store.py",
+      "lineRange": [19, 35],
+      "summary": "Creates a PersonReference fixture with name, email, role, source type, document ID, and timestamp for store testing.",
+      "tags": ["test-helper", "fixture", "people"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_people_store.py:store",
+      "type": "function",
+      "name": "store",
+      "filePath": "tests/test_people_store.py",
+      "lineRange": [39, 45],
+      "summary": "Provides a temporary PersonStore fixture backed by a test database for store operation tests.",
+      "tags": ["test-helper", "fixture", "database"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_personal_ai_v1_readiness.py",
+      "type": "file",
+      "name": "test_personal_ai_v1_readiness.py",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "summary": "Comprehensive v1 readiness test suite covering exact decision retrieval, paraphrase handling, project scope filtering, restart persistence, retrieval failure handling, read-only invariants, memory isolation, error handling, consumer tool surface, identity determinism, configuration defaults, CLI search, end-to-end ingestion, and corpus scale validation.",
+      "tags": ["test", "v1-readiness", "integration", "retrieval", "persistence", "cli", "ingestion"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_personal_ai_v1_readiness.py:_seed_corpus",
+      "type": "function",
+      "name": "_seed_corpus",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [249, 274],
+      "summary": "Seeds a test corpus of documents and chunks into the database for retrieval testing.",
+      "tags": ["test-helper", "fixture", "corpus", "seeding"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_personal_ai_v1_readiness.py:_db_checksum",
+      "type": "function",
+      "name": "_db_checksum",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [277, 290],
+      "summary": "Computes a SHA256 checksum of all database tables for read-only invariant verification.",
+      "tags": ["test-helper", "database", "checksum", "invariant"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_personal_ai_v1_readiness.py:text_response",
+      "type": "function",
+      "name": "text_response",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [325, 326],
+      "summary": "Creates a text ChatResponse for scripted agent testing.",
+      "tags": ["test-helper", "mock", "chat"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_personal_ai_v1_readiness.py:tool_response",
+      "type": "function",
+      "name": "tool_response",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [329, 330],
+      "summary": "Creates a tool-use ChatResponse for scripted agent testing.",
+      "tags": ["test-helper", "mock", "chat"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_personal_ai_v1_readiness.py:_documents_count",
+      "type": "function",
+      "name": "_documents_count",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [1101, 1102],
+      "summary": "Counts documents in the database for idempotency verification.",
+      "tags": ["test-helper", "database", "count"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:WiredKnowledge",
+      "type": "class",
+      "name": "WiredKnowledge",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [293, 322],
+      "summary": "Test knowledge fixture wiring DocumentStore, ChunkStore, ExtractionStore, RetrievalService, and a default registry with seeded corpus.",
+      "tags": ["test-fixture", "knowledge", "registry", "retrieval"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_personal_ai_v1_readiness.py:ScriptedClient",
+      "type": "class",
+      "name": "ScriptedClient",
+      "filePath": "tests/test_personal_ai_v1_readiness.py",
+      "lineRange": [333, 349],
+      "summary": "Scripted LLM client returning pre-defined responses for deterministic agent testing.",
+      "tags": ["test-double", "mock", "llm", "agent"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_people_extract.py",
+      "target": "function:tests/test_people_extract.py:make_email_record",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_extract.py",
+      "target": "function:tests/test_people_extract.py:make_financial_record",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_store.py",
+      "target": "function:tests/test_people_store.py:make_reference",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_store.py",
+      "target": "function:tests/test_people_store.py:store",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "function:tests/test_personal_ai_v1_readiness.py:_seed_corpus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "function:tests/test_personal_ai_v1_readiness.py:_db_checksum",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "function:tests/test_personal_ai_v1_readiness.py:text_response",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "function:tests/test_personal_ai_v1_readiness.py:tool_response",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "function:tests/test_personal_ai_v1_readiness.py:_documents_count",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:WiredKnowledge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_personal_ai_v1_readiness.py",
+      "target": "class:tests/test_personal_ai_v1_readiness.py:ScriptedClient",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    }
+  ]
+}

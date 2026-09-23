@@ -55,6 +55,25 @@ def normalize_job(
     # Remote/hybrid/onsite classification honors explicit location words first,
     # then falls back to description keywords.
     out.remote_mode = classify_remote_mode(out)
+
+    # Apply role classification
+    from .role_classifier import classify_role
+    role_archetypes, role_family, confidence, reason, career_direction = classify_role(out)
+    out.role_archetypes = list(role_archetypes)
+    out.role_family = role_family
+    out.role_classification_confidence = confidence
+    out.role_classification_reason = reason
+    out.career_direction = career_direction
+
+    # Apply location classification
+    from .location_classifier import classify_location
+    location_city, location_country, location_scope, location_score, location_reason = classify_location(out)
+    out.location_city = location_city
+    out.location_country = location_country
+    out.location_scope = location_scope
+    out.location_score = location_score
+    out.location_reason = location_reason
+
     return out
 
 

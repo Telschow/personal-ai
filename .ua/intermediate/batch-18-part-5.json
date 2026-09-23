@@ -1,0 +1,1533 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_cli_conversation_ingest.py",
+      "type": "file",
+      "name": "test_cli_conversation_ingest.py",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "summary": "Tests CLI conversation ingestion for ChatGPT and Gemini exports.",
+      "tags": [
+        "test",
+        "cli",
+        "command-line"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_cli_conversation_ingest.py:_run_cli",
+      "type": "function",
+      "name": "_run_cli",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "lineRange": [
+        12,
+        14
+      ],
+      "summary": "Helper function: _run_cli.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_conversation_ingest.py:gemini_export",
+      "type": "function",
+      "name": "gemini_export",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "lineRange": [
+        18,
+        33
+      ],
+      "summary": "Function gemini_export with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_conversation_ingest.py:chatgpt_export",
+      "type": "function",
+      "name": "chatgpt_export",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "lineRange": [
+        37,
+        77
+      ],
+      "summary": "Function chatgpt_export with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_conversation_ingest.py:_counts",
+      "type": "function",
+      "name": "_counts",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "lineRange": [
+        89,
+        95
+      ],
+      "summary": "Helper function: _counts.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_export",
+      "type": "function",
+      "name": "test_ingest_chatgpt_export",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "lineRange": [
+        98,
+        125
+      ],
+      "summary": "Test: ingest chatgpt export.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_rerun_is_idempotent",
+      "type": "function",
+      "name": "test_ingest_chatgpt_rerun_is_idempotent",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "lineRange": [
+        128,
+        165
+      ],
+      "summary": "Test: ingest chatgpt rerun is idempotent.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_conversation_ingest.py:test_ingest_gemini_with_memory_writes_durable_memory",
+      "type": "function",
+      "name": "test_ingest_gemini_with_memory_writes_durable_memory",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "lineRange": [
+        168,
+        212
+      ],
+      "summary": "Test: ingest gemini with memory writes durable memory.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_conversation_ingest.py:test_ingest_gemini_without_memory_never_touches_memory_store",
+      "type": "function",
+      "name": "test_ingest_gemini_without_memory_never_touches_memory_store",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "lineRange": [
+        215,
+        236
+      ],
+      "summary": "Test: ingest gemini without memory never touches memory store.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_conversation_ingest.py:test_ingested_chatgpt_conversation_is_searchable",
+      "type": "function",
+      "name": "test_ingested_chatgpt_conversation_is_searchable",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "lineRange": [
+        239,
+        263
+      ],
+      "summary": "Test: ingested chatgpt conversation is searchable.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_conversation_ingest.py:test_memory_flag_requires_conversation_source",
+      "type": "function",
+      "name": "test_memory_flag_requires_conversation_source",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "lineRange": [
+        266,
+        287
+      ],
+      "summary": "Test: memory flag requires conversation source.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_conversation_ingest.py:test_memory_flag_requires_ingest_mode",
+      "type": "function",
+      "name": "test_memory_flag_requires_ingest_mode",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "lineRange": [
+        290,
+        302
+      ],
+      "summary": "Test: memory flag requires ingest mode.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_cli_conversation_ingest.py:ExplodingOllamaClient",
+      "type": "class",
+      "name": "ExplodingOllamaClient",
+      "filePath": "tests/test_cli_conversation_ingest.py",
+      "lineRange": [
+        80,
+        86
+      ],
+      "summary": "Class ExplodingOllamaClient with 1 methods.",
+      "tags": [
+        "helper-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_cli_embedding.py",
+      "type": "file",
+      "name": "test_cli_embedding.py",
+      "filePath": "tests/test_cli_embedding.py",
+      "summary": "Tests CLI embedding backfill command with idempotency and model changes.",
+      "tags": [
+        "test",
+        "cli",
+        "command-line"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_cli_embedding.py:seed_chunks",
+      "type": "function",
+      "name": "seed_chunks",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        33,
+        46
+      ],
+      "summary": "Function seed_chunks with 2 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_embedding.py:embedding_count",
+      "type": "function",
+      "name": "embedding_count",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        49,
+        54
+      ],
+      "summary": "Function embedding_count with 2 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_embedding.py:test_embedding_backfill_parser_defaults",
+      "type": "function",
+      "name": "test_embedding_backfill_parser_defaults",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        57,
+        65
+      ],
+      "summary": "Test: embedding backfill parser defaults.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_embedding.py:test_embedding_backfill_no_resume_flag",
+      "type": "function",
+      "name": "test_embedding_backfill_no_resume_flag",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        68,
+        73
+      ],
+      "summary": "Test: embedding backfill no resume flag.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_embedding.py:test_embedding_missing_database_exits",
+      "type": "function",
+      "name": "test_embedding_missing_database_exits",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        76,
+        90
+      ],
+      "summary": "Test: embedding missing database exits.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_embedding.py:test_embedding_requires_model_or_configuration",
+      "type": "function",
+      "name": "test_embedding_requires_model_or_configuration",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        93,
+        103
+      ],
+      "summary": "Test: embedding requires model or configuration.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_embedding.py:test_embedding_backfill_end_to_end_hermetic",
+      "type": "function",
+      "name": "test_embedding_backfill_end_to_end_hermetic",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        106,
+        140
+      ],
+      "summary": "Test: embedding backfill end to end hermetic.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_embedding.py:test_embedding_backfill_is_idempotent_across_invocations",
+      "type": "function",
+      "name": "test_embedding_backfill_is_idempotent_across_invocations",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        143,
+        160
+      ],
+      "summary": "Test: embedding backfill is idempotent across invocations.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_embedding.py:test_embedding_backfill_default_model_from_configuration",
+      "type": "function",
+      "name": "test_embedding_backfill_default_model_from_configuration",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        163,
+        181
+      ],
+      "summary": "Test: embedding backfill default model from configuration.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_embedding.py:test_embedding_backfill_invalid_batch_size",
+      "type": "function",
+      "name": "test_embedding_backfill_invalid_batch_size",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        184,
+        202
+      ],
+      "summary": "Test: embedding backfill invalid batch size.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_embedding.py:test_embedding_unknown_verb_exits",
+      "type": "function",
+      "name": "test_embedding_unknown_verb_exits",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        205,
+        207
+      ],
+      "summary": "Test: embedding unknown verb exits.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_embedding.py:test_main_dispatches_embedding_verb",
+      "type": "function",
+      "name": "test_main_dispatches_embedding_verb",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        210,
+        226
+      ],
+      "summary": "Test: main dispatches embedding verb.",
+      "tags": [
+        "test-function",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_cli_embedding.py:FakeEmbeddingProvider",
+      "type": "class",
+      "name": "FakeEmbeddingProvider",
+      "filePath": "tests/test_cli_embedding.py",
+      "lineRange": [
+        21,
+        30
+      ],
+      "summary": "Class FakeEmbeddingProvider with 2 methods.",
+      "tags": [
+        "helper-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_cli_event_ingest.py",
+      "type": "file",
+      "name": "test_cli_event_ingest.py",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "summary": "Tests CLI event ingestion for Chrome and YouTube history exports.",
+      "tags": [
+        "test",
+        "cli",
+        "command-line"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_cli_event_ingest.py:_chrome_file",
+      "type": "function",
+      "name": "_chrome_file",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "lineRange": [
+        41,
+        44
+      ],
+      "summary": "Helper function: _chrome_file.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_event_ingest.py:_visit",
+      "type": "function",
+      "name": "_visit",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "lineRange": [
+        47,
+        51
+      ],
+      "summary": "Helper function: _visit.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_event_ingest.py:_chrome_export",
+      "type": "function",
+      "name": "_chrome_export",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "lineRange": [
+        54,
+        65
+      ],
+      "summary": "Helper function: _chrome_export.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_event_ingest.py:_youtube_watch",
+      "type": "function",
+      "name": "_youtube_watch",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "lineRange": [
+        68,
+        74
+      ],
+      "summary": "Helper function: _youtube_watch.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_event_ingest.py:_youtube_search",
+      "type": "function",
+      "name": "_youtube_search",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "lineRange": [
+        77,
+        83
+      ],
+      "summary": "Helper function: _youtube_search.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_event_ingest.py:_youtube_export",
+      "type": "function",
+      "name": "_youtube_export",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "lineRange": [
+        86,
+        98
+      ],
+      "summary": "Helper function: _youtube_export.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_event_ingest.py:run_cli",
+      "type": "function",
+      "name": "run_cli",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "lineRange": [
+        101,
+        103
+      ],
+      "summary": "Function run_cli with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_cli_event_ingest.py:document_tables_exist",
+      "type": "function",
+      "name": "document_tables_exist",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "lineRange": [
+        106,
+        120
+      ],
+      "summary": "Function document_tables_exist with 1 parameters.",
+      "tags": [
+        "helper",
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_cli_event_ingest.py:TestIngestableSourceAdvertisement",
+      "type": "class",
+      "name": "TestIngestableSourceAdvertisement",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "lineRange": [
+        123,
+        138
+      ],
+      "summary": "Test class TestIngestableSourceAdvertisement with 3 methods.",
+      "tags": [
+        "test-class",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_cli_event_ingest.py:TestCliChromeIngest",
+      "type": "class",
+      "name": "TestCliChromeIngest",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "lineRange": [
+        141,
+        199
+      ],
+      "summary": "Test class TestCliChromeIngest with 2 methods.",
+      "tags": [
+        "test-class",
+        "exported"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_cli_event_ingest.py:TestCliYoutubeIngest",
+      "type": "class",
+      "name": "TestCliYoutubeIngest",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "lineRange": [
+        202,
+        263
+      ],
+      "summary": "Test class TestCliYoutubeIngest with 2 methods.",
+      "tags": [
+        "test-class",
+        "exported"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_cli_event_ingest.py:TestEventIngestionPrivacyAndBoundedCallback",
+      "type": "class",
+      "name": "TestEventIngestionPrivacyAndBoundedCallback",
+      "filePath": "tests/test_cli_event_ingest.py",
+      "lineRange": [
+        266,
+        355
+      ],
+      "summary": "Test class TestEventIngestionPrivacyAndBoundedCallback with 3 methods.",
+      "tags": [
+        "test-class",
+        "exported"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:_run_cli",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:_run_cli",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:gemini_export",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:gemini_export",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:chatgpt_export",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:chatgpt_export",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:_counts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:_counts",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_export",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_export",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_rerun_is_idempotent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_rerun_is_idempotent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_ingest_gemini_with_memory_writes_durable_memory",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_ingest_gemini_with_memory_writes_durable_memory",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_ingest_gemini_without_memory_never_touches_memory_store",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_ingest_gemini_without_memory_never_touches_memory_store",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_ingested_chatgpt_conversation_is_searchable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_ingested_chatgpt_conversation_is_searchable",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_memory_flag_requires_conversation_source",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_memory_flag_requires_conversation_source",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_memory_flag_requires_ingest_mode",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "function:tests/test_cli_conversation_ingest.py:test_memory_flag_requires_ingest_mode",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "class:tests/test_cli_conversation_ingest.py:ExplodingOllamaClient",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_conversation_ingest.py",
+      "target": "class:tests/test_cli_conversation_ingest.py:ExplodingOllamaClient",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_export",
+      "target": "function:tests/test_cli_conversation_ingest.py:_run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_export",
+      "target": "function:tests/test_cli_conversation_ingest.py:_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_export",
+      "target": "function:tests/test_cli_conversation_ingest.py:_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_rerun_is_idempotent",
+      "target": "function:tests/test_cli_conversation_ingest.py:_run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_rerun_is_idempotent",
+      "target": "function:tests/test_cli_conversation_ingest.py:_run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_rerun_is_idempotent",
+      "target": "function:tests/test_cli_conversation_ingest.py:_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_chatgpt_rerun_is_idempotent",
+      "target": "function:tests/test_cli_conversation_ingest.py:_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_gemini_with_memory_writes_durable_memory",
+      "target": "function:tests/test_cli_conversation_ingest.py:_run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_gemini_with_memory_writes_durable_memory",
+      "target": "function:tests/test_cli_conversation_ingest.py:_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_gemini_with_memory_writes_durable_memory",
+      "target": "function:tests/test_cli_conversation_ingest.py:_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_gemini_without_memory_never_touches_memory_store",
+      "target": "function:tests/test_cli_conversation_ingest.py:_run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_gemini_without_memory_never_touches_memory_store",
+      "target": "function:tests/test_cli_conversation_ingest.py:_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingest_gemini_without_memory_never_touches_memory_store",
+      "target": "function:tests/test_cli_conversation_ingest.py:_counts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_conversation_ingest.py:test_ingested_chatgpt_conversation_is_searchable",
+      "target": "function:tests/test_cli_conversation_ingest.py:_run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:seed_chunks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:seed_chunks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:embedding_count",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:embedding_count",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_backfill_parser_defaults",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_backfill_parser_defaults",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_backfill_no_resume_flag",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_backfill_no_resume_flag",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_missing_database_exits",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_missing_database_exits",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_requires_model_or_configuration",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_requires_model_or_configuration",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_backfill_end_to_end_hermetic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_backfill_end_to_end_hermetic",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_backfill_is_idempotent_across_invocations",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_backfill_is_idempotent_across_invocations",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_backfill_default_model_from_configuration",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_backfill_default_model_from_configuration",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_backfill_invalid_batch_size",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_backfill_invalid_batch_size",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_unknown_verb_exits",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_embedding_unknown_verb_exits",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_main_dispatches_embedding_verb",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "function:tests/test_cli_embedding.py:test_main_dispatches_embedding_verb",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "class:tests/test_cli_embedding.py:FakeEmbeddingProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_embedding.py",
+      "target": "class:tests/test_cli_embedding.py:FakeEmbeddingProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_embedding.py:test_embedding_backfill_end_to_end_hermetic",
+      "target": "function:tests/test_cli_embedding.py:seed_chunks",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_embedding.py:test_embedding_backfill_end_to_end_hermetic",
+      "target": "function:tests/test_cli_embedding.py:embedding_count",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_embedding.py:test_embedding_backfill_is_idempotent_across_invocations",
+      "target": "function:tests/test_cli_embedding.py:seed_chunks",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_embedding.py:test_embedding_backfill_is_idempotent_across_invocations",
+      "target": "function:tests/test_cli_embedding.py:embedding_count",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_embedding.py:test_embedding_backfill_default_model_from_configuration",
+      "target": "function:tests/test_cli_embedding.py:seed_chunks",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_embedding.py:test_embedding_backfill_default_model_from_configuration",
+      "target": "function:tests/test_cli_embedding.py:embedding_count",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_embedding.py:test_embedding_backfill_invalid_batch_size",
+      "target": "function:tests/test_cli_embedding.py:seed_chunks",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:_chrome_file",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:_chrome_file",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:_visit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:_visit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:_chrome_export",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:_chrome_export",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:_youtube_watch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:_youtube_watch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:_youtube_search",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:_youtube_search",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:_youtube_export",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:_youtube_export",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:run_cli",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:run_cli",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:document_tables_exist",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "function:tests/test_cli_event_ingest.py:document_tables_exist",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "class:tests/test_cli_event_ingest.py:TestIngestableSourceAdvertisement",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "class:tests/test_cli_event_ingest.py:TestIngestableSourceAdvertisement",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "class:tests/test_cli_event_ingest.py:TestCliChromeIngest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "class:tests/test_cli_event_ingest.py:TestCliChromeIngest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "class:tests/test_cli_event_ingest.py:TestCliYoutubeIngest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "class:tests/test_cli_event_ingest.py:TestCliYoutubeIngest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "class:tests/test_cli_event_ingest.py:TestEventIngestionPrivacyAndBoundedCallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_cli_event_ingest.py",
+      "target": "class:tests/test_cli_event_ingest.py:TestEventIngestionPrivacyAndBoundedCallback",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_event_ingest.py:_chrome_export",
+      "target": "function:tests/test_cli_event_ingest.py:_chrome_file",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_event_ingest.py:_chrome_export",
+      "target": "function:tests/test_cli_event_ingest.py:_visit",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_event_ingest.py:_chrome_export",
+      "target": "function:tests/test_cli_event_ingest.py:_visit",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_event_ingest.py:_chrome_export",
+      "target": "function:tests/test_cli_event_ingest.py:_visit",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_event_ingest.py:_youtube_export",
+      "target": "function:tests/test_cli_event_ingest.py:_youtube_watch",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_event_ingest.py:_youtube_export",
+      "target": "function:tests/test_cli_event_ingest.py:_youtube_watch",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/test_cli_event_ingest.py:_youtube_export",
+      "target": "function:tests/test_cli_event_ingest.py:_youtube_search",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestCliChromeIngest",
+      "target": "function:tests/test_cli_event_ingest.py:_chrome_export",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestCliChromeIngest",
+      "target": "function:tests/test_cli_event_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestCliChromeIngest",
+      "target": "function:tests/test_cli_event_ingest.py:document_tables_exist",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestCliChromeIngest",
+      "target": "function:tests/test_cli_event_ingest.py:_chrome_export",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestCliChromeIngest",
+      "target": "function:tests/test_cli_event_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestCliChromeIngest",
+      "target": "function:tests/test_cli_event_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestCliYoutubeIngest",
+      "target": "function:tests/test_cli_event_ingest.py:_youtube_export",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestCliYoutubeIngest",
+      "target": "function:tests/test_cli_event_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestCliYoutubeIngest",
+      "target": "function:tests/test_cli_event_ingest.py:document_tables_exist",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestCliYoutubeIngest",
+      "target": "function:tests/test_cli_event_ingest.py:_youtube_export",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestCliYoutubeIngest",
+      "target": "function:tests/test_cli_event_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestCliYoutubeIngest",
+      "target": "function:tests/test_cli_event_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestEventIngestionPrivacyAndBoundedCallback",
+      "target": "function:tests/test_cli_event_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestEventIngestionPrivacyAndBoundedCallback",
+      "target": "function:tests/test_cli_event_ingest.py:_chrome_export",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestEventIngestionPrivacyAndBoundedCallback",
+      "target": "function:tests/test_cli_event_ingest.py:_chrome_export",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestEventIngestionPrivacyAndBoundedCallback",
+      "target": "function:tests/test_cli_event_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestEventIngestionPrivacyAndBoundedCallback",
+      "target": "function:tests/test_cli_event_ingest.py:_visit",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_cli_event_ingest.py:TestEventIngestionPrivacyAndBoundedCallback",
+      "target": "function:tests/test_cli_event_ingest.py:run_cli",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/cli.py",
+      "target": "file:tests/test_cli_conversation_ingest.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/conversation_ingestion.py",
+      "target": "file:tests/test_cli_conversation_ingest.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/cli.py",
+      "target": "file:tests/test_cli_embedding.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/embeddings.py",
+      "target": "file:tests/test_cli_embedding.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/cli.py",
+      "target": "file:tests/test_cli_event_ingest.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/event_ingestion.py",
+      "target": "file:tests/test_cli_event_ingest.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

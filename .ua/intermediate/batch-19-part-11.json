@@ -1,0 +1,2622 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_memory_audit_time_filtering.py",
+      "type": "file",
+      "name": "test_memory_audit_time_filtering.py",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "summary": "Test file with 6 test classes and 16 test functions for memory_audit_time_filtering.",
+      "tags": [
+        "test",
+        "memory",
+        "audit",
+        "time-filtering"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "type": "class",
+      "name": "TestStoreAuditTimeFiltering",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test class with 19 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.setup_method",
+      "type": "function",
+      "name": "setup_method",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating setup method.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.teardown_method",
+      "type": "function",
+      "name": "teardown_method",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating teardown method.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_no_bounds_returns_all",
+      "type": "function",
+      "name": "test_no_bounds_returns_all",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating no bounds returns all.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_since_only",
+      "type": "function",
+      "name": "test_since_only",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating since only.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_until_only",
+      "type": "function",
+      "name": "test_until_only",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating until only.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_both_bounds",
+      "type": "function",
+      "name": "test_both_bounds",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating both bounds.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_exact_since_boundary_included",
+      "type": "function",
+      "name": "test_exact_since_boundary_included",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating exact since boundary included.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_exact_until_boundary_included",
+      "type": "function",
+      "name": "test_exact_until_boundary_included",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating exact until boundary included.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_event_immediately_before_since_excluded",
+      "type": "function",
+      "name": "test_event_immediately_before_since_excluded",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating event immediately before since excluded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_event_immediately_after_until_excluded",
+      "type": "function",
+      "name": "test_event_immediately_after_until_excluded",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating event immediately after until excluded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_reversed_range_rejected",
+      "type": "function",
+      "name": "test_reversed_range_rejected",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating reversed range rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_deterministic_ordering_preserved",
+      "type": "function",
+      "name": "test_deterministic_ordering_preserved",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating deterministic ordering preserved.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_same_timestamp_tie_break_by_id",
+      "type": "function",
+      "name": "test_same_timestamp_tie_break_by_id",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating same timestamp tie break by id.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_limit_applies_after_filtering",
+      "type": "function",
+      "name": "test_limit_applies_after_filtering",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating limit applies after filtering.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_max_limit_clamp",
+      "type": "function",
+      "name": "test_max_limit_clamp",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating max limit clamp.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_counts_use_same_filter",
+      "type": "function",
+      "name": "test_counts_use_same_filter",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating counts use same filter.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_filtered_counts_match_filtered_events",
+      "type": "function",
+      "name": "test_filtered_counts_match_filtered_events",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating filtered counts match filtered events.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_empty_filtered_window_returns_zero",
+      "type": "function",
+      "name": "test_empty_filtered_window_returns_zero",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating empty filtered window returns zero.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_since_until_with_timezone_forms",
+      "type": "function",
+      "name": "test_since_until_with_timezone_forms",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        194,
+        349
+      ],
+      "summary": "Test method validating since until with timezone forms.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering",
+      "type": "class",
+      "name": "TestServiceAuditTimeFiltering",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        355,
+        392
+      ],
+      "summary": "Test class with 6 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering.setup_method",
+      "type": "function",
+      "name": "setup_method",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        355,
+        392
+      ],
+      "summary": "Test method validating setup method.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering.test_audit_since_until",
+      "type": "function",
+      "name": "test_audit_since_until",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        355,
+        392
+      ],
+      "summary": "Test method validating audit since until.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering.test_audit_counts_since_until",
+      "type": "function",
+      "name": "test_audit_counts_since_until",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        355,
+        392
+      ],
+      "summary": "Test method validating audit counts since until.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering.test_service_strips_private_fields",
+      "type": "function",
+      "name": "test_service_strips_private_fields",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        355,
+        392
+      ],
+      "summary": "Test method validating service strips private fields.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering.test_invalid_timestamp_rejected",
+      "type": "function",
+      "name": "test_invalid_timestamp_rejected",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        355,
+        392
+      ],
+      "summary": "Test method validating invalid timestamp rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering.test_reversed_range_rejected",
+      "type": "function",
+      "name": "test_reversed_range_rejected",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        355,
+        392
+      ],
+      "summary": "Test method validating reversed range rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "type": "class",
+      "name": "TestCLIAuditTimeFiltering",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test class with 14 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.setup_method",
+      "type": "function",
+      "name": "setup_method",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating setup method.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.teardown_method",
+      "type": "function",
+      "name": "teardown_method",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating teardown method.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering._run",
+      "type": "function",
+      "name": "_run",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating  run.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_since",
+      "type": "function",
+      "name": "test_audit_since",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating audit since.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_until",
+      "type": "function",
+      "name": "test_audit_until",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating audit until.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_since_until",
+      "type": "function",
+      "name": "test_audit_since_until",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating audit since until.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_counts_since",
+      "type": "function",
+      "name": "test_audit_counts_since",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating audit counts since.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_counts_until",
+      "type": "function",
+      "name": "test_audit_counts_until",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating audit counts until.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_json_output",
+      "type": "function",
+      "name": "test_audit_json_output",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating audit json output.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_counts_json_output",
+      "type": "function",
+      "name": "test_audit_counts_json_output",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating audit counts json output.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_invalid_timestamp_rejected",
+      "type": "function",
+      "name": "test_invalid_timestamp_rejected",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating invalid timestamp rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_reversed_range_rejected",
+      "type": "function",
+      "name": "test_reversed_range_rejected",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating reversed range rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_empty_filtered_window",
+      "type": "function",
+      "name": "test_empty_filtered_window",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating empty filtered window.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_privacy_sentinels_never_leaked",
+      "type": "function",
+      "name": "test_privacy_sentinels_never_leaked",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        400,
+        620
+      ],
+      "summary": "Test method validating privacy sentinels never leaked.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "type": "class",
+      "name": "TestAgentToolAuditTimeFiltering",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test class with 20 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.setup_method",
+      "type": "function",
+      "name": "setup_method",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating setup method.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_recent_with_since",
+      "type": "function",
+      "name": "test_recent_with_since",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating recent with since.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_recent_with_until",
+      "type": "function",
+      "name": "test_recent_with_until",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating recent with until.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_recent_with_both",
+      "type": "function",
+      "name": "test_recent_with_both",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating recent with both.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_counts_with_since",
+      "type": "function",
+      "name": "test_counts_with_since",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating counts with since.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_counts_with_until",
+      "type": "function",
+      "name": "test_counts_with_until",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating counts with until.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_counts_with_both",
+      "type": "function",
+      "name": "test_counts_with_both",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating counts with both.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_invalid_timestamp_rejected",
+      "type": "function",
+      "name": "test_invalid_timestamp_rejected",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating invalid timestamp rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_reversed_range_rejected",
+      "type": "function",
+      "name": "test_reversed_range_rejected",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating reversed range rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_non_string_timestamp_rejected",
+      "type": "function",
+      "name": "test_non_string_timestamp_rejected",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating non string timestamp rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_limit_with_time_range",
+      "type": "function",
+      "name": "test_limit_with_time_range",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating limit with time range.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_max_limit_clamp_with_time_range",
+      "type": "function",
+      "name": "test_max_limit_clamp_with_time_range",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating max limit clamp with time range.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_unknown_operation_still_rejected",
+      "type": "function",
+      "name": "test_unknown_operation_still_rejected",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating unknown operation still rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_reviewer_agent_denied",
+      "type": "function",
+      "name": "test_reviewer_agent_denied",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating reviewer agent denied.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_researcher_allowed",
+      "type": "function",
+      "name": "test_researcher_allowed",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating researcher allowed.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_mutation_args_ignored",
+      "type": "function",
+      "name": "test_mutation_args_ignored",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating mutation args ignored.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_no_sql_escape_hatch",
+      "type": "function",
+      "name": "test_no_sql_escape_hatch",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating no sql escape hatch.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_privacy_sentinels_absent",
+      "type": "function",
+      "name": "test_privacy_sentinels_absent",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating privacy sentinels absent.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_output_only_allowed_fields",
+      "type": "function",
+      "name": "test_output_only_allowed_fields",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating output only allowed fields.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_read_only_no_state_change",
+      "type": "function",
+      "name": "test_read_only_no_state_change",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        626,
+        832
+      ],
+      "summary": "Test method validating read only no state change.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression",
+      "type": "class",
+      "name": "TestPhase2829Regression",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        838,
+        895
+      ],
+      "summary": "Test class with 5 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression.setup_method",
+      "type": "function",
+      "name": "setup_method",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        838,
+        895
+      ],
+      "summary": "Test method validating setup method.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression.teardown_method",
+      "type": "function",
+      "name": "teardown_method",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        838,
+        895
+      ],
+      "summary": "Test method validating teardown method.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression.test_audit_without_bounds_still_works",
+      "type": "function",
+      "name": "test_audit_without_bounds_still_works",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        838,
+        895
+      ],
+      "summary": "Test method validating audit without bounds still works.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression.test_tool_without_bounds_still_works",
+      "type": "function",
+      "name": "test_tool_without_bounds_still_works",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        838,
+        895
+      ],
+      "summary": "Test method validating tool without bounds still works.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression.test_cli_audit_without_bounds_still_works",
+      "type": "function",
+      "name": "test_cli_audit_without_bounds_still_works",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        838,
+        895
+      ],
+      "summary": "Test method validating cli audit without bounds still works.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_memory_audit_time_filtering.py:TestReadOnlyGuarantee",
+      "type": "class",
+      "name": "TestReadOnlyGuarantee",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        901,
+        969
+      ],
+      "summary": "Test class with 3 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestReadOnlyGuarantee.test_store_read_only",
+      "type": "function",
+      "name": "test_store_read_only",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        901,
+        969
+      ],
+      "summary": "Test method validating store read only.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestReadOnlyGuarantee.test_service_read_only",
+      "type": "function",
+      "name": "test_service_read_only",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        901,
+        969
+      ],
+      "summary": "Test method validating service read only.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:TestReadOnlyGuarantee.test_tool_read_only",
+      "type": "function",
+      "name": "test_tool_read_only",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        901,
+        969
+      ],
+      "summary": "Test method validating tool read only.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_utc",
+      "type": "function",
+      "name": "test_parse_iso_timestamp_utc",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        47,
+        50
+      ],
+      "summary": "Test function for parse iso timestamp utc.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_z_suffix",
+      "type": "function",
+      "name": "test_parse_iso_timestamp_z_suffix",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        53,
+        56
+      ],
+      "summary": "Test function for parse iso timestamp z suffix.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_positive_offset",
+      "type": "function",
+      "name": "test_parse_iso_timestamp_positive_offset",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        59,
+        63
+      ],
+      "summary": "Test function for parse iso timestamp positive offset.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_negative_offset",
+      "type": "function",
+      "name": "test_parse_iso_timestamp_negative_offset",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        66,
+        70
+      ],
+      "summary": "Test function for parse iso timestamp negative offset.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_naive_assumed_utc",
+      "type": "function",
+      "name": "test_parse_iso_timestamp_naive_assumed_utc",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        73,
+        76
+      ],
+      "summary": "Test function for parse iso timestamp naive assumed utc.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_date_only",
+      "type": "function",
+      "name": "test_parse_iso_timestamp_date_only",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        79,
+        85
+      ],
+      "summary": "Test function for parse iso timestamp date only.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_fractional_seconds",
+      "type": "function",
+      "name": "test_parse_iso_timestamp_fractional_seconds",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        88,
+        90
+      ],
+      "summary": "Test function for parse iso timestamp fractional seconds.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_invalid",
+      "type": "function",
+      "name": "test_parse_iso_timestamp_invalid",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        93,
+        95
+      ],
+      "summary": "Test function for parse iso timestamp invalid.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:test_format_utc_timestamp_roundtrip",
+      "type": "function",
+      "name": "test_format_utc_timestamp_roundtrip",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        98,
+        103
+      ],
+      "summary": "Test function for format utc timestamp roundtrip.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:test_equivalent_instants_produce_same_filtering",
+      "type": "function",
+      "name": "test_equivalent_instants_produce_same_filtering",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        106,
+        115
+      ],
+      "summary": "Test function for equivalent instants produce same filtering.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:_timestamp",
+      "type": "function",
+      "name": "_timestamp",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        127,
+        131
+      ],
+      "summary": "Helper function for  timestamp.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:_seed_audit",
+      "type": "function",
+      "name": "_seed_audit",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        134,
+        162
+      ],
+      "summary": "Helper function for  seed audit.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:_make_service",
+      "type": "function",
+      "name": "_make_service",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        165,
+        174
+      ],
+      "summary": "Helper function for  make service.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:_make_tools",
+      "type": "function",
+      "name": "_make_tools",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        177,
+        178
+      ],
+      "summary": "Helper function for  make tools.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:_make_policy",
+      "type": "function",
+      "name": "_make_policy",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        181,
+        184
+      ],
+      "summary": "Helper function for  make policy.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_audit_time_filtering.py:_invoke",
+      "type": "function",
+      "name": "_invoke",
+      "filePath": "tests/test_memory_audit_time_filtering.py",
+      "lineRange": [
+        187,
+        188
+      ],
+      "summary": "Helper function for  invoke.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_memory_candidate.py",
+      "type": "file",
+      "name": "test_memory_candidate.py",
+      "filePath": "tests/test_memory_candidate.py",
+      "summary": "Test module with 13 test functions for memory_candidate.",
+      "tags": [
+        "test",
+        "memory",
+        "candidate"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:_evidence",
+      "type": "function",
+      "name": "_evidence",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        25,
+        33
+      ],
+      "summary": "Helper function for  evidence.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:_candidate",
+      "type": "function",
+      "name": "_candidate",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        36,
+        52
+      ],
+      "summary": "Helper function for  candidate.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:test_statement_is_stripped_and_min_nonempty",
+      "type": "function",
+      "name": "test_statement_is_stripped_and_min_nonempty",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        55,
+        61
+      ],
+      "summary": "Test function for statement is stripped and min nonempty.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:test_statement_length_is_bounded",
+      "type": "function",
+      "name": "test_statement_length_is_bounded",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        64,
+        68
+      ],
+      "summary": "Test function for statement length is bounded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:test_numeric_fields_reject_out_of_bounds",
+      "type": "function",
+      "name": "test_numeric_fields_reject_out_of_bounds",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        74,
+        79
+      ],
+      "summary": "Test function for numeric fields reject out of bounds.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:test_recurrence_must_be_positive_int",
+      "type": "function",
+      "name": "test_recurrence_must_be_positive_int",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        83,
+        85
+      ],
+      "summary": "Test function for recurrence must be positive int.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:test_evidence_count_is_bounded",
+      "type": "function",
+      "name": "test_evidence_count_is_bounded",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        88,
+        91
+      ],
+      "summary": "Test function for evidence count is bounded.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:test_duplicate_evidence_in_candidate_is_rejected",
+      "type": "function",
+      "name": "test_duplicate_evidence_in_candidate_is_rejected",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        94,
+        97
+      ],
+      "summary": "Test function for duplicate evidence in candidate is rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:test_evidence_requires_source_type_and_id",
+      "type": "function",
+      "name": "test_evidence_requires_source_type_and_id",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        100,
+        104
+      ],
+      "summary": "Test function for evidence requires source type and id.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:test_evidence_timestamp_is_validated",
+      "type": "function",
+      "name": "test_evidence_timestamp_is_validated",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        107,
+        109
+      ],
+      "summary": "Test function for evidence timestamp is validated.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:test_unknown_enum_values_are_rejected",
+      "type": "function",
+      "name": "test_unknown_enum_values_are_rejected",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        120,
+        122
+      ],
+      "summary": "Test function for unknown enum values are rejected.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:test_enum_fields_are_normalized_to_members",
+      "type": "function",
+      "name": "test_enum_fields_are_normalized_to_members",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        125,
+        133
+      ],
+      "summary": "Test function for enum fields are normalized to members.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_memory_candidate.py:test_to_dict_roundtrip_via_from_dict",
+      "type": "function",
+      "name": "test_to_dict_roundtrip_via_from_dict",
+      "filePath": "tests/test_memory_candidate.py",
+      "lineRange": [
+        136,
+        147
+      ],
+      "summary": "Test function for to dict roundtrip via from dict.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.setup_method",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.teardown_method",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_no_bounds_returns_all",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_since_only",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_until_only",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_both_bounds",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_exact_since_boundary_included",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_exact_until_boundary_included",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_event_immediately_before_since_excluded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_event_immediately_after_until_excluded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_reversed_range_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_deterministic_ordering_preserved",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_same_timestamp_tie_break_by_id",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_limit_applies_after_filtering",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_max_limit_clamp",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_counts_use_same_filter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_filtered_counts_match_filtered_events",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_empty_filtered_window_returns_zero",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestStoreAuditTimeFiltering.test_since_until_with_timezone_forms",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "class:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "class:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering.setup_method",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering.test_audit_since_until",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering.test_audit_counts_since_until",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering.test_service_strips_private_fields",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering.test_invalid_timestamp_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestServiceAuditTimeFiltering.test_reversed_range_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.setup_method",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.teardown_method",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering._run",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_since",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_until",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_since_until",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_counts_since",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_counts_until",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_json_output",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_audit_counts_json_output",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_invalid_timestamp_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_reversed_range_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_empty_filtered_window",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestCLIAuditTimeFiltering.test_privacy_sentinels_never_leaked",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.setup_method",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_recent_with_since",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_recent_with_until",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_recent_with_both",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_counts_with_since",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_counts_with_until",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_counts_with_both",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_invalid_timestamp_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_reversed_range_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_non_string_timestamp_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_limit_with_time_range",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_max_limit_clamp_with_time_range",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_unknown_operation_still_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_reviewer_agent_denied",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_researcher_allowed",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_mutation_args_ignored",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_no_sql_escape_hatch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_privacy_sentinels_absent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_output_only_allowed_fields",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestAgentToolAuditTimeFiltering.test_read_only_no_state_change",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "class:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "class:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression.setup_method",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression.teardown_method",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression.test_audit_without_bounds_still_works",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression.test_tool_without_bounds_still_works",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestPhase2829Regression.test_cli_audit_without_bounds_still_works",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "class:tests/test_memory_audit_time_filtering.py:TestReadOnlyGuarantee",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "class:tests/test_memory_audit_time_filtering.py:TestReadOnlyGuarantee",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestReadOnlyGuarantee",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestReadOnlyGuarantee.test_store_read_only",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestReadOnlyGuarantee",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestReadOnlyGuarantee.test_service_read_only",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_memory_audit_time_filtering.py:TestReadOnlyGuarantee",
+      "target": "function:tests/test_memory_audit_time_filtering.py:TestReadOnlyGuarantee.test_tool_read_only",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_utc",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_utc",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_z_suffix",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_z_suffix",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_positive_offset",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_positive_offset",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_negative_offset",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_negative_offset",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_naive_assumed_utc",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_naive_assumed_utc",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_date_only",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_date_only",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_fractional_seconds",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_fractional_seconds",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_invalid",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_parse_iso_timestamp_invalid",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_format_utc_timestamp_roundtrip",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_format_utc_timestamp_roundtrip",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_equivalent_instants_produce_same_filtering",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:test_equivalent_instants_produce_same_filtering",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:_timestamp",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:_timestamp",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:_seed_audit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:_seed_audit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:_make_service",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:_make_service",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:_make_tools",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:_make_tools",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:_make_policy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:_make_policy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:_invoke",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_audit_time_filtering.py",
+      "target": "function:tests/test_memory_audit_time_filtering.py:_invoke",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:_evidence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:_evidence",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:_candidate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:_candidate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_statement_is_stripped_and_min_nonempty",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_statement_is_stripped_and_min_nonempty",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_statement_length_is_bounded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_statement_length_is_bounded",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_numeric_fields_reject_out_of_bounds",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_numeric_fields_reject_out_of_bounds",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_recurrence_must_be_positive_int",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_recurrence_must_be_positive_int",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_evidence_count_is_bounded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_evidence_count_is_bounded",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_duplicate_evidence_in_candidate_is_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_duplicate_evidence_in_candidate_is_rejected",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_evidence_requires_source_type_and_id",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_evidence_requires_source_type_and_id",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_evidence_timestamp_is_validated",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_evidence_timestamp_is_validated",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_unknown_enum_values_are_rejected",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_unknown_enum_values_are_rejected",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_enum_fields_are_normalized_to_members",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_enum_fields_are_normalized_to_members",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_to_dict_roundtrip_via_from_dict",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_memory_candidate.py",
+      "target": "function:tests/test_memory_candidate.py:test_to_dict_roundtrip_via_from_dict",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

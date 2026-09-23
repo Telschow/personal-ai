@@ -1,0 +1,1871 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_ingestion.py",
+      "type": "file",
+      "name": "test_ingestion.py",
+      "filePath": "tests/test_ingestion.py",
+      "summary": "Test file with 7 test classes and 29 test functions for ingestion.",
+      "tags": [
+        "test",
+        "ingestion",
+        "e2e"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:tests/test_ingestion.py:FakeStructuredExtractor",
+      "type": "class",
+      "name": "FakeStructuredExtractor",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        50,
+        61
+      ],
+      "summary": "Test class with 2 test methods.",
+      "tags": [
+        "test-class",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:FakeStructuredExtractor.__init__",
+      "type": "function",
+      "name": "__init__",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        50,
+        61
+      ],
+      "summary": "Test method validating   init  .",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:FakeStructuredExtractor.extract",
+      "type": "function",
+      "name": "extract",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        50,
+        61
+      ],
+      "summary": "Test method validating extract.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_ingestion.py:FailingStructuredExtractor",
+      "type": "class",
+      "name": "FailingStructuredExtractor",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        64,
+        66
+      ],
+      "summary": "Test class with 1 test methods.",
+      "tags": [
+        "test-class",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:FailingStructuredExtractor.extract",
+      "type": "function",
+      "name": "extract",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        64,
+        66
+      ],
+      "summary": "Test method validating extract.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_ingestion.py:_Unspecified",
+      "type": "class",
+      "name": "_Unspecified",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        69,
+        70
+      ],
+      "summary": "Test class with 0 test methods.",
+      "tags": [
+        "test-class",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_ingestion.py:FakeEmbeddingProvider",
+      "type": "class",
+      "name": "FakeEmbeddingProvider",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        76,
+        85
+      ],
+      "summary": "Test class with 2 test methods.",
+      "tags": [
+        "test-class",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:FakeEmbeddingProvider.__init__",
+      "type": "function",
+      "name": "__init__",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        76,
+        85
+      ],
+      "summary": "Test method validating   init  .",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:FakeEmbeddingProvider.embed",
+      "type": "function",
+      "name": "embed",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        76,
+        85
+      ],
+      "summary": "Test method validating embed.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_ingestion.py:ChunkStoreSpy",
+      "type": "class",
+      "name": "ChunkStoreSpy",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        88,
+        110
+      ],
+      "summary": "Test class with 4 test methods.",
+      "tags": [
+        "test-class",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:ChunkStoreSpy.__init__",
+      "type": "function",
+      "name": "__init__",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        88,
+        110
+      ],
+      "summary": "Test method validating   init  .",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:ChunkStoreSpy.list_for_document",
+      "type": "function",
+      "name": "list_for_document",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        88,
+        110
+      ],
+      "summary": "Test method validating list for document.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:ChunkStoreSpy.add_many",
+      "type": "function",
+      "name": "add_many",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        88,
+        110
+      ],
+      "summary": "Test method validating add many.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:ChunkStoreSpy.delete_for_document",
+      "type": "function",
+      "name": "delete_for_document",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        88,
+        110
+      ],
+      "summary": "Test method validating delete for document.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_ingestion.py:EmbeddingStoreSpy",
+      "type": "class",
+      "name": "EmbeddingStoreSpy",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        113,
+        135
+      ],
+      "summary": "Test class with 4 test methods.",
+      "tags": [
+        "test-class",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:EmbeddingStoreSpy.__init__",
+      "type": "function",
+      "name": "__init__",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        113,
+        135
+      ],
+      "summary": "Test method validating   init  .",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:EmbeddingStoreSpy.get",
+      "type": "function",
+      "name": "get",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        113,
+        135
+      ],
+      "summary": "Test method validating get.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:EmbeddingStoreSpy.add",
+      "type": "function",
+      "name": "add",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        113,
+        135
+      ],
+      "summary": "Test method validating add.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:EmbeddingStoreSpy.delete",
+      "type": "function",
+      "name": "delete",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        113,
+        135
+      ],
+      "summary": "Test method validating delete.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_ingestion.py:IngestionHarness",
+      "type": "class",
+      "name": "IngestionHarness",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        138,
+        144
+      ],
+      "summary": "Test class with 0 test methods.",
+      "tags": [
+        "test-class",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:make_record",
+      "type": "function",
+      "name": "make_record",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        38,
+        47
+      ],
+      "summary": "Helper function for make record.",
+      "tags": [
+        "test-function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:make_ingestor",
+      "type": "function",
+      "name": "make_ingestor",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        147,
+        177
+      ],
+      "summary": "Helper function for make ingestor.",
+      "tags": [
+        "test-function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_text_heavy_record_flows_through_full_pipeline",
+      "type": "function",
+      "name": "test_text_heavy_record_flows_through_full_pipeline",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        180,
+        195
+      ],
+      "summary": "Test function for text heavy record flows through full pipeline.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_structured_extractor_receives_existing_extraction_result",
+      "type": "function",
+      "name": "test_structured_extractor_receives_existing_extraction_result",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        198,
+        209
+      ],
+      "summary": "Test function for structured extractor receives existing extraction result.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_reingesting_unchanged_content_is_idempotent",
+      "type": "function",
+      "name": "test_reingesting_unchanged_content_is_idempotent",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        212,
+        223
+      ],
+      "summary": "Test function for reingesting unchanged content is idempotent.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_changed_content_creates_new_identity_and_keeps_old_extraction",
+      "type": "function",
+      "name": "test_changed_content_creates_new_identity_and_keeps_old_extraction",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        226,
+        241
+      ],
+      "summary": "Test function for changed content creates new identity and keeps old extraction.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_empty_document_skips_structured_extraction",
+      "type": "function",
+      "name": "test_empty_document_skips_structured_extraction",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        244,
+        255
+      ],
+      "summary": "Test function for empty document skips structured extraction.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_mixed_document_skips_structured_extraction",
+      "type": "function",
+      "name": "test_mixed_document_skips_structured_extraction",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        258,
+        268
+      ],
+      "summary": "Test function for mixed document skips structured extraction.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_mixed_document_with_usable_text_is_chunked_without_extraction",
+      "type": "function",
+      "name": "test_mixed_document_with_usable_text_is_chunked_without_extraction",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        271,
+        301
+      ],
+      "summary": "Test function for mixed document with usable text is chunked without extraction.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_reingesting_unchanged_mixed_document_does_not_duplicate_chunks",
+      "type": "function",
+      "name": "test_reingesting_unchanged_mixed_document_does_not_duplicate_chunks",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        304,
+        324
+      ],
+      "summary": "Test function for reingesting unchanged mixed document does not duplicate chunks.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_image_heavy_documents_never_touch_the_embedding_store",
+      "type": "function",
+      "name": "test_image_heavy_documents_never_touch_the_embedding_store",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        327,
+        353
+      ],
+      "summary": "Test function for image heavy documents never touch the embedding store.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_text_extraction_failure_propagates_without_persistence",
+      "type": "function",
+      "name": "test_text_extraction_failure_propagates_without_persistence",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        356,
+        365
+      ],
+      "summary": "Test function for text extraction failure propagates without persistence.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_structured_failure_propagates_and_leaves_no_extraction_record",
+      "type": "function",
+      "name": "test_structured_failure_propagates_and_leaves_no_extraction_record",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        368,
+        378
+      ],
+      "summary": "Test function for structured failure propagates and leaves no extraction record.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_identity_and_metadata_survive_the_pipeline",
+      "type": "function",
+      "name": "test_identity_and_metadata_survive_the_pipeline",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        381,
+        392
+      ],
+      "summary": "Test function for identity and metadata survive the pipeline.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_text_heavy_document_persists_deterministic_chunks",
+      "type": "function",
+      "name": "test_text_heavy_document_persists_deterministic_chunks",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        395,
+        403
+      ],
+      "summary": "Test function for text heavy document persists deterministic chunks.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_reingesting_unchanged_content_does_not_duplicate_chunks",
+      "type": "function",
+      "name": "test_reingesting_unchanged_content_does_not_duplicate_chunks",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        406,
+        415
+      ],
+      "summary": "Test function for reingesting unchanged content does not duplicate chunks.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_ingestion_succeeds_without_any_embedding_provider",
+      "type": "function",
+      "name": "test_ingestion_succeeds_without_any_embedding_provider",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        418,
+        444
+      ],
+      "summary": "Test function for ingestion succeeds without any embedding provider.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_missing_chunks_are_repaired_without_rerunning_the_model",
+      "type": "function",
+      "name": "test_missing_chunks_are_repaired_without_rerunning_the_model",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        447,
+        459
+      ],
+      "summary": "Test function for missing chunks are repaired without rerunning the model.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_reingestion_does_not_rewrite_identical_embeddings_or_chunks",
+      "type": "function",
+      "name": "test_reingestion_does_not_rewrite_identical_embeddings_or_chunks",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        462,
+        486
+      ],
+      "summary": "Test function for reingestion does not rewrite identical embeddings or chunks.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_rechunking_prunes_stale_embeddings_immediately",
+      "type": "function",
+      "name": "test_rechunking_prunes_stale_embeddings_immediately",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        489,
+        521
+      ],
+      "summary": "Test function for rechunking prunes stale embeddings immediately.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_stale_embedding_deletion_precedes_chunk_replacement",
+      "type": "function",
+      "name": "test_stale_embedding_deletion_precedes_chunk_replacement",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        524,
+        560
+      ],
+      "summary": "Test function for stale embedding deletion precedes chunk replacement.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_interrupted_stale_deletion_state_is_reconciled_by_retry",
+      "type": "function",
+      "name": "test_interrupted_stale_deletion_state_is_reconciled_by_retry",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        563,
+        598
+      ],
+      "summary": "Test function for interrupted stale deletion state is reconciled by retry.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_missing_embeddings_never_cause_model_or_extraction_reruns",
+      "type": "function",
+      "name": "test_missing_embeddings_never_cause_model_or_extraction_reruns",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        601,
+        623
+      ],
+      "summary": "Test function for missing embeddings never cause model or extraction reruns.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_empty_document_produces_no_chunks",
+      "type": "function",
+      "name": "test_empty_document_produces_no_chunks",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        626,
+        634
+      ],
+      "summary": "Test function for empty document produces no chunks.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_mixed_document_produces_no_text_chunks",
+      "type": "function",
+      "name": "test_mixed_document_produces_no_text_chunks",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        637,
+        645
+      ],
+      "summary": "Test function for mixed document produces no text chunks.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_structured_failure_persists_no_chunks",
+      "type": "function",
+      "name": "test_structured_failure_persists_no_chunks",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        648,
+        656
+      ],
+      "summary": "Test function for structured failure persists no chunks.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_chunks_remain_isolated_between_documents",
+      "type": "function",
+      "name": "test_chunks_remain_isolated_between_documents",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        659,
+        668
+      ],
+      "summary": "Test function for chunks remain isolated between documents.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_changed_chunk_configuration_replaces_stale_chunks",
+      "type": "function",
+      "name": "test_changed_chunk_configuration_replaces_stale_chunks",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        671,
+        692
+      ],
+      "summary": "Test function for changed chunk configuration replaces stale chunks.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_ingestion.py:test_repeated_identical_rechunking_performs_zero_writes",
+      "type": "function",
+      "name": "test_repeated_identical_rechunking_performs_zero_writes",
+      "filePath": "tests/test_ingestion.py",
+      "lineRange": [
+        695,
+        724
+      ],
+      "summary": "Test function for repeated identical rechunking performs zero writes.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_mcp_bridge.py",
+      "type": "file",
+      "name": "test_mcp_bridge.py",
+      "filePath": "tests/test_mcp_bridge.py",
+      "summary": "Test file with 3 test classes and 4 test functions for mcp_bridge.",
+      "tags": [
+        "test",
+        "mcp",
+        "bridge"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_mcp_bridge.py:TestBridgeRegistration",
+      "type": "class",
+      "name": "TestBridgeRegistration",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        101,
+        116
+      ],
+      "summary": "Test class with 3 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:TestBridgeRegistration.test_only_read_tools_are_registered",
+      "type": "function",
+      "name": "test_only_read_tools_are_registered",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        101,
+        116
+      ],
+      "summary": "Test method validating only read tools are registered.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:TestBridgeRegistration.test_no_write_tool_is_registered",
+      "type": "function",
+      "name": "test_no_write_tool_is_registered",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        101,
+        116
+      ],
+      "summary": "Test method validating no write tool is registered.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:TestBridgeRegistration.test_tool_metadata_is_privacy_safe",
+      "type": "function",
+      "name": "test_tool_metadata_is_privacy_safe",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        101,
+        116
+      ],
+      "summary": "Test method validating tool metadata is privacy safe.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_mcp_bridge.py:TestBridgeReads",
+      "type": "class",
+      "name": "TestBridgeReads",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        119,
+        160
+      ],
+      "summary": "Test class with 6 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:TestBridgeReads.test_get_document_not_found",
+      "type": "function",
+      "name": "test_get_document_not_found",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        119,
+        160
+      ],
+      "summary": "Test method validating get document not found.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:TestBridgeReads.test_empty_corpus_searches",
+      "type": "function",
+      "name": "test_empty_corpus_searches",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        119,
+        160
+      ],
+      "summary": "Test method validating empty corpus searches.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:TestBridgeReads.test_document_fetch_returns_seeded_chunks",
+      "type": "function",
+      "name": "test_document_fetch_returns_seeded_chunks",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        119,
+        160
+      ],
+      "summary": "Test method validating document fetch returns seeded chunks.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:TestBridgeReads.test_memory_search_finds_seeded_memory",
+      "type": "function",
+      "name": "test_memory_search_finds_seeded_memory",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        119,
+        160
+      ],
+      "summary": "Test method validating memory search finds seeded memory.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:TestBridgeReads.test_people_search_finds_seeded_person",
+      "type": "function",
+      "name": "test_people_search_finds_seeded_person",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        119,
+        160
+      ],
+      "summary": "Test method validating people search finds seeded person.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:TestBridgeReads.test_seeded_limits_and_caps",
+      "type": "function",
+      "name": "test_seeded_limits_and_caps",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        119,
+        160
+      ],
+      "summary": "Test method validating seeded limits and caps.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_mcp_bridge.py:TestBridgeValidation",
+      "type": "class",
+      "name": "TestBridgeValidation",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        163,
+        172
+      ],
+      "summary": "Test class with 2 test methods.",
+      "tags": [
+        "test-class",
+        "pytest",
+        "pytest-suite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:TestBridgeValidation.test_invalid_argument_types_raise",
+      "type": "function",
+      "name": "test_invalid_argument_types_raise",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        163,
+        172
+      ],
+      "summary": "Test method validating invalid argument types raise.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:TestBridgeValidation.test_empty_required_arguments_raise",
+      "type": "function",
+      "name": "test_empty_required_arguments_raise",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        163,
+        172
+      ],
+      "summary": "Test method validating empty required arguments raise.",
+      "tags": [
+        "test-method",
+        "pytest"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:_call",
+      "type": "function",
+      "name": "_call",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        22,
+        32
+      ],
+      "summary": "Helper function for  call.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:_tools",
+      "type": "function",
+      "name": "_tools",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        35,
+        43
+      ],
+      "summary": "Helper function for  tools.",
+      "tags": [
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:database",
+      "type": "function",
+      "name": "database",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        47,
+        51
+      ],
+      "summary": "Helper function for database.",
+      "tags": [
+        "test-function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_mcp_bridge.py:seeded_database",
+      "type": "function",
+      "name": "seeded_database",
+      "filePath": "tests/test_mcp_bridge.py",
+      "lineRange": [
+        55,
+        98
+      ],
+      "summary": "Helper function for seeded database.",
+      "tags": [
+        "test-function"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:FakeStructuredExtractor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:FakeStructuredExtractor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_ingestion.py:FakeStructuredExtractor",
+      "target": "function:tests/test_ingestion.py:FakeStructuredExtractor.__init__",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_ingestion.py:FakeStructuredExtractor",
+      "target": "function:tests/test_ingestion.py:FakeStructuredExtractor.extract",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:FailingStructuredExtractor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:FailingStructuredExtractor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_ingestion.py:FailingStructuredExtractor",
+      "target": "function:tests/test_ingestion.py:FailingStructuredExtractor.extract",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:_Unspecified",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:_Unspecified",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:FakeEmbeddingProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:FakeEmbeddingProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_ingestion.py:FakeEmbeddingProvider",
+      "target": "function:tests/test_ingestion.py:FakeEmbeddingProvider.__init__",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_ingestion.py:FakeEmbeddingProvider",
+      "target": "function:tests/test_ingestion.py:FakeEmbeddingProvider.embed",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:ChunkStoreSpy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:ChunkStoreSpy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_ingestion.py:ChunkStoreSpy",
+      "target": "function:tests/test_ingestion.py:ChunkStoreSpy.__init__",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_ingestion.py:ChunkStoreSpy",
+      "target": "function:tests/test_ingestion.py:ChunkStoreSpy.list_for_document",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_ingestion.py:ChunkStoreSpy",
+      "target": "function:tests/test_ingestion.py:ChunkStoreSpy.add_many",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_ingestion.py:ChunkStoreSpy",
+      "target": "function:tests/test_ingestion.py:ChunkStoreSpy.delete_for_document",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:EmbeddingStoreSpy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:EmbeddingStoreSpy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_ingestion.py:EmbeddingStoreSpy",
+      "target": "function:tests/test_ingestion.py:EmbeddingStoreSpy.__init__",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_ingestion.py:EmbeddingStoreSpy",
+      "target": "function:tests/test_ingestion.py:EmbeddingStoreSpy.get",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_ingestion.py:EmbeddingStoreSpy",
+      "target": "function:tests/test_ingestion.py:EmbeddingStoreSpy.add",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_ingestion.py:EmbeddingStoreSpy",
+      "target": "function:tests/test_ingestion.py:EmbeddingStoreSpy.delete",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:IngestionHarness",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "class:tests/test_ingestion.py:IngestionHarness",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:make_record",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:make_record",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:make_ingestor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:make_ingestor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_text_heavy_record_flows_through_full_pipeline",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_text_heavy_record_flows_through_full_pipeline",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_structured_extractor_receives_existing_extraction_result",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_structured_extractor_receives_existing_extraction_result",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_reingesting_unchanged_content_is_idempotent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_reingesting_unchanged_content_is_idempotent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_changed_content_creates_new_identity_and_keeps_old_extraction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_changed_content_creates_new_identity_and_keeps_old_extraction",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_empty_document_skips_structured_extraction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_empty_document_skips_structured_extraction",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_mixed_document_skips_structured_extraction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_mixed_document_skips_structured_extraction",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_mixed_document_with_usable_text_is_chunked_without_extraction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_mixed_document_with_usable_text_is_chunked_without_extraction",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_reingesting_unchanged_mixed_document_does_not_duplicate_chunks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_reingesting_unchanged_mixed_document_does_not_duplicate_chunks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_image_heavy_documents_never_touch_the_embedding_store",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_image_heavy_documents_never_touch_the_embedding_store",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_text_extraction_failure_propagates_without_persistence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_text_extraction_failure_propagates_without_persistence",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_structured_failure_propagates_and_leaves_no_extraction_record",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_structured_failure_propagates_and_leaves_no_extraction_record",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_identity_and_metadata_survive_the_pipeline",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_identity_and_metadata_survive_the_pipeline",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_text_heavy_document_persists_deterministic_chunks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_text_heavy_document_persists_deterministic_chunks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_reingesting_unchanged_content_does_not_duplicate_chunks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_reingesting_unchanged_content_does_not_duplicate_chunks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_ingestion_succeeds_without_any_embedding_provider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_ingestion_succeeds_without_any_embedding_provider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_missing_chunks_are_repaired_without_rerunning_the_model",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_missing_chunks_are_repaired_without_rerunning_the_model",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_reingestion_does_not_rewrite_identical_embeddings_or_chunks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_reingestion_does_not_rewrite_identical_embeddings_or_chunks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_rechunking_prunes_stale_embeddings_immediately",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_rechunking_prunes_stale_embeddings_immediately",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_stale_embedding_deletion_precedes_chunk_replacement",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_stale_embedding_deletion_precedes_chunk_replacement",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_interrupted_stale_deletion_state_is_reconciled_by_retry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_interrupted_stale_deletion_state_is_reconciled_by_retry",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_missing_embeddings_never_cause_model_or_extraction_reruns",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_missing_embeddings_never_cause_model_or_extraction_reruns",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_empty_document_produces_no_chunks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_empty_document_produces_no_chunks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_mixed_document_produces_no_text_chunks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_mixed_document_produces_no_text_chunks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_structured_failure_persists_no_chunks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_structured_failure_persists_no_chunks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_chunks_remain_isolated_between_documents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_chunks_remain_isolated_between_documents",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_changed_chunk_configuration_replaces_stale_chunks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_changed_chunk_configuration_replaces_stale_chunks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_repeated_identical_rechunking_performs_zero_writes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingestion.py",
+      "target": "function:tests/test_ingestion.py:test_repeated_identical_rechunking_performs_zero_writes",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "class:tests/test_mcp_bridge.py:TestBridgeRegistration",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "class:tests/test_mcp_bridge.py:TestBridgeRegistration",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_mcp_bridge.py:TestBridgeRegistration",
+      "target": "function:tests/test_mcp_bridge.py:TestBridgeRegistration.test_only_read_tools_are_registered",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_mcp_bridge.py:TestBridgeRegistration",
+      "target": "function:tests/test_mcp_bridge.py:TestBridgeRegistration.test_no_write_tool_is_registered",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_mcp_bridge.py:TestBridgeRegistration",
+      "target": "function:tests/test_mcp_bridge.py:TestBridgeRegistration.test_tool_metadata_is_privacy_safe",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "class:tests/test_mcp_bridge.py:TestBridgeReads",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "class:tests/test_mcp_bridge.py:TestBridgeReads",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_mcp_bridge.py:TestBridgeReads",
+      "target": "function:tests/test_mcp_bridge.py:TestBridgeReads.test_get_document_not_found",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_mcp_bridge.py:TestBridgeReads",
+      "target": "function:tests/test_mcp_bridge.py:TestBridgeReads.test_empty_corpus_searches",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_mcp_bridge.py:TestBridgeReads",
+      "target": "function:tests/test_mcp_bridge.py:TestBridgeReads.test_document_fetch_returns_seeded_chunks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_mcp_bridge.py:TestBridgeReads",
+      "target": "function:tests/test_mcp_bridge.py:TestBridgeReads.test_memory_search_finds_seeded_memory",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_mcp_bridge.py:TestBridgeReads",
+      "target": "function:tests/test_mcp_bridge.py:TestBridgeReads.test_people_search_finds_seeded_person",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_mcp_bridge.py:TestBridgeReads",
+      "target": "function:tests/test_mcp_bridge.py:TestBridgeReads.test_seeded_limits_and_caps",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "class:tests/test_mcp_bridge.py:TestBridgeValidation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "class:tests/test_mcp_bridge.py:TestBridgeValidation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:tests/test_mcp_bridge.py:TestBridgeValidation",
+      "target": "function:tests/test_mcp_bridge.py:TestBridgeValidation.test_invalid_argument_types_raise",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "class:tests/test_mcp_bridge.py:TestBridgeValidation",
+      "target": "function:tests/test_mcp_bridge.py:TestBridgeValidation.test_empty_required_arguments_raise",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "function:tests/test_mcp_bridge.py:_call",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "function:tests/test_mcp_bridge.py:_call",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "function:tests/test_mcp_bridge.py:_tools",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "function:tests/test_mcp_bridge.py:_tools",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "function:tests/test_mcp_bridge.py:database",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "function:tests/test_mcp_bridge.py:database",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "function:tests/test_mcp_bridge.py:seeded_database",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_mcp_bridge.py",
+      "target": "function:tests/test_mcp_bridge.py:seeded_database",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

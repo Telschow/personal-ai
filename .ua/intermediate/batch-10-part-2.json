@@ -1,0 +1,1094 @@
+{
+  "nodes": [
+    {
+      "id": "function:job_agent/tests/test_career_llm.py:test_ollama_client_happy_path_takes_allowlist",
+      "type": "function",
+      "name": "test_ollama_client_happy_path_takes_allowlist",
+      "filePath": "job_agent/tests/test_career_llm.py",
+      "summary": "Asserts OllamaJsonClient sends an evidence allow list and parses an analyse_fit response on the happy path.",
+      "tags": [
+        "tests",
+        "llm",
+        "allow-list"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 65,
+        "endLine": 82,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_llm.py:test_ollama_client_think_can_be_re_enabled",
+      "type": "function",
+      "name": "test_ollama_client_think_can_be_re_enabled",
+      "filePath": "job_agent/tests/test_career_llm.py",
+      "summary": "Asserts the think flag can be re-enabled via constructor options despite the think-false default.",
+      "tags": [
+        "tests",
+        "llm",
+        "options"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 97,
+        "endLine": 111,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_llm.py:test_call_log_records_success_narrative",
+      "type": "function",
+      "name": "test_call_log_records_success_narrative",
+      "filePath": "job_agent/tests/test_career_llm.py",
+      "summary": "Records a successful narrative call and asserts LlmCallLog outcome counts reflect the success.",
+      "tags": [
+        "tests",
+        "llm",
+        "call-log"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 114,
+        "endLine": 134,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_llm.py:test_call_log_records_schema_invalid_and_http_error",
+      "type": "function",
+      "name": "test_call_log_records_schema_invalid_and_http_error",
+      "filePath": "job_agent/tests/test_career_llm.py",
+      "summary": "Asserts schema-invalid and HTTP-error responses both land as distinct failure outcomes in the call log.",
+      "tags": [
+        "tests",
+        "llm",
+        "call-log",
+        "fail-closed"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 137,
+        "endLine": 166,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_llm.py:test_call_log_capped_and_aggregates",
+      "type": "function",
+      "name": "test_call_log_capped_and_aggregates",
+      "filePath": "job_agent/tests/test_career_llm.py",
+      "summary": "Fires many calls and asserts the call log caps total entries while still aggregating outcome counts and durations.",
+      "tags": [
+        "tests",
+        "llm",
+        "call-log",
+        "bounds"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 169,
+        "endLine": 185,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_llm.py:test_ollama_client_adversarial_content_never_injected",
+      "type": "function",
+      "name": "test_ollama_client_adversarial_content_never_injected",
+      "filePath": "job_agent/tests/test_career_llm.py",
+      "summary": "Feeds adversarial/jailbreak content into the mock transport and asserts the system prompt is never altered and payload stays schema-bound.",
+      "tags": [
+        "tests",
+        "llm",
+        "injection",
+        "security"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 204,
+        "endLine": 233,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_llm.py:test_fit_narrative_length_caps",
+      "type": "function",
+      "name": "test_fit_narrative_length_caps",
+      "filePath": "job_agent/tests/test_career_llm.py",
+      "summary": "Asserts FitNarrative rejects and strips items that exceed configured length caps.",
+      "tags": [
+        "tests",
+        "llm",
+        "bounds"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 236,
+        "endLine": 248,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_mapping.py:_job",
+      "type": "function",
+      "name": "_job",
+      "filePath": "job_agent/tests/test_career_mapping.py",
+      "summary": "Fixture helper building a Job from a description and title.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 22,
+        "endLine": 31,
+        "params": [
+          "description",
+          "title"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_mapping.py:_ev",
+      "type": "function",
+      "name": "_ev",
+      "filePath": "job_agent/tests/test_career_mapping.py",
+      "summary": "Fixture helper constructing scored CareerEvidence with categories and verification level.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 34,
+        "endLine": 43,
+        "params": [
+          "claim",
+          "level",
+          "categories",
+          "source"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_mapping.py:test_mapping_direct_evidence_is_strong",
+      "type": "function",
+      "name": "test_mapping_direct_evidence_is_strong",
+      "filePath": "job_agent/tests/test_career_mapping.py",
+      "summary": "Asserts a concept with direct profile evidence maps to strong coverage.",
+      "tags": [
+        "tests",
+        "mapping",
+        "coverage"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 68,
+        "endLine": 80,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_mapping.py:test_mapping_transferable_distinct_from_gap",
+      "type": "function",
+      "name": "test_mapping_transferable_distinct_from_gap",
+      "filePath": "job_agent/tests/test_career_mapping.py",
+      "summary": "Asserts transferable skills map to a distinct coverage state rather than a plain gap.",
+      "tags": [
+        "tests",
+        "mapping",
+        "transferable"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 103,
+        "endLine": 116,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_mapping.py:test_mapping_every_mapping_carries_evidence_ids_or_is_gap",
+      "type": "function",
+      "name": "test_mapping_every_mapping_carries_evidence_ids_or_is_gap",
+      "filePath": "job_agent/tests/test_career_mapping.py",
+      "summary": "Asserts every non-gap mapping row references at least one evidence id.",
+      "tags": [
+        "tests",
+        "mapping",
+        "invariant"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 119,
+        "endLine": 131,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_mapping.py:test_mapping_confidence_bounded",
+      "type": "function",
+      "name": "test_mapping_confidence_bounded",
+      "filePath": "job_agent/tests/test_career_mapping.py",
+      "summary": "Asserts mapping confidence scores stay within their documented bounds across scenarios.",
+      "tags": [
+        "tests",
+        "mapping",
+        "bounds"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 152,
+        "endLine": 162,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_mapping_eval.py:_build_evidence",
+      "type": "function",
+      "name": "_build_evidence",
+      "filePath": "job_agent/tests/test_career_mapping_eval.py",
+      "summary": "Converts eval-case keyword tuples into CareerEvidence objects with stable ids.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 35,
+        "endLine": 49,
+        "params": [
+          "items"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_mapping_eval.py:_poor_fixture_mappings",
+      "type": "function",
+      "name": "_poor_fixture_mappings",
+      "filePath": "job_agent/tests/test_career_mapping_eval.py",
+      "summary": "Runs map_requirements on fixtures lacking direct hints and returns the resulting mapping rows.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 84,
+        "endLine": 99,
+        "params": [
+          "evidence"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_mapping_eval.py:test_backend_and_data_without_hint_stay_gap",
+      "type": "function",
+      "name": "test_backend_and_data_without_hint_stay_gap",
+      "filePath": "job_agent/tests/test_career_mapping_eval.py",
+      "summary": "Asserts backend/data concepts without a direct evidence hint map to gap rather than strong coverage.",
+      "tags": [
+        "tests",
+        "mapping",
+        "gap"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 102,
+        "endLine": 120,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_positioning_plan.py:_ev",
+      "type": "function",
+      "name": "_ev",
+      "filePath": "job_agent/tests/test_career_positioning_plan.py",
+      "summary": "Fixture helper constructing CareerEvidence with categories, verification level and source.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 18,
+        "endLine": 27,
+        "params": [
+          "claim",
+          "level",
+          "categories",
+          "source"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_positioning_plan.py:_attrs",
+      "type": "function",
+      "name": "_attrs",
+      "filePath": "job_agent/tests/test_career_positioning_plan.py",
+      "summary": "Fixture helper deriving job attributes from a description and title via extract_job_attributes.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 35,
+        "endLine": 45,
+        "params": [
+          "description",
+          "title"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_positioning_plan.py:test_achievements_no_fabrication_numbers",
+      "type": "function",
+      "name": "test_achievements_no_fabrication_numbers",
+      "filePath": "job_agent/tests/test_career_positioning_plan.py",
+      "summary": "Asserts derived achievements never invent quantified metrics not present in the source evidence.",
+      "tags": [
+        "tests",
+        "achievements",
+        "no-fabrication"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 73,
+        "endLine": 85,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_positioning_plan.py:test_positioning_headline_from_strong",
+      "type": "function",
+      "name": "test_positioning_headline_from_strong",
+      "filePath": "job_agent/tests/test_career_positioning_plan.py",
+      "summary": "Asserts a positioning plan headline is derived from the strongest evidence for the target role.",
+      "tags": [
+        "tests",
+        "positioning",
+        "headline"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 88,
+        "endLine": 105,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_positioning_plan.py:test_positioning_references_evidence_ids",
+      "type": "function",
+      "name": "test_positioning_references_evidence_ids",
+      "filePath": "job_agent/tests/test_career_positioning_plan.py",
+      "summary": "Asserts positioning plan entries carry real evidence ids back to profile evidence.",
+      "tags": [
+        "tests",
+        "positioning",
+        "traceability"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 108,
+        "endLine": 121,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_positioning_plan.py:test_positioning_lists_gaps_and_negative_evidence",
+      "type": "function",
+      "name": "test_positioning_lists_gaps_and_negative_evidence",
+      "filePath": "job_agent/tests/test_career_positioning_plan.py",
+      "summary": "Asserts the positioning plan surfaces unmet requirements as gaps and negative evidence.",
+      "tags": [
+        "tests",
+        "positioning",
+        "gaps"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 124,
+        "endLine": 134,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_profile.py:_prof",
+      "type": "function",
+      "name": "_prof",
+      "filePath": "job_agent/tests/test_career_profile.py",
+      "summary": "Fixture helper building a minimal profile dict merged with optional overrides.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 6,
+        "endLine": 18,
+        "params": [
+          "**overrides"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_reconcile.py:_txt_doc",
+      "type": "function",
+      "name": "_txt_doc",
+      "filePath": "job_agent/tests/test_career_reconcile.py",
+      "summary": "Fixture helper wrapping text into a CareerDocument with a deterministic document id and a single Experience section.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 21,
+        "endLine": 30,
+        "params": [
+          "text",
+          "name"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_reconcile.py:_ev",
+      "type": "function",
+      "name": "_ev",
+      "filePath": "job_agent/tests/test_career_reconcile.py",
+      "summary": "Fixture helper constructing a CareerEvidence with a stable id from a claim and source.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 33,
+        "endLine": 42,
+        "params": [
+          "claim",
+          "level",
+          "source",
+          "eid"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_reconcile.py:test_candidate_evidence_skips_heading_repetitions",
+      "type": "function",
+      "name": "test_candidate_evidence_skips_heading_repetitions",
+      "filePath": "job_agent/tests/test_career_reconcile.py",
+      "summary": "Asserts repeated heading strings are excluded from candidate evidence claims.",
+      "tags": [
+        "tests",
+        "candidate-evidence"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 60,
+        "endLine": 74,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_reconcile.py:test_reconcile_exact_keeps_existing",
+      "type": "function",
+      "name": "test_reconcile_exact_keeps_existing",
+      "filePath": "job_agent/tests/test_career_reconcile.py",
+      "summary": "Asserts an exact-matching fact during reconcile preserves the existing evidence entry.",
+      "tags": [
+        "tests",
+        "reconcile",
+        "exact-match"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 92,
+        "endLine": 101,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_reconcile.py:test_profile_documented_keeps_higher_level",
+      "type": "function",
+      "name": "test_profile_documented_keeps_higher_level",
+      "filePath": "job_agent/tests/test_career_reconcile.py",
+      "summary": "Derives profile evidence from the real profile.yaml and asserts reconciliation keeps the higher verification level for documented facts.",
+      "tags": [
+        "tests",
+        "reconcile",
+        "profile"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 150,
+        "endLine": 167,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_reconcile.py:test_no_heading_strings_enter_fact_lines",
+      "type": "function",
+      "name": "test_no_heading_strings_enter_fact_lines",
+      "filePath": "job_agent/tests/test_career_reconcile.py",
+      "summary": "Asserts heading strings never leak into candidate fact lines during document parsing.",
+      "tags": [
+        "tests",
+        "candidate-evidence",
+        "invariant"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 170,
+        "endLine": 186,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_reconcile.py:test_injection_text_is_inert",
+      "type": "function",
+      "name": "test_injection_text_is_inert",
+      "filePath": "job_agent/tests/test_career_reconcile.py",
+      "summary": "Asserts prompt-injection text inside documents stays inert and never leaks into evidence claims or structured keys.",
+      "tags": [
+        "tests",
+        "security",
+        "injection"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 189,
+        "endLine": 199,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_requirements.py:_job",
+      "type": "function",
+      "name": "_job",
+      "filePath": "job_agent/tests/test_career_requirements.py",
+      "summary": "Fixture helper building a Job from title, description, location and remote mode.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 10,
+        "endLine": 21,
+        "params": [
+          "title",
+          "description",
+          "location",
+          "remote_mode"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_requirements.py:test_product_management_attrs",
+      "type": "function",
+      "name": "test_product_management_attrs",
+      "filePath": "job_agent/tests/test_career_requirements.py",
+      "summary": "Asserts a product-management JD produces the expected role family, seniority and categories.",
+      "tags": [
+        "tests",
+        "requirements-extraction"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 24,
+        "endLine": 36,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_requirements.py:test_engineering_attrs",
+      "type": "function",
+      "name": "test_engineering_attrs",
+      "filePath": "job_agent/tests/test_career_requirements.py",
+      "summary": "Asserts an engineering JD produces the expected role family and seniority ranking.",
+      "tags": [
+        "tests",
+        "requirements-extraction"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 39,
+        "endLine": 48,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_retrieval.py:_job",
+      "type": "function",
+      "name": "_job",
+      "filePath": "job_agent/tests/test_career_retrieval.py",
+      "summary": "Fixture helper building a Job from a description and title.",
+      "tags": [
+        "tests",
+        "fixture-helper"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 32,
+        "endLine": 41,
+        "params": [
+          "description",
+          "title"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_retrieval.py:test_plan_uses_templates_not_raw_jd",
+      "type": "function",
+      "name": "test_plan_uses_templates_not_raw_jd",
+      "filePath": "job_agent/tests/test_career_retrieval.py",
+      "summary": "Asserts retrieval plan queries derive from templates and attributes rather than raw JD text.",
+      "tags": [
+        "tests",
+        "retrieval-plan"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 48,
+        "endLine": 58,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_retrieval.py:test_concept_coverage_matches_keywords",
+      "type": "function",
+      "name": "test_concept_coverage_matches_keywords",
+      "filePath": "job_agent/tests/test_career_retrieval.py",
+      "summary": "Asserts concept_coverage returns concepts whose keywords match profile evidence.",
+      "tags": [
+        "tests",
+        "concept-coverage"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 70,
+        "endLine": 84,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_retrieval.py:test_concept_coverage_capped_and_deduped",
+      "type": "function",
+      "name": "test_concept_coverage_capped_and_deduped",
+      "filePath": "job_agent/tests/test_career_retrieval.py",
+      "summary": "Asserts concept coverage output stays capped and free of duplicate concepts.",
+      "tags": [
+        "tests",
+        "concept-coverage",
+        "bounds"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 87,
+        "endLine": 100,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_retrieval.py:test_collect_evidence_null_knowledge_no_crash",
+      "type": "function",
+      "name": "test_collect_evidence_null_knowledge_no_crash",
+      "filePath": "job_agent/tests/test_career_retrieval.py",
+      "summary": "Asserts collect_evidence degrades gracefully to empty results when knowledge is the Null provider.",
+      "tags": [
+        "tests",
+        "retrieval",
+        "fail-safe"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 103,
+        "endLine": 115,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_retrieval.py:test_compact_evidence_bounded",
+      "type": "function",
+      "name": "test_compact_evidence_bounded",
+      "filePath": "job_agent/tests/test_career_retrieval.py",
+      "summary": "Asserts compact_evidence keeps output within configured size bounds.",
+      "tags": [
+        "tests",
+        "compact-evidence",
+        "bounds"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 118,
+        "endLine": 135,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_retrieval.py:test_compact_evidence_never_contains_secrets_fields",
+      "type": "function",
+      "name": "test_compact_evidence_never_contains_secrets_fields",
+      "filePath": "job_agent/tests/test_career_retrieval.py",
+      "summary": "Asserts compacted evidence never leaks fields that look like secrets.",
+      "tags": [
+        "tests",
+        "compact-evidence",
+        "security"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 138,
+        "endLine": 151,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_artifacts_versioning.py:test_save_returns_version_number",
+      "type": "function",
+      "name": "test_save_returns_version_number",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Asserts saving a career artifact returns the assigned integer version for later lookup.",
+      "tags": [
+        "tests",
+        "versioning"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 147,
+        "endLine": 154,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_artifacts_versioning.py:test_get_latest_returns_highest_version",
+      "type": "function",
+      "name": "test_get_latest_returns_highest_version",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Saves multiple versions and asserts the latest lookup returns the highest.",
+      "tags": [
+        "tests",
+        "versioning"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 162,
+        "endLine": 170,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_artifacts_versioning.py:test_get_specific_version",
+      "type": "function",
+      "name": "test_get_specific_version",
+      "filePath": "job_agent/tests/test_career_artifacts_versioning.py",
+      "summary": "Saves two versions and asserts each can be retrieved by its exact version number.",
+      "tags": [
+        "tests",
+        "versioning"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 173,
+        "endLine": 181,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm.py:test_schema_version",
+      "type": "function",
+      "name": "test_schema_version",
+      "filePath": "job_agent/tests/test_career_cv_llm.py",
+      "summary": "Asserts the proposal SCHEMA_VERSION is exposed and used consistently.",
+      "tags": [
+        "tests",
+        "llm",
+        "schema"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 90,
+        "endLine": 91,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm_retries.py:test_persistent_transient_fails_closed_after_bounded_retries",
+      "type": "function",
+      "name": "test_persistent_transient_fails_closed_after_bounded_retries",
+      "filePath": "job_agent/tests/test_career_cv_llm_retries.py",
+      "summary": "Asserts a continuously failing transient error exhausts bounded retries and returns None fail-closed.",
+      "tags": [
+        "tests",
+        "llm",
+        "retries",
+        "fail-closed"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 63,
+        "endLine": 71,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm_retries.py:test_malformed_success_is_not_retried_and_fails_closed",
+      "type": "function",
+      "name": "test_malformed_success_is_not_retried_and_fails_closed",
+      "filePath": "job_agent/tests/test_career_cv_llm_retries.py",
+      "summary": "Asserts a malformed success response is not retried and fails closed.",
+      "tags": [
+        "tests",
+        "llm",
+        "fail-closed"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 101,
+        "endLine": 107,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm_retries.py:test_network_error_retried_then_fails_closed",
+      "type": "function",
+      "name": "test_network_error_retried_then_fails_closed",
+      "filePath": "job_agent/tests/test_career_cv_llm_retries.py",
+      "summary": "Asserts a ConnectError is retried a bounded number of times then fails closed.",
+      "tags": [
+        "tests",
+        "llm",
+        "retries"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 83,
+        "endLine": 89,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm_retries.py:test_client_error_not_retried",
+      "type": "function",
+      "name": "test_client_error_not_retried",
+      "filePath": "job_agent/tests/test_career_cv_llm_retries.py",
+      "summary": "Asserts client errors (4xx) are not retried at all.",
+      "tags": [
+        "tests",
+        "llm",
+        "retries"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 74,
+        "endLine": 80,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_cv_llm_retries.py:test_retries_disabled_with_max_retries_zero",
+      "type": "function",
+      "name": "test_retries_disabled_with_max_retries_zero",
+      "filePath": "job_agent/tests/test_career_cv_llm_retries.py",
+      "summary": "Asserts max_retries zero disables retry entirely and fails closed on a transient error.",
+      "tags": [
+        "tests",
+        "llm",
+        "retries"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 92,
+        "endLine": 98,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_knowledge.py:test_null_provider_healthy_false",
+      "type": "function",
+      "name": "test_null_provider_healthy_false",
+      "filePath": "job_agent/tests/test_career_knowledge.py",
+      "summary": "Asserts NullCareerKnowledge reports unhealthy and empty searches.",
+      "tags": [
+        "tests",
+        "knowledge",
+        "null-provider"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 86,
+        "endLine": 90,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_knowledge.py:test_adapter_read_only_connection",
+      "type": "function",
+      "name": "test_adapter_read_only_connection",
+      "filePath": "job_agent/tests/test_career_knowledge.py",
+      "summary": "Asserts the knowledge adapter opens its backing SQLite connection read-only.",
+      "tags": [
+        "tests",
+        "knowledge",
+        "read-only"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 102,
+        "endLine": 107,
+        "params": [
+          "tmp_path"
+        ]
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_reconcile.py:test_reconcile_new_adds_documented",
+      "type": "function",
+      "name": "test_reconcile_new_adds_documented",
+      "filePath": "job_agent/tests/test_career_reconcile.py",
+      "summary": "Asserts a new documented fact is added as documented evidence by reconcile.",
+      "tags": [
+        "tests",
+        "reconcile"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 104,
+        "endLine": 110,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_reconcile.py:test_reconcile_conflict_records",
+      "type": "function",
+      "name": "test_reconcile_conflict_records",
+      "filePath": "job_agent/tests/test_career_reconcile.py",
+      "summary": "Asserts conflicting facts are recorded as conflicts by reconcile.",
+      "tags": [
+        "tests",
+        "reconcile",
+        "conflict"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 113,
+        "endLine": 119,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_reconcile.py:test_reconcile_idempotent_on_rerun",
+      "type": "function",
+      "name": "test_reconcile_idempotent_on_rerun",
+      "filePath": "job_agent/tests/test_career_reconcile.py",
+      "summary": "Asserts running reconcile twice on the same document produces the same evidence set.",
+      "tags": [
+        "tests",
+        "reconcile",
+        "idempotency"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 132,
+        "endLine": 138,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_mapping_eval.py:test_eval_set_is_44_cases_across_all_categories",
+      "type": "function",
+      "name": "test_eval_set_is_44_cases_across_all_categories",
+      "filePath": "job_agent/tests/test_career_mapping_eval.py",
+      "summary": "Asserts the fixture eval set contains exactly 44 cases spanning every evidence category.",
+      "tags": [
+        "tests",
+        "eval-set"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 52,
+        "endLine": 58,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_mapping_eval.py:test_eval_accuracy_meets_floor",
+      "type": "function",
+      "name": "test_eval_accuracy_meets_floor",
+      "filePath": "job_agent/tests/test_career_mapping_eval.py",
+      "summary": "Runs the eval set through evaluate_mapping_set and asserts accuracy meets the configured floor.",
+      "tags": [
+        "tests",
+        "eval",
+        "accuracy"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 61,
+        "endLine": 66,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_profile.py:test_default_target_families_include_current",
+      "type": "function",
+      "name": "test_default_target_families_include_current",
+      "filePath": "job_agent/tests/test_career_profile.py",
+      "summary": "Asserts default target families include the profile's current role family.",
+      "tags": [
+        "tests",
+        "profile"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 21,
+        "endLine": 25,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_profile.py:test_explicit_targets_are_kept_and_current_inserted_first",
+      "type": "function",
+      "name": "test_explicit_targets_are_kept_and_current_inserted_first",
+      "filePath": "job_agent/tests/test_career_profile.py",
+      "summary": "Asserts explicit target families are kept with the current family inserted first.",
+      "tags": [
+        "tests",
+        "profile"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 28,
+        "endLine": 32,
+        "params": []
+      }
+    },
+    {
+      "id": "function:job_agent/tests/test_career_profile.py:test_constraints_back_stated_values",
+      "type": "function",
+      "name": "test_constraints_back_stated_values",
+      "filePath": "job_agent/tests/test_career_profile.py",
+      "summary": "Asserts profile constraints reinforce explicitly stated values.",
+      "tags": [
+        "tests",
+        "profile",
+        "constraints"
+      ],
+      "complexity": "simple",
+      "metadata": {
+        "startLine": 63,
+        "endLine": 68,
+        "params": []
+      }
+    }
+  ],
+  "edges": []
+}

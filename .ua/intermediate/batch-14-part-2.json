@@ -1,0 +1,1237 @@
+{
+ "nodes": [
+  {
+   "id": "file:src/personal_ai/hybrid_index.py",
+   "type": "file",
+   "name": "hybrid_index.py",
+   "filePath": "src/personal_ai/hybrid_index.py",
+   "summary": "Hybrid keyword+semantic chunk retrieval behind the ChunkIndex boundary: RRF fusion (_rrf_score) of lexical and semantic candidate lists with a bounded candidate limit.",
+   "tags": [
+    "infrastructure"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "function:src/personal_ai/hybrid_index.py:_candidate_limit",
+   "type": "function",
+   "name": "_candidate_limit",
+   "filePath": "src/personal_ai/hybrid_index.py",
+   "lineRange": [
+    63,
+    68
+   ],
+   "summary": "Return the per-backend candidate window for a final result limit.",
+   "tags": [
+    "python"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/hybrid_index.py:_rrf_score",
+   "type": "function",
+   "name": "_rrf_score",
+   "filePath": "src/personal_ai/hybrid_index.py",
+   "lineRange": [
+    71,
+    81
+   ],
+   "summary": "Compute the RRF contribution with k = 60, equal weights, 0-based ranks.",
+   "tags": [
+    "python"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/hybrid_index.py:HybridChunkIndex",
+   "type": "class",
+   "name": "HybridChunkIndex",
+   "filePath": "src/personal_ai/hybrid_index.py",
+   "lineRange": [
+    105,
+    177
+   ],
+   "summary": "Concrete ``ChunkIndex`` implementation composing two backends with RRF.",
+   "tags": [
+    "python",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:src/personal_ai/ingestion.py",
+   "type": "file",
+   "name": "ingestion.py",
+   "filePath": "src/personal_ai/ingestion.py",
+   "summary": "Orchestrates source records into durable documents and extractions via DocumentIngestor, returning an IngestionResult summary.",
+   "tags": [
+    "infrastructure"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "class:src/personal_ai/ingestion.py:IngestionResult",
+   "type": "class",
+   "name": "IngestionResult",
+   "filePath": "src/personal_ai/ingestion.py",
+   "lineRange": [
+    49,
+    67
+   ],
+   "summary": "Outcome of ingesting one source record.",
+   "tags": [
+    "python",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/ingestion.py:DocumentIngestor",
+   "type": "class",
+   "name": "DocumentIngestor",
+   "filePath": "src/personal_ai/ingestion.py",
+   "lineRange": [
+    70,
+    448
+   ],
+   "summary": "Connects extraction, classification, and storage for one record.",
+   "tags": [
+    "python",
+    "class"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "file:src/personal_ai/mcp_server.py",
+   "type": "file",
+   "name": "mcp_server.py",
+   "filePath": "src/personal_ai/mcp_server.py",
+   "summary": "Local read-only MCP knowledge bridge exposing policy-gated knowledge tools over an MCP server; build_mcp_server wires the runtime embedding provider on demand.",
+   "tags": [
+    "infrastructure"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "function:src/personal_ai/mcp_server.py:build_mcp_server",
+   "type": "function",
+   "name": "build_mcp_server",
+   "filePath": "src/personal_ai/mcp_server.py",
+   "lineRange": [
+    90,
+    161
+   ],
+   "summary": "Build a read-only MCP server exposing the personal knowledge tools.",
+   "tags": [
+    "python"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:src/personal_ai/mcp_server.py:main",
+   "type": "function",
+   "name": "main",
+   "filePath": "src/personal_ai/mcp_server.py",
+   "lineRange": [
+    164,
+    175
+   ],
+   "summary": "Defines main in mcp_server.py.",
+   "tags": [
+    "python"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:src/personal_ai/memory/__init__.py",
+   "type": "file",
+   "name": "__init__.py",
+   "filePath": "src/personal_ai/memory/__init__.py",
+   "summary": "Package init for the memory subsystem; re-exports high-level memory ingestion/curation primitives.",
+   "tags": [
+    "memory"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "file:src/personal_ai/memory/chat.py",
+   "type": "file",
+   "name": "chat.py",
+   "filePath": "src/personal_ai/memory/chat.py",
+   "summary": "Phase 42 bounded conversational memory recall adapter: derives chat scopes, runs bounded queries, returns polite ChatMemoryResult for the chat/CLI path.",
+   "tags": [
+    "memory"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "function:src/personal_ai/memory/chat.py:derive_chat_scopes",
+   "type": "function",
+   "name": "derive_chat_scopes",
+   "filePath": "src/personal_ai/memory/chat.py",
+   "lineRange": [
+    86,
+    104
+   ],
+   "summary": "Derive trusted retrieval scopes for automatic chat recall.",
+   "tags": [
+    "python",
+    "memory"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/chat.py:ChatMemoryResult",
+   "type": "class",
+   "name": "ChatMemoryResult",
+   "filePath": "src/personal_ai/memory/chat.py",
+   "lineRange": [
+    115,
+    137
+   ],
+   "summary": "Everything the chat layer needs from one automatic recall.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/chat.py:ChatMemory",
+   "type": "class",
+   "name": "ChatMemory",
+   "filePath": "src/personal_ai/memory/chat.py",
+   "lineRange": [
+    140,
+    239
+   ],
+   "summary": "Application layer: bounded, deterministic automatic chat recall.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:src/personal_ai/memory/context.py",
+   "type": "file",
+   "name": "context.py",
+   "filePath": "src/personal_ai/memory/context.py",
+   "summary": "Untrusted memory context for eventual model-provider integration; renders retrieved memories as contextual data, never instructions.",
+   "tags": [
+    "memory"
+   ],
+   "complexity": "simple",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "class:src/personal_ai/memory/context.py:MemoryContext",
+   "type": "class",
+   "name": "MemoryContext",
+   "filePath": "src/personal_ai/memory/context.py",
+   "lineRange": [
+    30,
+    74
+   ],
+   "summary": "A small, explicitly-untrusted context bundle of retrieved memories.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/memory/context.py:render_untrusted_memory_context",
+   "type": "function",
+   "name": "render_untrusted_memory_context",
+   "filePath": "src/personal_ai/memory/context.py",
+   "lineRange": [
+    77,
+    86
+   ],
+   "summary": "Render a :class:`MemoryContext` as the LLM-input untrusted block.",
+   "tags": [
+    "python",
+    "memory"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:src/personal_ai/memory/models.py",
+   "type": "file",
+   "name": "models.py",
+   "filePath": "src/personal_ai/memory/models.py",
+   "summary": "Memory domain model: kinds/scopes/status/source/temporal/assertion enums, Memory + MemoryDraft + MemoryEvidenceRef + MemoryCandidate dataclasses, validation and ISO timestamp/ID helpers.",
+   "tags": [
+    "memory"
+   ],
+   "complexity": "high",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "class:src/personal_ai/memory/models.py:MemoryKind",
+   "type": "class",
+   "name": "MemoryKind",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    82,
+    111
+   ],
+   "summary": "The kinds of durable memory the system may retain.",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/models.py:MemoryScope",
+   "type": "class",
+   "name": "MemoryScope",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    114,
+    120
+   ],
+   "summary": "Who/what a memory applies to. Retrieval must enforce this.",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/models.py:MemoryStatus",
+   "type": "class",
+   "name": "MemoryStatus",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    123,
+    139
+   ],
+   "summary": "Lifecycle of a memory record.",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/models.py:MemorySourceType",
+   "type": "class",
+   "name": "MemorySourceType",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    142,
+    151
+   ],
+   "summary": "Provenance: where a durable memory came from.",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/models.py:TemporalScope",
+   "type": "class",
+   "name": "TemporalScope",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    154,
+    165
+   ],
+   "summary": "How a memory's content relates to the present.",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/models.py:AssertionStatus",
+   "type": "class",
+   "name": "AssertionStatus",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    168,
+    179
+   ],
+   "summary": "How a candidate statement was asserted.",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/models.py:MemoryEventType",
+   "type": "class",
+   "name": "MemoryEventType",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    182,
+    196
+   ],
+   "summary": "Canonical safe memory event names (stored in the memory store).",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/models.py:MemoryValidationError",
+   "type": "class",
+   "name": "MemoryValidationError",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    199,
+    200
+   ],
+   "summary": "Raised when a memory record violates the domain contract.",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/memory/models.py:validate_memory",
+   "type": "function",
+   "name": "validate_memory",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    298,
+    330
+   ],
+   "summary": "Validate a memory record against the domain contract.",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "class:src/personal_ai/memory/models.py:Memory",
+   "type": "class",
+   "name": "Memory",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    226,
+    295
+   ],
+   "summary": "One durable memory record.",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/models.py:MemoryDraft",
+   "type": "class",
+   "name": "MemoryDraft",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    334,
+    376
+   ],
+   "summary": "Input for creating a memory.",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/models.py:MemoryEvidenceRef",
+   "type": "class",
+   "name": "MemoryEvidenceRef",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    384,
+    411
+   ],
+   "summary": "One provenance reference supporting a memory.",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/models.py:MemoryCandidate",
+   "type": "class",
+   "name": "MemoryCandidate",
+   "filePath": "src/personal_ai/memory/models.py",
+   "lineRange": [
+    415,
+    543
+   ],
+   "summary": "A proposed memory before policy and reconciliation run.",
+   "tags": [
+    "python",
+    "memory",
+    "domain-model",
+    "class"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "file:src/personal_ai/memory/policy.py",
+   "type": "file",
+   "name": "policy.py",
+   "filePath": "src/personal_ai/memory/policy.py",
+   "summary": "Deterministic automatic memory policy deciding whether a MemoryCandidate may become durable memory or is rejected/downgraded; sensitivity and source-quality classification.",
+   "tags": [
+    "memory"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "class:src/personal_ai/memory/policy.py:Sensitivity",
+   "type": "class",
+   "name": "Sensitivity",
+   "filePath": "src/personal_ai/memory/policy.py",
+   "lineRange": [
+    43,
+    49
+   ],
+   "summary": "How sensitive the candidate statement is.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/policy.py:SourceQuality",
+   "type": "class",
+   "name": "SourceQuality",
+   "filePath": "src/personal_ai/memory/policy.py",
+   "lineRange": [
+    61,
+    73
+   ],
+   "summary": "Strength of the provenance backing a candidate.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/policy.py:MemoryPolicyDecision",
+   "type": "class",
+   "name": "MemoryPolicyDecision",
+   "filePath": "src/personal_ai/memory/policy.py",
+   "lineRange": [
+    77,
+    97
+   ],
+   "summary": "Outcome of evaluating one candidate against the policy.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/policy.py:MemoryPolicy",
+   "type": "class",
+   "name": "MemoryPolicy",
+   "filePath": "src/personal_ai/memory/policy.py",
+   "lineRange": [
+    261,
+    326
+   ],
+   "summary": "Pure, deterministic policy over validated memory candidates.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/memory/policy.py:classify_sensitivity",
+   "type": "function",
+   "name": "classify_sensitivity",
+   "filePath": "src/personal_ai/memory/policy.py",
+   "lineRange": [
+    329,
+    348
+   ],
+   "summary": "Deterministic, conservative sensitivity classification.",
+   "tags": [
+    "python",
+    "memory"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/memory/policy.py:classify_source_quality",
+   "type": "function",
+   "name": "classify_source_quality",
+   "filePath": "src/personal_ai/memory/policy.py",
+   "lineRange": [
+    351,
+    370
+   ],
+   "summary": "Best available provenance quality across the candidate's evidence.",
+   "tags": [
+    "python",
+    "memory"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:src/personal_ai/memory/reconcile.py",
+   "type": "file",
+   "name": "reconcile.py",
+   "filePath": "src/personal_ai/memory/reconcile.py",
+   "summary": "Deterministic reconciliation of a candidate against existing memories before writing: dedup / supersede / augment decisions from token overlap and newest-source-time evidence.",
+   "tags": [
+    "memory"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python source module."
+  },
+  {
+   "id": "class:src/personal_ai/memory/reconcile.py:ReconcileAction",
+   "type": "class",
+   "name": "ReconcileAction",
+   "filePath": "src/personal_ai/memory/reconcile.py",
+   "lineRange": [
+    45,
+    51
+   ],
+   "summary": "The reconciled outcome for a candidate.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/reconcile.py:ReconciliationPlan",
+   "type": "class",
+   "name": "ReconciliationPlan",
+   "filePath": "src/personal_ai/memory/reconcile.py",
+   "lineRange": [
+    55,
+    60
+   ],
+   "summary": "The deterministic plan for a candidate before any write happens.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:src/personal_ai/memory/reconcile.py:MemoryReconciler",
+   "type": "class",
+   "name": "MemoryReconciler",
+   "filePath": "src/personal_ai/memory/reconcile.py",
+   "lineRange": [
+    73,
+    162
+   ],
+   "summary": "Plans how a candidate should be written, deterministically.",
+   "tags": [
+    "python",
+    "memory",
+    "class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:src/personal_ai/memory/reconcile.py:token_overlap",
+   "type": "function",
+   "name": "token_overlap",
+   "filePath": "src/personal_ai/memory/reconcile.py",
+   "lineRange": [
+    170,
+    176
+   ],
+   "summary": "Defines token_overlap in reconcile.py.",
+   "tags": [
+    "python",
+    "memory"
+   ],
+   "complexity": "simple"
+  }
+ ],
+ "edges": [
+  {
+   "source": "file:src/personal_ai/hybrid_index.py",
+   "target": "function:src/personal_ai/hybrid_index.py:_candidate_limit",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/hybrid_index.py",
+   "target": "function:src/personal_ai/hybrid_index.py:_candidate_limit",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/hybrid_index.py",
+   "target": "function:src/personal_ai/hybrid_index.py:_rrf_score",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/hybrid_index.py",
+   "target": "function:src/personal_ai/hybrid_index.py:_rrf_score",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/hybrid_index.py",
+   "target": "class:src/personal_ai/hybrid_index.py:HybridChunkIndex",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/hybrid_index.py",
+   "target": "class:src/personal_ai/hybrid_index.py:HybridChunkIndex",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ingestion.py",
+   "target": "class:src/personal_ai/ingestion.py:IngestionResult",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/ingestion.py",
+   "target": "class:src/personal_ai/ingestion.py:IngestionResult",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/ingestion.py",
+   "target": "class:src/personal_ai/ingestion.py:DocumentIngestor",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/ingestion.py",
+   "target": "class:src/personal_ai/ingestion.py:DocumentIngestor",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/mcp_server.py",
+   "target": "function:src/personal_ai/mcp_server.py:build_mcp_server",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/mcp_server.py",
+   "target": "function:src/personal_ai/mcp_server.py:build_mcp_server",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/mcp_server.py",
+   "target": "function:src/personal_ai/mcp_server.py:main",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/mcp_server.py",
+   "target": "function:src/personal_ai/mcp_server.py:main",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/chat.py",
+   "target": "function:src/personal_ai/memory/chat.py:derive_chat_scopes",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/chat.py",
+   "target": "function:src/personal_ai/memory/chat.py:derive_chat_scopes",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/chat.py",
+   "target": "class:src/personal_ai/memory/chat.py:ChatMemoryResult",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/chat.py",
+   "target": "class:src/personal_ai/memory/chat.py:ChatMemoryResult",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/chat.py",
+   "target": "class:src/personal_ai/memory/chat.py:ChatMemory",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/chat.py",
+   "target": "class:src/personal_ai/memory/chat.py:ChatMemory",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/context.py",
+   "target": "class:src/personal_ai/memory/context.py:MemoryContext",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/context.py",
+   "target": "class:src/personal_ai/memory/context.py:MemoryContext",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/context.py",
+   "target": "function:src/personal_ai/memory/context.py:render_untrusted_memory_context",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/context.py",
+   "target": "function:src/personal_ai/memory/context.py:render_untrusted_memory_context",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryKind",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryKind",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryScope",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryScope",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryStatus",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryStatus",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemorySourceType",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemorySourceType",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:TemporalScope",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:TemporalScope",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:AssertionStatus",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:AssertionStatus",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryEventType",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryEventType",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryValidationError",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryValidationError",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "function:src/personal_ai/memory/models.py:validate_memory",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "function:src/personal_ai/memory/models.py:validate_memory",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:Memory",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:Memory",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryDraft",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryDraft",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryEvidenceRef",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryEvidenceRef",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryCandidate",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "class:src/personal_ai/memory/models.py:MemoryCandidate",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "class:src/personal_ai/memory/policy.py:Sensitivity",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "class:src/personal_ai/memory/policy.py:Sensitivity",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "class:src/personal_ai/memory/policy.py:SourceQuality",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "class:src/personal_ai/memory/policy.py:SourceQuality",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "class:src/personal_ai/memory/policy.py:MemoryPolicyDecision",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "class:src/personal_ai/memory/policy.py:MemoryPolicyDecision",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "class:src/personal_ai/memory/policy.py:MemoryPolicy",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "class:src/personal_ai/memory/policy.py:MemoryPolicy",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "function:src/personal_ai/memory/policy.py:classify_sensitivity",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "function:src/personal_ai/memory/policy.py:classify_sensitivity",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "function:src/personal_ai/memory/policy.py:classify_source_quality",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "function:src/personal_ai/memory/policy.py:classify_source_quality",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/reconcile.py",
+   "target": "class:src/personal_ai/memory/reconcile.py:ReconcileAction",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/reconcile.py",
+   "target": "class:src/personal_ai/memory/reconcile.py:ReconcileAction",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/reconcile.py",
+   "target": "class:src/personal_ai/memory/reconcile.py:ReconciliationPlan",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/reconcile.py",
+   "target": "class:src/personal_ai/memory/reconcile.py:ReconciliationPlan",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/reconcile.py",
+   "target": "class:src/personal_ai/memory/reconcile.py:MemoryReconciler",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/reconcile.py",
+   "target": "class:src/personal_ai/memory/reconcile.py:MemoryReconciler",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/reconcile.py",
+   "target": "function:src/personal_ai/memory/reconcile.py:token_overlap",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:src/personal_ai/memory/reconcile.py",
+   "target": "function:src/personal_ai/memory/reconcile.py:token_overlap",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:src/personal_ai/mcp_server.py:main",
+   "target": "function:src/personal_ai/mcp_server.py:build_mcp_server",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:src/personal_ai/memory/models.py:validate_memory",
+   "target": "class:src/personal_ai/memory/models.py:MemoryValidationError",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:src/personal_ai/memory/policy.py",
+   "target": "file:src/personal_ai/memory/reconcile.py",
+   "type": "related",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:src/personal_ai/memory/models.py",
+   "target": "file:src/personal_ai/memory/policy.py",
+   "type": "related",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:src/personal_ai/memory/__init__.py",
+   "target": "file:src/personal_ai/memory/models.py",
+   "type": "related",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:src/personal_ai/ingestion.py",
+   "target": "file:src/personal_ai/hybrid_index.py",
+   "type": "related",
+   "direction": "forward",
+   "weight": 0.5
+  }
+ ]
+}

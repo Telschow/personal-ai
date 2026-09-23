@@ -1,0 +1,63 @@
+{
+  "nodes": [
+    {
+      "id": "service:docker/Dockerfile",
+      "type": "service",
+      "name": "Dockerfile",
+      "filePath": "docker/Dockerfile",
+      "summary": "Single-stage production image for the Personal AI gateway, built on uv's Python 3.14 slim base, installing the src package non-editable and the Job-Agent package editable with the discovery extra. Runtime state (SQLite DB and agent workspace) is intentionally excluded and arrives via mounted volumes; the container runs `python -m personal_ai.server` on port 8000.",
+      "tags": ["containerization", "infrastructure", "deployment", "python"],
+      "complexity": "moderate",
+      "languageNotes": "Single-stage build relying on uv.lock as the single source of truth; --no-editable for the main package vs --editable for job_agent to keep runtime data at /app/job_agent."
+    },
+    {
+      "id": "service:docker/Dockerfile:base",
+      "type": "service",
+      "name": "base",
+      "filePath": "docker/Dockerfile",
+      "summary": "Base build stage defining the uv python3.14-bookworm-slim runtime environment, copying dependencies first for layer caching, then installing src and job_agent, and exposing port 8000 for the gateway.",
+      "tags": ["containerization", "build-stage", "deployment"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "service:docker/docker-compose.yml",
+      "type": "service",
+      "name": "docker-compose.yml",
+      "filePath": "docker/docker-compose.yml",
+      "summary": "Docker Compose deployment for the Personal AI gateway. Builds the Dockerfile into the `personal-ai` service on two external networks (open-webui_default and ollama_default) so Open WebUI can reach it at http://personal-ai:8000/v1 and it can reach Ollama, with no host firewall exposure, persistent /data volumes for SQLite databases and the agent workspace, and a /v1/models healthcheck.",
+      "tags": ["orchestration", "infrastructure", "deployment", "networking"],
+      "complexity": "moderate",
+      "languageNotes": "Publishes no direct host port; joins two external compose networks to route Open WebUI -> gateway -> Ollama through shared bridges."
+    }
+  ],
+  "edges": [
+    {
+      "source": "service:docker/docker-compose.yml",
+      "target": "service:docker/Dockerfile",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "service:docker/Dockerfile",
+      "target": "service:docker/Dockerfile:base",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "service:docker/Dockerfile",
+      "target": "file:src/personal_ai/server.py",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "service:docker/docker-compose.yml",
+      "target": "file:src/personal_ai/server.py",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

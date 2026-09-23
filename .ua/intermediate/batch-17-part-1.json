@@ -1,0 +1,1562 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/personal_ai/storage/vision.py",
+      "type": "file",
+      "name": "vision.py",
+      "filePath": "src/personal_ai/storage/vision.py",
+      "summary": "Storage module providing StoredVisionPage for storage domain.",
+      "tags": [
+        "barrel"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/personal_ai/storage/vision.py:_row_to_page",
+      "type": "function",
+      "name": "_row_to_page",
+      "filePath": "src/personal_ai/storage/vision.py",
+      "lineRange": [
+        54,
+        60
+      ],
+      "summary": "Function _row_to_page with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/storage/vision.py:_utc_now",
+      "type": "function",
+      "name": "_utc_now",
+      "filePath": "src/personal_ai/storage/vision.py",
+      "lineRange": [
+        63,
+        64
+      ],
+      "summary": "Function _utc_now with 0 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/storage/vision.py:StoredVisionPage",
+      "type": "class",
+      "name": "StoredVisionPage",
+      "filePath": "src/personal_ai/storage/vision.py",
+      "lineRange": [
+        45,
+        51
+      ],
+      "summary": "Storage class StoredVisionPage for database operations.",
+      "tags": [
+        "storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/storage/vision.py:VisionStore",
+      "type": "class",
+      "name": "VisionStore",
+      "filePath": "src/personal_ai/storage/vision.py",
+      "lineRange": [
+        67,
+        143
+      ],
+      "summary": "Storage class VisionStore for database operations.",
+      "tags": [
+        "storage"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/personal_ai/tools/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/personal_ai/tools/__init__.py",
+      "summary": "Package init file exporting 0 symbols.",
+      "tags": [
+        "type-definition"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/tools/corpus.py",
+      "type": "file",
+      "name": "corpus.py",
+      "filePath": "src/personal_ai/tools/corpus.py",
+      "summary": "Tool definitions for corpus capabilities.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/personal_ai/tools/corpus.py:build_policy_gated_corpus_handler",
+      "type": "function",
+      "name": "build_policy_gated_corpus_handler",
+      "filePath": "src/personal_ai/tools/corpus.py",
+      "lineRange": [
+        59,
+        75
+      ],
+      "summary": "Builds policy-gated handler for corpus tool.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/corpus.py:PolicyGatedCorpus",
+      "type": "class",
+      "name": "PolicyGatedCorpus",
+      "filePath": "src/personal_ai/tools/corpus.py",
+      "lineRange": [
+        24,
+        56
+      ],
+      "summary": "Class PolicyGatedCorpus with 3 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/tools/defaults.py",
+      "type": "file",
+      "name": "defaults.py",
+      "filePath": "src/personal_ai/tools/defaults.py",
+      "summary": "Tool definitions for defaults capabilities.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/personal_ai/tools/defaults.py:create_default_registry",
+      "type": "function",
+      "name": "create_default_registry",
+      "filePath": "src/personal_ai/tools/defaults.py",
+      "lineRange": [
+        23,
+        739
+      ],
+      "summary": "Creates the default agent tool registry with all available tools.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/personal_ai/tools/events.py",
+      "type": "file",
+      "name": "events.py",
+      "filePath": "src/personal_ai/tools/events.py",
+      "summary": "Tool definitions for events capabilities.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/personal_ai/tools/events.py:_parse_optional_str",
+      "type": "function",
+      "name": "_parse_optional_str",
+      "filePath": "src/personal_ai/tools/events.py",
+      "lineRange": [
+        84,
+        90
+      ],
+      "summary": "Function _parse_optional_str with 2 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/tools/events.py:_parse_limit",
+      "type": "function",
+      "name": "_parse_limit",
+      "filePath": "src/personal_ai/tools/events.py",
+      "lineRange": [
+        93,
+        99
+      ],
+      "summary": "Function _parse_limit with 2 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/tools/events.py:_parse_keyword",
+      "type": "function",
+      "name": "_parse_keyword",
+      "filePath": "src/personal_ai/tools/events.py",
+      "lineRange": [
+        102,
+        114
+      ],
+      "summary": "Function _parse_keyword with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/tools/events.py:_validate_event_type",
+      "type": "function",
+      "name": "_validate_event_type",
+      "filePath": "src/personal_ai/tools/events.py",
+      "lineRange": [
+        117,
+        126
+      ],
+      "summary": "Function _validate_event_type with 2 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/tools/events.py:_format_event",
+      "type": "function",
+      "name": "_format_event",
+      "filePath": "src/personal_ai/tools/events.py",
+      "lineRange": [
+        129,
+        144
+      ],
+      "summary": "Function _format_event with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/events.py:EventQueryTool",
+      "type": "class",
+      "name": "EventQueryTool",
+      "filePath": "src/personal_ai/tools/events.py",
+      "lineRange": [
+        147,
+        295
+      ],
+      "summary": "Tool class EventQueryTool for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/personal_ai/tools/fetch.py",
+      "type": "file",
+      "name": "fetch.py",
+      "filePath": "src/personal_ai/tools/fetch.py",
+      "summary": "Tool definitions for fetch capabilities.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/personal_ai/tools/fetch.py:build_policy_gated_get_handler",
+      "type": "function",
+      "name": "build_policy_gated_get_handler",
+      "filePath": "src/personal_ai/tools/fetch.py",
+      "lineRange": [
+        75,
+        89
+      ],
+      "summary": "Builds policy-gated handler for get tool.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/fetch.py:PolicyGatedGetter",
+      "type": "class",
+      "name": "PolicyGatedGetter",
+      "filePath": "src/personal_ai/tools/fetch.py",
+      "lineRange": [
+        39,
+        72
+      ],
+      "summary": "Class PolicyGatedGetter with 3 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/tools/filesystem.py",
+      "type": "file",
+      "name": "filesystem.py",
+      "filePath": "src/personal_ai/tools/filesystem.py",
+      "summary": "Tool definitions for filesystem capabilities.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/filesystem.py:FilesystemToolError",
+      "type": "class",
+      "name": "FilesystemToolError",
+      "filePath": "src/personal_ai/tools/filesystem.py",
+      "lineRange": [
+        6,
+        7
+      ],
+      "summary": "Tool class FilesystemToolError for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/filesystem.py:PathOutsideWorkspaceError",
+      "type": "class",
+      "name": "PathOutsideWorkspaceError",
+      "filePath": "src/personal_ai/tools/filesystem.py",
+      "lineRange": [
+        10,
+        11
+      ],
+      "summary": "Custom exception PathOutsideWorkspaceError for error handling.",
+      "tags": [
+        "error-type"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/filesystem.py:FilesystemTool",
+      "type": "class",
+      "name": "FilesystemTool",
+      "filePath": "src/personal_ai/tools/filesystem.py",
+      "lineRange": [
+        14,
+        55
+      ],
+      "summary": "Tool class FilesystemTool for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/tools/knowledge.py",
+      "type": "file",
+      "name": "knowledge.py",
+      "filePath": "src/personal_ai/tools/knowledge.py",
+      "summary": "Tool definitions for knowledge capabilities.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/personal_ai/tools/knowledge.py:_parse_query",
+      "type": "function",
+      "name": "_parse_query",
+      "filePath": "src/personal_ai/tools/knowledge.py",
+      "lineRange": [
+        34,
+        40
+      ],
+      "summary": "Function _parse_query with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/tools/knowledge.py:_parse_limit",
+      "type": "function",
+      "name": "_parse_limit",
+      "filePath": "src/personal_ai/tools/knowledge.py",
+      "lineRange": [
+        43,
+        49
+      ],
+      "summary": "Function _parse_limit with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/tools/knowledge.py:_parse_document_filter",
+      "type": "function",
+      "name": "_parse_document_filter",
+      "filePath": "src/personal_ai/tools/knowledge.py",
+      "lineRange": [
+        52,
+        91
+      ],
+      "summary": "Function _parse_document_filter with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/tools/knowledge.py:_format_conversation_result",
+      "type": "function",
+      "name": "_format_conversation_result",
+      "filePath": "src/personal_ai/tools/knowledge.py",
+      "lineRange": [
+        94,
+        125
+      ],
+      "summary": "Function _format_conversation_result with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/knowledge.py:KnowledgeSearchTool",
+      "type": "class",
+      "name": "KnowledgeSearchTool",
+      "filePath": "src/personal_ai/tools/knowledge.py",
+      "lineRange": [
+        128,
+        191
+      ],
+      "summary": "Tool class KnowledgeSearchTool for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/personal_ai/tools/memory.py",
+      "type": "file",
+      "name": "memory.py",
+      "filePath": "src/personal_ai/tools/memory.py",
+      "summary": "Tool definitions for memory capabilities.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/personal_ai/tools/memory.py:build_policy_gated_memory_proposal_handler",
+      "type": "function",
+      "name": "build_policy_gated_memory_proposal_handler",
+      "filePath": "src/personal_ai/tools/memory.py",
+      "lineRange": [
+        50,
+        78
+      ],
+      "summary": "Builds policy-gated handler for memory_proposal tool.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/tools/memory.py:build_automatic_memory_curator",
+      "type": "function",
+      "name": "build_automatic_memory_curator",
+      "filePath": "src/personal_ai/tools/memory.py",
+      "lineRange": [
+        165,
+        188
+      ],
+      "summary": "Function build_automatic_memory_curator with 4 parameters.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/memory.py:AutomaticMemoryCurator",
+      "type": "class",
+      "name": "AutomaticMemoryCurator",
+      "filePath": "src/personal_ai/tools/memory.py",
+      "lineRange": [
+        81,
+        162
+      ],
+      "summary": "Class AutomaticMemoryCurator with 5 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/personal_ai/tools/people.py",
+      "type": "file",
+      "name": "people.py",
+      "filePath": "src/personal_ai/tools/people.py",
+      "summary": "Tool definitions for people capabilities.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/personal_ai/tools/people.py:build_policy_gated_people_handler",
+      "type": "function",
+      "name": "build_policy_gated_people_handler",
+      "filePath": "src/personal_ai/tools/people.py",
+      "lineRange": [
+        62,
+        71
+      ],
+      "summary": "Builds policy-gated handler for people tool.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/people.py:PolicyGatedPeople",
+      "type": "class",
+      "name": "PolicyGatedPeople",
+      "filePath": "src/personal_ai/tools/people.py",
+      "lineRange": [
+        36,
+        59
+      ],
+      "summary": "Class PolicyGatedPeople with 3 methods.",
+      "tags": [
+        "data-model",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/tools/personal_context.py",
+      "type": "file",
+      "name": "personal_context.py",
+      "filePath": "src/personal_ai/tools/personal_context.py",
+      "summary": "Tool definitions for personal_context capabilities.",
+      "tags": [
+        "barrel"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/personal_ai/tools/personal_context.py:build_policy_gated_personal_context_handler",
+      "type": "function",
+      "name": "build_policy_gated_personal_context_handler",
+      "filePath": "src/personal_ai/tools/personal_context.py",
+      "lineRange": [
+        325,
+        351
+      ],
+      "summary": "Builds policy-gated handler for personal_context tool.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/personal_context.py:PersonalContextError",
+      "type": "class",
+      "name": "PersonalContextError",
+      "filePath": "src/personal_ai/tools/personal_context.py",
+      "lineRange": [
+        65,
+        66
+      ],
+      "summary": "Custom exception PersonalContextError for error handling.",
+      "tags": [
+        "error-type"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/personal_context.py:UnknownDomainError",
+      "type": "class",
+      "name": "UnknownDomainError",
+      "filePath": "src/personal_ai/tools/personal_context.py",
+      "lineRange": [
+        69,
+        70
+      ],
+      "summary": "Custom exception UnknownDomainError for error handling.",
+      "tags": [
+        "error-type"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/personal_context.py:PersonalContextService",
+      "type": "class",
+      "name": "PersonalContextService",
+      "filePath": "src/personal_ai/tools/personal_context.py",
+      "lineRange": [
+        73,
+        302
+      ],
+      "summary": "Service class PersonalContextService providing business logic.",
+      "tags": [
+        "service"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:src/personal_ai/tools/personal_context.py:PersonalContextTool",
+      "type": "class",
+      "name": "PersonalContextTool",
+      "filePath": "src/personal_ai/tools/personal_context.py",
+      "lineRange": [
+        308,
+        322
+      ],
+      "summary": "Tool class PersonalContextTool for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/tools/registry.py",
+      "type": "file",
+      "name": "registry.py",
+      "filePath": "src/personal_ai/tools/registry.py",
+      "summary": "Tool definitions for registry capabilities.",
+      "tags": [
+        "barrel"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/personal_ai/tools/registry.py:ToolError",
+      "type": "class",
+      "name": "ToolError",
+      "filePath": "src/personal_ai/tools/registry.py",
+      "lineRange": [
+        12,
+        13
+      ],
+      "summary": "Tool class ToolError for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/registry.py:DuplicateToolError",
+      "type": "class",
+      "name": "DuplicateToolError",
+      "filePath": "src/personal_ai/tools/registry.py",
+      "lineRange": [
+        16,
+        17
+      ],
+      "summary": "Tool class DuplicateToolError for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/registry.py:InvalidToolNameError",
+      "type": "class",
+      "name": "InvalidToolNameError",
+      "filePath": "src/personal_ai/tools/registry.py",
+      "lineRange": [
+        20,
+        21
+      ],
+      "summary": "Tool class InvalidToolNameError for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/registry.py:UnknownToolError",
+      "type": "class",
+      "name": "UnknownToolError",
+      "filePath": "src/personal_ai/tools/registry.py",
+      "lineRange": [
+        24,
+        25
+      ],
+      "summary": "Tool class UnknownToolError for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/registry.py:ToolArgumentError",
+      "type": "class",
+      "name": "ToolArgumentError",
+      "filePath": "src/personal_ai/tools/registry.py",
+      "lineRange": [
+        28,
+        29
+      ],
+      "summary": "Tool class ToolArgumentError for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/registry.py:ToolExecutionError",
+      "type": "class",
+      "name": "ToolExecutionError",
+      "filePath": "src/personal_ai/tools/registry.py",
+      "lineRange": [
+        32,
+        33
+      ],
+      "summary": "Tool class ToolExecutionError for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/registry.py:ToolDefinition",
+      "type": "class",
+      "name": "ToolDefinition",
+      "filePath": "src/personal_ai/tools/registry.py",
+      "lineRange": [
+        37,
+        43
+      ],
+      "summary": "Tool class ToolDefinition for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/registry.py:ToolRegistry",
+      "type": "class",
+      "name": "ToolRegistry",
+      "filePath": "src/personal_ai/tools/registry.py",
+      "lineRange": [
+        46,
+        87
+      ],
+      "summary": "Tool class ToolRegistry for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/personal_ai/tools/search.py",
+      "type": "file",
+      "name": "search.py",
+      "filePath": "src/personal_ai/tools/search.py",
+      "summary": "Tool definitions for search capabilities.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/personal_ai/tools/search.py:_parse_query",
+      "type": "function",
+      "name": "_parse_query",
+      "filePath": "src/personal_ai/tools/search.py",
+      "lineRange": [
+        35,
+        41
+      ],
+      "summary": "Function _parse_query with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/tools/search.py:_parse_limit",
+      "type": "function",
+      "name": "_parse_limit",
+      "filePath": "src/personal_ai/tools/search.py",
+      "lineRange": [
+        44,
+        50
+      ],
+      "summary": "Function _parse_limit with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/tools/search.py:_parse_document_filter",
+      "type": "function",
+      "name": "_parse_document_filter",
+      "filePath": "src/personal_ai/tools/search.py",
+      "lineRange": [
+        53,
+        92
+      ],
+      "summary": "Function _parse_document_filter with 1 parameters.",
+      "tags": [
+        "utility",
+        "exported",
+        "private"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/personal_ai/tools/search.py:SearchTool",
+      "type": "class",
+      "name": "SearchTool",
+      "filePath": "src/personal_ai/tools/search.py",
+      "lineRange": [
+        95,
+        146
+      ],
+      "summary": "Tool class SearchTool for agent capabilities.",
+      "tags": [
+        "tool"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/personal_ai/tools/workouts.py",
+      "type": "file",
+      "name": "workouts.py",
+      "filePath": "src/personal_ai/tools/workouts.py",
+      "summary": "Tool definitions for workouts capabilities.",
+      "tags": [
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/personal_ai/tools/workouts.py:build_policy_gated_workout_handler",
+      "type": "function",
+      "name": "build_policy_gated_workout_handler",
+      "filePath": "src/personal_ai/tools/workouts.py",
+      "lineRange": [
+        25,
+        47
+      ],
+      "summary": "Builds policy-gated handler for workout tool.",
+      "tags": [
+        "utility",
+        "exported"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/personal_ai/storage/vision.py",
+      "target": "function:src/personal_ai/storage/vision.py:_row_to_page",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/storage/vision.py",
+      "target": "function:src/personal_ai/storage/vision.py:_row_to_page",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/storage/vision.py",
+      "target": "function:src/personal_ai/storage/vision.py:_utc_now",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/storage/vision.py",
+      "target": "function:src/personal_ai/storage/vision.py:_utc_now",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/storage/vision.py",
+      "target": "class:src/personal_ai/storage/vision.py:StoredVisionPage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/storage/vision.py",
+      "target": "class:src/personal_ai/storage/vision.py:StoredVisionPage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/storage/vision.py",
+      "target": "class:src/personal_ai/storage/vision.py:VisionStore",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/storage/vision.py",
+      "target": "class:src/personal_ai/storage/vision.py:VisionStore",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/corpus.py",
+      "target": "function:src/personal_ai/tools/corpus.py:build_policy_gated_corpus_handler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/corpus.py",
+      "target": "function:src/personal_ai/tools/corpus.py:build_policy_gated_corpus_handler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/corpus.py",
+      "target": "class:src/personal_ai/tools/corpus.py:PolicyGatedCorpus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/corpus.py",
+      "target": "class:src/personal_ai/tools/corpus.py:PolicyGatedCorpus",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/defaults.py",
+      "target": "function:src/personal_ai/tools/defaults.py:create_default_registry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/defaults.py",
+      "target": "function:src/personal_ai/tools/defaults.py:create_default_registry",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/events.py",
+      "target": "function:src/personal_ai/tools/events.py:_parse_optional_str",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/events.py",
+      "target": "function:src/personal_ai/tools/events.py:_parse_optional_str",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/events.py",
+      "target": "function:src/personal_ai/tools/events.py:_parse_limit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/events.py",
+      "target": "function:src/personal_ai/tools/events.py:_parse_limit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/events.py",
+      "target": "function:src/personal_ai/tools/events.py:_parse_keyword",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/events.py",
+      "target": "function:src/personal_ai/tools/events.py:_parse_keyword",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/events.py",
+      "target": "function:src/personal_ai/tools/events.py:_validate_event_type",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/events.py",
+      "target": "function:src/personal_ai/tools/events.py:_validate_event_type",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/events.py",
+      "target": "function:src/personal_ai/tools/events.py:_format_event",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/events.py",
+      "target": "function:src/personal_ai/tools/events.py:_format_event",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/events.py",
+      "target": "class:src/personal_ai/tools/events.py:EventQueryTool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/events.py",
+      "target": "class:src/personal_ai/tools/events.py:EventQueryTool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/fetch.py",
+      "target": "function:src/personal_ai/tools/fetch.py:build_policy_gated_get_handler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/fetch.py",
+      "target": "function:src/personal_ai/tools/fetch.py:build_policy_gated_get_handler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/fetch.py",
+      "target": "class:src/personal_ai/tools/fetch.py:PolicyGatedGetter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/fetch.py",
+      "target": "class:src/personal_ai/tools/fetch.py:PolicyGatedGetter",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/filesystem.py",
+      "target": "class:src/personal_ai/tools/filesystem.py:FilesystemToolError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/filesystem.py",
+      "target": "class:src/personal_ai/tools/filesystem.py:FilesystemToolError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/filesystem.py",
+      "target": "class:src/personal_ai/tools/filesystem.py:PathOutsideWorkspaceError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/filesystem.py",
+      "target": "class:src/personal_ai/tools/filesystem.py:PathOutsideWorkspaceError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/filesystem.py",
+      "target": "class:src/personal_ai/tools/filesystem.py:FilesystemTool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/filesystem.py",
+      "target": "class:src/personal_ai/tools/filesystem.py:FilesystemTool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/knowledge.py",
+      "target": "function:src/personal_ai/tools/knowledge.py:_parse_query",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/knowledge.py",
+      "target": "function:src/personal_ai/tools/knowledge.py:_parse_query",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/knowledge.py",
+      "target": "function:src/personal_ai/tools/knowledge.py:_parse_limit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/knowledge.py",
+      "target": "function:src/personal_ai/tools/knowledge.py:_parse_limit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/knowledge.py",
+      "target": "function:src/personal_ai/tools/knowledge.py:_parse_document_filter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/knowledge.py",
+      "target": "function:src/personal_ai/tools/knowledge.py:_parse_document_filter",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/knowledge.py",
+      "target": "function:src/personal_ai/tools/knowledge.py:_format_conversation_result",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/knowledge.py",
+      "target": "function:src/personal_ai/tools/knowledge.py:_format_conversation_result",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/knowledge.py",
+      "target": "class:src/personal_ai/tools/knowledge.py:KnowledgeSearchTool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/knowledge.py",
+      "target": "class:src/personal_ai/tools/knowledge.py:KnowledgeSearchTool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/memory.py",
+      "target": "function:src/personal_ai/tools/memory.py:build_policy_gated_memory_proposal_handler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/memory.py",
+      "target": "function:src/personal_ai/tools/memory.py:build_policy_gated_memory_proposal_handler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/memory.py",
+      "target": "function:src/personal_ai/tools/memory.py:build_automatic_memory_curator",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/memory.py",
+      "target": "function:src/personal_ai/tools/memory.py:build_automatic_memory_curator",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/memory.py",
+      "target": "class:src/personal_ai/tools/memory.py:AutomaticMemoryCurator",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/memory.py",
+      "target": "class:src/personal_ai/tools/memory.py:AutomaticMemoryCurator",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/people.py",
+      "target": "function:src/personal_ai/tools/people.py:build_policy_gated_people_handler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/people.py",
+      "target": "function:src/personal_ai/tools/people.py:build_policy_gated_people_handler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/people.py",
+      "target": "class:src/personal_ai/tools/people.py:PolicyGatedPeople",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/people.py",
+      "target": "class:src/personal_ai/tools/people.py:PolicyGatedPeople",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/personal_context.py",
+      "target": "function:src/personal_ai/tools/personal_context.py:build_policy_gated_personal_context_handler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/personal_context.py",
+      "target": "function:src/personal_ai/tools/personal_context.py:build_policy_gated_personal_context_handler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/personal_context.py",
+      "target": "class:src/personal_ai/tools/personal_context.py:PersonalContextError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/personal_context.py",
+      "target": "class:src/personal_ai/tools/personal_context.py:PersonalContextError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/personal_context.py",
+      "target": "class:src/personal_ai/tools/personal_context.py:UnknownDomainError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/personal_context.py",
+      "target": "class:src/personal_ai/tools/personal_context.py:UnknownDomainError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/personal_context.py",
+      "target": "class:src/personal_ai/tools/personal_context.py:PersonalContextService",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/personal_context.py",
+      "target": "class:src/personal_ai/tools/personal_context.py:PersonalContextService",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/personal_context.py",
+      "target": "class:src/personal_ai/tools/personal_context.py:PersonalContextTool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/personal_context.py",
+      "target": "class:src/personal_ai/tools/personal_context.py:PersonalContextTool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:ToolError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:ToolError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:DuplicateToolError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:DuplicateToolError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:InvalidToolNameError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:InvalidToolNameError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:UnknownToolError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:UnknownToolError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:ToolArgumentError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:ToolArgumentError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:ToolExecutionError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:ToolExecutionError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:ToolDefinition",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:ToolDefinition",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:ToolRegistry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/registry.py",
+      "target": "class:src/personal_ai/tools/registry.py:ToolRegistry",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/search.py",
+      "target": "function:src/personal_ai/tools/search.py:_parse_query",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/search.py",
+      "target": "function:src/personal_ai/tools/search.py:_parse_query",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/search.py",
+      "target": "function:src/personal_ai/tools/search.py:_parse_limit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/search.py",
+      "target": "function:src/personal_ai/tools/search.py:_parse_limit",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/search.py",
+      "target": "function:src/personal_ai/tools/search.py:_parse_document_filter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/search.py",
+      "target": "function:src/personal_ai/tools/search.py:_parse_document_filter",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/search.py",
+      "target": "class:src/personal_ai/tools/search.py:SearchTool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/search.py",
+      "target": "class:src/personal_ai/tools/search.py:SearchTool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/workouts.py",
+      "target": "function:src/personal_ai/tools/workouts.py:build_policy_gated_workout_handler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/personal_ai/tools/workouts.py",
+      "target": "function:src/personal_ai/tools/workouts.py:build_policy_gated_workout_handler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/personal_ai/tools/__init__.py",
+      "target": "file:tests/__init__.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/tools/filesystem.py",
+      "target": "file:tests/test_agent_filesystem.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/tools/memory.py",
+      "target": "file:tests/test_agent_get_document_get_memory.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/personal_ai/tools/people.py",
+      "target": "file:tests/test_agent_people_tools.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

@@ -1,0 +1,690 @@
+{
+  "schema": "http://opencode.ai/ua/graph.fragment.schema.json",
+  "documentId": "batch-8-part-1",
+  "kind": "GraphFragment",
+  "metadata": {
+    "sourceFile": "extract-structure.mjs",
+    "batchNumber": 8,
+    "partNumber": 1,
+    "totals": {
+      "knownTotals": false,
+      "paths": 25,
+      "exportedSymbols": 156,
+      "missingExports": []
+    },
+    "summary": "Alphabetical first slice of job_agent batch 8: project pins, systemd packaging, job application lifecycle (application.py, apply.py), candidate canonicalization (canonical.py), career package barrel, CV evidence/artifacts foundations (achievements, artifacts, cv_llm). 0 imports edges recorded (batchImportData empty); trust cross-file calls only where imports verified in source.",
+    "checksumsSum": 0,
+    "errors": []
+  },
+  "nodes": [
+    {
+      "id": "file:.python-version",
+      "type": "file",
+      "name": ".python-version",
+      "description": "Project Python version pin. Contains ``3.14``. Single line, no logic.",
+      "codeSummary": "Repository pins the Python toolchain to 3.14.",
+      "fileLines": 1
+    },
+    {
+      "id": "file:docker/personal-ai.service",
+      "type": "file",
+      "name": "docker/personal-ai.service",
+      "description": "systemd unit for the Personal AI Gateway. Runs ``docker compose up`` in the docker directory and ``docker compose down`` on stop. Deploy packaging, no Python logic.",
+      "codeSummary": "systemd service that starts/stops the Personal AI stack via docker compose.",
+      "fileLines": 15
+    },
+    {
+      "id": "file:job_agent/job_agent/__init__.py",
+      "type": "file",
+      "name": "job_agent/job_agent/__init__.py",
+      "description": "Empty package marker, no code.",
+      "codeSummary": "Package __init__.py, no logic.",
+      "fileLines": 0
+    },
+    {
+      "id": "file:job_agent/job_agent/application.py",
+      "type": "file",
+      "name": "job_agent/job_agent/application.py",
+      "description": "Job application lifecycle state machine. Defines the application stages, validates transitions (never skips stages, no invalid moves), detects terminal states, and normalizes company/title strings for stable identity.",
+      "codeSummary": "Application lifecycle: stage validation, transition guards, terminal detection, company/title normalization.",
+      "fileLines": 277
+    },
+    {
+      "id": "class:job_agent/job_agent/application.py:ApplicationError",
+      "type": "class",
+      "name": "ApplicationError",
+      "description": "Base ValueError for application pipeline failures.",
+      "codeSummary": "Base exception for application errors.",
+      "fileLines": 1
+    },
+    {
+      "id": "class:job_agent/job_agent/application.py:UnknownStageError",
+      "type": "class",
+      "name": "UnknownStageError",
+      "description": "Raised when an application is referenced by an unknown stage identifier.",
+      "codeSummary": "ApplicationError subclass for unknown stages.",
+      "fileLines": 1
+    },
+    {
+      "id": "class:job_agent/job_agent/application.py:InvalidApplicationTransition",
+      "type": "class",
+      "name": "InvalidApplicationTransition",
+      "description": "Raised when a stage transition is not allowed by the state machine.",
+      "codeSummary": "ApplicationError subclass for invalid stage transitions.",
+      "fileLines": 1
+    },
+    {
+      "id": "class:job_agent/job_agent/application.py:Application",
+      "type": "class",
+      "name": "Application",
+      "description": "Stateful model of one job application: stage, timestamps, tracked normalized company and title. Guards stage changes through ``check_transition``.",
+      "codeSummary": "One job application record with stage lifecycle enforcement.",
+      "fileLines": 84
+    },
+    {
+      "id": "function:job_agent/job_agent/application.py:valid_stages",
+      "type": "function",
+      "name": "valid_stages",
+      "description": "Return the ordered list of all legal application stages.",
+      "codeSummary": "Lists valid application stages.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/application.py:is_valid_stage",
+      "type": "function",
+      "name": "is_valid_stage",
+      "description": "True when ``stage`` is a known stage name.",
+      "codeSummary": "Checks stage membership.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/application.py:check_transition",
+      "type": "function",
+      "name": "check_transition",
+      "description": "Validate a ``current -> target`` stage move; raises ApplicationError on unknown stages or illegal transitions.",
+      "codeSummary": "Guards application stage transitions.",
+      "fileLines": 8
+    },
+    {
+      "id": "function:job_agent/job_agent/application.py:is_terminal",
+      "type": "function",
+      "name": "is_terminal",
+      "description": "True when the stage is a final, non-transitionable state.",
+      "codeSummary": "Detects terminal application stages.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/application.py:_now",
+      "type": "function",
+      "name": "_now",
+      "description": "Current UTC timestamp, isoformat with seconds.",
+      "codeSummary": "Timestamp helper.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/application.py:_parse_datetime",
+      "type": "function",
+      "name": "_parse_datetime",
+      "description": "Parse a stored datetime string back to datetime.",
+      "codeSummary": "Datetime parsing helper.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/application.py:is_valid_interview_stage",
+      "type": "function",
+      "name": "is_valid_interview_stage",
+      "description": "True when the value is a legal interview sub-stage.",
+      "codeSummary": "Validates interview stage values.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/application.py:normalize_company",
+      "type": "function",
+      "name": "normalize_company",
+      "description": "Deterministic company-name normalization used for application identity.",
+      "codeSummary": "Normalizes company names for stable identity.",
+      "fileLines": 24
+    },
+    {
+      "id": "function:job_agent/job_agent/application.py:normalize_job_title",
+      "type": "function",
+      "name": "normalize_job_title",
+      "description": "Deterministic job-title normalization used for application identity.",
+      "codeSummary": "Normalizes job titles for stable identity.",
+      "fileLines": 24
+    },
+    {
+      "id": "file:job_agent/job_agent/apply.py",
+      "type": "file",
+      "name": "job_agent/job_agent/apply.py",
+      "description": "Approval-gated application submission flow. Builds a human approval prompt from a job and CV/cover-letter paths, then executes the submission as an ApplicationRunner that only acts after approval.",
+      "codeSummary": "Approval-gated application runner for job submissions.",
+      "fileLines": 34
+    },
+    {
+      "id": "function:job_agent/job_agent/apply.py:approval_prompt",
+      "type": "function",
+      "name": "approval_prompt",
+      "description": "Compose the approval request text that a human must confirm before any submission happens.",
+      "codeSummary": "Builds the consent prompt for the user.",
+      "fileLines": 3
+    },
+    {
+      "id": "class:job_agent/job_agent/apply.py:ApplicationRunner",
+      "type": "class",
+      "name": "ApplicationRunner",
+      "description": "Executes an approved application using a CV path and optional cover letter; refuses to run without approval.",
+      "codeSummary": "Runner that submits an approved application.",
+      "fileLines": 14
+    },
+    {
+      "id": "file:job_agent/job_agent/canonical.py",
+      "type": "file",
+      "name": "job_agent/job_agent/canonical.py",
+      "description": "Canonical identity layer for job search. Normalizes companies, titles, locations into stable canonical forms; splits compound locations; builds dedupe keys and canonical URLs; dedupes candidate identifiers.",
+      "codeSummary": "Canonicalization for company/title/location and dedupe keys.",
+      "fileLines": 224
+    },
+    {
+      "id": "function:job_agent/job_agent/canonical.py:_normalize",
+      "type": "function",
+      "name": "_normalize",
+      "description": "Casefold + strip a single text value.",
+      "codeSummary": "Text normalization primitive.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/canonical.py:normalize_company",
+      "type": "function",
+      "name": "normalize_company",
+      "description": "Canonical form of a company name (stable across variants).",
+      "codeSummary": "Canonical company name.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/canonical.py:normalize_title",
+      "type": "function",
+      "name": "normalize_title",
+      "description": "Canonical form of a job title.",
+      "codeSummary": "Canonical job title.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/canonical.py:normalize_location",
+      "type": "function",
+      "name": "normalize_location",
+      "description": "Canonical form of a location string.",
+      "codeSummary": "Canonical location.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/canonical.py:split_locations",
+      "type": "function",
+      "name": "split_locations",
+      "description": "Split a compound location string into individual locations.",
+      "codeSummary": "Splits compound locations.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/canonical.py:_key",
+      "type": "function",
+      "name": "_key",
+      "description": "Join normalized company/title/location into a key fragment.",
+      "codeSummary": "Key join helper.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/canonical.py:canonical_key",
+      "type": "function",
+      "name": "canonical_key",
+      "description": "Build the canonical dedupe key ``company|title|location`` for a posting.",
+      "codeSummary": "Canonical identity key for dedupe.",
+      "fileLines": 15
+    },
+    {
+      "id": "function:job_agent/job_agent/canonical.py:canonical_url",
+      "type": "function",
+      "name": "canonical_url",
+      "description": "Normalize a job URL to a canonical identity form.",
+      "codeSummary": "Canonical URL form.",
+      "fileLines": 15
+    },
+    {
+      "id": "function:job_agent/job_agent/canonical.py:dedupe_candidates",
+      "type": "function",
+      "name": "dedupe_candidates",
+      "description": "Dedupe an iterable of candidate identifiers preserving order.",
+      "codeSummary": "Order-preserving candidate dedupe.",
+      "fileLines": 2
+    },
+    {
+      "id": "file:job_agent/job_agent/career/__init__.py",
+      "type": "file",
+      "name": "job_agent/job_agent/career/__init__.py",
+      "description": "Barrel module re-exporting the career subpackage public API (artifacts, achievements, documents, evidence, fit, knowledge, llm, llm_log, mapping, positioning, positioning_plan, profile, reconcile, requirements, retrieval, semantic_mapping, user_artifacts). Only imports/__all__, no logic.",
+      "codeSummary": "Career package barrel re-exporting all public career modules.",
+      "fileLines": 155
+    },
+    {
+      "id": "file:job_agent/job_agent/career/achievements.py",
+      "type": "file",
+      "name": "job_agent/job_agent/career/achievements.py",
+      "description": "Deterministic achievement extraction from evidence claims. Flags claims whose text pattern signals a measurable achievement and caps them at a bounded set.",
+      "codeSummary": "Extracts bounded, deterministic achievements from evidence.",
+      "fileLines": 95
+    },
+    {
+      "id": "class:job_agent/job_agent/career/achievements.py:Achievement",
+      "type": "class",
+      "name": "Achievement",
+      "description": "One extracted achievement: claim text, source evidence id and level.",
+      "codeSummary": "Achievement data model.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/career/achievements.py:_looks_achievement",
+      "type": "function",
+      "name": "_looks_achievement",
+      "description": "Heuristic: True when a claim text looks like a measurable achievement.",
+      "codeSummary": "Achievement-text heuristic.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/career/achievements.py:derive_achievements",
+      "type": "function",
+      "name": "derive_achievements",
+      "description": "From evidence list, return ranked achievements capped at ``limit``. Reuses evidence ids, never invents facts.",
+      "codeSummary": "Deterministic, evidence-backed achievement derivation.",
+      "fileLines": 22
+    },
+    {
+      "id": "file:job_agent/job_agent/career/artifacts.py",
+      "type": "file",
+      "name": "job_agent/job_agent/career/artifacts.py",
+      "description": "Career artifact domain model (CV artifacts): status enum, experience bullets, and the CVArtifact aggregate carrying document + bullets. Claims validated through ``career.validation``.",
+      "codeSummary": "CVArtifact status/bullet models and validation hook.",
+      "fileLines": 67
+    },
+    {
+      "id": "class:job_agent/job_agent/career/artifacts.py:ArtifactStatus",
+      "type": "class",
+      "name": "ArtifactStatus",
+      "description": "StrEnum lifecycle of an artifact (e.g. draft/approved lifecycle states).",
+      "codeSummary": "Artifact status enum.",
+      "fileLines": 1
+    },
+    {
+      "id": "class:job_agent/job_agent/career/artifacts.py:Bullet",
+      "type": "class",
+      "name": "Bullet",
+      "description": "One experience bullet with evidence back-reference for a CV.",
+      "codeSummary": "CV experience bullet model.",
+      "fileLines": 1
+    },
+    {
+      "id": "class:job_agent/job_agent/career/artifacts.py:CVArtifact",
+      "type": "class",
+      "name": "CVArtifact",
+      "description": "Aggregate: a CV document product with status, bullets, and claim validation results.",
+      "codeSummary": "CV artifact aggregate.",
+      "fileLines": 1
+    },
+    {
+      "id": "file:job_agent/job_agent/career/cv_llm.py",
+      "type": "file",
+      "name": "job_agent/job_agent/career/cv_llm.py",
+      "description": "CV tailoring via LLM. Schema-capped proposal generation (headline, summary, bullets) validated against an evidence allow-list; any failure degrades to ``None``. `OllamaCvClient` mirrors `llm.OllamaJsonClient` with ``think: false`` for reasoning models.",
+      "codeSummary": "Ollama-backed, schema-validated CV tailoring client.",
+      "fileLines": 308
+    },
+    {
+      "id": "function:job_agent/job_agent/career/cv_llm.py:_is_transient",
+      "type": "function",
+      "name": "_is_transient",
+      "description": "Classify httpx exceptions as transient for retry decisions.",
+      "codeSummary": "Transient-failure predicate.",
+      "fileLines": 1
+    },
+    {
+      "id": "class:job_agent/job_agent/career/cv_llm.py:CvLlmError",
+      "type": "class",
+      "name": "CvLlmError",
+      "description": "Raised when the model produced unusable tailoring output.",
+      "codeSummary": "CV LLM error type.",
+      "fileLines": 1
+    },
+    {
+      "id": "class:job_agent/job_agent/career/cv_llm.py:CvBullet",
+      "type": "class",
+      "name": "CvBullet",
+      "description": "One length-capped CV bullet with optional evidence id reference.",
+      "codeSummary": "CV bullet model.",
+      "fileLines": 1
+    },
+    {
+      "id": "class:job_agent/job_agent/career/cv_llm.py:CvProposal",
+      "type": "class",
+      "name": "CvProposal",
+      "description": "Validated tailored CV proposal: headline, bullets, summary.",
+      "codeSummary": "Tailored CV proposal model.",
+      "fileLines": 1
+    },
+    {
+      "id": "function:job_agent/job_agent/career/cv_llm.py:parse_tailoring",
+      "type": "function",
+      "name": "parse_tailoring",
+      "description": "Parse + validate model output against the schema and evidence allow-list; raises CvLlmError on malformed output.",
+      "codeSummary": "Validates raw model output into a CvProposal.",
+      "fileLines": 15
+    },
+    {
+      "id": "class:job_agent/job_agent/career/cv_llm.py:CvGenerationClient",
+      "type": "class",
+      "name": "CvGenerationClient",
+      "description": "Protocol for any CV generation backend; failures surface as ``None``.",
+      "codeSummary": "CV generation protocol.",
+      "fileLines": 1
+    },
+    {
+      "id": "class:job_agent/job_agent/career/cv_llm.py:OllamaCvClient",
+      "type": "class",
+      "name": "OllamaCvClient",
+      "description": "Ollama-backed tailoring client posting a JSON-schema ``format`` contract with retries and aggregate-only call logging.",
+      "codeSummary": "Ollama CV client with retry + call log.",
+      "fileLines": 126
+    }
+  ],
+  "edges": [
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "class:job_agent/job_agent/application.py:ApplicationError",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "class:job_agent/job_agent/application.py:UnknownStageError",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "class:job_agent/job_agent/application.py:InvalidApplicationTransition",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "class:job_agent/job_agent/application.py:Application",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "function:job_agent/job_agent/application.py:valid_stages",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "function:job_agent/job_agent/application.py:is_valid_stage",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "function:job_agent/job_agent/application.py:check_transition",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "function:job_agent/job_agent/application.py:is_terminal",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "function:job_agent/job_agent/application.py:_now",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "function:job_agent/job_agent/application.py:_parse_datetime",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "function:job_agent/job_agent/application.py:is_valid_interview_stage",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "function:job_agent/job_agent/application.py:normalize_company",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/application.py",
+      "to": "function:job_agent/job_agent/application.py:normalize_job_title",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/apply.py",
+      "to": "function:job_agent/job_agent/apply.py:approval_prompt",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/apply.py",
+      "to": "class:job_agent/job_agent/apply.py:ApplicationRunner",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/canonical.py",
+      "to": "function:job_agent/job_agent/canonical.py:_normalize",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/canonical.py",
+      "to": "function:job_agent/job_agent/canonical.py:normalize_company",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/canonical.py",
+      "to": "function:job_agent/job_agent/canonical.py:normalize_title",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/canonical.py",
+      "to": "function:job_agent/job_agent/canonical.py:normalize_location",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/canonical.py",
+      "to": "function:job_agent/job_agent/canonical.py:split_locations",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/canonical.py",
+      "to": "function:job_agent/job_agent/canonical.py:_key",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/canonical.py",
+      "to": "function:job_agent/job_agent/canonical.py:canonical_key",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/canonical.py",
+      "to": "function:job_agent/job_agent/canonical.py:canonical_url",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/canonical.py",
+      "to": "function:job_agent/job_agent/canonical.py:dedupe_candidates",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/achievements.py",
+      "to": "class:job_agent/job_agent/career/achievements.py:Achievement",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/achievements.py",
+      "to": "function:job_agent/job_agent/career/achievements.py:_looks_achievement",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/achievements.py",
+      "to": "function:job_agent/job_agent/career/achievements.py:derive_achievements",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/artifacts.py",
+      "to": "class:job_agent/job_agent/career/artifacts.py:ArtifactStatus",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/artifacts.py",
+      "to": "class:job_agent/job_agent/career/artifacts.py:Bullet",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/artifacts.py",
+      "to": "class:job_agent/job_agent/career/artifacts.py:CVArtifact",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/cv_llm.py",
+      "to": "function:job_agent/job_agent/career/cv_llm.py:_is_transient",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/cv_llm.py",
+      "to": "class:job_agent/job_agent/career/cv_llm.py:CvLlmError",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/cv_llm.py",
+      "to": "class:job_agent/job_agent/career/cv_llm.py:CvBullet",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/cv_llm.py",
+      "to": "class:job_agent/job_agent/career/cv_llm.py:CvProposal",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/cv_llm.py",
+      "to": "function:job_agent/job_agent/career/cv_llm.py:parse_tailoring",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/cv_llm.py",
+      "to": "class:job_agent/job_agent/career/cv_llm.py:CvGenerationClient",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/cv_llm.py",
+      "to": "class:job_agent/job_agent/career/cv_llm.py:OllamaCvClient",
+      "type": "contains"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/achievements.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/artifacts.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/documents.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/evidence.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/fit.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/knowledge.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/llm.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/llm_log.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/mapping.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/positioning.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/positioning_plan.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/profile.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/reconcile.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/requirements.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/retrieval.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/__init__.py",
+      "to": "file:job_agent/job_agent/career/semantic_mapping.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/achievements.py",
+      "to": "file:job_agent/job_agent/career/evidence.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/achievements.py",
+      "to": "class:job_agent/job_agent/career/evidence.py:CareerEvidence",
+      "type": "calls"
+    },
+    {
+      "from": "file:job_agent/job_agent/career/cv_llm.py",
+      "to": "file:job_agent/job_agent/career/llm_log.py",
+      "type": "depends_on"
+    },
+    {
+      "from": "class:job_agent/job_agent/career/cv_llm.py:OllamaCvClient",
+      "to": "class:job_agent/job_agent/career/llm_log.py:LlmCallRecord",
+      "type": "calls"
+    },
+    {
+      "from": "class:job_agent/job_agent/career/cv_llm.py:OllamaCvClient",
+      "to": "function:job_agent/job_agent/career/cv_llm.py:parse_tailoring",
+      "type": "calls"
+    }
+  ],
+  "confident": true
+}

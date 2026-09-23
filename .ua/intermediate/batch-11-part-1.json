@@ -1,0 +1,1370 @@
+{
+ "nodes": [
+  {
+   "id": "file:job_agent/tests/test_career_robustness.py",
+   "type": "file",
+   "name": "test_career_robustness.py",
+   "filePath": "job_agent/tests/test_career_robustness.py",
+   "summary": "Hermetic robustness tests for Slice 3.5: concurrent artifact version assignment under racing writers, config/CLI LLM gates (career.llm.enabled, --no-llm, semantic toggle), and fail-closed degradation to deterministic output on provider errors.",
+   "tags": [
+    "test",
+    "concurrency",
+    "fail-closed",
+    "career-artifacts"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python pytest module; hermetic tests mock network/Ollama bound at infrastructure boundary."
+  },
+  {
+   "id": "function:job_agent/tests/test_career_robustness.py:_artifact",
+   "type": "function",
+   "name": "_artifact",
+   "filePath": "job_agent/tests/test_career_robustness.py",
+   "lineRange": [
+    28,
+    37
+   ],
+   "summary": " Artifact.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_robustness.py:_job_conn",
+   "type": "function",
+   "name": "_job_conn",
+   "filePath": "job_agent/tests/test_career_robustness.py",
+   "lineRange": [
+    40,
+    56
+   ],
+   "summary": " Job conn.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_robustness.py:TestConcurrentArtifactVersions",
+   "type": "class",
+   "name": "TestConcurrentArtifactVersions",
+   "filePath": "job_agent/tests/test_career_robustness.py",
+   "lineRange": [
+    77,
+    143
+   ],
+   "summary": "Test class with 3 methods exercising TestConcurrentArtifactVersions behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_robustness.py:TestLlmAndSemanticGates",
+   "type": "class",
+   "name": "TestLlmAndSemanticGates",
+   "filePath": "job_agent/tests/test_career_robustness.py",
+   "lineRange": [
+    151,
+    219
+   ],
+   "summary": "Test class with 5 methods exercising TestLlmAndSemanticGates behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:job_agent/tests/test_career_security.py",
+   "type": "file",
+   "name": "test_career_security.py",
+   "filePath": "job_agent/tests/test_career_security.py",
+   "summary": "Security-oriented tests: prompt-injection content remains inert data in reconciliation and CV generation, fabricated numbers never earn evidence support, and oversized/malformed inputs are rejected.",
+   "tags": [
+    "test",
+    "security",
+    "injection",
+    "prompt-safety"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python pytest module; hermetic tests mock network/Ollama bound at infrastructure boundary."
+  },
+  {
+   "id": "function:job_agent/tests/test_career_security.py:test_injection_never_becomes_instruction_in_prompt_projection",
+   "type": "function",
+   "name": "test_injection_never_becomes_instruction_in_prompt_projection",
+   "filePath": "job_agent/tests/test_career_security.py",
+   "lineRange": [
+    43,
+    53
+   ],
+   "summary": "Injection never becomes instruction in prompt projection.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "type": "file",
+   "name": "test_career_semantic_eval_merge.py",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "summary": "Evaluation harness tests proving the deterministic 44-case mapping floor is preserved when the semantic refinement layer merges in, with guards against negative-evidence upgrades, demotions, and fail-closed behaviour.",
+   "tags": [
+    "test",
+    "eval",
+    "semantic-mapping",
+    "mapping-floor"
+   ],
+   "complexity": "complex",
+   "languageNotes": "Python pytest module; hermetic tests mock network/Ollama bound at infrastructure boundary."
+  },
+  {
+   "id": "function:job_agent/tests/test_career_semantic_eval_merge.py:_evidences",
+   "type": "function",
+   "name": "_evidences",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "lineRange": [
+    26,
+    40
+   ],
+   "summary": " Evidences.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_semantic_eval_merge.py:_map_for_case",
+   "type": "function",
+   "name": "_map_for_case",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "lineRange": [
+    43,
+    57
+   ],
+   "summary": " Map for case.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_negative_evidence_guard_under_strong_proposal",
+   "type": "function",
+   "name": "test_negative_evidence_guard_under_strong_proposal",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "lineRange": [
+    107,
+    123
+   ],
+   "summary": "Negative evidence guard under strong proposal.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_all_conflicting_cases_stay_gap_under_semantic_layer",
+   "type": "function",
+   "name": "test_all_conflicting_cases_stay_gap_under_semantic_layer",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "lineRange": [
+    126,
+    136
+   ],
+   "summary": "All conflicting cases stay gap under semantic layer.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_positive_refinement_is_applied_with_allowlisted_evidence",
+   "type": "function",
+   "name": "test_positive_refinement_is_applied_with_allowlisted_evidence",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "lineRange": [
+    139,
+    154
+   ],
+   "summary": "Positive refinement is applied with allowlisted evidence.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_demotion_to_unknown_is_rejected",
+   "type": "function",
+   "name": "test_demotion_to_unknown_is_rejected",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "lineRange": [
+    157,
+    171
+   ],
+   "summary": "Demotion to unknown is rejected.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_demotion_within_positive_levels_is_rejected",
+   "type": "function",
+   "name": "test_demotion_within_positive_levels_is_rejected",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "lineRange": [
+    174,
+    185
+   ],
+   "summary": "Demotion within positive levels is rejected.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_transferable_is_not_demoted_to_gap",
+   "type": "function",
+   "name": "test_transferable_is_not_demoted_to_gap",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "lineRange": [
+    188,
+    199
+   ],
+   "summary": "Transferable is not demoted to gap.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_promotion_from_gap_to_positive_still_applies",
+   "type": "function",
+   "name": "test_promotion_from_gap_to_positive_still_applies",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "lineRange": [
+    202,
+    217
+   ],
+   "summary": "Promotion from gap to positive still applies.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_fail_closed_when_client_returns_none",
+   "type": "function",
+   "name": "test_fail_closed_when_client_returns_none",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "lineRange": [
+    220,
+    235
+   ],
+   "summary": "Fail closed when client returns none.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_eval_set_deterministic_floor_unchanged_by_semantic_harness",
+   "type": "function",
+   "name": "test_eval_set_deterministic_floor_unchanged_by_semantic_harness",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "lineRange": [
+    238,
+    255
+   ],
+   "summary": "Eval set deterministic floor unchanged by semantic harness.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_semantic_eval_merge.py:_MockSemanticClient",
+   "type": "class",
+   "name": "_MockSemanticClient",
+   "filePath": "job_agent/tests/test_career_semantic_eval_merge.py",
+   "lineRange": [
+    67,
+    88
+   ],
+   "summary": "Test class with 2 methods exercising  MockSemanticClient behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:job_agent/tests/test_career_semantic_mapping.py",
+   "type": "file",
+   "name": "test_career_semantic_mapping.py",
+   "filePath": "job_agent/tests/test_career_semantic_mapping.py",
+   "summary": "Bounded LLM refinement tests: positive re-classifications require allow-listed evidence, negative evidence is never upgraded, malformed LLM output degrades to the deterministic floor, and windows/reasoning are capped.",
+   "tags": [
+    "test",
+    "semantic-mapping",
+    "validation",
+    "fail-closed"
+   ],
+   "complexity": "complex",
+   "languageNotes": "Python pytest module; hermetic tests mock network/Ollama bound at infrastructure boundary."
+  },
+  {
+   "id": "function:job_agent/tests/test_career_semantic_mapping.py:_ev",
+   "type": "function",
+   "name": "_ev",
+   "filePath": "job_agent/tests/test_career_semantic_mapping.py",
+   "lineRange": [
+    25,
+    35
+   ],
+   "summary": " Ev.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_semantic_mapping.py:_FakeClient",
+   "type": "class",
+   "name": "_FakeClient",
+   "filePath": "job_agent/tests/test_career_semantic_mapping.py",
+   "lineRange": [
+    49,
+    61
+   ],
+   "summary": "Test class with 2 methods exercising  FakeClient behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_semantic_mapping.py:TestParseSemanticMapping",
+   "type": "class",
+   "name": "TestParseSemanticMapping",
+   "filePath": "job_agent/tests/test_career_semantic_mapping.py",
+   "lineRange": [
+    69,
+    161
+   ],
+   "summary": "Test class with 7 methods exercising TestParseSemanticMapping behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_semantic_mapping.py:TestRefineMapping",
+   "type": "class",
+   "name": "TestRefineMapping",
+   "filePath": "job_agent/tests/test_career_semantic_mapping.py",
+   "lineRange": [
+    169,
+    323
+   ],
+   "summary": "Test class with 12 methods exercising TestRefineMapping behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:job_agent/tests/test_career_tailoring.py",
+   "type": "file",
+   "name": "test_career_tailoring.py",
+   "filePath": "job_agent/tests/test_career_tailoring.py",
+   "summary": "Tailoring pipeline tests: deterministic artifacts are fully evidence-backed, LLM proposals are revalidated before acceptance, provider failures fall back to deterministic, and unvalidated proposals never persist.",
+   "tags": [
+    "test",
+    "tailoring",
+    "validation",
+    "fail-closed"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python pytest module; hermetic tests mock network/Ollama bound at infrastructure boundary."
+  },
+  {
+   "id": "function:job_agent/tests/test_career_tailoring.py:_ev",
+   "type": "function",
+   "name": "_ev",
+   "filePath": "job_agent/tests/test_career_tailoring.py",
+   "lineRange": [
+    21,
+    30
+   ],
+   "summary": " Ev.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_tailoring.py:_evidence",
+   "type": "function",
+   "name": "_evidence",
+   "filePath": "job_agent/tests/test_career_tailoring.py",
+   "lineRange": [
+    33,
+    43
+   ],
+   "summary": " Evidence.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_tailoring.py:test_tailor_deterministic_artifact_is_fully_evidence_backed",
+   "type": "function",
+   "name": "test_tailor_deterministic_artifact_is_fully_evidence_backed",
+   "filePath": "job_agent/tests/test_career_tailoring.py",
+   "lineRange": [
+    56,
+    78
+   ],
+   "summary": "Tailor deterministic artifact is fully evidence backed.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_tailoring.py:test_tailor_llm_proposal_is_revalidated",
+   "type": "function",
+   "name": "test_tailor_llm_proposal_is_revalidated",
+   "filePath": "job_agent/tests/test_career_tailoring.py",
+   "lineRange": [
+    81,
+    109
+   ],
+   "summary": "Tailor llm proposal is revalidated.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_tailoring.py:test_tailor_llm_failure_falls_back_to_deterministic",
+   "type": "function",
+   "name": "test_tailor_llm_failure_falls_back_to_deterministic",
+   "filePath": "job_agent/tests/test_career_tailoring.py",
+   "lineRange": [
+    112,
+    132
+   ],
+   "summary": "Tailor llm failure falls back to deterministic.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_tailoring.py:test_tailor_never_returns_unvalidated_proposal",
+   "type": "function",
+   "name": "test_tailor_never_returns_unvalidated_proposal",
+   "filePath": "job_agent/tests/test_career_tailoring.py",
+   "lineRange": [
+    135,
+    162
+   ],
+   "summary": "Tailor never returns unvalidated proposal.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_tailoring.py:_FakeCvClient",
+   "type": "class",
+   "name": "_FakeCvClient",
+   "filePath": "job_agent/tests/test_career_tailoring.py",
+   "lineRange": [
+    46,
+    53
+   ],
+   "summary": "Test class with 2 methods exercising  FakeCvClient behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:job_agent/tests/test_career_tracks.py",
+   "type": "file",
+   "name": "test_career_tracks.py",
+   "filePath": "job_agent/tests/test_career_tracks.py",
+   "summary": "Career track classification tests: twelve default tracks, classify_track for domains (autonomous driving, product, AI/ML, robotics), resolve settings (default all vs configured), match_tracks, and seniority band normalization.",
+   "tags": [
+    "test",
+    "career-tracks",
+    "classification"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python pytest module; hermetic tests mock network/Ollama bound at infrastructure boundary."
+  },
+  {
+   "id": "function:job_agent/tests/test_career_tracks.py:test_twelve_default_tracks",
+   "type": "function",
+   "name": "test_twelve_default_tracks",
+   "filePath": "job_agent/tests/test_career_tracks.py",
+   "lineRange": [
+    16,
+    31
+   ],
+   "summary": "Twelve default tracks.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:job_agent/tests/test_career_validation_artifacts.py",
+   "type": "file",
+   "name": "test_career_validation_artifacts.py",
+   "filePath": "job_agent/tests/test_career_validation_artifacts.py",
+   "summary": "Artifact claim validation tests: every bullet must be evidence-backed to auto-approve, unsupported/fabricated bullets force review, and missing or dangling evidence ids never auto-approve.",
+   "tags": [
+    "test",
+    "validation",
+    "evidence",
+    "approval-gate"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python pytest module; hermetic tests mock network/Ollama bound at infrastructure boundary."
+  },
+  {
+   "id": "function:job_agent/tests/test_career_validation_artifacts.py:_ev",
+   "type": "function",
+   "name": "_ev",
+   "filePath": "job_agent/tests/test_career_validation_artifacts.py",
+   "lineRange": [
+    12,
+    21
+   ],
+   "summary": " Ev.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_validation_artifacts.py:_evidence",
+   "type": "function",
+   "name": "_evidence",
+   "filePath": "job_agent/tests/test_career_validation_artifacts.py",
+   "lineRange": [
+    24,
+    34
+   ],
+   "summary": " Evidence.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_validation_artifacts.py:test_artifact_validated_when_every_bullet_is_backed",
+   "type": "function",
+   "name": "test_artifact_validated_when_every_bullet_is_backed",
+   "filePath": "job_agent/tests/test_career_validation_artifacts.py",
+   "lineRange": [
+    58,
+    70
+   ],
+   "summary": "Artifact validated when every bullet is backed.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_career_validation_artifacts.py:test_artifact_requires_review_on_unsupported_bullet",
+   "type": "function",
+   "name": "test_artifact_requires_review_on_unsupported_bullet",
+   "filePath": "job_agent/tests/test_career_validation_artifacts.py",
+   "lineRange": [
+    73,
+    85
+   ],
+   "summary": "Artifact requires review on unsupported bullet.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:job_agent/tests/test_career_validation_entities.py",
+   "type": "file",
+   "name": "test_career_validation_entities.py",
+   "filePath": "job_agent/tests/test_career_validation_entities.py",
+   "summary": "Entity-level claim validation tests covering employer, job title, dates, team size, scope, technology and credential extraction plus unverifiable award/publication signals that surface as UNKNOWN, never SUPPORTED.",
+   "tags": [
+    "test",
+    "validation",
+    "entity-extraction",
+    "evidence"
+   ],
+   "complexity": "complex",
+   "languageNotes": "Python pytest module; hermetic tests mock network/Ollama bound at infrastructure boundary."
+  },
+  {
+   "id": "class:job_agent/tests/test_career_validation_entities.py:TestEmployerEntity",
+   "type": "class",
+   "name": "TestEmployerEntity",
+   "filePath": "job_agent/tests/test_career_validation_entities.py",
+   "lineRange": [
+    30,
+    56
+   ],
+   "summary": "Test class with 4 methods exercising TestEmployerEntity behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_validation_entities.py:TestJobTitleEntity",
+   "type": "class",
+   "name": "TestJobTitleEntity",
+   "filePath": "job_agent/tests/test_career_validation_entities.py",
+   "lineRange": [
+    64,
+    84
+   ],
+   "summary": "Test class with 3 methods exercising TestJobTitleEntity behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_validation_entities.py:TestDatesEntity",
+   "type": "class",
+   "name": "TestDatesEntity",
+   "filePath": "job_agent/tests/test_career_validation_entities.py",
+   "lineRange": [
+    92,
+    116
+   ],
+   "summary": "Test class with 4 methods exercising TestDatesEntity behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_validation_entities.py:TestTeamSizeEntity",
+   "type": "class",
+   "name": "TestTeamSizeEntity",
+   "filePath": "job_agent/tests/test_career_validation_entities.py",
+   "lineRange": [
+    124,
+    142
+   ],
+   "summary": "Test class with 3 methods exercising TestTeamSizeEntity behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_validation_entities.py:TestScopeEntity",
+   "type": "class",
+   "name": "TestScopeEntity",
+   "filePath": "job_agent/tests/test_career_validation_entities.py",
+   "lineRange": [
+    150,
+    162
+   ],
+   "summary": "Test class with 2 methods exercising TestScopeEntity behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_validation_entities.py:TestTechnologyEntity",
+   "type": "class",
+   "name": "TestTechnologyEntity",
+   "filePath": "job_agent/tests/test_career_validation_entities.py",
+   "lineRange": [
+    170,
+    188
+   ],
+   "summary": "Test class with 3 methods exercising TestTechnologyEntity behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_validation_entities.py:TestCredentialEntity",
+   "type": "class",
+   "name": "TestCredentialEntity",
+   "filePath": "job_agent/tests/test_career_validation_entities.py",
+   "lineRange": [
+    196,
+    209
+   ],
+   "summary": "Test class with 2 methods exercising TestCredentialEntity behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_validation_entities.py:TestUnverifiedSignals",
+   "type": "class",
+   "name": "TestUnverifiedSignals",
+   "filePath": "job_agent/tests/test_career_validation_entities.py",
+   "lineRange": [
+    217,
+    237
+   ],
+   "summary": "Test class with 3 methods exercising TestUnverifiedSignals behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_validation_entities.py:TestExtractEntities",
+   "type": "class",
+   "name": "TestExtractEntities",
+   "filePath": "job_agent/tests/test_career_validation_entities.py",
+   "lineRange": [
+    245,
+    289
+   ],
+   "summary": "Test class with 11 methods exercising TestExtractEntities behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:job_agent/tests/test_career_validation_entities.py:TestProblemPrecedence",
+   "type": "class",
+   "name": "TestProblemPrecedence",
+   "filePath": "job_agent/tests/test_career_validation_entities.py",
+   "lineRange": [
+    297,
+    317
+   ],
+   "summary": "Test class with 3 methods exercising TestProblemPrecedence behaviour.",
+   "tags": [
+    "test",
+    "pytest",
+    "test-class"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:job_agent/tests/test_catalog.py",
+   "type": "file",
+   "name": "test_catalog.py",
+   "filePath": "job_agent/tests/test_catalog.py",
+   "summary": "Source catalog tests: text-based catalog loading, entry types and discovery methods, query_hosts direct-only filtering, select_sources ordering/disable/track-category respects, and populated built-in catalog.",
+   "tags": [
+    "test",
+    "catalog",
+    "discovery"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Python pytest module; hermetic tests mock network/Ollama bound at infrastructure boundary."
+  },
+  {
+   "id": "function:job_agent/tests/test_catalog.py:test_entries_carry_types_and_methods",
+   "type": "function",
+   "name": "test_entries_carry_types_and_methods",
+   "filePath": "job_agent/tests/test_catalog.py",
+   "lineRange": [
+    66,
+    75
+   ],
+   "summary": "Entries carry types and methods.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_catalog.py:test_select_sources_omits_disabled_and_orders",
+   "type": "function",
+   "name": "test_select_sources_omits_disabled_and_orders",
+   "filePath": "job_agent/tests/test_catalog.py",
+   "lineRange": [
+    87,
+    98
+   ],
+   "summary": "Select sources omits disabled and orders.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_catalog.py:test_select_sources_respects_track_categories",
+   "type": "function",
+   "name": "test_select_sources_respects_track_categories",
+   "filePath": "job_agent/tests/test_catalog.py",
+   "lineRange": [
+    101,
+    122
+   ],
+   "summary": "Select sources respects track categories.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:job_agent/tests/test_catalog.py:test_builtin_catalog_is_populated",
+   "type": "function",
+   "name": "test_builtin_catalog_is_populated",
+   "filePath": "job_agent/tests/test_catalog.py",
+   "lineRange": [
+    125,
+    138
+   ],
+   "summary": "Builtin catalog is populated.",
+   "tags": [
+    "test",
+    "pytest"
+   ],
+   "complexity": "simple"
+  }
+ ],
+ "edges": [
+  {
+   "source": "file:job_agent/tests/test_career_robustness.py",
+   "target": "function:job_agent/tests/test_career_robustness.py:_artifact",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_robustness.py",
+   "target": "function:job_agent/tests/test_career_robustness.py:_job_conn",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_robustness.py",
+   "target": "class:job_agent/tests/test_career_robustness.py:TestConcurrentArtifactVersions",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_robustness.py",
+   "target": "class:job_agent/tests/test_career_robustness.py:TestLlmAndSemanticGates",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/job_agent/db.py",
+   "target": "file:job_agent/tests/test_career_robustness.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/job_agent/career/artifacts.py",
+   "target": "file:job_agent/tests/test_career_robustness.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/job_agent/career/cv_llm.py",
+   "target": "file:job_agent/tests/test_career_robustness.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/job_agent/cli.py",
+   "target": "file:job_agent/tests/test_career_robustness.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/tests/test_career_security.py",
+   "target": "function:job_agent/tests/test_career_security.py:test_injection_never_becomes_instruction_in_prompt_projection",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/job_agent/career/reconcile.py",
+   "target": "file:job_agent/tests/test_career_security.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/job_agent/career/validation.py",
+   "target": "file:job_agent/tests/test_career_security.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/job_agent/career/evidence.py",
+   "target": "file:job_agent/tests/test_career_security.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "target": "function:job_agent/tests/test_career_semantic_eval_merge.py:_evidences",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "target": "function:job_agent/tests/test_career_semantic_eval_merge.py:_map_for_case",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "target": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_negative_evidence_guard_under_strong_proposal",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "target": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_all_conflicting_cases_stay_gap_under_semantic_layer",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "target": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_positive_refinement_is_applied_with_allowlisted_evidence",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "target": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_demotion_to_unknown_is_rejected",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "target": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_demotion_within_positive_levels_is_rejected",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "target": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_transferable_is_not_demoted_to_gap",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "target": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_promotion_from_gap_to_positive_still_applies",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "target": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_fail_closed_when_client_returns_none",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "target": "function:job_agent/tests/test_career_semantic_eval_merge.py:test_eval_set_deterministic_floor_unchanged_by_semantic_harness",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "target": "class:job_agent/tests/test_career_semantic_eval_merge.py:_MockSemanticClient",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/job_agent/career/semantic_mapping.py",
+   "target": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/job_agent/career/mapping.py",
+   "target": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/job_agent/career/eval.py",
+   "target": "file:job_agent/tests/test_career_semantic_eval_merge.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_mapping.py",
+   "target": "function:job_agent/tests/test_career_semantic_mapping.py:_ev",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_mapping.py",
+   "target": "class:job_agent/tests/test_career_semantic_mapping.py:_FakeClient",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_mapping.py",
+   "target": "class:job_agent/tests/test_career_semantic_mapping.py:TestParseSemanticMapping",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_semantic_mapping.py",
+   "target": "class:job_agent/tests/test_career_semantic_mapping.py:TestRefineMapping",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/job_agent/career/semantic_mapping.py",
+   "target": "file:job_agent/tests/test_career_semantic_mapping.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/tests/test_career_tailoring.py",
+   "target": "function:job_agent/tests/test_career_tailoring.py:_ev",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_tailoring.py",
+   "target": "function:job_agent/tests/test_career_tailoring.py:_evidence",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_tailoring.py",
+   "target": "function:job_agent/tests/test_career_tailoring.py:test_tailor_deterministic_artifact_is_fully_evidence_backed",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_tailoring.py",
+   "target": "function:job_agent/tests/test_career_tailoring.py:test_tailor_llm_proposal_is_revalidated",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_tailoring.py",
+   "target": "function:job_agent/tests/test_career_tailoring.py:test_tailor_llm_failure_falls_back_to_deterministic",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_tailoring.py",
+   "target": "function:job_agent/tests/test_career_tailoring.py:test_tailor_never_returns_unvalidated_proposal",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_tailoring.py",
+   "target": "class:job_agent/tests/test_career_tailoring.py:_FakeCvClient",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/job_agent/career/tailoring.py",
+   "target": "file:job_agent/tests/test_career_tailoring.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/job_agent/career/cv_llm.py",
+   "target": "file:job_agent/tests/test_career_tailoring.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/job_agent/career/artifacts.py",
+   "target": "file:job_agent/tests/test_career_tailoring.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/tests/test_career_tracks.py",
+   "target": "function:job_agent/tests/test_career_tracks.py:test_twelve_default_tracks",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/job_agent/career_tracks.py",
+   "target": "file:job_agent/tests/test_career_tracks.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_artifacts.py",
+   "target": "function:job_agent/tests/test_career_validation_artifacts.py:_ev",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_artifacts.py",
+   "target": "function:job_agent/tests/test_career_validation_artifacts.py:_evidence",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_artifacts.py",
+   "target": "function:job_agent/tests/test_career_validation_artifacts.py:test_artifact_validated_when_every_bullet_is_backed",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_artifacts.py",
+   "target": "function:job_agent/tests/test_career_validation_artifacts.py:test_artifact_requires_review_on_unsupported_bullet",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/job_agent/career/validation.py",
+   "target": "file:job_agent/tests/test_career_validation_artifacts.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/job_agent/career/artifacts.py",
+   "target": "file:job_agent/tests/test_career_validation_artifacts.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_entities.py",
+   "target": "class:job_agent/tests/test_career_validation_entities.py:TestEmployerEntity",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_entities.py",
+   "target": "class:job_agent/tests/test_career_validation_entities.py:TestJobTitleEntity",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_entities.py",
+   "target": "class:job_agent/tests/test_career_validation_entities.py:TestDatesEntity",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_entities.py",
+   "target": "class:job_agent/tests/test_career_validation_entities.py:TestTeamSizeEntity",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_entities.py",
+   "target": "class:job_agent/tests/test_career_validation_entities.py:TestScopeEntity",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_entities.py",
+   "target": "class:job_agent/tests/test_career_validation_entities.py:TestTechnologyEntity",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_entities.py",
+   "target": "class:job_agent/tests/test_career_validation_entities.py:TestCredentialEntity",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_entities.py",
+   "target": "class:job_agent/tests/test_career_validation_entities.py:TestUnverifiedSignals",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_entities.py",
+   "target": "class:job_agent/tests/test_career_validation_entities.py:TestExtractEntities",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_career_validation_entities.py",
+   "target": "class:job_agent/tests/test_career_validation_entities.py:TestProblemPrecedence",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/job_agent/career/validation.py",
+   "target": "file:job_agent/tests/test_career_validation_entities.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:job_agent/tests/test_catalog.py",
+   "target": "function:job_agent/tests/test_catalog.py:test_entries_carry_types_and_methods",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_catalog.py",
+   "target": "function:job_agent/tests/test_catalog.py:test_select_sources_omits_disabled_and_orders",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_catalog.py",
+   "target": "function:job_agent/tests/test_catalog.py:test_select_sources_respects_track_categories",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/tests/test_catalog.py",
+   "target": "function:job_agent/tests/test_catalog.py:test_builtin_catalog_is_populated",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:job_agent/job_agent/catalog.py",
+   "target": "file:job_agent/tests/test_catalog.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  }
+ ]
+}

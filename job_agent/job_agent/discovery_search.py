@@ -197,41 +197,30 @@ class SourceRunStats:
 
 
 @dataclass(frozen=True)
-class DiscoveryPacingReport:
-    """Bounded per-source + aggregate pacing + yield outcomes for a run.
+class ProviderRunStats:
+    """Aggregate-only provider run for reports/checkpoints (never content)."""
 
-    ``catalog_unknown_jobs`` counts jobs emitted by fetch whose provenance could
-    not be attributed to a plan query (surface-level attribution gap).
-    ``providers`` holds aggregate-only per-provider run results (content-free).
-    """
-
-    per_source: tuple[SourceRunStats, ...] = ()
-    cost_seconds: float = 0.0
-    catalog_unknown_jobs: int = 0
-    providers: tuple[dict[str, object], ...] = ()
-
-    @property
-    def totals(self) -> dict[str, int]:
-        return {
-            "planned": sum(s.planned_queries for s in self.per_source),
-            "attempted": sum(s.attempted_queries for s in self.per_source),
-            "successful": sum(s.successful_queries for s in self.per_source),
-            "rate_limited": sum(s.rate_limited_queries for s in self.per_source),
-            "failed": sum(s.failed_queries for s in self.per_source),
-            "paused_skipped": sum(s.paused_skipped_queries for s in self.per_source),
-            "hits_returned": sum(s.hits_returned for s in self.per_source),
-            "duplicate_on_page": sum(s.duplicate_on_page for s in self.per_source),
-            "duplicate_at_url": sum(s.duplicate_at_url for s in self.per_source),
-            "candidate_pages": sum(s.candidate_pages for s in self.per_source),
-            "jobs_parsed": sum(s.jobs_parsed for s in self.per_source),
-        }
+    source_id: str
+    provider: str
+    status: str
+    requests: int = 0
+    hits: int = 0
+    candidate_jobs: int = 0
+    duplicates: int = 0
+    errors: tuple[str, ...] = ()
+    latency_ms: int = 0
 
     def to_dict(self) -> dict[str, object]:
         return {
-            "per_source": [s.to_dict() for s in self.per_source],
-            "totals": {**self.totals, "cost_seconds": round(self.cost_seconds, 3)},
-            "catalog_unknown_jobs": self.catalog_unknown_jobs,
-            "providers": [dict(p) for p in self.providers],
+            "source_id": self.source_id,
+            "provider": self.provider,
+            "status": self.status,
+            "requests": self.requests,
+            "hits": self.hits,
+            "candidate_jobs": self.candidate_jobs,
+            "duplicates": self.duplicates,
+            "errors": list(self.errors),
+            "latency_ms": self.latency_ms,
         }
 
 
@@ -241,7 +230,8 @@ class RateLimitPacer:
     ``sleep``/``now`` are injectable for hermetic tests; production uses wall
     time. A rate-limited query triggers an immediate bounded backoff (single
     sleep), after ``max_consecutive_failures`` the source is paused for the
-    rest of the run with a recorded reason — other sources keep going.
+    rest of the run with a recorded reason — other sources continue. ``provider``
+    backed sources are fetched directly and not subject to pacing.
     """
 
     def __init__(
@@ -364,6 +354,45 @@ class RateLimitPacer:
         )
 
 
+@dataclass(frozen=True)
+class DiscoveryPacingReport:
+    """Bounded per-source + aggregate pacing + yield outcomes for a run.
+
+    ``catalog_unknown_jobs`` counts jobs emitted by fetch whose provenance could
+    not be attributed to a plan query (surface-level attribution gap).
+    ``providers`` holds aggregate-only per-provider run results (content-free).
+    """
+
+    per_source: tuple[SourceRunStats, ...] = ()
+    cost_seconds: float = 0.0
+    catalog_unknown_jobs: int = 0
+    providers: tuple[dict[str, object], ...] = ()
+
+    @property
+    def totals(self) -> dict[str, int]:
+        return {
+            "planned": sum(s.planned_queries for s in self.per_source),
+            "attempted": sum(s.attempted_queries for s in self.per_source),
+            "successful": sum(s.successful_queries for s in self.per_source),
+            "rate_limited": sum(s.rate_limited_queries for s in self.per_source),
+            "failed": sum(s.failed_queries for s in self.per_source),
+            "paused_skipped": sum(s.paused_skipped_queries for s in self.per_source),
+            "hits_returned": sum(s.hits_returned for s in self.per_source),
+            "duplicate_on_page": sum(s.duplicate_on_page for s in self.per_source),
+            "duplicate_at_url": sum(s.duplicate_at_url for s in self.per_source),
+            "candidate_pages": sum(s.candidate_pages for s in self.per_source),
+            "jobs_parsed": sum(s.jobs_parsed for s in self.per_source),
+        }
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "per_source": [s.to_dict() for s in self.per_source],
+            "totals": {**self.totals, "cost_seconds": round(self.cost_seconds, 3)},
+            "catalog_unknown_jobs": self.catalog_unknown_jobs,
+            "providers": [dict(p) for p in self.providers],
+        }
+
+
 def build_global_queries(cfg) -> list[str]:
     """Generate bounded, deduplicated discovery queries from config."""
     search = cfg.search
@@ -441,6 +470,8 @@ def run_planned_discovery(
     pacing: RateLimitPacer | None = None,
     engine: WebSearchDiscovery | None = None,
     fetch=None,
+    provider_only: bool = False,
+    skip_search_engines: bool = False,
 ):
     """Run the catalog-driven discovery plan end to end.
 
@@ -461,11 +492,11 @@ def run_planned_discovery(
         limit_per_source=limit_per_source,
         limit_sources=limit_sources,
     )
-    item_by_query = {item.query: item for item in plan.items}
 
     # Provider-backed sources: catalog entries that declare a native provider
     # (e.g. remoteok/remotive) are fetched directly from their feed; the
     # generic search-engine path remains the fallback for everything else.
+
     provider_by_source: dict[str, DiscoveryProvider] = {}
     catalog: object | None = None
     catalog_loaded = False
@@ -479,6 +510,13 @@ def run_planned_discovery(
     except Exception:  # noqa: BLE001 — missing/unparseable catalog => search fallback only
         catalog_loaded = False
 
+    # Provider-only mode: filter plan to only include functional providers
+    if provider_only or skip_search_engines:
+        filtered_items = [item for item in plan.items if item.source_id in provider_by_source]
+        plan = type(plan)(items=tuple(filtered_items), budgets=plan.budgets, locations=plan.locations)
+
+    item_by_query = {item.query: item for item in plan.items}
+
     if pacing is None:
         pacing = RateLimitPacer(cfg.career.pacing)
     eng = engine or WebSearchDiscovery(max_results=max_results, rate_limit_s=rate_limit_s)
@@ -491,87 +529,95 @@ def run_planned_discovery(
     for source_id, count in per_source_planned.items():
         pacing.set_planned(source_id, count)
 
+    # Initialize result containers
+    jobs: list[Job] = []
+    errors: list[str] = []
+    provenance: list[Provenance] = []
     url_query: dict[str, str] = {}
     url_source: dict[str, str] = {}
     candidate_by_source: dict[str, int] = {}
-    for item in plan.items:
-        if item.source_id in provider_by_source:
-            continue  # provider-backed sources are fetched directly, not queried
-        pacing.wait_before(item.source_id, item.rate_limit_class)
-        if not pacing.should_attempt(item.source_id):
-            continue
-        max_tries = 1 + pacing.pacing.max_retries_per_query
-        hits: list[SearchHit] = []
-        for _ in range(max_tries):
-            try:
-                hits = eng.search_one(item.query) if hasattr(eng, "search_one") else eng.search([item.query])
-            except RateLimitExceeded:
-                pacing.note_failure(item.source_id, rate_limited=True)
-                break
-            except Exception:  # noqa: BLE001 - isolated per query
-                pacing.note_failure(item.source_id, rate_limited=False)
-                break
-            else:
-                pacing.note_success(item.source_id)
-                break
-        # Yield accounting for this query's raw hits (URLs only, no fetching).
-        q_urls: list[str] = []
-        q_duplicate_on_page = 0
-        q_seen: set[str] = set()
-        for h in hits:
-            if not h.url:
-                continue
-            if h.url in q_seen:
-                # Same posting URL repeated within one query's results page.
-                q_duplicate_on_page += 1
-                continue
-            q_seen.add(h.url)
-            q_urls.append(h.url)
-        successful = any(h.url for h in hits)
-        if successful:
-            pacing.note_hits(item.source_id, len(q_urls))
-            pacing.note_on_page_duplicate(item.source_id, q_duplicate_on_page)
-        for url in q_urls:
-            if url in url_query:
-                # Distinct query/source in the same run collapsing to one URL.
-                pacing.note_url_duplicate(item.source_id)
-                continue
-            url_query[url] = hits[0].source_query or item.query
-            url_source[url] = item.source_id
-            candidate_by_source[item.source_id] = candidate_by_source.get(item.source_id, 0) + 1
-    for source_id, count in candidate_by_source.items():
-        pacing.note_candidate_pages(source_id, count)
-
-    fetcher = fetch or fetch_candidate_jobs
-    jobs, errors = fetcher(list(url_query.keys()), max_pages=max_pages)
-
-    provenance: list[Provenance] = []
     catalog_unknown = 0
     jobs_by_source: dict[str, int] = {}
-    for job in jobs:
-        query = url_query.get(job.url)
-        plan_item = item_by_query.get(query) if query else None
-        if plan_item is not None:
-            provenance.append(
-                Provenance(
-                    source_id=plan_item.source_id,
-                    source_name=plan_item.source_id,
-                    discovery_method=plan_item.discovery_method,
-                    query=plan_item.query,
+    provider_stats: list[dict[str, object]] = []
+
+    # Continue with search-engine discovery (only if not in provider-only mode)
+    if not (provider_only or skip_search_engines):
+        for item in plan.items:
+            if item.source_id in provider_by_source:
+                continue  # provider-backed sources are fetched directly, not queried
+            pacing.wait_before(item.source_id, item.rate_limit_class)
+            if not pacing.should_attempt(item.source_id):
+                continue
+            max_tries = 1 + pacing.pacing.max_retries_per_query
+            hits: list[SearchHit] = []
+            for _ in range(max_tries):
+                try:
+                    hits = eng.search_one(item.query) if hasattr(eng, "search_one") else eng.search([item.query])
+                except RateLimitExceeded:
+                    pacing.note_failure(item.source_id, rate_limited=True)
+                    break
+                except Exception:  # noqa: BLE001 - isolated per query
+                    pacing.note_failure(item.source_id, rate_limited=False)
+                    break
+                else:
+                    pacing.note_success(item.source_id)
+                    break
+            # Yield accounting for this query's raw hits (URLs only, no fetching).
+            q_urls: list[str] = []
+            q_duplicate_on_page = 0
+            q_seen: set[str] = set()
+            for h in hits:
+                if not h.url:
+                    continue
+                if h.url in q_seen:
+                    # Same posting URL repeated within one query's results page.
+                    q_duplicate_on_page += 1
+                    continue
+                q_seen.add(h.url)
+                q_urls.append(h.url)
+            successful = any(h.url for h in hits)
+            if successful:
+                pacing.note_hits(item.source_id, len(q_urls))
+                pacing.note_on_page_duplicate(item.source_id, q_duplicate_on_page)
+            for url in q_urls:
+                if url in url_query:
+                    # Distinct query/source in the same run collapsing to one URL.
+                    pacing.note_url_duplicate(item.source_id)
+                    continue
+                url_query[url] = hits[0].source_query or item.query
+                url_source[url] = item.source_id
+                candidate_by_source[item.source_id] = candidate_by_source.get(item.source_id, 0) + 1
+        for source_id, count in candidate_by_source.items():
+            pacing.note_candidate_pages(source_id, count)
+
+        fetcher = fetch or fetch_candidate_jobs
+        search_jobs, search_errors = fetcher(list(url_query.keys()), max_pages=max_pages)
+        jobs.extend(search_jobs)
+        errors.extend(search_errors)
+
+        for job in search_jobs:
+            query = url_query.get(job.url)
+            plan_item = item_by_query.get(query) if query else None
+            if plan_item is not None:
+                provenance.append(
+                    Provenance(
+                        source_id=plan_item.source_id,
+                        source_name=plan_item.source_id,
+                        discovery_method=plan_item.discovery_method,
+                        query=plan_item.query,
+                    )
                 )
-            )
-            jobs_by_source[plan_item.source_id] = jobs_by_source.get(plan_item.source_id, 0) + 1
-        else:
-            catalog_unknown += 1
-            provenance.append(Provenance(source_id="catalog_unknown", discovery_method="search_engine", query=query))
-    for source_id, count in jobs_by_source.items():
-        pacing.note_jobs_parsed(source_id, count)
-    pacing.note_catalog_unknown_jobs(catalog_unknown)
+                jobs_by_source[plan_item.source_id] = jobs_by_source.get(plan_item.source_id, 0) + 1
+            else:
+                catalog_unknown += 1
+                provenance.append(Provenance(source_id="catalog_unknown", discovery_method="search_engine", query=query))
+        for source_id, count in jobs_by_source.items():
+            pacing.note_jobs_parsed(source_id, count)
+        pacing.note_catalog_unknown_jobs(catalog_unknown)
 
     # Provider-backed sources are fetched once each (bounded by their planned
     # share of the discovery budget). A provider failure is isolated and only
     # reported — it never aborts the run and never affects scoring.
-    provider_stats: list[dict[str, object]] = []
     if provider_by_source:
         entry_by_id = {entry.source_id: entry for entry in (catalog.sources if catalog_loaded else [])}
         for source_id in sorted(provider_by_source):
@@ -606,4 +652,5 @@ def run_planned_discovery(
             provider_stats.append(result.to_run_stats().to_dict())
             if result.status == providers_mod.ProviderStatus.OK:
                 pacing.note_jobs_parsed(source_id, len(result.jobs))
+
     return plan, jobs, provenance, errors, pacing.report(class_for, providers=tuple(provider_stats))

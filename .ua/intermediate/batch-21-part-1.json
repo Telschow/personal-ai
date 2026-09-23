@@ -1,0 +1,390 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_pdf_ingestion_e2e.py",
+      "type": "file",
+      "name": "test_pdf_ingestion_e2e.py",
+      "filePath": "tests/test_pdf_ingestion_e2e.py",
+      "summary": "End-to-end tests for PDF ingestion pipeline covering document persistence, page-aware chunking, non-PDF regression, mixed content handling, orchestration flows, and metadata provenance.",
+      "tags": ["test", "pdf", "ingestion", "e2e", "chunking"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_pdf_ingestion_e2e.py:_make_pdf_bytes",
+      "type": "function",
+      "name": "_make_pdf_bytes",
+      "filePath": "tests/test_pdf_ingestion_e2e.py",
+      "lineRange": [23, 32],
+      "summary": "Generates synthetic PDF bytes with configurable page count and text content for testing.",
+      "tags": ["utility", "test-helper", "pdf-generation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_pdf_ingestion_e2e.py:FakeStructuredExtractor",
+      "type": "class",
+      "name": "FakeStructuredExtractor",
+      "filePath": "tests/test_pdf_ingestion_e2e.py",
+      "lineRange": [35, 48],
+      "summary": "Mock structured extractor that records calls and returns fixed extraction results for testing.",
+      "tags": ["test-double", "mock", "extraction"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_pdf_ingestion_e2e.py:IngestionHarness",
+      "type": "class",
+      "name": "IngestionHarness",
+      "filePath": "tests/test_pdf_ingestion_e2e.py",
+      "lineRange": [51, 70],
+      "summary": "Test harness managing database connections and ingestion services for PDF end-to-end tests.",
+      "tags": ["test-harness", "fixture", "ingestion"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_pdf_ingestion_e2e.py:TestTwoPagePDFEndToEnd",
+      "type": "class",
+      "name": "TestTwoPagePDFEndToEnd",
+      "filePath": "tests/test_pdf_ingestion_e2e.py",
+      "lineRange": [78, 181],
+      "summary": "Tests for two-page PDF ingestion verifying document metadata, chunk persistence, page number tracking, and content preservation.",
+      "tags": ["test", "pdf", "chunking", "metadata"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_pdf_ingestion_e2e.py:TestPageAwareChunkingEndToEnd",
+      "type": "class",
+      "name": "TestPageAwareChunkingEndToEnd",
+      "filePath": "tests/test_pdf_ingestion_e2e.py",
+      "lineRange": [189, 240],
+      "summary": "Tests for page-aware chunking ensuring large pages produce multiple chunks with correct page numbers and three-page documents preserve all page numbers.",
+      "tags": ["test", "pdf", "chunking", "page-aware"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_pdf_ingestion_e2e.py:TestNonPDFRegression",
+      "type": "class",
+      "name": "TestNonPDFRegression",
+      "filePath": "tests/test_pdf_ingestion_e2e.py",
+      "lineRange": [248, 300],
+      "summary": "Regression tests ensuring text file ingestion still works and image-only PDFs are stored without chunks.",
+      "tags": ["test", "regression", "pdf", "text-ingestion"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_pdf_ingestion_e2e.py:TestMixedPDFEndToEnd",
+      "type": "class",
+      "name": "TestMixedPDFEndToEnd",
+      "filePath": "tests/test_pdf_ingestion_e2e.py",
+      "lineRange": [308, 350],
+      "summary": "Tests for mixed-content PDFs (text and image pages) ensuring chunking occurs but never reaches the LLM.",
+      "tags": ["test", "pdf", "mixed-content", "chunking"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_pdf_ingestion_e2e.py:TestOrchestrationEndToEnd",
+      "type": "class",
+      "name": "TestOrchestrationEndToEnd",
+      "filePath": "tests/test_pdf_ingestion_e2e.py",
+      "lineRange": [358, 400],
+      "summary": "Orchestration-level tests for multi-document PDF ingestion and idempotency of repeated ingestion.",
+      "tags": ["test", "pdf", "orchestration", "idempotency"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_pdf_ingestion_e2e.py:TestDocumentMetadataPersistence",
+      "type": "class",
+      "name": "TestDocumentMetadataPersistence",
+      "filePath": "tests/test_pdf_ingestion_e2e.py",
+      "lineRange": [408, 451],
+      "summary": "Tests verifying PDF metadata and chunk provenance survive in document storage after ingestion.",
+      "tags": ["test", "pdf", "metadata", "provenance", "persistence"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_people_canonicalize.py",
+      "type": "file",
+      "name": "test_people_canonicalize.py",
+      "filePath": "tests/test_people_canonicalize.py",
+      "summary": "Tests for people canonicalization covering name part extraction, identity folding, store-level canonical identity upserts, and collection canonicalization of fragmented references.",
+      "tags": ["test", "people", "canonicalization", "identity", "deduplication"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_people_canonicalize.py:make_reference",
+      "type": "function",
+      "name": "make_reference",
+      "filePath": "tests/test_people_canonicalize.py",
+      "lineRange": [28, 42],
+      "summary": "Creates a PersonReference fixture with configurable name, email, document ID, and timestamp for testing.",
+      "tags": ["test-helper", "fixture", "people"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_people_canonicalize.py:store",
+      "type": "function",
+      "name": "store",
+      "filePath": "tests/test_people_canonicalize.py",
+      "lineRange": [46, 52],
+      "summary": "Provides a temporary PersonStore fixture backed by a test database.",
+      "tags": ["test-helper", "fixture", "database"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_people_canonicalize.py:_seed_legacy",
+      "type": "function",
+      "name": "_seed_legacy",
+      "filePath": "tests/test_people_canonicalize.py",
+      "lineRange": [280, 302],
+      "summary": "Seeds legacy person references into the store for canonicalization testing.",
+      "tags": ["test-helper", "fixture", "legacy-data"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_people_canonicalize.py:TestCanonicalParts",
+      "type": "class",
+      "name": "TestCanonicalParts",
+      "filePath": "tests/test_people_canonicalize.py",
+      "lineRange": [58, 193],
+      "summary": "Tests for canonical name part extraction covering nicknames, aliases, salutations, parentheticals, Unicode preservation, and empty name handling.",
+      "tags": ["test", "canonicalization", "name-parsing", "unicode"],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:tests/test_people_canonicalize.py:TestCanonicalIdentity",
+      "type": "class",
+      "name": "TestCanonicalIdentity",
+      "filePath": "tests/test_people_canonicalize.py",
+      "lineRange": [196, 243],
+      "summary": "Tests for canonical identity computation verifying nickname folding, surname variant merging, opaque name handling, and identity stability.",
+      "tags": ["test", "canonicalization", "identity", "deduplication"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_people_canonicalize.py:TestStoreCanonicalIdentity",
+      "type": "class",
+      "name": "TestStoreCanonicalIdentity",
+      "filePath": "tests/test_people_canonicalize.py",
+      "lineRange": [249, 277],
+      "summary": "Tests for store-level canonical identity upserts verifying nickname variant folding and distinct family member preservation.",
+      "tags": ["test", "store", "canonicalization", "upsert"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_people_canonicalize.py:TestStoreCanonicalize",
+      "type": "class",
+      "name": "TestStoreCanonicalize",
+      "filePath": "tests/test_people_canonicalize.py",
+      "lineRange": [305, 375],
+      "summary": "Tests for store canonicalize operation covering dry-run semantics, apply folding, idempotency, and empty store handling.",
+      "tags": ["test", "store", "canonicalize", "idempotency"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_people_canonicalize.py:TestStoreCanonicalizeCollection",
+      "type": "class",
+      "name": "TestStoreCanonicalizeCollection",
+      "filePath": "tests/test_people_canonicalize.py",
+      "lineRange": [378, 450],
+      "summary": "Collection-level canonicalization tests using a large fragment fixture to verify bounded identity folding.",
+      "tags": ["test", "store", "canonicalize", "collection", "fragments"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_people_chat.py",
+      "type": "file",
+      "name": "test_people_chat.py",
+      "filePath": "tests/test_people_chat.py",
+      "summary": "Tests for chat people integration covering untrusted context blocks, privacy-safe serialization, limit clamping, deterministic ordering, provenance shape, HTTP route integration, and database restart survival.",
+      "tags": ["test", "chat", "people", "context", "privacy", "provenance"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_people_chat.py:store",
+      "type": "function",
+      "name": "store",
+      "filePath": "tests/test_people_chat.py",
+      "lineRange": [47, 50],
+      "summary": "Provides a basic PersonStore fixture for chat people tests.",
+      "tags": ["test-helper", "fixture", "people"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_people_chat.py:rich_store",
+      "type": "function",
+      "name": "rich_store",
+      "filePath": "tests/test_people_chat.py",
+      "lineRange": [54, 70],
+      "summary": "Provides a PersonStore fixture pre-populated with multiple person references for rich testing scenarios.",
+      "tags": ["test-helper", "fixture", "people"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_people_chat.py:_chat",
+      "type": "function",
+      "name": "_chat",
+      "filePath": "tests/test_people_chat.py",
+      "lineRange": [73, 74],
+      "summary": "Creates a ChatPeople instance bound to a store for testing chat integration.",
+      "tags": ["test-helper", "chat", "people"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:tests/test_people_chat.py:FakeAgent",
+      "type": "class",
+      "name": "FakeAgent",
+      "filePath": "tests/test_people_chat.py",
+      "lineRange": [77, 87],
+      "summary": "Mock agent recording calls for testing chat completion integration with people context.",
+      "tags": ["test-double", "mock", "agent", "chat"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/test_pdf_ingestion_e2e.py",
+      "target": "function:tests/test_pdf_ingestion_e2e.py:_make_pdf_bytes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_ingestion_e2e.py",
+      "target": "class:tests/test_pdf_ingestion_e2e.py:FakeStructuredExtractor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_ingestion_e2e.py",
+      "target": "class:tests/test_pdf_ingestion_e2e.py:IngestionHarness",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_ingestion_e2e.py",
+      "target": "class:tests/test_pdf_ingestion_e2e.py:TestTwoPagePDFEndToEnd",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_ingestion_e2e.py",
+      "target": "class:tests/test_pdf_ingestion_e2e.py:TestPageAwareChunkingEndToEnd",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_ingestion_e2e.py",
+      "target": "class:tests/test_pdf_ingestion_e2e.py:TestNonPDFRegression",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_ingestion_e2e.py",
+      "target": "class:tests/test_pdf_ingestion_e2e.py:TestMixedPDFEndToEnd",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_ingestion_e2e.py",
+      "target": "class:tests/test_pdf_ingestion_e2e.py:TestOrchestrationEndToEnd",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_pdf_ingestion_e2e.py",
+      "target": "class:tests/test_pdf_ingestion_e2e.py:TestDocumentMetadataPersistence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_canonicalize.py",
+      "target": "function:tests/test_people_canonicalize.py:make_reference",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_canonicalize.py",
+      "target": "function:tests/test_people_canonicalize.py:store",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_canonicalize.py",
+      "target": "function:tests/test_people_canonicalize.py:_seed_legacy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_canonicalize.py",
+      "target": "class:tests/test_people_canonicalize.py:TestCanonicalParts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_canonicalize.py",
+      "target": "class:tests/test_people_canonicalize.py:TestCanonicalIdentity",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_canonicalize.py",
+      "target": "class:tests/test_people_canonicalize.py:TestStoreCanonicalIdentity",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_canonicalize.py",
+      "target": "class:tests/test_people_canonicalize.py:TestStoreCanonicalize",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_canonicalize.py",
+      "target": "class:tests/test_people_canonicalize.py:TestStoreCanonicalizeCollection",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_chat.py",
+      "target": "function:tests/test_people_chat.py:store",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_chat.py",
+      "target": "function:tests/test_people_chat.py:rich_store",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_chat.py",
+      "target": "function:tests/test_people_chat.py:_chat",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_people_chat.py",
+      "target": "class:tests/test_people_chat.py:FakeAgent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    }
+  ]
+}
