@@ -17,12 +17,15 @@ from urllib.parse import urlparse
 import httpx
 from bs4 import BeautifulSoup
 
+from .logging_setup import get_logger, log_event
 from .models import Job
 
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130 Safari/537.36 PersonalJobAgent/0.2"
 
 MAX_RESPONSE_BYTES = 5_000_000
 DEFAULT_TIMEOUT = httpx.Timeout(20.0, connect=10.0, read=20.0)
+
+log = get_logger("sources")
 
 
 class SourceKind(StrEnum):
@@ -97,20 +100,44 @@ class GreenhouseSource(AtsBoardSource):
 
     def __init__(self, token: str) -> None:
         self.token = token
+        # Shorter timeout for Greenhouse to prevent hanging on slow/large responses
+        self._timeout = httpx.Timeout(15.0, connect=5.0, read=15.0)
+        self._max_pages = 50  # Hard limit to prevent infinite pagination
+        self._per_page = 100
+
+    def _get_json(self, url: str) -> dict | list:
+        headers = {"User-Agent": UA}
+        resp = httpx.get(url, headers=headers, timeout=self._timeout, follow_redirects=True)
+        resp.raise_for_status()
+        if len(resp.content) > MAX_RESPONSE_BYTES:
+            raise SourceError(f"{self.name}:{self.token}: response too large ({len(resp.content)} bytes)")
+        return resp.json()
 
     def fetch(self) -> list[Job]:
-        per_page = 100
+        per_page = self._per_page
         page = 1
         out: list[Job] = []
         seen_ids = set()
-        while True:
+        
+        while page <= self._max_pages:
             url = f"https://boards-api.greenhouse.io/v1/boards/{self.token}/jobs?content=true&per_page={per_page}&page={page}"
-            data = self._get_json(url)
+            try:
+                data = self._get_json(url)
+            except httpx.TimeoutException as exc:
+                log_event(log, "greenhouse_timeout", token=self.token, page=page, error=str(exc))
+                raise SourceError(f"greenhouse:{self.token}: timeout on page {page}") from exc
+            except httpx.HTTPStatusError as exc:
+                log_event(log, "greenhouse_http_error", token=self.token, page=page, status=exc.response.status_code)
+                raise
+            
             jobs_dict = data if isinstance(data, dict) else {}
             jobs = jobs_dict.get("jobs") or []
             if not jobs:
                 break
+            
             for x in jobs:
+                if not isinstance(x, dict):
+                    continue
                 jid = x.get("id")
                 if jid is None:
                     continue
@@ -151,12 +178,20 @@ class LeverSource(AtsBoardSource):
         url = f"https://api.lever.co/v0/postings/{self.site}?mode=json"
         data = self._get_json(url)
         items = data if isinstance(data, list) else []
+        if not isinstance(items, list):
+            log_event(log, "lever_invalid_response", site=self.site, type=type(items).__name__)
+            items = []
         out: list[Job] = []
         for x in items:
+            if not isinstance(x, dict):
+                log_event(log, "lever_malformed_posting", site=self.site, type=type(x).__name__)
+                continue
             cats = x.get("categories", {}) or {}
+            if not isinstance(cats, dict):
+                cats = {}
             out.append(
                 Job(
-                    id=f"lever:{x['id']}",
+                    id=f"lever:{x.get('id', '')}",
                     title=x.get("text", ""),
                     company=self.site,
                     url=x.get("hostedUrl", ""),
@@ -182,15 +217,38 @@ class AshbySource(AtsBoardSource):
         offset = 0
         out: list[Job] = []
         seen = set()
-        while True:
+        max_pages = 50  # Hard limit to prevent infinite pagination
+        page = 0
+        
+        while page < max_pages:
             url = f"https://api.ashbyhq.com/posting-api/job-board/{self.board}?includeCompensation=true&limit={limit}&offset={offset}"
             data = self._get_json(url)
-            items = data.get("jobs", []) if isinstance(data, dict) else []
+            
+            # Validate response shape
+            if not isinstance(data, dict):
+                log_event(log, "ashby_malformed_response", board=self.board, type=type(data).__name__)
+                break
+            
+            items = data.get("jobs", [])
+            if not isinstance(items, list):
+                log_event(log, "ashby_invalid_jobs_field", board=self.board, type=type(items).__name__)
+                items = []
             if not items:
                 break
+            
             for x in items:
+                if not isinstance(x, dict):
+                    log_event(log, "ashby_malformed_posting", board=self.board, type=type(x).__name__)
+                    continue
+                
                 comp = x.get("compensation") or {}
+                if not isinstance(comp, dict):
+                    comp = {}
+                
                 jid = x.get("jobUrl") or x.get("applyUrl") or x.get("title")
+                if not jid:
+                    log_event(log, "ashby_missing_job_id", board=self.board)
+                    continue
                 job_id = f"ashby:{jid}"
                 if job_id in seen:
                     continue
@@ -216,6 +274,7 @@ class AshbySource(AtsBoardSource):
             if len(items) < limit:
                 break
             offset += limit
+            page += 1
             # safety guard against infinite loops
             if offset > 10000:
                 break
@@ -232,8 +291,27 @@ class SmartRecruitersSource(AtsBoardSource):
         url = f"https://api.smartrecruiters.com/v1/companies/{self.company}/postings"
         data = self._get_json(url)
         out: list[Job] = []
-        for x in data.get("content", []) if isinstance(data, dict) else []:
+        
+        # Validate response shape - handle unexpected structures gracefully
+        if not isinstance(data, dict):
+            raise SourceError(f"smartrecruiters:{self.company}: unexpected top-level response type {type(data).__name__}, expected dict")
+        
+        content = data.get("content")
+        if not isinstance(content, list):
+            raise SourceError(f"smartrecruiters:{self.company}: 'content' field missing or not a list, got {type(content).__name__}")
+        
+        for i, x in enumerate(content):
+            # Validate each posting is a dict
+            if not isinstance(x, dict):
+                # Log but don't fail the entire company - just skip malformed entries
+                log_event(log, "smartrecruiters_malformed_posting", 
+                    company=self.company, index=i, type=type(x).__name__)
+                continue
+            
             ref = x.get("ref") or {}
+            if not isinstance(ref, dict):
+                ref = {}
+            
             url_final = ref.get("jobAdUrl") or f"https://careers.smartrecruiters.com/{self.company}/{x.get('id', '')}"
             out.append(
                 Job(
@@ -313,6 +391,7 @@ class DirectPageSource(StructuredPageSource):
         headers = {"User-Agent": UA}
         max_attempts = 3
         backoff_factor = 0.5
+        resp = None
         for attempt in range(max_attempts):
             try:
                 resp = httpx.get(self.url, headers=headers, timeout=DEFAULT_TIMEOUT, follow_redirects=True)
@@ -322,7 +401,8 @@ class DirectPageSource(StructuredPageSource):
                 break
             except (httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
                 if attempt == max_attempts - 1:
-                    raise
+                    log_event(log, "direct_timeout", url=self.url, attempts=attempt + 1)
+                    raise SourceError(f"direct:{self.url}: timeout after {max_attempts} attempts") from exc
                 sleep_time = backoff_factor * (2 ** attempt)
                 time.sleep(sleep_time)
                 continue
@@ -335,18 +415,24 @@ class DirectPageSource(StructuredPageSource):
         else:
             # This block runs if we didn't break (i.e., all attempts failed)
             # Should not happen because we raise in the last attempt
-            raise
+            raise SourceError(f"direct:{self.url}: all attempts failed")
+        
         soup = BeautifulSoup(resp.text, "html.parser")
         out: list[Job] = []
+        jsonld_count = 0
+        jobposting_count = 0
         for node in soup.find_all("script", type="application/ld+json"):
             try:
                 data = json.loads(node.string or "")
             except Exception:
+                log_event(log, "direct_jsonld_parse_error", url=self.url)
                 continue
+            jsonld_count += 1
             items = data if isinstance(data, list) else [data]
             for x in items:
                 if not isinstance(x, dict) or x.get("@type") != "JobPosting":
                     continue
+                jobposting_count += 1
                 org = (x.get("hiringOrganization") or {}).get("name") or urlparse(self.url).netloc
                 ident = x.get("identifier") or {}
                 jid = ident.get("value") or x.get("url") or x.get("title")
@@ -379,6 +465,14 @@ class DirectPageSource(StructuredPageSource):
                         raw=x,
                     )
                 )
+        
+        # Log diagnostic info for zero-result cases
+        if not out:
+            log_event(log, "direct_zero_candidates", 
+                url=self.url, 
+                jsonld_blocks=jsonld_count, 
+                jobposting_found=jobposting_count,
+                page_size=len(resp.content))
         return out
 
 

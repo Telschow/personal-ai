@@ -12,7 +12,7 @@ from job_agent.models import Job
 from job_agent.normalizer import normalize_job
 
 _EXAMPLE_CV = """\
-Daniel Telschow
+Alice Example
 
 Experience
 Product Owner - Autonomous Driving at BMW Group, 2024-present

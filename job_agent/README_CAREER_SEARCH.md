@@ -251,7 +251,7 @@ Migrations are applied automatically:
 ### profile/profile.yaml
 
 ```yaml
-name: Daniel Telschow
+name: Alice Example
 location: Munich, Germany
 languages: [...]
 education: [...]

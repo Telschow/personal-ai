@@ -64,7 +64,7 @@ class YouTubeHistoryLoader:
                 continue
             try:
                 text = candidate.read_text(encoding="utf-8")
-            except UnicodeDecodeError, OSError:
+            except (UnicodeDecodeError, OSError):
                 continue
             if is_history_export(text):
                 files.append(candidate)

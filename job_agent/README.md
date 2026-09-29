@@ -182,6 +182,70 @@ job-agent stats
 job-agent decision JOB_ID approve|reject [--note NOTE]
 ```
 
+## Career Intelligence GUI
+
+Launch the local web interface for daily job management:
+
+```bash
+cd job_agent
+uv run python -m job_agent.cli gui
+```
+
+or
+
+```bash
+uv run python -m streamlit run job_agent/gui/app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+The GUI opens at http://127.0.0.1:8501 and provides:
+
+### Pages
+
+- **📊 Dashboard** — Latest crawl, new jobs, active jobs, high-fit jobs, jobs reviewed, applications, interviews
+- **📅 Daily Intelligence** — NEW, CHANGED, HIGH-FIT, HIGH-FIT Munich, HIGH-FIT AI/Autonomous, NEWLY SALARY-DISCLOSED, STALE/CLOSING
+- **🔍 Job Explorer** — Searchable table with filters (company, provider, role family, location, salary, remote, fit range, application status, feedback status)
+- **📋 Calibration** — Feedback queue with next/previous/skip/label/note workflow
+- **📑 Shortlists** — Top overall, Munich, AI/Autonomous, Product Leadership, Career Pivot, International
+- **📄 CV Generation** — Generate tailored CV from real jobs with evidence manifest
+- **💼 LinkedIn** — Optimize LinkedIn profile with current vs recommended view
+- **📁 Projects** — Portfolio project recommendations with effort estimates
+- **📝 Applications** — Application tracker with stage updates
+- **👤 Career Profile** — Read-only career configuration (targets, constraints, preferences)
+- **🕷️ Crawl Control** — Last crawl stats, trigger new crawl via CLI
+- **🏥 Provider Health** — Provider status (healthy, zero results, failed, timeout)
+- **📊 Reports** — Browse generated markdown reports
+
+### Daily Workflow
+
+1. Open Dashboard to see today's opportunities
+2. Review Job Explorer or Daily Intelligence for new/high-fit jobs
+3. Use Calibration queue to review and label jobs
+4. Generate CV for target jobs
+5. Track applications in Applications page
+6. Review Provider Health and Reports as needed
+
+### Feedback Workflow
+
+- Click any job to view details
+- Submit feedback with label (strong_interest, interested, maybe, not_interested, wrong_role, etc.) + optional note
+- Feedback persists immediately and updates calibration metrics
+- No automatic ranking weight changes from GUI
+
+### CV Workflow
+
+- Select target job from explorer
+- Configure language, master CV path, LLM options
+- Generate CV with evidence manifest
+- Preview markdown output
+- Save artifact for future use
+
+### LinkedIn Safety
+
+- LinkedIn recommendations do **not** mutate profiles automatically
+- Current profile is read-only
+- User must manually apply changes
+- No scraping, login automation, or automated profile modification
+
 ## Safety
 
 - The system never submits applications or publishes anything automatically

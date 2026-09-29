@@ -11,7 +11,7 @@ from job_agent.career.documents import (
     ingest_document,
 )
 
-_SIMPLE = """Daniel Telschow
+_SIMPLE = """Alice Example
 Product Owner - Autonomous Driving
 
 Experience
@@ -26,7 +26,7 @@ Product Management
 Autonomous Driving
 """
 
-_OTHER = """Daniel Telschow
+_OTHER = """Alice Example
 Function Owner - Autonomous Driving
 
 Experience
@@ -125,7 +125,7 @@ def test_docx_roundtrip_text_extraction(tmp_path):
 
     p = tmp_path / "cv.docx"
     d = Document()
-    d.add_heading("Daniel Telschow", 0)
+    d.add_heading("Alice Example", 0)
     d.add_heading("Experience", 1)
     d.add_paragraph("BMW Group, 2024-present — Product Owner - Automated Valet Parking")
     d.add_paragraph("Led cross-functional autonomous-driving product team")
@@ -191,8 +191,8 @@ def test_pdf_idempotent_and_stable(tmp_path):
     pytest.importorskip("pypdf")
     p1 = tmp_path / "a.pdf"
     p2 = tmp_path / "b.pdf"
-    p1.write_bytes(_minimal_pdf("Daniel Telschow - Autonomous Driving"))
-    p2.write_bytes(_minimal_pdf("Daniel Telschow - Autonomous Driving"))
+    p1.write_bytes(_minimal_pdf("Alice Example - Autonomous Driving"))
+    p2.write_bytes(_minimal_pdf("Alice Example - Autonomous Driving"))
     assert ingest_document(p1).content_hash == ingest_document(p2).content_hash
     assert ingest_document(p1).document_id == ingest_document(p2).document_id
 

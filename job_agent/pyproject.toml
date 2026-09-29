@@ -14,6 +14,7 @@ dependencies = [
   "trafilatura>=1.9,<3",
   "python-docx>=1.1,<2",
   "pypdf>=5,<7",
+  "streamlit>=1.38,<2",
 ]
 
 [project.optional-dependencies]
@@ -22,6 +23,9 @@ playwright = ["playwright>=1.46,<2"]
 discovery = ["ddgs>=9,<10"]
 dev = ["pytest>=8,<9", "ruff>=0.6,<1", "mypy>=1.11,<2", "types-PyYAML>=6"]
 all = ["ollama>=0.3,<1", "playwright>=1.46,<2", "ddgs>=9,<10"]
+gui = [
+    "streamlit>=1.64.0",
+]
 
 [project.scripts]
 job-agent = "job_agent.cli:main"

@@ -155,6 +155,10 @@ def candidate_evidence_from_document(
         eid = evidence_id(claim, doc.document_id)
         cats = set(classify_categories(claim))
         words = [w for w in re.findall(r"[a-zäöüßñ]{3,}", _normalize(claim)) if len(w) > 2]
+        # Infer source location from section and position
+        source_loc = f"document:{doc.document_id[:8]}:{section_name}:pos{position}"
+        if section_heading:
+            source_loc += f":heading={section_heading}"
         out.append(
             CareerEvidence(
                 evidence_id=eid,
@@ -169,6 +173,7 @@ def candidate_evidence_from_document(
                 normalized_fact=_normalize(claim),
                 authority="cv_document",
                 observed_at=now,
+                source_location=source_loc,
                 raw={
                     "section": section_name,
                     "heading": section_heading,

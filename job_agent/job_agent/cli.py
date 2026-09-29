@@ -19,6 +19,7 @@ import argparse
 import json
 import sys
 import time
+import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -101,14 +102,24 @@ def cmd_scan(args: argparse.Namespace) -> int:
         return 1
 
     start = time.monotonic()
+    run_started_at = _now_iso()
+    run_id = uuid.uuid4().hex
 
     def _progress(source_name: str, fetched: int, total: int, elapsed: float) -> None:
         print(f"  {source_name}: +{fetched} candidates ({total} accepted) in {elapsed:.1f}s")
 
     seen: set[str] = set()
+    total_fetched = 0
+    total_provider_failures = 0
+    total_fetch_errors = 0
+    jobs_from_providers = 0
     for src in sources:
-        result = run_sources(connection, [src], profile, policy, on_progress=_progress)
+        result = run_sources(connection, [src], profile, policy, run_id=run_id, on_progress=_progress)
         seen |= result.jobs_seen
+        total_fetched += result.total_fetched
+        total_provider_failures += sum(1 for s in result.stats if s.errors)
+        total_fetch_errors += len(result.errors)
+        jobs_from_providers += sum(s.fetched for s in result.stats)
 
     if not args.no_global_search and cfg.search.global_enabled and not args.dry_run:
         print("Running global search discovery...")
@@ -118,11 +129,30 @@ def cmd_scan(args: argparse.Namespace) -> int:
         jobs, search_errors = fetch_candidate_jobs(urls, max_pages=cfg.search.max_global_pages)
         log_event(log, "global_search_fetched", urls=len(urls), jobs=len(jobs), errors=len(search_errors))
         provenance = [Provenance(source_id="web_search", discovery_method="search_engine") for _ in jobs]
-        result = ingest_global_jobs(connection, jobs, profile, policy, provenance=provenance)
+        result = ingest_global_jobs(connection, jobs, profile, policy, provenance=provenance, run_started_at=run_started_at, run_id=run_id)
         seen |= result.jobs_seen
+        total_fetched += len(jobs)
+        total_fetch_errors += len(search_errors)
 
     lifecycle = run_lifecycle(connection, cfg, seen)
     elapsed = time.monotonic() - start
+
+    if not args.dry_run:
+        jobs_persisted = sum(1 for _ in seen)
+        db.record_discovery_run(
+            connection,
+            run_id=run_id,
+            started_at=run_started_at,
+            planned_queries=0,
+            candidates_found=total_fetched,
+            jobs_persisted=jobs_persisted,
+            jobs_from_providers=jobs_from_providers,
+            jobs_from_search=0,
+            provider_failures=total_provider_failures,
+            fetch_errors=total_fetch_errors,
+            duration_ms=int(elapsed * 1000),
+        )
+        connection.commit()
 
     if args.dry_run:
         print(f"\n[Dry run] in-memory DB used; nothing persisted. Evaluated in {elapsed:.1f}s.")
@@ -140,6 +170,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
 
 def cmd_discover(args: argparse.Namespace) -> int:
     """Plan (deterministic, offline) or run (bounded, live) discovery."""
+    import uuid
     cfg = load_config(path=args.config)
 
     if args.mode == "plan":
@@ -171,6 +202,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
     connection = db.connect(":memory:" if args.dry_run else _db_path(args, cfg))
     start = time.monotonic()
     run_started_at = _now_iso()
+    run_id = uuid.uuid4().hex
     plan, jobs, provenance, search_errors, pacing_report = run_planned_discovery(
         cfg,
         max_pages=args.raw_limit or cfg.search.max_global_pages,
@@ -180,7 +212,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
         limit_sources=args.max_sources_per_track,
     )
     elapsed_fetch = time.monotonic() - start
-    result = ingest_global_jobs(connection, jobs, profile, policy, provenance=provenance, run_started_at=run_started_at)
+    result = ingest_global_jobs(connection, jobs, profile, policy, provenance=provenance, run_started_at=run_started_at, run_id=run_id)
     lifecycle = run_lifecycle(connection, cfg, result.jobs_seen)
     diag = discovery_diagnostics(connection)
     catalog = load_catalog(cfg.catalog_path_resolved())
@@ -208,6 +240,8 @@ def cmd_discover(args: argparse.Namespace) -> int:
         provider_totals = yield_report.provider_totals
         db.record_discovery_run(
             connection,
+            run_id=run_id,
+            started_at=run_started_at,
             planned_queries=len(plan.queries()),
             candidates_found=len(jobs),
             jobs_persisted=sum(result.persisted_by_source.values()),
@@ -928,6 +962,272 @@ def cmd_tailor(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_cv_generate(args: argparse.Namespace) -> int:
+    """Generate a full evidence-grounded CV for a job."""
+    cfg = load_config(path=args.config)
+    connection = db.connect(_db_path(args, cfg))
+    job = db.get_job(connection, args.job_id)
+    if job is None:
+        print(f"Job not found: {args.job_id}", file=sys.stderr)
+        return 1
+
+    profile = _load_career_profile(cfg)
+    career = derive_career_profile(profile)
+    attrs = extract_job_attributes(job)
+
+    try:
+        doc = ingest_document(Path(args.cv))
+        db.save_career_document(connection, doc)
+    except DocumentError as exc:
+        print(f"Error loading CV: {exc}", file=sys.stderr)
+        return 1
+
+    candidates = candidate_evidence_from_document(doc)
+    existing = _get_existing_evidence(connection)
+    result = reconcile_document(doc, candidates, existing)
+    db.save_career_evidence_many(connection, result.evidence)
+    all_evidence = _get_existing_evidence(connection)
+    db.save_career_reconciliation(
+        connection,
+        document_id=doc.document_id,
+        total_facts=result.new_count + result.kept_count + result.conflict_count,
+        exact_matches=result.kept_count,
+        new_count=result.new_count,
+        conflicts=result.conflict_count,
+        status="conflicts" if result.conflict_count else "clean",
+    )
+    connection.commit()
+
+    # LLM proposal (opt-in, fail-closed)
+    client = None
+    semantic_client = None
+    llm_enabled = cfg.career.llm.enabled and not getattr(args, "no_llm", False)
+    if llm_enabled:
+        llm = cfg.career.llm
+        llm_timeout = llm.timeout_seconds or cfg.llm.timeout_seconds
+        from .career.cv_llm import OllamaCvClient
+        from .career.llm_log import LlmCallLog
+
+        llm_log = LlmCallLog()
+        client = OllamaCvClient(
+            llm.base_url or cfg.llm.base_url,
+            llm.model or cfg.llm.model,
+            temperature=llm.temperature,
+            timeout=llm_timeout,
+            call_log=llm_log,
+        )
+        if cfg.career.llm.semantic and not getattr(args, "no_semantic", False):
+            from .career.llm import OllamaJsonClient
+
+            semantic_client = OllamaJsonClient(
+                llm.base_url or cfg.llm.base_url,
+                llm.model or cfg.llm.model,
+                temperature=llm.temperature,
+                timeout=llm_timeout,
+                call_log=llm_log,
+            )
+
+    from .career.cv_generation import generate_cv, render_cv_human
+
+    cv = generate_cv(career, attrs, all_evidence, job_id=job.id, client=client, semantic_client=semantic_client)
+
+    # Save artifact to database
+    db.save_career_artifact(
+        connection,
+        cv.artifact,
+        source=cv.artifact.status.value,
+        llm_used=False,
+        mapping_json=json.dumps(
+            [m.model_dump(mode="json") for m in cv.positioning.mapping] if hasattr(cv.positioning, 'mapping') else [],
+            ensure_ascii=False,
+        ),
+        validation_json=json.dumps(
+            [v.model_dump(mode="json") for v in cv.artifact.check_compliance(all_evidence)[1]],
+            ensure_ascii=False,
+        ),
+        positioning_json=json.dumps(
+            cv.positioning.model_dump(mode="json"),
+            ensure_ascii=False,
+        ),
+    )
+    connection.commit()
+
+    # Output
+    output = render_cv_human(cv, language=args.language)
+
+    if args.output:
+        Path(args.output).write_text(output, encoding="utf-8")
+        print(f"CV written to {args.output}")
+    elif getattr(args, "json", False):
+        print(json.dumps({
+            "artifact_id": cv.artifact.artifact_id,
+            "job_id": job.id,
+            "headline": cv.artifact.headline,
+            "summary": cv.artifact.summary,
+            "sections": [{"name": s.name, "content": s.content, "evidence_ids": s.evidence_ids} for s in cv.sections],
+            "status": cv.artifact.status.value,
+            "move_type": cv.move_type.value,
+            "gaps": cv.gaps,
+            "manifest": cv.manifest.model_dump(mode="json") if cv.manifest else None,
+        }, indent=2, ensure_ascii=False))
+    else:
+        print(output)
+
+    return 0
+
+
+def cmd_linkedin_optimize(args: argparse.Namespace) -> int:
+    """Optimize LinkedIn profile for a job."""
+    cfg = load_config(path=args.config)
+    connection = db.connect(_db_path(args, cfg))
+    job = db.get_job(connection, args.job_id)
+    if job is None:
+        print(f"Job not found: {args.job_id}", file=sys.stderr)
+        return 1
+
+    profile = _load_career_profile(cfg)
+    career = derive_career_profile(profile)
+    attrs = extract_job_attributes(job)
+
+    try:
+        doc = ingest_document(Path(args.cv))
+        db.save_career_document(connection, doc)
+    except DocumentError as exc:
+        print(f"Error loading CV: {exc}", file=sys.stderr)
+        return 1
+
+    candidates = candidate_evidence_from_document(doc)
+    existing = _get_existing_evidence(connection)
+    result = reconcile_document(doc, candidates, existing)
+    db.save_career_evidence_many(connection, result.evidence)
+    all_evidence = _get_existing_evidence(connection)
+    db.save_career_reconciliation(
+        connection,
+        document_id=doc.document_id,
+        total_facts=result.new_count + result.kept_count + result.conflict_count,
+        exact_matches=result.kept_count,
+        new_count=result.new_count,
+        conflicts=result.conflict_count,
+        status="conflicts" if result.conflict_count else "clean",
+    )
+    connection.commit()
+
+    # LLM proposal (opt-in, fail-closed)
+    client = None
+    semantic_client = None
+    llm_enabled = cfg.career.llm.enabled and not getattr(args, "no_llm", False)
+    if llm_enabled:
+        llm = cfg.career.llm
+        llm_timeout = llm.timeout_seconds or cfg.llm.timeout_seconds
+        from .career.cv_llm import OllamaCvClient
+        from .career.llm_log import LlmCallLog
+
+        llm_log = LlmCallLog()
+        client = OllamaCvClient(
+            llm.base_url or cfg.llm.base_url,
+            llm.model or cfg.llm.model,
+            temperature=llm.temperature,
+            timeout=llm_timeout,
+            call_log=llm_log,
+        )
+        if cfg.career.llm.semantic and not getattr(args, "no_semantic", False):
+            from .career.llm import OllamaJsonClient
+
+            semantic_client = OllamaJsonClient(
+                llm.base_url or cfg.llm.base_url,
+                llm.model or cfg.llm.model,
+                temperature=llm.temperature,
+                timeout=llm_timeout,
+                call_log=llm_log,
+            )
+
+    from .career.cv_generation import generate_cv
+    from .career.linkedin_optimization import import_linkedin_profile, optimize_linkedin
+
+    cv = generate_cv(career, attrs, all_evidence, job_id=job.id, client=client, semantic_client=semantic_client)
+
+    # Import current LinkedIn profile
+    try:
+        linkedin_profile = import_linkedin_profile(args.profile)
+    except Exception as exc:
+        print(f"Error loading LinkedIn profile: {exc}", file=sys.stderr)
+        return 1
+
+    # Optimize
+    linkedin_result = optimize_linkedin(linkedin_profile, career, all_evidence, cv)
+
+    # Save artifact to database
+    db.save_career_artifact(
+        connection,
+        cv.artifact,
+        source="linkedin_optimization",
+        llm_used=False,
+        mapping_json=json.dumps(
+            [m.model_dump(mode="json") for m in cv.positioning.mapping] if hasattr(cv.positioning, 'mapping') else [],
+            ensure_ascii=False,
+        ),
+        validation_json=json.dumps(
+            [v.model_dump(mode="json") for v in cv.artifact.check_compliance(all_evidence)[1]],
+            ensure_ascii=False,
+        ),
+        positioning_json=json.dumps(
+            cv.positioning.model_dump(mode="json"),
+            ensure_ascii=False,
+        ),
+    )
+    connection.commit()
+
+    # Output
+    lines = [
+        "# LinkedIn Optimization Recommendations",
+        "",
+        f"**Job:** {job.title} @ {job.company}",
+        f"**Career Move Type:** {linkedin_result.career_move_type}",
+        f"**Validation Status:** {linkedin_result.validation_status.value}",
+        "",
+    ]
+
+    for rec in linkedin_result.recommendations:
+        lines.append(f"## {rec.section.upper()}")
+        lines.append("")
+        lines.append(f"**Current:** {rec.current or '(empty)'}")
+        lines.append("")
+        lines.append(f"**Recommended:** {rec.recommended}")
+        lines.append("")
+        lines.append(f"**Rationale:** {rec.rationale}")
+        lines.append(f"**Verification:** {rec.verification}")
+        if rec.evidence_ids:
+            lines.append(f"**Evidence IDs:** {', '.join(rec.evidence_ids)}")
+        lines.append("")
+
+    output = "\n".join(lines)
+
+    if args.output:
+        Path(args.output).write_text(output, encoding="utf-8")
+        print(f"LinkedIn optimization written to {args.output}")
+    elif getattr(args, "json", False):
+        print(json.dumps({
+            "current_profile": linkedin_result.current_profile.__dict__,
+            "recommendations": [
+                {
+                    "section": r.section,
+                    "current": r.current,
+                    "recommended": r.recommended,
+                    "rationale": r.rationale,
+                    "evidence_ids": r.evidence_ids,
+                    "verification": r.verification,
+                }
+                for r in linkedin_result.recommendations
+            ],
+            "career_move_type": linkedin_result.career_move_type,
+            "validation_status": linkedin_result.validation_status.value,
+        }, indent=2, ensure_ascii=False))
+    else:
+        print(output)
+
+    return 0
+
+
 def _parent_database_path() -> str:
     env = __import__("os").environ.get("PERSONAL_AI_DATABASE", "")
     if env:
@@ -1082,8 +1382,46 @@ def cmd_feedback_summary(args: argparse.Namespace) -> int:
     except Exception as e:
         print(f"Error getting feedback summary: {e}", file=sys.stderr)
         return 1
-    finally:
-        connection.close()
+
+
+def cmd_gui(args: argparse.Namespace) -> int:
+    """Launch the Career Intelligence web GUI."""
+    import subprocess
+    import sys
+    from pathlib import Path
+    
+    # Resolve app path - find the actual Python file
+    app_path = Path(__file__).parent / "gui" / "app.py"
+    app_path_str = str(app_path.resolve())
+    
+    # Verify app exists
+    if not app_path.exists():
+        print(f"Error: Streamlit app not found at {app_path_str}", file=sys.stderr)
+        return 1
+    
+    # Launch Streamlit app
+    cmd = [
+        sys.executable, "-m", "streamlit", "run",
+        app_path_str,
+        "--server.address", args.host,
+        "--server.port", str(args.port),
+        "--server.runOnSave", "false",
+        "--theme.base", "light",
+    ]
+    
+    print(f"Starting Career Intelligence GUI on http://{args.host}:{args.port}")
+    print(f"App path: {app_path_str}")
+    print("Press Ctrl+C to stop.")
+    
+    try:
+        subprocess.run(cmd, check=False)
+        return 0
+    except KeyboardInterrupt:
+        print("\nGUI stopped.")
+        return 0
+    except Exception as e:
+        print(f"Error starting GUI: {e}", file=sys.stderr)
+        return 1
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1221,6 +1559,42 @@ def build_parser() -> argparse.ArgumentParser:
         help="Disable the optional semantic mapping refinement (deterministic floor only)",
     )
     p_tailor.set_defaults(func=cmd_tailor)
+
+    # CV generation (full evidence-grounded CV)
+    p_cv = p_career_sub.add_parser("cv", help="Generate evidence-grounded CV for a job")
+    p_cv.add_argument("job_id")
+    p_cv.add_argument("--cv", required=True, help="Path to the CV document to ground generation")
+    p_cv.add_argument("--output", help="Output file path (markdown)")
+    p_cv.add_argument("--language", choices=["en", "de"], default="en", help="Output language")
+    p_cv.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    p_cv.add_argument("--no-llm", action="store_true", help="Disable the opt-in LLM proposal")
+    p_cv.add_argument(
+        "--no-semantic",
+        action="store_true",
+        help="Disable the optional semantic mapping refinement (deterministic floor only)",
+    )
+    p_cv.set_defaults(func=cmd_cv_generate)
+
+    # LinkedIn optimization
+    p_linkedin = p_career_sub.add_parser("linkedin", help="Optimize LinkedIn profile for a job")
+    p_linkedin.add_argument("job_id")
+    p_linkedin.add_argument("--cv", required=True, help="Path to the CV document to ground optimization")
+    p_linkedin.add_argument("--profile", required=True, help="Path to current LinkedIn profile (YAML/Markdown)")
+    p_linkedin.add_argument("--output", help="Output file path (markdown)")
+    p_linkedin.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    p_linkedin.add_argument("--no-llm", action="store_true", help="Disable the opt-in LLM proposal")
+    p_linkedin.add_argument(
+        "--no-semantic",
+        action="store_true",
+        help="Disable the optional semantic mapping refinement (deterministic floor only)",
+    )
+    p_linkedin.set_defaults(func=cmd_linkedin_optimize)
+
+    # GUI command
+    p_gui = sub.add_parser("gui", help="Launch the Career Intelligence web GUI")
+    p_gui.add_argument("--host", default="127.0.0.1", help="Host to bind to (default 127.0.0.1)")
+    p_gui.add_argument("--port", type=int, default=8501, help="Port to bind to (default 8501)")
+    p_gui.set_defaults(func=cmd_gui)
 
     return ap
 

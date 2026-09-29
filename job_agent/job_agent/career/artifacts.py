@@ -14,7 +14,7 @@ No inference, no model calls here.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
 
@@ -37,6 +37,21 @@ class Bullet:
     evidence_id: str | None = None
 
 
+@dataclass(frozen=True)
+class EvidenceProvenance:
+    evidence_id: str
+    claim: str
+    verification: str
+    sources: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class EvidenceManifest:
+    artifact_id: str
+    job_id: str
+    provenance: list[EvidenceProvenance] = field(default_factory=list)
+
+
 class CVArtifact(BaseModel):
     artifact_id: str
     job_id: str
@@ -47,6 +62,8 @@ class CVArtifact(BaseModel):
     evidence_ids: list[str] = Field(default_factory=list)
     created_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
     note: str = "PROPOSAL - NOT APPROVED"
+    manifest: EvidenceManifest | None = None  # Add this field
+
 
     def check_compliance(
         self,

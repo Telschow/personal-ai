@@ -20,8 +20,8 @@ unrelated rows is not a personhood signal.
 
 The identity key is the canonical given name plus the lexicographically last
 surname token. Picking the last surname (not the whole set) is what lets
-compound-surname variants (``Daniel Telschow Arjona``) and single-surname
-forms (``Daniel Telschow``) unify deterministically while distinct people
+compound-surname variants (``Alice Example Arjona``) and single-surname
+forms (``Alice Example``) unify deterministically while distinct people
 (``Dirk`` / ``Nicolas`` / ``WG``) stay separate by given name. This is an
 acknowledged heuristic: do not widen it without adding cases to
 ``tests/test_people_canonicalize.py``.
@@ -35,9 +35,9 @@ import unicodedata
 from personal_ai.people.models import normalize_identity
 
 GIVEN_NAME_ALIASES: dict[str, str] = {
-    "daniel": "daniel",
-    "dani": "daniel",
-    "dan": "daniel",
+    "alice": "alice",
+    "ali": "alice",
+    "al": "alice",
 }
 
 _SALUTATION_TOKENS = frozenset(

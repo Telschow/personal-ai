@@ -136,10 +136,11 @@ def compact_evidence(
     budget = max_chars
     for ev in evidence:
         claim = ev.claim
-        if budget <= 0:
+        if budget <= 12:  # Need at least 12 chars for "…[-truncated]"
             break
         if len(claim) > budget:
-            claim = claim[: budget - 12] + "…[-truncated]"
+            available = max(0, budget - 12)
+            claim = claim[:available] + "…[-truncated]"
         items.append(
             {
                 "evidence_id": ev.evidence_id,

@@ -63,7 +63,7 @@ def _db_path(tmp_path) -> str:
 def _cv_path(tmp_path) -> str:
     p = tmp_path / "cv.txt"
     p.write_text(
-        "Daniel Telschow\n\nExperience\nProduct Owner - Autonomous Driving at BMW Group, 2024-present\n"
+        "Alice Example\n\nExperience\nProduct Owner - Autonomous Driving at BMW Group, 2024-present\n"
         "Led design of Automated Valet Parking feature\n"
     )
     return str(p)

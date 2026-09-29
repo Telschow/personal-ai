@@ -114,13 +114,72 @@ def upsert_job(conn: sqlite3.Connection, job: Job) -> None:
         ),
     )
     # Refresh last_seen/last_checked whenever the job is seen again.
-    # IMPORTANT: Do NOT update user_status or user_status_updated_at here - those are user-owned.
+    # Also update all job fields to reflect the latest data, EXCEPT:
+    # - run_id (preserve original discovery run for provenance)
+    # - user_status/user_status_updated_at (user-owned)
+    # - discovered_at (original discovery time)
+    # - id (primary key)
     conn.execute(
         """
-        UPDATE jobs SET last_seen=?, last_checked=?, missing_scans=0
-        WHERE id=? AND status NOT IN ('closed','duplicate')
+        UPDATE jobs SET
+            title=?, company=?, url=?, apply_url=?, source=?, source_type=?, location=?, country=?,
+            normalized_location=?, remote_mode=?, employment_type=?, date_posted=?, description=?,
+            salary_min=?, salary_max=?, salary_currency=?, salary_min_eur=?, salary_max_eur=?,
+            salary_converted=?, raw_json=?, canonical_key=?, status=?, last_seen=?, last_checked=?,
+            missing_scans=0, canonical_url=?, 
+            discovery_source=?, company_radar_id=?, provider_native_id=?,
+            role_family=?, role_classification_confidence=?, role_classification_reason=?,
+            location_city=?, location_country=?, location_scope=?, location_score=?, location_reason=?,
+            salary_period=?, salary_source=?, salary_confidence=?, compensation_status=?,
+            salary_min_eur=?, salary_max_eur=?, salary_converted=?
+        WHERE id=? AND status NOT IN ('closed')
         """,
-        (now, now, job.id),
+        (
+            job.title,
+            job.company,
+            job.url,
+            job.apply_url,
+            job.source,
+            job.source_type,
+            job.location,
+            job.country,
+            job.normalized_location,
+            job.remote_mode,
+            job.employment_type,
+            job.date_posted.isoformat() if job.date_posted else None,
+            job.description,
+            job.salary_min,
+            job.salary_max,
+            job.salary_currency,
+            job.salary_min_eur,
+            job.salary_max_eur,
+            1 if job.salary_converted else 0,
+            job.raw_json if isinstance(job.raw_json, str) else json.dumps(job.raw, ensure_ascii=False),
+            job.canonical_key,
+            "active",
+            now,
+            now,
+            job.canonical_url,
+            job.discovery_source,
+            job.company_radar_id,
+            job.provider_native_id,
+            job.role_family,
+            job.role_classification_confidence,
+            job.role_classification_reason,
+            job.location_city,
+            job.location_country,
+            job.location_scope,
+            job.location_score,
+            job.location_reason,
+            job.salary_period,
+            job.salary_source,
+            job.salary_confidence,
+            job.compensation_status,
+            job.salary_min_eur,
+            job.salary_max_eur,
+            1 if job.salary_converted else 0,
+            job.id,
+        ),
     )
 
 
@@ -476,12 +535,27 @@ def find_duplicate_of(conn: sqlite3.Connection, job: Job) -> Job | None:
     different aggregator), so source multiplicity never creates duplicates.
     """
     row = None
+    # First check by ID (same posting re-fetched) - same posting re-fetched
+    if job.id:
+        row = conn.execute(
+            """
+            SELECT * FROM jobs
+            WHERE id = ? AND id <> ?
+            LIMIT 1
+            """,
+            (job.id, job.id),  # This will never match (id = id AND id <> id is always false)
+        ).fetchone()
+    # Actually, we can't check by ID without excluding the current job.
+    # The ID check is problematic because the job might have been just inserted.
+    # For now, rely on canonical_key and canonical_url for duplicate detection.
+    if False and job.id:  # Disabled for now
+        pass
     if job.canonical_key:
         row = conn.execute(
             """
             SELECT * FROM jobs
             WHERE canonical_key = ? AND id <> ?
-              AND status NOT IN ('closed','duplicate')
+              AND status NOT IN ('closed')
             ORDER BY first_seen ASC
             LIMIT 1
             """,
@@ -492,7 +566,7 @@ def find_duplicate_of(conn: sqlite3.Connection, job: Job) -> Job | None:
             """
             SELECT * FROM jobs
             WHERE canonical_url = ? AND canonical_url IS NOT NULL AND id <> ?
-              AND status NOT IN ('closed','duplicate')
+              AND status NOT IN ('closed')
             ORDER BY first_seen ASC
             LIMIT 1
             """,
@@ -821,13 +895,17 @@ def record_discovery_run(
 def latest_discovery_run(conn: sqlite3.Connection) -> dict[str, Any] | None:
     row = conn.execute(
         """
-        SELECT id, planned_queries, candidates_found, jobs_persisted,
+        SELECT id, run_id, planned_queries, candidates_found, jobs_persisted,
                jobs_from_providers, jobs_from_search, provider_failures,
                fetch_errors, duration_ms, ran_at
         FROM discovery_runs ORDER BY id DESC LIMIT 1
         """
     ).fetchone()
-    return dict(row) if row else None
+    if row:
+        d = dict(row)
+        d['started_at'] = d.get('ran_at')
+        return d
+    return None
 
 
 # ---------------------------------------------------------------------------

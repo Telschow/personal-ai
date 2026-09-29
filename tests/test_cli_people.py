@@ -362,7 +362,7 @@ def test_people_canonicalize_dry_run_and_apply(tmp_path: Path) -> None:
     from personal_ai.people.store import PersonStore
 
     db = tmp_path / "people.db"
-    _seed_legacy_people(db, ["Daniel Telschow", "Dani Telschow", "Telschow, Daniel"])
+    _seed_legacy_people(db, ["Alice Example", "Dani Example", "Example, Daniel"])
 
     dry = cli.run_people(
         cli.parse_args(["people", "canonicalize", "--database", str(db)])
@@ -382,7 +382,7 @@ def test_people_canonicalize_dry_run_and_apply(tmp_path: Path) -> None:
     try:
         store = PersonStore(connection)
         assert store.count() == 1
-        daniel = store.get(person_id_for(canonical_identity("Daniel Telschow")))
+        daniel = store.get(person_id_for(canonical_identity("Alice Example")))
         assert daniel is not None and daniel.evidence_count == 3
     finally:
         connection.close()
@@ -392,7 +392,7 @@ def test_people_canonicalize_json_dry_run(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     db = tmp_path / "people.db"
-    _seed_legacy_people(db, ["Daniel Telschow", "Dani Telschow"])
+    _seed_legacy_people(db, ["Alice Example", "Dani Example"])
     code = cli.run_people(
         cli.parse_args(["people", "canonicalize", "--database", str(db), "--json"])
     )

@@ -28,7 +28,7 @@ from personal_ai.storage import (
 
 FAKE_RESPONSE = {
     "summary": "Daniel works at Example GmbH on Project Apollo.",
-    "people": ["Daniel Telschow"],
+    "people": ["Alice Example"],
     "organizations": ["Example GmbH"],
     "projects": ["Project Apollo"],
     "goals": ["Learn local AI deployment"],
@@ -37,7 +37,7 @@ FAKE_RESPONSE = {
 
 FAKE_RESPONSE_SECOND = {
     "summary": "Revised summary for the same document.",
-    "people": ["Daniel Telschow", "Alice"],
+    "people": ["Alice Example", "Alice"],
     "organizations": ["Example GmbH", "BCG"],
     "projects": ["Project Apollo"],
     "goals": ["Learn local AI deployment", "Financial independence"],
@@ -56,7 +56,7 @@ def _make_pdf_bytes(text: str) -> bytes:
 
 
 SYNTHETIC_TEXT = (
-    "Daniel Telschow works at Example GmbH. "
+    "Alice Example works at Example GmbH. "
     "He is leading Project Apollo which started in January 2026. "
     "His goal is to learn local AI deployment and build a personal knowledge system. "
     "The project involves career development, AI research, and personal growth. "
@@ -141,7 +141,7 @@ class TestExtractionIntegration:
 
             assert result.structured_extraction is not None
             assert result.structured_extraction.summary == FAKE_RESPONSE["summary"]
-            assert result.structured_extraction.people == ("Daniel Telschow",)
+            assert result.structured_extraction.people == ("Alice Example",)
             assert result.structured_extraction.organizations == ("Example GmbH",)
             assert result.structured_extraction.projects == ("Project Apollo",)
             assert result.structured_extraction.goals == ("Learn local AI deployment",)
@@ -172,7 +172,7 @@ class TestExtractionIntegration:
         def handler(request):
             body = json.loads(request.content)
             user_message = body["messages"][1]["content"]
-            assert "Daniel Telschow" in user_message
+            assert "Alice Example" in user_message
             assert "Example GmbH" in user_message
             assert "Project Apollo" in user_message
             assert len(user_message) > 200

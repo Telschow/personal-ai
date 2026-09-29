@@ -14,7 +14,7 @@ from job_agent.career.reconcile import candidate_evidence_from_document, reconci
 from job_agent.career.validation import validate_claim
 
 _INJECTION = """\
-Daniel Telschow
+Alice Example
 
 Experience
 Product Owner - Autonomous Driving at BMW Group, 2024-present

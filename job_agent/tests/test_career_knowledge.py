@@ -57,7 +57,7 @@ def _new_personal_db(tmp_path) -> str:
         DocumentChunk(
             id="chunk-1",
             document_id="doc-1",
-            text="Daniel Telschow works on autonomous driving perception systems.",
+            text="Alice Example works on autonomous driving perception systems.",
             page_number=0,
             metadata={"chunk_index": 0},
         )
@@ -68,7 +68,7 @@ def _new_personal_db(tmp_path) -> str:
         Memory(
             memory_id=new_memory_id(),
             kind=MemoryKind.WORK,
-            content="Daniel Telschow is a Product Owner at BMW Group",
+            content="Alice Example is a Product Owner at BMW Group",
             summary="work identity",
             source_type=MemorySourceType.IMPORTED,
             source_id="conv-1",

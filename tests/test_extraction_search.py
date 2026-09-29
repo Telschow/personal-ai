@@ -39,7 +39,7 @@ class TestExtractionSearch:
             _make_extraction(
                 "doc-1",
                 summary="Daniel works at BCG on consulting projects",
-                people=("Daniel Telschow",),
+                people=("Alice Example",),
                 organizations=("BCG",),
                 projects=("Project Apollo",),
                 goals=("Career advancement",),
@@ -61,7 +61,7 @@ class TestExtractionSearch:
             _make_extraction(
                 "doc-3",
                 summary="Financial goals for 2026",
-                people=("Daniel Telschow",),
+                people=("Alice Example",),
                 organizations=(),
                 projects=("Financial independence",),
                 goals=("Save 100k", "Invest wisely"),

@@ -10,7 +10,7 @@ def validate_materials(data: dict, profile: dict) -> list[str]:
     allowed_companies = {x.get("company", "").lower() for x in profile.get("experience", [])}
     for company in re.findall(r"\b[A-Z][A-Za-z&.-]{2,}(?:\s+[A-Z][A-Za-z&.-]{2,})*\b", text):
         c = company.lower()
-        if c in {"Daniel Telschow", "Product Owner", "Experience", "Profile"}:
+        if c in {"Alice Example", "Product Owner", "Experience", "Profile"}:
             continue
         # Only hard-check known employer-like names if they recur exactly in generated text.
     profile_numbers = set(re.findall(r"\b\d+(?:[.,]\d+)?\b", str(profile)))

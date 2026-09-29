@@ -1,0 +1,15 @@
+name: Alice Example
+location: Example City
+languages:
+  - English: native
+education:
+  - school: Example University
+    degree: BSc Computer Science
+    years: 2018-2021
+experience:
+  - company: Example Corp
+    title: Software Engineer
+    dates: 2021-present
+skills:
+  - Python
+  - Testing

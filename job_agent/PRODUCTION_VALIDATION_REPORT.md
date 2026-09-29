@@ -54,7 +54,7 @@ All tests passing: 100%
 **Profile loaded from:** `profile/profile.yaml`
 
 ```yaml
-name: Daniel Telschow
+name: Alice Example
 current_role: product_management
 target_roles: [product_management, product_leadership]
 target_seniority: 4
@@ -70,7 +70,7 @@ constraints:
 
 ### 3. CV Ingestion ✅
 
-**CV source:** `/mnt/immich/projects/personal-ai/Daniel Telschow CV.pdf`
+**CV source:** `/mnt/immich/projects/personal-ai/Alice Example CV.pdf`
 
 **Status:** Successfully ingested
 - Document ID: cv-doc:76ad16be125899c9

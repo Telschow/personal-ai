@@ -57,7 +57,7 @@ class FakeStructuredExtractor:
         return StructuredExtraction(
             document_id=extraction.document_id,
             summary=f"Summary about BCG project for document {self.calls}",
-            people=("Daniel Telschow",),
+            people=("Alice Example",),
             organizations=("BCG",),
             projects=("Project Apollo",),
             goals=("Career advancement",),

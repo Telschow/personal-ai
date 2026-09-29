@@ -16,7 +16,8 @@ import urllib.parse
 from collections.abc import Sequence
 from typing import Any, Protocol
 
-from .evidence import CareerEvidence, VerificationLevel
+from .evidence import CareerEvidence, CareerEvidenceType, VerificationLevel
+from .evidence_cache import EvidenceQueryCache, get_global_cache
 
 # Canonical memory kinds the fit layer will consider (subset of the parent's
 # MemoryKind vocabulary). Others are ignored to keep narrative claims bounded.
@@ -54,6 +55,51 @@ class CareerKnowledge(Protocol):
     def corpus_search(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
         """Search document chunks. Returns attrs-limited evidence."""
 
+    # Job-aware retrieval methods
+    def find_skills(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        """Find skill evidence matching the query."""
+        ...
+
+    def find_projects(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        """Find project evidence matching the query."""
+        ...
+
+    def find_achievements(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        """Find achievement evidence matching the query."""
+        ...
+
+    def find_leadership_experience(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        """Find leadership evidence matching the query."""
+        ...
+
+    def find_domain_experience(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        """Find domain/industry experience evidence matching the query."""
+        ...
+
+    def find_education(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        """Find education evidence matching the query."""
+        ...
+
+    def find_certifications(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        """Find certification evidence matching the query."""
+        ...
+
+    def find_technologies(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        """Find technology evidence matching the query."""
+        ...
+
+    def find_languages(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        """Find language proficiency evidence matching the query."""
+        ...
+
+    def find_career_experience(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        """Find career experience evidence matching the query."""
+        ...
+
+    def find_evidence_by_type(self, evidence_type: CareerEvidenceType, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        """Generic evidence retrieval filtered by evidence type."""
+        ...
+
 
 class NullCareerKnowledge:
     """Knowledge provider that serves nothing (default for offline running)."""
@@ -65,6 +111,40 @@ class NullCareerKnowledge:
         return ()
 
     def corpus_search(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        return ()
+
+    # Job-aware retrieval methods (no-op implementations)
+    def find_skills(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        return ()
+
+    def find_projects(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        return ()
+
+    def find_achievements(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        return ()
+
+    def find_leadership_experience(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        return ()
+
+    def find_domain_experience(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        return ()
+
+    def find_education(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        return ()
+
+    def find_certifications(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        return ()
+
+    def find_technologies(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        return ()
+
+    def find_languages(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        return ()
+
+    def find_career_experience(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        return ()
+
+    def find_evidence_by_type(self, evidence_type: CareerEvidenceType, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
         return ()
 
 
@@ -83,6 +163,8 @@ class PersonalAiCareerKnowledge:
         memory_kinds: Sequence[str] | None = None,
         corpus_limit: int = 12,
         memory_limit: int = 8,
+        cache_ttl: float = 300.0,
+        cache: EvidenceQueryCache | None = None,
     ) -> None:
         self._path = database_path
         self._kinds: tuple[str, ...] = tuple(memory_kinds) if memory_kinds else DEFAULT_MEMORY_KINDS
@@ -92,6 +174,8 @@ class PersonalAiCareerKnowledge:
         self._chunk_index: Any = None
         self._memory_retriever: Any = None
         self._parent: Any = None
+        self._cache = cache or get_global_cache()
+        self._cache_ttl = cache_ttl
 
     # -- construction ------------------------------------------------------
 
@@ -127,6 +211,10 @@ class PersonalAiCareerKnowledge:
             return False
 
     def memory_search(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        # Check cache first
+        cached = self._cache.get("memory_search", query, limit)
+        if cached is not None:
+            return cached
         self._load()
         where = limit if limit and limit < self._memory_limit else self._memory_limit
         hits = self._memory_retriever.search(query, scopes=(), limit=max(1, where))
@@ -135,6 +223,8 @@ class PersonalAiCareerKnowledge:
             memory = hit.memory
             if memory.kind.value not in self._kinds:
                 continue
+            # Infer evidence type from memory kind
+            ev_type = self._infer_evidence_type_from_kind(memory.kind.value, memory.content)
             out.append(
                 CareerEvidence(
                     evidence_id=self._evidence_id(memory.content, "personal_ai_memory"),
@@ -142,6 +232,8 @@ class PersonalAiCareerKnowledge:
                     level=VerificationLevel.DOCUMENTED,
                     source="personal_ai_memory",
                     source_type=memory.source_type.value,
+                    evidence_type=ev_type,
+                    source_location=f"memory:{memory.kind.value}:{memory.memory_id[:8]}",
                     categories=[],
                     keywords=[],
                     confidence=float(memory.confidence),
@@ -151,14 +243,23 @@ class PersonalAiCareerKnowledge:
                     raw={"summary": memory.summary},
                 )
             )
-        return tuple(out)
+        result = tuple(out)
+        self._cache.set("memory_search", query, limit, result, ttl=self._cache_ttl)
+        return result
 
     def corpus_search(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        # Check cache first
+        cached = self._cache.get("corpus_search", query, limit)
+        if cached is not None:
+            return cached
         self._load()
         where = limit if limit and limit < self._corpus_limit else self._corpus_limit
         hits = self._chunk_index.search(query, limit=max(1, where))
         out: list[CareerEvidence] = []
         for hit in hits:
+            # Infer evidence type from source_type and content
+            ev_type = self._infer_evidence_type_from_source(hit.source_type, hit.text)
+            source_loc = f"corpus:{hit.document_id[:8]}:chunk{hit.chunk_index}"
             out.append(
                 CareerEvidence(
                     evidence_id=self._evidence_id(hit.text, "personal_ai_corpus"),
@@ -166,19 +267,154 @@ class PersonalAiCareerKnowledge:
                     level=VerificationLevel.DOCUMENTED,
                     source="personal_ai_corpus",
                     source_type=hit.source_type,
+                    evidence_type=ev_type,
+                    source_location=source_loc,
                     confidence=0.6,
                     document_id=hit.document_id,
                     chunk_id=hit.chunk_id,
                     raw={"rank": hit.rank, "source": hit.source},
                 )
             )
-        return tuple(out)
+        result = tuple(out)
+        self._cache.set("corpus_search", query, limit, result, ttl=self._cache_ttl)
+        return result
+
+    def _infer_evidence_type_from_kind(self, kind: str, content: str) -> CareerEvidenceType | None:
+        """Infer evidence type from memory kind and content."""
+        content_l = content.casefold()
+        if kind == "skill":
+            return CareerEvidenceType.SKILL
+        if kind == "work":
+            return CareerEvidenceType.CAREER_EXPERIENCE
+        if kind == "education":
+            return CareerEvidenceType.EDUCATION
+        if kind == "goal":
+            return None  # goals are not evidence of current capabilities
+        if kind == "habit":
+            return CareerEvidenceType.SKILL
+        if kind == "identity":
+            return None
+        if kind == "preference":
+            return None
+        if kind == "relationship":
+            return None
+        if kind == "personal_fact":
+            return None
+        if kind == "biography":
+            return CareerEvidenceType.CAREER_EXPERIENCE
+        if kind == "long_term_context":
+            return None
+        # Fallback: infer from content
+        if any(k in content_l for k in ("skill", "proficient", "expertise", "experience with")):
+            return CareerEvidenceType.SKILL
+        if any(k in content_l for k in ("project", "built", "developed", "launched")):
+            return CareerEvidenceType.PROJECT
+        if any(k in content_l for k in ("led", "lead", "managed", "spearheaded")):
+            return CareerEvidenceType.LEADERSHIP
+        if any(k in content_l for k in ("python", "c++", "java", "kubernetes", "docker", "aws", "sql", "kafka", "spark")):
+            return CareerEvidenceType.TECHNOLOGY
+        return None
+
+    def _infer_evidence_type_from_source(self, source_type: str, content: str) -> CareerEvidenceType | None:
+        """Infer evidence type from corpus source type and content."""
+        content_l = content.casefold()
+        if source_type == "financial":
+            return None
+        if source_type == "email":
+            return None
+        if source_type == "chat":
+            return None
+        if source_type == "web" and any(k in content_l for k in ("skill", "project", "experience", "led", "built")):
+            return CareerEvidenceType.SKILL
+        return None
+
+    # ---- Job-aware retrieval methods ----
+    # These filter the base search results by evidence_type
+
+    def _filter_by_type(self, results: tuple[CareerEvidence, ...], ev_type: CareerEvidenceType) -> tuple[CareerEvidence, ...]:
+        return tuple(r for r in results if r.evidence_type == ev_type)
+
+    def find_skills(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        mem = self.memory_search(query, limit=limit)
+        corp = self.corpus_search(query, limit=limit)
+        combined = mem + corp
+        return self._filter_by_type(combined, CareerEvidenceType.SKILL)[:limit]
+
+    def find_projects(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        mem = self.memory_search(query, limit=limit)
+        corp = self.corpus_search(query, limit=limit)
+        combined = mem + corp
+        return self._filter_by_type(combined, CareerEvidenceType.PROJECT)[:limit]
+
+    def find_achievements(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        mem = self.memory_search(query, limit=limit)
+        corp = self.corpus_search(query, limit=limit)
+        combined = mem + corp
+        return self._filter_by_type(combined, CareerEvidenceType.ACHIEVEMENT)[:limit]
+
+    def find_leadership_experience(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        mem = self.memory_search(query, limit=limit)
+        corp = self.corpus_search(query, limit=limit)
+        combined = mem + corp
+        return self._filter_by_type(combined, CareerEvidenceType.LEADERSHIP)[:limit]
+
+    def find_domain_experience(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        mem = self.memory_search(query, limit=limit)
+        corp = self.corpus_search(query, limit=limit)
+        combined = mem + corp
+        return self._filter_by_type(combined, CareerEvidenceType.DOMAIN_EXPERIENCE)[:limit]
+
+    def find_education(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        mem = self.memory_search(query, limit=limit)
+        corp = self.corpus_search(query, limit=limit)
+        combined = mem + corp
+        return self._filter_by_type(combined, CareerEvidenceType.EDUCATION)[:limit]
+
+    def find_certifications(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        mem = self.memory_search(query, limit=limit)
+        corp = self.corpus_search(query, limit=limit)
+        combined = mem + corp
+        return self._filter_by_type(combined, CareerEvidenceType.CERTIFICATION)[:limit]
+
+    def find_technologies(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        mem = self.memory_search(query, limit=limit)
+        corp = self.corpus_search(query, limit=limit)
+        combined = mem + corp
+        return self._filter_by_type(combined, CareerEvidenceType.TECHNOLOGY)[:limit]
+
+    def find_languages(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        mem = self.memory_search(query, limit=limit)
+        corp = self.corpus_search(query, limit=limit)
+        combined = mem + corp
+        return self._filter_by_type(combined, CareerEvidenceType.LANGUAGE)[:limit]
+
+    def find_career_experience(self, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        mem = self.memory_search(query, limit=limit)
+        corp = self.corpus_search(query, limit=limit)
+        combined = mem + corp
+        return self._filter_by_type(combined, CareerEvidenceType.CAREER_EXPERIENCE)[:limit]
+
+    def find_evidence_by_type(self, evidence_type: CareerEvidenceType, query: str, limit: int = 10) -> tuple[CareerEvidence, ...]:
+        mem = self.memory_search(query, limit=limit)
+        corp = self.corpus_search(query, limit=limit)
+        combined = mem + corp
+        return self._filter_by_type(combined, evidence_type)[:limit]
 
     def close(self) -> None:
         if self._conn is not None:
             with contextlib.suppress(sqlite3.Error):
                 self._conn.close()
             self._conn = None
+        # Clear cache on close to avoid stale data
+        self._cache.clear()
+
+    def clear_cache(self) -> None:
+        """Explicitly clear the query cache."""
+        self._cache.clear()
+
+    def cache_stats(self) -> dict[str, Any]:
+        """Return cache statistics for monitoring."""
+        return self._cache.stats()
 
     @staticmethod
     def _evidence_id(claim: str, source: str) -> str:

@@ -5,7 +5,7 @@ import pytest
 import httpx
 from unittest.mock import patch, MagicMock
 
-from job_agent.sources import DirectPageSource
+from job_agent.sources import DirectPageSource, SourceError
 
 
 def test_direct_source_normal_response():
@@ -57,8 +57,9 @@ def test_direct_source_connect_timeout():
     def fake_get(url, **kwargs):
         raise httpx.ConnectTimeout("Connection timed out")
     with patch("httpx.get", side_effect=fake_get):
-        with pytest.raises(httpx.ConnectTimeout):
+        with pytest.raises(SourceError) as excinfo:
             src.fetch()
+    assert "timeout after 3 attempts" in str(excinfo.value)
 
 
 def test_direct_source_read_timeout():
@@ -66,8 +67,9 @@ def test_direct_source_read_timeout():
     def fake_get(url, **kwargs):
         raise httpx.ReadTimeout("Read timed out")
     with patch("httpx.get", side_effect=fake_get):
-        with pytest.raises(httpx.ReadTimeout):
+        with pytest.raises(SourceError) as excinfo:
             src.fetch()
+    assert "timeout after 3 attempts" in str(excinfo.value)
 
 
 def test_direct_source_transient_http_error():
