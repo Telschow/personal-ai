@@ -192,7 +192,7 @@ class KeepSourceAdapter:
             source_key = candidate.relative_to(self.directory).as_posix()
             try:
                 records.append(build_note_record(source_key, candidate.read_bytes()))
-            except (TrashedNoteError, EmptyNoteError):
+            except TrashedNoteError, EmptyNoteError:
                 continue
         records.sort(key=lambda record: record.source_key)
         return records

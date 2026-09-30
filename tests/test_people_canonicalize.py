@@ -223,9 +223,7 @@ class TestCanonicalIdentity:
             assert canonical_identity(name) == normalize_identity(name)
 
     def test_distinct_family_members_stay_distinct(self) -> None:
-        assert canonical_identity("Alice Example") != canonical_identity(
-            "Dirk Example"
-        )
+        assert canonical_identity("Alice Example") != canonical_identity("Dirk Example")
         assert canonical_identity("Alice Example") != canonical_identity(
             "Nicolas Example"
         )
@@ -264,9 +262,7 @@ class TestStoreCanonicalIdentity:
     def test_upsert_keeps_distinct_family_members(self, store: PersonStore) -> None:
         store.upsert_reference(make_reference(name="Alice Example", document_id="d1"))
         store.upsert_reference(make_reference(name="Dirk Example", document_id="d2"))
-        store.upsert_reference(
-            make_reference(name="Nicolas Example", document_id="d3")
-        )
+        store.upsert_reference(make_reference(name="Nicolas Example", document_id="d3"))
         assert store.count() == 3
 
     def test_existing_unfragmented_names_unchanged(self, store: PersonStore) -> None:

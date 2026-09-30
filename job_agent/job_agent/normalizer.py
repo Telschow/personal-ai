@@ -58,6 +58,7 @@ def normalize_job(
 
     # Apply role classification
     from .role_classifier import classify_role
+
     role_archetypes, role_family, confidence, reason, career_direction = classify_role(out)
     out.role_archetypes = list(role_archetypes)
     out.role_family = role_family
@@ -67,6 +68,7 @@ def normalize_job(
 
     # Apply location classification
     from .location_classifier import classify_location
+
     location_city, location_country, location_scope, location_score, location_reason = classify_location(out)
     out.location_city = location_city
     out.location_country = location_country

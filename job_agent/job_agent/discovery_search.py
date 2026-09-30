@@ -610,7 +610,9 @@ def run_planned_discovery(
                 jobs_by_source[plan_item.source_id] = jobs_by_source.get(plan_item.source_id, 0) + 1
             else:
                 catalog_unknown += 1
-                provenance.append(Provenance(source_id="catalog_unknown", discovery_method="search_engine", query=query))
+                provenance.append(
+                    Provenance(source_id="catalog_unknown", discovery_method="search_engine", query=query)
+                )
         for source_id, count in jobs_by_source.items():
             pacing.note_jobs_parsed(source_id, count)
         pacing.note_catalog_unknown_jobs(catalog_unknown)

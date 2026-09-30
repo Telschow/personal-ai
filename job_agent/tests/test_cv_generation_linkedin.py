@@ -2,19 +2,17 @@
 
 from __future__ import annotations
 
-import tempfile
 from pathlib import Path
 
 import pytest
 import yaml
 
 from job_agent.career.cv_generation import GeneratedCV, generate_cv, render_cv_human
-from job_agent.career.evidence import CareerEvidence, VerificationLevel, CareerEvidenceType, evidence_id
+from job_agent.career.evidence import CareerEvidence, CareerEvidenceType, VerificationLevel, evidence_id
 from job_agent.career.linkedin_optimization import LinkedInProfile, optimize_linkedin
 from job_agent.career.profile import derive_career_profile
 from job_agent.career.requirements import extract_job_attributes
 from job_agent.models import Job
-from job_agent.career.knowledge import NullCareerKnowledge
 
 
 def _profile():
@@ -29,7 +27,9 @@ def _career():
 def _evidence():
     return [
         CareerEvidence(
-            evidence_id=evidence_id("Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)", "profile"),
+            evidence_id=evidence_id(
+                "Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)", "profile"
+            ),
             claim="Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)",
             level=VerificationLevel.VERIFIED,
             source="profile",
@@ -61,7 +61,10 @@ def _evidence():
             categories=["leadership"],
         ),
         CareerEvidence(
-            evidence_id=evidence_id("MSc Automotive and Combustion Engine Technology from Technical University of Munich (2018-2021)", "profile"),
+            evidence_id=evidence_id(
+                "MSc Automotive and Combustion Engine Technology from Technical University of Munich (2018-2021)",
+                "profile",
+            ),
             claim="MSc Automotive and Combustion Engine Technology from Technical University of Munich (2018-2021)",
             level=VerificationLevel.VERIFIED,
             source="profile",

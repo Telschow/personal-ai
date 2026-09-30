@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from job_agent.career.documents import ingest_document
 from job_agent.career.evidence import (
     CareerEvidence,
     CareerEvidenceType,
@@ -17,10 +18,7 @@ from job_agent.career.evidence import (
 )
 from job_agent.career.evidence_cache import EvidenceQueryCache, get_global_cache
 from job_agent.career.knowledge import NullCareerKnowledge, PersonalAiCareerKnowledge
-from job_agent.career.reconcile import candidate_evidence_from_document, reconcile_document
-from job_agent.career.documents import ingest_document, CareerDocument
-from job_agent.migrations import migrate
-from job_agent import db
+from job_agent.career.reconcile import candidate_evidence_from_document
 
 
 def test_evidence_verification_levels() -> None:
@@ -96,11 +94,9 @@ def test_build_profile_evidence_includes_new_fields() -> None:
             }
         ],
         "skills": ["Python", "Leadership"],
-        "education": [
-            {"school": "TUM", "degree": "MSc Computer Science", "years": "2018-2020"}
-        ],
+        "education": [{"school": "TUM", "degree": "MSc Computer Science", "years": "2018-2020"}],
         "languages": ["English: fluent", "German: native"],
-"career": {
+        "career": {
             "target_role_families": ["product_management"],
             "target_seniority": 4,
             "leadership_direction": "product",
@@ -110,6 +106,7 @@ def test_build_profile_evidence_includes_new_fields() -> None:
 
     # Create a minimal career profile object
     from job_agent.career.profile import derive_career_profile
+
     career = derive_career_profile(profile_yaml)
 
     evidence = build_profile_evidence(profile_yaml, career)
@@ -163,6 +160,7 @@ def test_evidence_cache_basic() -> None:
 
     # Test set and get
     from job_agent.career.evidence import CareerEvidence, VerificationLevel
+
     test_evidence = (
         CareerEvidence(evidence_id="1", claim="test", level=VerificationLevel.VERIFIED, source="test"),
         CareerEvidence(evidence_id="2", claim="test2", level=VerificationLevel.VERIFIED, source="test"),
@@ -192,15 +190,15 @@ def test_evidence_cache_ttl_expiry() -> None:
     cache = EvidenceQueryCache(default_ttl=0.1, max_entries=10)  # 100ms TTL
 
     from job_agent.career.evidence import CareerEvidence, VerificationLevel
-    test_evidence = (
-        CareerEvidence(evidence_id="1", claim="test", level=VerificationLevel.VERIFIED, source="test"),
-    )
+
+    test_evidence = (CareerEvidence(evidence_id="1", claim="test", level=VerificationLevel.VERIFIED, source="test"),)
 
     cache.set("find_skills", "python", 10, test_evidence)
     assert cache.get("find_skills", "python", 10) == test_evidence
 
     # Wait for expiry
     import time
+
     time.sleep(0.2)
 
     result = cache.get("find_skills", "python", 10)
@@ -212,9 +210,8 @@ def test_evidence_cache_max_entries() -> None:
     cache = EvidenceQueryCache(default_ttl=300.0, max_entries=3)
 
     from job_agent.career.evidence import CareerEvidence, VerificationLevel
-    test_evidence = (
-        CareerEvidence(evidence_id="1", claim="test", level=VerificationLevel.VERIFIED, source="test"),
-    )
+
+    test_evidence = (CareerEvidence(evidence_id="1", claim="test", level=VerificationLevel.VERIFIED, source="test"),)
 
     cache.set("method", "q1", 10, test_evidence)
     cache.set("method", "q2", 10, test_evidence)

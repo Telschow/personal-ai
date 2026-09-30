@@ -232,7 +232,7 @@ def read_article_metadata(path: Path) -> dict[str, str]:
         return {}
     try:
         data = json.loads(metadata_path.read_bytes().decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError):
+    except UnicodeDecodeError, json.JSONDecodeError:
         return {}
     if not isinstance(data, dict):
         return {}

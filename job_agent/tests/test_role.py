@@ -1,7 +1,6 @@
 """Tests for role classification."""
-from __future__ import annotations
 
-import pytest
+from __future__ import annotations
 
 from job_agent.models import Job
 from job_agent.role_archetypes import RoleArchetype

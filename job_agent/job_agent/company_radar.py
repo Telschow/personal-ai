@@ -8,17 +8,15 @@ tracked separately from generic provider discovery.
 
 from __future__ import annotations
 
-import yaml
-from pathlib import Path
 from dataclasses import dataclass
-from typing import Any
+from pathlib import Path
+
+import yaml
 
 from .config import Config
-from .sources import Source, AtsBoardSource
 from .models import Job
 from .normalizer import normalize_job
-from .pipeline import Provenance
-
+from .sources import Source
 
 _RADAR_PATH = Path(__file__).parent.parent / "company_radar.yaml"
 
@@ -65,13 +63,13 @@ def _find_source_for_provider(cfg: Config, provider_type: str, token: str) -> So
 
     for src in build_sources(cfg):
         # match by token field
-        if provider_type == "greenhouse" and hasattr(src, "token") and getattr(src, "token") == token:
+        if provider_type == "greenhouse" and hasattr(src, "token") and src.token == token:
             return src
-        if provider_type == "ashby" and hasattr(src, "board") and getattr(src, "board") == token:
+        if provider_type == "ashby" and hasattr(src, "board") and src.board == token:
             return src
-        if provider_type == "lever" and hasattr(src, "site") and getattr(src, "site") == token:
+        if provider_type == "lever" and hasattr(src, "site") and src.site == token:
             return src
-        if provider_type == "smartrecruiters" and hasattr(src, "company") and getattr(src, "company") == token:
+        if provider_type == "smartrecruiters" and hasattr(src, "company") and src.company == token:
             return src
     return None
 
@@ -163,6 +161,7 @@ def discover_radar(
             if existing_row:
                 metrics["radar_duplicates"] += 1
                 from .db import _now
+
                 now = _now()
                 conn.execute(
                     "UPDATE jobs SET last_seen=?, last_checked=?, missing_scans=0 WHERE id=?",
@@ -176,6 +175,7 @@ def discover_radar(
                 continue
 
             from .db import upsert_job
+
             upsert_job(conn, norm)
             metrics["radar_persisted"] += 1
 

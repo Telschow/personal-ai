@@ -1,10 +1,11 @@
 """Integration tests for role and location classification."""
+
 from __future__ import annotations
 
-from job_agent.models import Job
-from job_agent.role_archetypes import RoleArchetype
 from job_agent.career_direction import CareerDirection
+from job_agent.models import Job
 from job_agent.normalizer import normalize_job
+from job_agent.role_archetypes import RoleArchetype
 
 
 def test_full_normalization_and_classification():
@@ -19,9 +20,9 @@ def test_full_normalization_and_classification():
         source="test",
         source_type="test",
     )
-    
+
     normalized = normalize_job(job, source_type="ats_board")
-    
+
     # Check role classification
     assert RoleArchetype.TECHNICAL_PRODUCT in normalized.role_archetypes
     assert RoleArchetype.AUTONOMOUS_SYSTEMS in normalized.role_archetypes
@@ -29,14 +30,14 @@ def test_full_normalization_and_classification():
     assert normalized.role_classification_confidence >= 0.9
     assert "technical product manager" in normalized.role_classification_reason
     assert normalized.career_direction == CareerDirection.DIRECT_MATCH
-    
+
     # Check location classification
     assert normalized.location_city == "Munich"
     assert normalized.location_country == "Germany"
     assert normalized.location_scope == "munich"
     assert normalized.location_score == 1.0
     assert "Munich city detected" in normalized.location_reason
-    
+
     # Check normalization fields
     assert normalized.remote_mode == "onsite"
     assert normalized.normalized_location.lower() == "munich germany"
@@ -56,21 +57,21 @@ def test_remote_job():
         source="test",
         source_type="test",
     )
-    
+
     normalized = normalize_job(job, source_type="ats_board")
-    
+
     # Check role classification
     assert RoleArchetype.AI_PRODUCT in normalized.role_archetypes
     assert normalized.role_family == "AI Product"
     assert normalized.role_classification_confidence >= 0.9
     assert "AI engineer detected" in normalized.role_classification_reason
     assert normalized.career_direction == CareerDirection.DIRECT_MATCH
-    
+
     # Check location classification
     assert normalized.location_scope == "remote_eu"
     assert normalized.location_score == 0.3
     assert "Remote detected" in normalized.location_reason
-    
+
     # Check normalization fields
     assert normalized.remote_mode == "remote"
 
@@ -87,16 +88,16 @@ def test_international_job():
         source="test",
         source_type="test",
     )
-    
+
     normalized = normalize_job(job, source_type="ats_board")
-    
+
     # Check role classification
     assert RoleArchetype.SOLUTIONS_ARCHITECTURE in normalized.role_archetypes
     assert normalized.role_family == "Solutions Architecture"
     assert normalized.role_classification_confidence >= 0.9
     assert "solutions architect detected" in normalized.role_classification_reason
     assert normalized.career_direction == CareerDirection.ADJACENT_MATCH
-    
+
     # Check location classification
     assert normalized.location_scope == "international"
     assert normalized.location_score == 0.2
@@ -115,16 +116,16 @@ def test_unknown_location_and_role():
         source="test",
         source_type="test",
     )
-    
+
     normalized = normalize_job(job, source_type="ats_board")
-    
+
     # Check role classification
     assert RoleArchetype.UNKNOWN in normalized.role_archetypes
     assert normalized.role_family == "Unknown"
     assert normalized.role_classification_confidence == 0.5
     assert "no matching keywords or track affinity" in normalized.role_classification_reason
     assert normalized.career_direction == CareerDirection.UNKNOWN
-    
+
     # Check location classification
     assert normalized.location_scope == "unknown"
     assert normalized.location_score == 0.0

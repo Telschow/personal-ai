@@ -117,5 +117,6 @@ class SourceRate(BaseModel):
     avg_duration_seconds: float = 5.0
     recent_count: int = 0
 
+
 # Rebuild models to resolve forward references (RoleArchetype, CareerDirection)
 Job.model_rebuild()

@@ -1,12 +1,10 @@
 """Role archetype classifier."""
+
 from __future__ import annotations
 
-from typing import Any
-
-from .models import Job, RoleArchetype
-from .role_archetypes import RoleArchetype
 from .career_direction import CareerDirection
-
+from .models import Job
+from .role_archetypes import RoleArchetype
 
 # Keywords for each archetype
 ARCHETYPE_KEYWORDS = {
@@ -306,7 +304,7 @@ def classify_role(job: Job, track: str | None = None) -> tuple[set[RoleArchetype
                 archetypes.add(archetype)
                 reason_parts.append(f"title/description contains '{kw}'")
                 break
-    
+
     # 2. Check for specific archetypes that might be missed
     if "technical product" in combined:
         archetypes.add(RoleArchetype.TECHNICAL_PRODUCT)
@@ -329,7 +327,7 @@ def classify_role(job: Job, track: str | None = None) -> tuple[set[RoleArchetype
     if "solutions architect" in combined:
         archetypes.add(RoleArchetype.SOLUTIONS_ARCHITECTURE)
         reason_parts.append("solutions architecture detected")
-    
+
     # 3. Check for AI Engineer specifically
     if "ai engineer" in combined:
         archetypes.add(RoleArchetype.AI_PRODUCT)
@@ -345,52 +343,52 @@ def classify_role(job: Job, track: str | None = None) -> tuple[set[RoleArchetype
     if not archetypes:
         archetypes.add(RoleArchetype.UNKNOWN)
         reason_parts.append("no matching keywords or track affinity")
-    
+
     # 4. Check for AI Engineer specifically
     if "ai engineer" in combined:
         archetypes.add(RoleArchetype.AI_PRODUCT)
         reason_parts.append("AI engineer detected")
-        
+
     # 5. Check for Product Manager specifically
     if "product manager" in combined:
         archetypes.add(RoleArchetype.TECHNICAL_PRODUCT)
         reason_parts.append("product manager detected")
-        
+
     # 6. Check for Program Manager specifically
     if "program manager" in combined:
         archetypes.add(RoleArchetype.TECHNICAL_PROGRAM)
         reason_parts.append("program manager detected")
-        
+
     # 7. Check for Solutions Architect specifically
     if "solutions architect" in combined:
         archetypes.add(RoleArchetype.SOLUTIONS_ARCHITECTURE)
         reason_parts.append("solutions architect detected")
-        
+
     # 8. Check for AI Engineer specifically
     if "ai engineer" in combined:
         archetypes.add(RoleArchetype.AI_PRODUCT)
         reason_parts.append("AI engineer detected")
-        
+
     # 9. Check for Product Manager specifically
     if "product manager" in combined:
         archetypes.add(RoleArchetype.TECHNICAL_PRODUCT)
         reason_parts.append("product manager detected")
-        
+
     # 10. Check for Program Manager specifically
     if "program manager" in combined:
         archetypes.add(RoleArchetype.TECHNICAL_PROGRAM)
         reason_parts.append("program manager detected")
-        
+
     # 11. Check for Technical Product Manager specifically
     if "technical product manager" in combined:
         archetypes.add(RoleArchetype.TECHNICAL_PRODUCT)
         reason_parts.append("technical product manager detected")
-        
+
     # 12. Check for Technical Program Manager specifically
     if "technical program manager" in combined:
         archetypes.add(RoleArchetype.TECHNICAL_PROGRAM)
         reason_parts.append("technical program manager detected")
-        
+
     # 13. Check for AI Product Manager specifically
     if "ai product manager" in combined:
         archetypes.add(RoleArchetype.AI_PRODUCT)
@@ -398,72 +396,69 @@ def classify_role(job: Job, track: str | None = None) -> tuple[set[RoleArchetype
 
     # Determine confidence based on evidence quality
     confidence = 0.5  # default
-    
+
     # Check for exact title matches (highest confidence)
     title_lower = title.lower()
-    if "technical product manager" in title_lower:
+    if "technical product manager" in title_lower or "ai product manager" in title_lower:
         confidence = 0.95
-    elif "ai product manager" in title_lower:
+    elif (
+        "product manager" in title_lower
+        or "program manager" in title_lower
+        or "robotics engineer" in title_lower
+        or "quantum engineer" in title_lower
+        or "global solutions architect" in title_lower
+        or "technical product manager" in combined
+        or "ai product manager" in combined
+        or "ai engineer" in combined
+        or "autonomous systems" in combined
+    ):
+        confidence = 0.9
+    elif "senior technical product manager" in combined or "senior ai product manager" in combined:
         confidence = 0.95
-    elif "product manager" in title_lower:
+    elif (
+        "senior program manager" in combined
+        or "senior robotics engineer" in combined
+        or "senior quantum engineer" in combined
+        or "senior solutions architect" in combined
+    ):
         confidence = 0.9
-    elif "program manager" in title_lower:
-        confidence = 0.9
-    elif "robotics engineer" in title_lower:
-        confidence = 0.9
-    elif "quantum engineer" in title_lower:
-        confidence = 0.9
-    elif "global solutions architect" in title_lower:
-        confidence = 0.9
-    
-    # Check for strong description matches
-    elif "technical product manager" in combined:
-        confidence = 0.9
-    elif "ai product manager" in combined or "ai engineer" in combined:
-        confidence = 0.9
-    elif "autonomous systems" in combined:
-        confidence = 0.9
-    elif "senior technical product manager" in combined:
-        confidence = 0.95
-    elif "senior ai product manager" in combined:
-        confidence = 0.95
-    elif "senior program manager" in combined:
-        confidence = 0.9
-    elif "senior robotics engineer" in combined:
-        confidence = 0.9
-    elif "senior quantum engineer" in combined:
-        confidence = 0.9
-    elif "senior solutions architect" in combined:
-        confidence = 0.9
-    
+
     # Check for good matches
-    elif "product manager" in combined or "program manager" in combined:
+    elif (
+        "product manager" in combined
+        or "program manager" in combined
+        or "technical product" in combined
+        or "technical program" in combined
+        or "ai product" in combined
+        or "autonomous systems" in combined
+    ):
         confidence = 0.8
-    elif "technical product" in combined:
-        confidence = 0.8
-    elif "technical program" in combined:
-        confidence = 0.8
-    elif "ai product" in combined:
-        confidence = 0.8
-    elif "autonomous systems" in combined:
-        confidence = 0.8
-    elif "senior" in title.lower() and "technical product" in title.lower():
+    elif (
+        "senior" in title.lower()
+        and "technical product" in title.lower()
+        or "senior" in title.lower()
+        and "technical program" in title.lower()
+        or "senior" in title.lower()
+        and "ai product" in title.lower()
+        or "senior" in title.lower()
+        and "autonomous systems" in title.lower()
+    ):
         confidence = 0.9
-    elif "senior" in title.lower() and "technical program" in title.lower():
-        confidence = 0.9
-    elif "senior" in title.lower() and "ai product" in title.lower():
-        confidence = 0.9
-    elif "senior" in title.lower() and "autonomous systems" in title.lower():
-        confidence = 0.9
-    elif "senior" in title.lower() and "product" in title.lower():
+    elif (
+        "senior" in title.lower()
+        and "product" in title.lower()
+        or "senior" in title.lower()
+        and "technical" in title.lower()
+    ):
         confidence = 0.8
-    elif "senior" in title.lower() and "technical" in title.lower():
-        confidence = 0.8
-    elif "senior" in title.lower() and "product manager" in title.lower():
+    elif (
+        "senior" in title.lower()
+        and "product manager" in title.lower()
+        or "senior" in title.lower()
+        and "program manager" in title.lower()
+    ):
         confidence = 0.9
-    elif "senior" in title.lower() and "program manager" in title.lower():
-        confidence = 0.9
-    
+
     # Adjust for multiple archetypes (but don't penalize too much for clear primary matches)
     archetype_count = len([a for a in archetypes if a != RoleArchetype.UNKNOWN])
     if archetype_count > 1:
@@ -483,7 +478,7 @@ def classify_role(job: Job, track: str | None = None) -> tuple[set[RoleArchetype
         # Use the first archetype's family as the primary family
         primary_archetype = next(iter(archetypes))
         role_family = ROLE_FAMILY_MAP.get(primary_archetype, "Unknown")
-        
+
         # Special case for technical product manager
         if RoleArchetype.TECHNICAL_PRODUCT in archetypes:
             role_family = "Product Management"
@@ -510,15 +505,14 @@ def classify_role(job: Job, track: str | None = None) -> tuple[set[RoleArchetype
         # Use the first archetype's career direction as the primary direction
         primary_archetype = next(iter(archetypes))
         career_direction = CAREER_DIRECTION_MAP.get(primary_archetype, CareerDirection.UNKNOWN)
-        
+
         # Special case for technical product manager
-        if RoleArchetype.TECHNICAL_PRODUCT in archetypes:
-            career_direction = CareerDirection.DIRECT_MATCH
-        elif RoleArchetype.TECHNICAL_PROGRAM in archetypes:
-            career_direction = CareerDirection.DIRECT_MATCH
-        elif RoleArchetype.AI_PRODUCT in archetypes:
-            career_direction = CareerDirection.DIRECT_MATCH
-        elif RoleArchetype.AUTONOMOUS_SYSTEMS in archetypes:
+        if (
+            RoleArchetype.TECHNICAL_PRODUCT in archetypes
+            or RoleArchetype.TECHNICAL_PROGRAM in archetypes
+            or RoleArchetype.AI_PRODUCT in archetypes
+            or RoleArchetype.AUTONOMOUS_SYSTEMS in archetypes
+        ):
             career_direction = CareerDirection.DIRECT_MATCH
         elif RoleArchetype.ROBOTICS in archetypes:
             career_direction = CareerDirection.ADJACENT_MATCH

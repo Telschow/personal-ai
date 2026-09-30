@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class RoleArchetype(StrEnum):
     TECHNICAL_PRODUCT = "technical_product"
     TECHNICAL_PROGRAM = "technical_program"

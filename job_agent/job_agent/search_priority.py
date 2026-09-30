@@ -2,19 +2,19 @@ from __future__ import annotations
 
 from typing import Any
 
-from .models import Job
-from .location import LocationTier, RemoteMode
-from .role_archetypes import RoleArchetype
 from .career_direction import CareerDirection
+from .location import LocationTier, RemoteMode
+from .models import Job
+from .role_archetypes import RoleArchetype
 
 
 class SearchPriority:
     """Search priority calculation for Munich-first prioritization."""
-    
+
     job_id: str
     priority: float
     reason: str
-    
+
     def __init__(self, job_id: str, priority: float, reason: str):
         self.job_id = job_id
         self.priority = priority

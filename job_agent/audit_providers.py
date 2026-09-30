@@ -1,5 +1,7 @@
 import sys
+
 sys.path.insert(0, ".")
+
 from job_agent.config import load_config
 from job_agent.discovery import build_sources
 

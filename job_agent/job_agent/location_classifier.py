@@ -1,10 +1,8 @@
 """Location classifier."""
+
 from __future__ import annotations
 
-from typing import Any
-
 from .models import Job
-
 
 # Location scope categories
 LOCATION_SCOPES = {

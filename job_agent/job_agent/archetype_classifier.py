@@ -7,11 +7,9 @@ No LLM dependency - purely keyword/rule based.
 from __future__ import annotations
 
 import re
-from typing import Any
 
 from .models import Job
 from .role_archetypes import RoleArchetype
-
 
 # Keywords for each archetype
 ARCHETYPE_KEYWORDS = {

@@ -1,10 +1,9 @@
 """Tests for location classification."""
+
 from __future__ import annotations
 
-import pytest
-
-from job_agent.models import Job
 from job_agent.location_classifier import classify_location
+from job_agent.models import Job
 
 
 def test_munich_location():

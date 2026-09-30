@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class CareerDirection(StrEnum):
     DIRECT_MATCH = "direct_match"
     ADJACENT_MATCH = "adjacent_match"

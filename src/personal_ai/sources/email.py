@@ -89,7 +89,7 @@ def _decode_header_value(raw: str | None) -> str:
         if isinstance(data, bytes):
             try:
                 decoded.append(data.decode(charset or "utf-8", errors="replace"))
-            except (LookupError, UnicodeDecodeError):
+            except LookupError, UnicodeDecodeError:
                 decoded.append(data.decode("utf-8", errors="replace"))
         else:
             decoded.append(data)
@@ -102,7 +102,7 @@ def _normalize_date(raw: str | None) -> str:
         return ""
     try:
         parsed = parsedate_to_datetime(raw)
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return ""
     return parsed.astimezone(dt.UTC).isoformat()
 
@@ -111,7 +111,7 @@ def _safe_decode(data: bytes, charset: str | None) -> str:
     """Decode bytes with a fallback to utf-8 if the charset is unknown."""
     try:
         return data.decode(charset or "utf-8", errors="replace")
-    except (LookupError, UnicodeDecodeError):
+    except LookupError, UnicodeDecodeError:
         return data.decode("utf-8", errors="replace")
 
 

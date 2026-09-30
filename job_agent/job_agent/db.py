@@ -126,7 +126,7 @@ def upsert_job(conn: sqlite3.Connection, job: Job) -> None:
             normalized_location=?, remote_mode=?, employment_type=?, date_posted=?, description=?,
             salary_min=?, salary_max=?, salary_currency=?, salary_min_eur=?, salary_max_eur=?,
             salary_converted=?, raw_json=?, canonical_key=?, status=?, last_seen=?, last_checked=?,
-            missing_scans=0, canonical_url=?, 
+            missing_scans=0, canonical_url=?,
             discovery_source=?, company_radar_id=?, provider_native_id=?,
             role_family=?, role_classification_confidence=?, role_classification_reason=?,
             location_city=?, location_country=?, location_scope=?, location_score=?, location_reason=?,
@@ -548,7 +548,7 @@ def find_duplicate_of(conn: sqlite3.Connection, job: Job) -> Job | None:
     # Actually, we can't check by ID without excluding the current job.
     # The ID check is problematic because the job might have been just inserted.
     # For now, rely on canonical_key and canonical_url for duplicate detection.
-    if False and job.id:  # Disabled for now
+    if False:  # Disabled for now
         pass
     if job.canonical_key:
         row = conn.execute(
@@ -903,7 +903,7 @@ def latest_discovery_run(conn: sqlite3.Connection) -> dict[str, Any] | None:
     ).fetchone()
     if row:
         d = dict(row)
-        d['started_at'] = d.get('ran_at')
+        d["started_at"] = d.get("ran_at")
         return d
     return None
 

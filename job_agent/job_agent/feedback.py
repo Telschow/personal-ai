@@ -11,33 +11,37 @@ from .logging_setup import get_logger
 log = get_logger("feedback")
 
 # Valid feedback labels
-VALID_LABELS: frozenset[str] = frozenset({
-    "strong_interest",
-    "interested",
-    "maybe",
-    "not_interested",
-    "wrong_role",
-    "wrong_seniority",
-    "wrong_location",
-    "wrong_compensation",
-    "wrong_domain",
-    "duplicate",
-    "irrelevant",
-})
+VALID_LABELS: frozenset[str] = frozenset(
+    {
+        "strong_interest",
+        "interested",
+        "maybe",
+        "not_interested",
+        "wrong_role",
+        "wrong_seniority",
+        "wrong_location",
+        "wrong_compensation",
+        "wrong_domain",
+        "duplicate",
+        "irrelevant",
+    }
+)
 
 # Labels that indicate positive relevance
 POSITIVE_LABELS: frozenset[str] = frozenset({"strong_interest", "interested"})
 
 # Labels that indicate negative relevance
-NEGATIVE_LABELS: frozenset[str] = frozenset({
-    "not_interested",
-    "wrong_role",
-    "wrong_seniority",
-    "wrong_location",
-    "wrong_compensation",
-    "wrong_domain",
-    "irrelevant",
-})
+NEGATIVE_LABELS: frozenset[str] = frozenset(
+    {
+        "not_interested",
+        "wrong_role",
+        "wrong_seniority",
+        "wrong_location",
+        "wrong_compensation",
+        "wrong_domain",
+        "irrelevant",
+    }
+)
 
 # Neutral labels
 NEUTRAL_LABELS: frozenset[str] = frozenset({"maybe", "duplicate"})
@@ -62,9 +66,7 @@ def validate_label(label: str) -> str:
     """Validate and normalize a feedback label."""
     normalized = label.strip().lower().replace(" ", "_")
     if normalized not in VALID_LABELS:
-        raise ValueError(
-            f"Invalid feedback label: '{label}'. Valid labels: {', '.join(sorted(VALID_LABELS))}"
-        )
+        raise ValueError(f"Invalid feedback label: '{label}'. Valid labels: {', '.join(sorted(VALID_LABELS))}")
     return normalized
 
 
@@ -78,7 +80,7 @@ def add_feedback(
     """Add a human feedback record. Never overwrites historical feedback."""
     validated_label = validate_label(label)
     now = datetime.now(UTC).isoformat(timespec="seconds")
-    
+
     cur = conn.execute(
         """
         INSERT INTO feedback (job_id, label, note, created_at, run_id)
@@ -92,9 +94,7 @@ def add_feedback(
     return feedback_id
 
 
-def get_feedback_for_job(
-    conn: sqlite3.Connection, job_id: str
-) -> list[dict[str, Any]]:
+def get_feedback_for_job(conn: sqlite3.Connection, job_id: str) -> list[dict[str, Any]]:
     """Get all feedback records for a job, ordered by creation time."""
     rows = conn.execute(
         """
@@ -108,9 +108,7 @@ def get_feedback_for_job(
     return [dict(r) for r in rows]
 
 
-def get_latest_feedback_for_job(
-    conn: sqlite3.Connection, job_id: str
-) -> dict[str, Any] | None:
+def get_latest_feedback_for_job(conn: sqlite3.Connection, job_id: str) -> dict[str, Any] | None:
     """Get the most recent feedback record for a job."""
     row = conn.execute(
         """
@@ -125,9 +123,7 @@ def get_latest_feedback_for_job(
     return dict(row) if row else None
 
 
-def get_all_feedback(
-    conn: sqlite3.Connection, limit: int | None = None
-) -> list[dict[str, Any]]:
+def get_all_feedback(conn: sqlite3.Connection, limit: int | None = None) -> list[dict[str, Any]]:
     """Get all feedback records, ordered by creation time descending."""
     sql = """
         SELECT id, job_id, label, note, created_at, run_id
@@ -143,14 +139,12 @@ def get_all_feedback(
 def get_feedback_summary(conn: sqlite3.Connection) -> dict[str, Any]:
     """Get a summary of all feedback."""
     total = conn.execute("SELECT COUNT(*) FROM feedback").fetchone()[0]
-    unique_jobs = conn.execute(
-        "SELECT COUNT(DISTINCT job_id) FROM feedback"
-    ).fetchone()[0]
-    
+    unique_jobs = conn.execute("SELECT COUNT(DISTINCT job_id) FROM feedback").fetchone()[0]
+
     label_counts = conn.execute(
         "SELECT label, COUNT(*) as cnt FROM feedback GROUP BY label ORDER BY cnt DESC"
     ).fetchall()
-    
+
     return {
         "total_records": total,
         "unique_jobs": unique_jobs,
@@ -160,9 +154,7 @@ def get_feedback_summary(conn: sqlite3.Connection) -> dict[str, Any]:
 
 def get_labeled_job_ids(conn: sqlite3.Connection) -> set[str]:
     """Get all job IDs that have feedback."""
-    rows = conn.execute(
-        "SELECT DISTINCT job_id FROM feedback"
-    ).fetchall()
+    rows = conn.execute("SELECT DISTINCT job_id FROM feedback").fetchall()
     return {r[0] for r in rows}
 
 
@@ -178,4 +170,5 @@ def has_feedback(conn: sqlite3.Connection, job_id: str) -> bool:
 def log_event(log, event: str, **kwargs: Any) -> None:
     """Log a feedback event."""
     from .logging_setup import log_event as _log_event
+
     _log_event(log, event, **kwargs)

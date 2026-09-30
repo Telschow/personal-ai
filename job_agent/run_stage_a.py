@@ -43,6 +43,7 @@ def main():
     from pathlib import Path
 
     import yaml
+
     profile_path = Path(cfg.profile_path)
     if not profile_path.is_absolute():
         profile_path = Path(__file__).parent / cfg.profile_path
@@ -80,7 +81,7 @@ def main():
         run_started_at=run_started_at,
     )
 
-    lifecycle = run_lifecycle(conn, cfg, result.jobs_seen)
+    run_lifecycle(conn, cfg, result.jobs_seen)
 
     # Record provider runs
     for pstat in pacing_report.providers:
@@ -99,8 +100,7 @@ def main():
 
     jobs_persisted = sum(result.persisted_by_source.values())
     jobs_from_providers = sum(
-        result.persisted_by_source.get(str(p.get("source_id")), 0)
-        for p in pacing_report.providers
+        result.persisted_by_source.get(str(p.get("source_id")), 0) for p in pacing_report.providers
     )
     jobs_from_search = jobs_persisted - jobs_from_providers
 
@@ -134,10 +134,12 @@ def main():
 
     print("\nPer-Source Pacing:")
     for src in pacing_report.per_source:
-        print(f"  {src.source_id}: planned={src.planned_queries}, attempted={src.attempted_queries}, "
-              f"successful={src.successful_queries}, rate_limited={src.rate_limited_queries}, "
-              f"failed={src.failed_queries}, paused={src.paused_skipped_queries}, "
-              f"hits={src.hits_returned}, pages={src.candidate_pages}, parsed={src.jobs_parsed}")
+        print(
+            f"  {src.source_id}: planned={src.planned_queries}, attempted={src.attempted_queries}, "
+            f"successful={src.successful_queries}, rate_limited={src.rate_limited_queries}, "
+            f"failed={src.failed_queries}, paused={src.paused_skipped_queries}, "
+            f"hits={src.hits_returned}, pages={src.candidate_pages}, parsed={src.jobs_parsed}"
+        )
 
     # Query effectiveness
     print("\nQuery Plan Summary:")
@@ -148,7 +150,9 @@ def main():
     # Query-by-query breakdown
     print("\nQuery Audit (first 10):")
     for item in plan.audit_items()[:10]:
-        print(f"  {item['query']} | track={item['track_id']} | source={item['source_id']} | loc={item['location_term']} | reason={item['reason']}")
+        print(
+            f"  {item['query']} | track={item['track_id']} | source={item['source_id']} | loc={item['location_term']} | reason={item['reason']}"
+        )
 
     conn.close()
 
@@ -156,6 +160,7 @@ def main():
     # print("\n=== Running fit analysis... ===")
     # from job_agent.cli import run_fit
     # run_fit(db_path, limit=50)
+
 
 if __name__ == "__main__":
     main()

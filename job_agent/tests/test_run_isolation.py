@@ -1,9 +1,8 @@
 """Tests for per-run isolation (Phase 2)."""
+
 from __future__ import annotations
 
 import uuid
-
-import pytest
 
 from job_agent import db
 
@@ -55,9 +54,6 @@ def test_record_discovery_run_isolation():
     # ensure historical runs unaffected
     row1_again = conn.execute("SELECT * FROM discovery_runs WHERE run_id=?", (run_id1,)).fetchone()
     assert row1_again["jobs_from_search"] == 0
-
-
-
 
 
 def test_provider_only_zero_search():

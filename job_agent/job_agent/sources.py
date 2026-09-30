@@ -118,7 +118,7 @@ class GreenhouseSource(AtsBoardSource):
         page = 1
         out: list[Job] = []
         seen_ids = set()
-        
+
         while page <= self._max_pages:
             url = f"https://boards-api.greenhouse.io/v1/boards/{self.token}/jobs?content=true&per_page={per_page}&page={page}"
             try:
@@ -129,12 +129,12 @@ class GreenhouseSource(AtsBoardSource):
             except httpx.HTTPStatusError as exc:
                 log_event(log, "greenhouse_http_error", token=self.token, page=page, status=exc.response.status_code)
                 raise
-            
+
             jobs_dict = data if isinstance(data, dict) else {}
             jobs = jobs_dict.get("jobs") or []
             if not jobs:
                 break
-            
+
             for x in jobs:
                 if not isinstance(x, dict):
                     continue
@@ -219,32 +219,32 @@ class AshbySource(AtsBoardSource):
         seen = set()
         max_pages = 50  # Hard limit to prevent infinite pagination
         page = 0
-        
+
         while page < max_pages:
             url = f"https://api.ashbyhq.com/posting-api/job-board/{self.board}?includeCompensation=true&limit={limit}&offset={offset}"
             data = self._get_json(url)
-            
+
             # Validate response shape
             if not isinstance(data, dict):
                 log_event(log, "ashby_malformed_response", board=self.board, type=type(data).__name__)
                 break
-            
+
             items = data.get("jobs", [])
             if not isinstance(items, list):
                 log_event(log, "ashby_invalid_jobs_field", board=self.board, type=type(items).__name__)
                 items = []
             if not items:
                 break
-            
+
             for x in items:
                 if not isinstance(x, dict):
                     log_event(log, "ashby_malformed_posting", board=self.board, type=type(x).__name__)
                     continue
-                
+
                 comp = x.get("compensation") or {}
                 if not isinstance(comp, dict):
                     comp = {}
-                
+
                 jid = x.get("jobUrl") or x.get("applyUrl") or x.get("title")
                 if not jid:
                     log_event(log, "ashby_missing_job_id", board=self.board)
@@ -291,27 +291,32 @@ class SmartRecruitersSource(AtsBoardSource):
         url = f"https://api.smartrecruiters.com/v1/companies/{self.company}/postings"
         data = self._get_json(url)
         out: list[Job] = []
-        
+
         # Validate response shape - handle unexpected structures gracefully
         if not isinstance(data, dict):
-            raise SourceError(f"smartrecruiters:{self.company}: unexpected top-level response type {type(data).__name__}, expected dict")
-        
+            raise SourceError(
+                f"smartrecruiters:{self.company}: unexpected top-level response type {type(data).__name__}, expected dict"
+            )
+
         content = data.get("content")
         if not isinstance(content, list):
-            raise SourceError(f"smartrecruiters:{self.company}: 'content' field missing or not a list, got {type(content).__name__}")
-        
+            raise SourceError(
+                f"smartrecruiters:{self.company}: 'content' field missing or not a list, got {type(content).__name__}"
+            )
+
         for i, x in enumerate(content):
             # Validate each posting is a dict
             if not isinstance(x, dict):
                 # Log but don't fail the entire company - just skip malformed entries
-                log_event(log, "smartrecruiters_malformed_posting", 
-                    company=self.company, index=i, type=type(x).__name__)
+                log_event(
+                    log, "smartrecruiters_malformed_posting", company=self.company, index=i, type=type(x).__name__
+                )
                 continue
-            
+
             ref = x.get("ref") or {}
             if not isinstance(ref, dict):
                 ref = {}
-            
+
             url_final = ref.get("jobAdUrl") or f"https://careers.smartrecruiters.com/{self.company}/{x.get('id', '')}"
             out.append(
                 Job(
@@ -403,12 +408,12 @@ class DirectPageSource(StructuredPageSource):
                 if attempt == max_attempts - 1:
                     log_event(log, "direct_timeout", url=self.url, attempts=attempt + 1)
                     raise SourceError(f"direct:{self.url}: timeout after {max_attempts} attempts") from exc
-                sleep_time = backoff_factor * (2 ** attempt)
+                sleep_time = backoff_factor * (2**attempt)
                 time.sleep(sleep_time)
                 continue
             except httpx.HTTPStatusError as exc:
                 if exc.response.status_code in (502, 503, 504) and attempt < max_attempts - 1:
-                    sleep_time = backoff_factor * (2 ** attempt)
+                    sleep_time = backoff_factor * (2**attempt)
                     time.sleep(sleep_time)
                     continue
                 raise
@@ -416,7 +421,7 @@ class DirectPageSource(StructuredPageSource):
             # This block runs if we didn't break (i.e., all attempts failed)
             # Should not happen because we raise in the last attempt
             raise SourceError(f"direct:{self.url}: all attempts failed")
-        
+
         soup = BeautifulSoup(resp.text, "html.parser")
         out: list[Job] = []
         jsonld_count = 0
@@ -465,14 +470,17 @@ class DirectPageSource(StructuredPageSource):
                         raw=x,
                     )
                 )
-        
+
         # Log diagnostic info for zero-result cases
         if not out:
-            log_event(log, "direct_zero_candidates", 
-                url=self.url, 
-                jsonld_blocks=jsonld_count, 
+            log_event(
+                log,
+                "direct_zero_candidates",
+                url=self.url,
+                jsonld_blocks=jsonld_count,
                 jobposting_found=jobposting_count,
-                page_size=len(resp.content))
+                page_size=len(resp.content),
+            )
         return out
 
 

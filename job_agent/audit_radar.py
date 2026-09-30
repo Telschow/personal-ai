@@ -1,8 +1,9 @@
 import sys
+
 sys.path.insert(0, ".")
+
+from job_agent.company_radar import _find_source_for_provider, _load_radar
 from job_agent.config import load_config
-from job_agent.discovery import build_sources
-from job_agent.company_radar import _load_radar, _find_source_for_provider
 
 cfg = load_config()
 radar = _load_radar()

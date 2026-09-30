@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
@@ -12,9 +11,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 def main() -> None:
     """Launch the Streamlit GUI."""
-    import streamlit as st
     from job_agent.gui.app import main as app_main
-    
+
     app_main()
 
 

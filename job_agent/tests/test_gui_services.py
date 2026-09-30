@@ -2,26 +2,21 @@
 
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
-
-import pytest
-
 from job_agent.gui.services import CareerService
 
 
 def test_service_initialization():
     """Test that CareerService initializes correctly."""
-    service = CareerService(config_path='config.yaml')
+    service = CareerService(config_path="config.yaml")
     assert service is not None
     assert service.config is not None
     # Verify service does NOT retain a persistent connection (thread-safe architecture)
-    assert not hasattr(service, '_conn') or service._conn is None
+    assert not hasattr(service, "_conn") or service._conn is None
 
 
 def test_service_job_count():
     """Test that service can count jobs."""
-    service = CareerService(config_path='config.yaml')
+    service = CareerService(config_path="config.yaml")
     count = service.count_jobs()
     assert count > 0
     print(f"Job count: {count}")
@@ -29,28 +24,28 @@ def test_service_job_count():
 
 def test_service_get_jobs():
     """Test that service can get jobs."""
-    service = CareerService(config_path='config.yaml')
+    service = CareerService(config_path="config.yaml")
     jobs = service.get_jobs(limit=5)
     assert len(jobs) <= 5
     for job in jobs:
-        assert hasattr(job, 'id')
-        assert hasattr(job, 'title')
-        assert hasattr(job, 'company')
+        assert hasattr(job, "id")
+        assert hasattr(job, "title")
+        assert hasattr(job, "company")
 
 
 def test_service_feedback_summary():
     """Test that service can get feedback summary."""
-    service = CareerService(config_path='config.yaml')
+    service = CareerService(config_path="config.yaml")
     summary = service.get_feedback_summary()
-    assert 'total_records' in summary
-    assert 'unique_jobs' in summary
-    assert 'label_distribution' in summary
+    assert "total_records" in summary
+    assert "unique_jobs" in summary
+    assert "label_distribution" in summary
 
 
 def test_service_get_job():
     """Test that service can get a single job."""
-    service = CareerService(config_path='config.yaml')
-    
+    service = CareerService(config_path="config.yaml")
+
     # Get a real job ID from the database
     jobs = service.get_jobs(limit=1)
     if jobs:
@@ -62,11 +57,11 @@ def test_service_get_job():
 
 def test_service_career_profile():
     """Test that service can load career profile."""
-    service = CareerService(config_path='config.yaml')
+    service = CareerService(config_path="config.yaml")
     profile = service.career_profile
     assert profile is not None
-    assert hasattr(profile, 'target_role_families')
-    assert hasattr(profile, 'current_role_family')
+    assert hasattr(profile, "target_role_families")
+    assert hasattr(profile, "current_role_family")
 
 
 if __name__ == "__main__":

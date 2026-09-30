@@ -23,30 +23,37 @@ def cmd_gui(args: argparse.Namespace) -> int:
     import subprocess
     import sys
     from pathlib import Path
-    
+
     # Resolve app path - find the actual Python file
     app_path = Path(__file__).parent / "gui" / "app.py"
     app_path_str = str(app_path.resolve())
-    
+
     # Verify app exists
     if not app_path.exists():
         print(f"Error: Streamlit app not found at {app_path_str}", file=sys.stderr)
         return 1
-    
+
     # Launch Streamlit app
     cmd = [
-        sys.executable, "-m", "streamlit", "run",
+        sys.executable,
+        "-m",
+        "streamlit",
+        "run",
         app_path_str,  # ← FIXED: actual .py file path
-        "--server.address", args.host,
-        "--server.port", str(args.port),
-        "--server.runOnSave", "false",
-        "--theme.base", "light",
+        "--server.address",
+        args.host,
+        "--server.port",
+        str(args.port),
+        "--server.runOnSave",
+        "false",
+        "--theme.base",
+        "light",
     ]
-    
+
     print(f"Starting Career Intelligence GUI on http://{args.host}:{args.port}")
     print(f"App path: {app_path_str}")
     print("Press Ctrl+C to stop.")
-    
+
     try:
         subprocess.run(cmd, check=False)
         return 0

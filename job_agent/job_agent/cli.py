@@ -129,7 +129,9 @@ def cmd_scan(args: argparse.Namespace) -> int:
         jobs, search_errors = fetch_candidate_jobs(urls, max_pages=cfg.search.max_global_pages)
         log_event(log, "global_search_fetched", urls=len(urls), jobs=len(jobs), errors=len(search_errors))
         provenance = [Provenance(source_id="web_search", discovery_method="search_engine") for _ in jobs]
-        result = ingest_global_jobs(connection, jobs, profile, policy, provenance=provenance, run_started_at=run_started_at, run_id=run_id)
+        result = ingest_global_jobs(
+            connection, jobs, profile, policy, provenance=provenance, run_started_at=run_started_at, run_id=run_id
+        )
         seen |= result.jobs_seen
         total_fetched += len(jobs)
         total_fetch_errors += len(search_errors)
@@ -171,6 +173,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
 def cmd_discover(args: argparse.Namespace) -> int:
     """Plan (deterministic, offline) or run (bounded, live) discovery."""
     import uuid
+
     cfg = load_config(path=args.config)
 
     if args.mode == "plan":
@@ -212,7 +215,9 @@ def cmd_discover(args: argparse.Namespace) -> int:
         limit_sources=args.max_sources_per_track,
     )
     elapsed_fetch = time.monotonic() - start
-    result = ingest_global_jobs(connection, jobs, profile, policy, provenance=provenance, run_started_at=run_started_at, run_id=run_id)
+    result = ingest_global_jobs(
+        connection, jobs, profile, policy, provenance=provenance, run_started_at=run_started_at, run_id=run_id
+    )
     lifecycle = run_lifecycle(connection, cfg, result.jobs_seen)
     diag = discovery_diagnostics(connection)
     catalog = load_catalog(cfg.catalog_path_resolved())
@@ -1038,7 +1043,7 @@ def cmd_cv_generate(args: argparse.Namespace) -> int:
         source=cv.artifact.status.value,
         llm_used=False,
         mapping_json=json.dumps(
-            [m.model_dump(mode="json") for m in cv.positioning.mapping] if hasattr(cv.positioning, 'mapping') else [],
+            [m.model_dump(mode="json") for m in cv.positioning.mapping] if hasattr(cv.positioning, "mapping") else [],
             ensure_ascii=False,
         ),
         validation_json=json.dumps(
@@ -1059,17 +1064,25 @@ def cmd_cv_generate(args: argparse.Namespace) -> int:
         Path(args.output).write_text(output, encoding="utf-8")
         print(f"CV written to {args.output}")
     elif getattr(args, "json", False):
-        print(json.dumps({
-            "artifact_id": cv.artifact.artifact_id,
-            "job_id": job.id,
-            "headline": cv.artifact.headline,
-            "summary": cv.artifact.summary,
-            "sections": [{"name": s.name, "content": s.content, "evidence_ids": s.evidence_ids} for s in cv.sections],
-            "status": cv.artifact.status.value,
-            "move_type": cv.move_type.value,
-            "gaps": cv.gaps,
-            "manifest": cv.manifest.model_dump(mode="json") if cv.manifest else None,
-        }, indent=2, ensure_ascii=False))
+        print(
+            json.dumps(
+                {
+                    "artifact_id": cv.artifact.artifact_id,
+                    "job_id": job.id,
+                    "headline": cv.artifact.headline,
+                    "summary": cv.artifact.summary,
+                    "sections": [
+                        {"name": s.name, "content": s.content, "evidence_ids": s.evidence_ids} for s in cv.sections
+                    ],
+                    "status": cv.artifact.status.value,
+                    "move_type": cv.move_type.value,
+                    "gaps": cv.gaps,
+                    "manifest": cv.manifest.model_dump(mode="json") if cv.manifest else None,
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
+        )
     else:
         print(output)
 
@@ -1163,7 +1176,7 @@ def cmd_linkedin_optimize(args: argparse.Namespace) -> int:
         source="linkedin_optimization",
         llm_used=False,
         mapping_json=json.dumps(
-            [m.model_dump(mode="json") for m in cv.positioning.mapping] if hasattr(cv.positioning, 'mapping') else [],
+            [m.model_dump(mode="json") for m in cv.positioning.mapping] if hasattr(cv.positioning, "mapping") else [],
             ensure_ascii=False,
         ),
         validation_json=json.dumps(
@@ -1206,22 +1219,28 @@ def cmd_linkedin_optimize(args: argparse.Namespace) -> int:
         Path(args.output).write_text(output, encoding="utf-8")
         print(f"LinkedIn optimization written to {args.output}")
     elif getattr(args, "json", False):
-        print(json.dumps({
-            "current_profile": linkedin_result.current_profile.__dict__,
-            "recommendations": [
+        print(
+            json.dumps(
                 {
-                    "section": r.section,
-                    "current": r.current,
-                    "recommended": r.recommended,
-                    "rationale": r.rationale,
-                    "evidence_ids": r.evidence_ids,
-                    "verification": r.verification,
-                }
-                for r in linkedin_result.recommendations
-            ],
-            "career_move_type": linkedin_result.career_move_type,
-            "validation_status": linkedin_result.validation_status.value,
-        }, indent=2, ensure_ascii=False))
+                    "current_profile": linkedin_result.current_profile.__dict__,
+                    "recommendations": [
+                        {
+                            "section": r.section,
+                            "current": r.current,
+                            "recommended": r.recommended,
+                            "rationale": r.rationale,
+                            "evidence_ids": r.evidence_ids,
+                            "verification": r.verification,
+                        }
+                        for r in linkedin_result.recommendations
+                    ],
+                    "career_move_type": linkedin_result.career_move_type,
+                    "validation_status": linkedin_result.validation_status.value,
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
+        )
     else:
         print(output)
 
@@ -1258,12 +1277,12 @@ def _career_narrative(cfg: Config, attrs, evidence):
 def cmd_feedback_add(args: argparse.Namespace) -> int:
     """Add feedback for a job."""
     from .feedback import add_feedback
-    
+
     cfg = load_config(path=args.config)
     connection = db.connect(_db_path(args, cfg))
-    
+
     try:
-        feedback_id = add_feedback(
+        add_feedback(
             connection,
             job_id=args.job_id,
             label=args.label,
@@ -1282,50 +1301,50 @@ def cmd_feedback_add(args: argparse.Namespace) -> int:
 
 def cmd_feedback_review(args: argparse.Namespace) -> int:
     """Interactive feedback review."""
-    from .feedback import get_labeled_job_ids, get_latest_feedback_for_job
-    
+    from .feedback import add_feedback, get_labeled_job_ids
+
     cfg = load_config(path=args.config)
     connection = db.connect(_db_path(args, cfg))
-    
+
     try:
         labeled_jobs = get_labeled_job_ids(connection)
         all_jobs = db.list_jobs(connection, limit=1000)
         review_jobs = [j for j in all_jobs if j.id not in labeled_jobs]
-        review_jobs = review_jobs[:args.limit]
-        
+        review_jobs = review_jobs[: args.limit]
+
         if not review_jobs:
             print("No jobs available for review.")
             return 0
-        
+
         print(f"Starting feedback review for {len(review_jobs)} jobs...")
-        
+
         for i, job in enumerate(review_jobs, 1):
             print(f"\nJob {i}/{len(review_jobs)}")
             print(f"Company: {job.company}")
             print(f"Title: {job.title}")
             print(f"Location: {job.location}")
-            
+
             score = db.get_score(connection, job.id)
             if score:
                 print(f"\nScore: {score.total}")
-            
+
             while True:
                 user_input = input("\nEnter label (s/i/m/n/r/y/l/c/d/x) or q to quit: ").strip().lower()
-                if user_input in ('q', 'quit'):
+                if user_input in ("q", "quit"):
                     print("Feedback review stopped.")
                     return 0
-                elif user_input in ('s', 'i', 'm', 'n', 'r', 'y', 'l', 'c', 'd', 'x'):
+                elif user_input in ("s", "i", "m", "n", "r", "y", "l", "c", "d", "x"):
                     label_map = {
-                        's': 'strong_interest',
-                        'i': 'interested',
-                        'm': 'maybe',
-                        'n': 'not_interested',
-                        'r': 'wrong_role',
-                        'y': 'wrong_seniority',
-                        'l': 'wrong_location',
-                        'c': 'wrong_compensation',
-                        'd': 'wrong_domain',
-                        'x': 'duplicate',
+                        "s": "strong_interest",
+                        "i": "interested",
+                        "m": "maybe",
+                        "n": "not_interested",
+                        "r": "wrong_role",
+                        "y": "wrong_seniority",
+                        "l": "wrong_location",
+                        "c": "wrong_compensation",
+                        "d": "wrong_domain",
+                        "x": "duplicate",
                     }
                     label = label_map[user_input]
                     note = input(f"Add note for {label} (optional): ").strip() or None
@@ -1334,7 +1353,7 @@ def cmd_feedback_review(args: argparse.Namespace) -> int:
                     break
                 else:
                     print("Invalid input.")
-        
+
         return 0
     except Exception as e:
         print(f"Error during feedback review: {e}", file=sys.stderr)
@@ -1346,14 +1365,14 @@ def cmd_feedback_review(args: argparse.Namespace) -> int:
 def cmd_feedback_pending(args: argparse.Namespace) -> int:
     """Show pending feedback jobs."""
     from .feedback import get_labeled_job_ids
-    
+
     cfg = load_config(path=args.config)
     connection = db.connect(_db_path(args, cfg))
-    
+
     try:
         labeled_jobs = get_labeled_job_ids(connection)
         total_jobs = db.count_jobs(connection)
-        
+
         print(f"Feedback status: {len(labeled_jobs)}/{total_jobs} jobs labeled")
         print(f"Pending jobs: {total_jobs - len(labeled_jobs)}")
         return 0
@@ -1367,16 +1386,16 @@ def cmd_feedback_pending(args: argparse.Namespace) -> int:
 def cmd_feedback_summary(args: argparse.Namespace) -> int:
     """Show feedback summary."""
     from .feedback import get_feedback_summary
-    
+
     cfg = load_config(path=args.config)
     connection = db.connect(_db_path(args, cfg))
-    
+
     try:
         summary = get_feedback_summary(connection)
         print(f"Total feedback records: {summary['total_records']}")
         print(f"Unique jobs with feedback: {summary['unique_jobs']}")
         print("\nLabel distribution:")
-        for label, count in summary['label_distribution'].items():
+        for label, count in summary["label_distribution"].items():
             print(f"  {label}: {count}")
         return 0
     except Exception as e:
@@ -1389,30 +1408,37 @@ def cmd_gui(args: argparse.Namespace) -> int:
     import subprocess
     import sys
     from pathlib import Path
-    
+
     # Resolve app path - find the actual Python file
     app_path = Path(__file__).parent / "gui" / "app.py"
     app_path_str = str(app_path.resolve())
-    
+
     # Verify app exists
     if not app_path.exists():
         print(f"Error: Streamlit app not found at {app_path_str}", file=sys.stderr)
         return 1
-    
+
     # Launch Streamlit app
     cmd = [
-        sys.executable, "-m", "streamlit", "run",
+        sys.executable,
+        "-m",
+        "streamlit",
+        "run",
         app_path_str,
-        "--server.address", args.host,
-        "--server.port", str(args.port),
-        "--server.runOnSave", "false",
-        "--theme.base", "light",
+        "--server.address",
+        args.host,
+        "--server.port",
+        str(args.port),
+        "--server.runOnSave",
+        "false",
+        "--theme.base",
+        "light",
     ]
-    
+
     print(f"Starting Career Intelligence GUI on http://{args.host}:{args.port}")
     print(f"App path: {app_path_str}")
     print("Press Ctrl+C to stop.")
-    
+
     try:
         subprocess.run(cmd, check=False)
         return 0
@@ -1483,7 +1509,22 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_feedback_add = p_feedback_sub.add_parser("add", help="Add feedback for a job")
     p_feedback_add.add_argument("job_id")
-    p_feedback_add.add_argument("label", choices=["strong_interest", "interested", "maybe", "not_interested", "wrong_role", "wrong_seniority", "wrong_location", "wrong_compensation", "wrong_domain", "duplicate", "irrelevant"])
+    p_feedback_add.add_argument(
+        "label",
+        choices=[
+            "strong_interest",
+            "interested",
+            "maybe",
+            "not_interested",
+            "wrong_role",
+            "wrong_seniority",
+            "wrong_location",
+            "wrong_compensation",
+            "wrong_domain",
+            "duplicate",
+            "irrelevant",
+        ],
+    )
     p_feedback_add.add_argument("--note", default=None)
     p_feedback_add.set_defaults(func=cmd_feedback_add)
 

@@ -1,8 +1,8 @@
 """Tests for Greenhouse pagination."""
+
 from __future__ import annotations
 
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from job_agent.sources import GreenhouseSource
 
@@ -18,6 +18,7 @@ def test_greenhouse_pagination_multiple_pages():
 
     def fake_get_json(url):
         import urllib.parse as up
+
         qs = up.parse_qs(up.urlparse(url).query)
         page = int(qs.get("page", ["1"])[0])
         page_calls.append(page)
@@ -38,8 +39,10 @@ def test_greenhouse_pagination_multiple_pages():
 
 def test_greenhouse_pagination_empty_first_page():
     src = GreenhouseSource("testboard")
+
     def fake_get_json(url):
         return make_fake_response([])
+
     with patch.object(src, "_get_json", side_effect=fake_get_json):
         jobs = src.fetch()
     assert jobs == []
@@ -47,8 +50,10 @@ def test_greenhouse_pagination_empty_first_page():
 
 def test_greenhouse_pagination_final_partial_page():
     src = GreenhouseSource("testboard")
+
     def fake_get_json(url):
         import urllib.parse as up
+
         qs = up.parse_qs(up.urlparse(url).query)
         page = int(qs.get("page", ["1"])[0])
         if page == 1:
@@ -56,6 +61,7 @@ def test_greenhouse_pagination_final_partial_page():
             return make_fake_response([{"id": i} for i in range(100)])
         else:
             return make_fake_response([])
+
     with patch.object(src, "_get_json", side_effect=fake_get_json):
         jobs = src.fetch()
     assert len(jobs) == 100
@@ -63,8 +69,10 @@ def test_greenhouse_pagination_final_partial_page():
 
 def test_greenhouse_pagination_duplicate_ids():
     src = GreenhouseSource("testboard")
+
     def fake_get_json(url):
         import urllib.parse as up
+
         qs = up.parse_qs(up.urlparse(url).query)
         page = int(qs.get("page", ["1"])[0])
         if page == 1:
@@ -74,6 +82,7 @@ def test_greenhouse_pagination_duplicate_ids():
             return make_fake_response([{"id": 50}, {"id": 100}])
         else:
             return make_fake_response([])
+
     with patch.object(src, "_get_json", side_effect=fake_get_json):
         jobs = src.fetch()
     ids = [j.id for j in jobs]

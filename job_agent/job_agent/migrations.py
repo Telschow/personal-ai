@@ -508,10 +508,9 @@ def _v11_user_artifacts(conn: sqlite3.Connection) -> None:
     )
 
 
-@ migration(12)
+@migration(12)
 def _v12_run_isolation(conn: sqlite3.Connection) -> None:
-    """Add run isolation columns and tables for per-run metrics.
-    """
+    """Add run isolation columns and tables for per-run metrics."""
     if not _column_exists(conn, "jobs", "run_id"):
         conn.execute("ALTER TABLE jobs ADD COLUMN run_id TEXT")
     # Add run_id to discovery_runs if present
@@ -520,7 +519,7 @@ def _v12_run_isolation(conn: sqlite3.Connection) -> None:
             conn,
             """
             ALTER TABLE discovery_runs ADD COLUMN run_id TEXT;
-            """
+            """,
         )
     # Ensure run_id is indexed for fast lookup
     _exec_many(
@@ -528,11 +527,11 @@ def _v12_run_isolation(conn: sqlite3.Connection) -> None:
         """
         CREATE INDEX IF NOT EXISTS idx_jobs_run_id ON jobs(run_id);
         CREATE UNIQUE INDEX IF NOT EXISTS idx_discovery_runs_run_id ON discovery_runs(run_id);
-        """
+        """,
     )
 
 
-@ migration(13)
+@migration(13)
 def _v13_provenance(conn: sqlite3.Connection) -> None:
     """Add provenance fields to jobs for company radar and discovery source tracking."""
     if not _column_exists(conn, "jobs", "discovery_source"):
@@ -546,11 +545,11 @@ def _v13_provenance(conn: sqlite3.Connection) -> None:
         """
         CREATE INDEX IF NOT EXISTS idx_jobs_company_radar_id ON jobs(company_radar_id);
         CREATE INDEX IF NOT EXISTS idx_jobs_discovery_source ON jobs(discovery_source);
-        """
+        """,
     )
 
 
-@ migration(14)
+@migration(14)
 def _v14_classification(conn: sqlite3.Connection) -> None:
     """Add role and location classification fields to jobs."""
     if not _column_exists(conn, "jobs", "role_family"):
@@ -575,11 +574,11 @@ def _v14_classification(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_jobs_role_family ON jobs(role_family);
         CREATE INDEX IF NOT EXISTS idx_jobs_location_city ON jobs(location_city);
         CREATE INDEX IF NOT EXISTS idx_jobs_location_scope ON jobs(location_scope);
-        """
+        """,
     )
 
 
-@ migration(15)
+@migration(15)
 def _v15_compensation_tracking(conn: sqlite3.Connection) -> None:
     """Add compensation tracking fields for salary metadata and status."""
     if not _column_exists(conn, "jobs", "salary_period"):
@@ -592,7 +591,7 @@ def _v15_compensation_tracking(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE jobs ADD COLUMN compensation_status TEXT DEFAULT 'unknown'")
 
 
-@ migration(16)
+@migration(16)
 def _v16_human_feedback(conn: sqlite3.Connection) -> None:
     """Add human feedback table for calibration."""
     _exec_many(
@@ -610,7 +609,7 @@ def _v16_human_feedback(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_feedback_job ON feedback(job_id);
         CREATE INDEX IF NOT EXISTS idx_feedback_label ON feedback(label);
         CREATE INDEX IF NOT EXISTS idx_feedback_created ON feedback(created_at);
-        """
+        """,
     )
 
 

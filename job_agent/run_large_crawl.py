@@ -46,7 +46,8 @@ def main():
     if not os.path.isabs(profile_path):
         profile_path = os.path.join(os.path.dirname(__file__), profile_path)
 
-    profile = yaml.safe_load(open(profile_path).read())
+    with open(profile_path) as f:
+        profile = yaml.safe_load(f)
     policy = scoring_policy_from_config(cfg.model_dump())
 
     print(f"\nProfile loaded from: {profile_path}")
@@ -76,21 +77,23 @@ def main():
     print(f"Candidates found: {len(jobs)}")
     print(f"Provenance entries: {len(provenance)}")
     print(f"Fetch errors: {len(errors)}")
-    print(f"Duration: {elapsed:.1f}s ({elapsed/60:.1f} minutes)")
+    print(f"Duration: {elapsed:.1f}s ({elapsed / 60:.1f} minutes)")
 
     print("\nQuery Plan Summary:")
     summary = plan.summary()
     for k, v in summary.items():
-        if k != 'budgets':
+        if k != "budgets":
             print(f"  {k}: {v}")
 
     print("\nPer-Source Pacing:")
     for src in pacing_report.per_source:
         status_icon = {"ok": "✓", "failed": "✗", "zero_yield": "⚠"}.get(src.status, "?")
-        print(f"  {status_icon} {src.source_id}: {src.planned_queries} planned, "
-              f"{src.attempted_queries} attempted, {src.successful_queries} successful, "
-              f"{src.failed_queries} failed, {src.rate_limited_queries} rate-limited, "
-              f"{src.hits_returned} hits, {src.candidate_pages} pages, {src.jobs_parsed} jobs")
+        print(
+            f"  {status_icon} {src.source_id}: {src.planned_queries} planned, "
+            f"{src.attempted_queries} attempted, {src.successful_queries} successful, "
+            f"{src.failed_queries} failed, {src.rate_limited_queries} rate-limited, "
+            f"{src.hits_returned} hits, {src.candidate_pages} pages, {src.jobs_parsed} jobs"
+        )
 
     # Prepare database connection
     db_path = cfg.database_path
@@ -114,7 +117,7 @@ def main():
     # Run lifecycle processing
     print("\nApplying lifecycle rules...")
     lifecycle_start = time.monotonic()
-    lifecycle = run_lifecycle(conn, cfg, result.jobs_seen)
+    run_lifecycle(conn, cfg, result.jobs_seen)
     lifecycle_elapsed = time.monotonic() - lifecycle_start
     print(f"Lifecycle processing completed in {lifecycle_elapsed:.1f}s")
 
@@ -135,8 +138,7 @@ def main():
 
     jobs_persisted = sum(result.persisted_by_source.values())
     jobs_from_providers = sum(
-        result.persisted_by_source.get(str(p.get("source_id")), 0)
-        for p in pacing_report.providers
+        result.persisted_by_source.get(str(p.get("source_id")), 0) for p in pacing_report.providers
     )
     jobs_from_search = jobs_persisted - jobs_from_providers
 
@@ -158,9 +160,7 @@ def main():
     print("\n=== FINAL SUMMARY ===")
     total_jobs = conn.execute("SELECT COUNT(*) as total FROM jobs").fetchone()[0]
     total_evaluations = conn.execute("SELECT COUNT(*) FROM evaluations").fetchone()[0]
-    high_fit_count = conn.execute(
-        "SELECT COUNT(*) FROM evaluations WHERE total >= 75"
-    ).fetchone()[0]
+    high_fit_count = conn.execute("SELECT COUNT(*) FROM evaluations WHERE total >= 75").fetchone()[0]
 
     print(f"Total jobs in database: {total_jobs}")
     print(f"Jobs with evaluations: {total_evaluations}")
@@ -174,7 +174,9 @@ def main():
             print(f"  {p['source_id']}: {p['candidate_jobs']} candidates -> {p['hits']} hits ({yield_pct:.0f}%)")
 
     print("\n=== ANALYSIS ===")
-    print(f"Search efficiency: {jobs_persisted}/{len(plan.queries())} = {jobs_persisted/len(plan.queries()):.1f} jobs per query")
+    print(
+        f"Search efficiency: {jobs_persisted}/{len(plan.queries())} = {jobs_persisted / len(plan.queries()):.1f} jobs per query"
+    )
     print(f"Provider sources: {jobs_from_providers}, Search engines: {jobs_from_search}")
 
     # Check if we met the target
@@ -195,6 +197,7 @@ def main():
     output_dir.mkdir(exist_ok=True)
 
     from datetime import datetime as dt
+
     today = dt.now().strftime("%Y-%m-%d")
 
     # Create crawl summary
@@ -218,12 +221,14 @@ def main():
     }
 
     import json
+
     with open(output_dir / f"crawl-summary-{today}.json", "w") as f:
         json.dump(summary_data, f, indent=2)
 
     print(f"\nSummary saved to: output/reports/crawl-summary-{today}.json")
 
     return total_jobs
+
 
 if __name__ == "__main__":
     try:
@@ -235,5 +240,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nERROR: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

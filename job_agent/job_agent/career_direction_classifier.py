@@ -14,19 +14,19 @@ from __future__ import annotations
 
 from typing import Any
 
-from .models import Job
 from .career_direction import CareerDirection
+from .models import Job
 from .role_archetypes import RoleArchetype
 
 
 class CareerDirectionAssessment:
     """Result of career direction classification."""
-    
+
     job_id: str
     direction: CareerDirection
     supporting_evidence: list[str]
     missing_evidence: list[str]
-    
+
     def __init__(
         self,
         job_id: str,

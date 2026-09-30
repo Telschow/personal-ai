@@ -170,7 +170,7 @@ class ChatGPTConversationLoader:
                 continue
             try:
                 data = json.loads(candidate.read_bytes())
-            except (json.JSONDecodeError, UnicodeDecodeError):
+            except json.JSONDecodeError, UnicodeDecodeError:
                 continue
             if is_conversation_list(data):
                 shards.append(candidate)

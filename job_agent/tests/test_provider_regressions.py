@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
-import json
+from unittest.mock import MagicMock, patch
+
 import httpx
 import pytest
-from unittest.mock import patch, MagicMock
 
 from job_agent.sources import (
-    SmartRecruitersSource,
-    GreenhouseSource,
-    DirectPageSource,
     AshbySource,
+    DirectPageSource,
+    GreenhouseSource,
     LeverSource,
-    WorkableSource,
+    SmartRecruitersSource,
     SourceError,
+    WorkableSource,
 )
 
 
@@ -32,9 +32,7 @@ def _mock_error_response(status: int = 500):
     mock = MagicMock()
     mock.status_code = status
     mock.raise_for_status.side_effect = httpx.HTTPStatusError(
-        f"HTTP {status}",
-        request=MagicMock(),
-        response=MagicMock(status_code=status)
+        f"HTTP {status}", request=MagicMock(), response=MagicMock(status_code=status)
     )
     return mock
 
@@ -64,7 +62,7 @@ def test_smartrecruiters_valid_response(monkeypatch):
             }
         ]
     }
-    
+
     monkeypatch.setattr("job_agent.sources.httpx.get", lambda url, **kwargs: _mock_response(payload))
     jobs = SmartRecruitersSource("google").fetch()
     assert len(jobs) == 1
@@ -98,7 +96,7 @@ def test_smartrecruiters_string_in_content(monkeypatch):
             {"id": "456", "name": "Another Valid", "ref": {}},
         ]
     }
-    
+
     monkeypatch.setattr("job_agent.sources.httpx.get", lambda url, **kwargs: _mock_response(payload))
     jobs = SmartRecruitersSource("google").fetch()
     assert len(jobs) == 2
@@ -114,7 +112,7 @@ def test_smartrecruiters_non_dict_ref(monkeypatch):
             {"id": "456", "name": "Job 2", "ref": {}},
         ]
     }
-    
+
     monkeypatch.setattr("job_agent.sources.httpx.get", lambda url, **kwargs: _mock_response(payload))
     jobs = SmartRecruitersSource("google").fetch()
     assert len(jobs) == 2
@@ -123,7 +121,7 @@ def test_smartrecruiters_non_dict_ref(monkeypatch):
 def test_greenhouse_pagination_bounded(monkeypatch):
     """Test Greenhouse pagination respects max_pages limit."""
     call_count = {"count": 0}
-    
+
     def fake_get(url, **kwargs):
         call_count["count"] += 1
         if call_count["count"] <= 3:
@@ -131,7 +129,7 @@ def test_greenhouse_pagination_bounded(monkeypatch):
         else:
             payload = {"jobs": []}
         return _mock_response(payload)
-    
+
     monkeypatch.setattr("job_agent.sources.httpx.get", fake_get)
     jobs = GreenhouseSource("test").fetch()
     assert len(jobs) >= 1
@@ -139,7 +137,10 @@ def test_greenhouse_pagination_bounded(monkeypatch):
 
 def test_greenhouse_timeout(monkeypatch):
     """Test Greenhouse handles timeout gracefully."""
-    monkeypatch.setattr("job_agent.sources.httpx.get", lambda url, **kwargs: (_ for _ in ()).throw(httpx.TimeoutException("Request timed out")))
+    monkeypatch.setattr(
+        "job_agent.sources.httpx.get",
+        lambda url, **kwargs: (_ for _ in ()).throw(httpx.TimeoutException("Request timed out")),
+    )
     with pytest.raises(SourceError) as excinfo:
         GreenhouseSource("test").fetch()
     assert "timeout" in str(excinfo.value).lower()
@@ -162,9 +163,11 @@ def test_direct_source_diagnostics(monkeypatch):
 
 def test_direct_source_timeout_wrapped(monkeypatch):
     """Test DirectPageSource wraps timeout in SourceError."""
-    with patch("httpx.get", side_effect=httpx.ConnectTimeout("Connection timed out")):
-        with pytest.raises(SourceError) as excinfo:
-            DirectPageSource("https://example.com/jobs").fetch()
+    with (
+        patch("httpx.get", side_effect=httpx.ConnectTimeout("Connection timed out")),
+        pytest.raises(SourceError) as excinfo,
+    ):
+        DirectPageSource("https://example.com/jobs").fetch()
     assert "timeout after 3 attempts" in str(excinfo.value)
 
 
@@ -184,7 +187,7 @@ def test_ashby_malformed_posting(monkeypatch):
             {"id": "2", "title": "Another Valid", "jobUrl": "https://example.com/2"},
         ]
     }
-    
+
     monkeypatch.setattr("job_agent.sources.httpx.get", lambda url, **kwargs: _mock_response(payload))
     jobs = AshbySource("test").fetch()
     assert len(jobs) == 2
@@ -208,7 +211,7 @@ def test_ashby_missing_job_id(monkeypatch):
             {"id": "3", "title": "Another Valid", "jobUrl": "https://example.com/3"},
         ]
     }
-    
+
     monkeypatch.setattr("job_agent.sources.httpx.get", lambda url, **kwargs: _mock_response(payload))
     jobs = AshbySource("test").fetch()
     # Should process all 3 (falls back to title for missing URL)
@@ -229,7 +232,7 @@ def test_lever_malformed_posting(monkeypatch):
         "not a dict",
         {"id": "2", "text": "Another Valid", "hostedUrl": "https://example.com/2"},
     ]
-    
+
     monkeypatch.setattr("job_agent.sources.httpx.get", lambda url, **kwargs: _mock_response(payload))
     jobs = LeverSource("test").fetch()
     assert len(jobs) == 2
