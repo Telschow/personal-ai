@@ -484,14 +484,14 @@ class RetrievalService:
             return document.source, document.source_type
 
         results: list[SearchResult] = []
-        for hit in chunk_hits:
-            title, source_type = _document_provenance(hit.document_id)
-            results.append(_chunk_to_search_result(hit, title, source_type))
-        for hit in extraction_hits:
-            title, source_type = _document_provenance(hit.document_id)
-            results.append(_extraction_to_search_result(hit, title, source_type))
-        for hit in conversation_hits:
-            results.append(_conversation_to_search_result(hit))
+        for chunk_hit in chunk_hits:
+            title, source_type = _document_provenance(chunk_hit.document_id)
+            results.append(_chunk_to_search_result(chunk_hit, title, source_type))
+        for extraction_hit in extraction_hits:
+            title, source_type = _document_provenance(extraction_hit.document_id)
+            results.append(_extraction_to_search_result(extraction_hit, title, source_type))
+        for conversation_hit in conversation_hits:
+            results.append(_conversation_to_search_result(conversation_hit))
 
         results.sort(key=lambda r: (-r.score, r.document_id or "", r.result_type))
         return tuple(results[:limit])
@@ -595,7 +595,7 @@ class ActivityBucketsRequest:
     limit: int = 100
 
 
-def _event_types(request_event_type: str | None, defaults: tuple[str, ...]) -> tuple:
+def _event_types(request_event_type: str | None, defaults: tuple[str, ...]) -> tuple[str, ...]:
     """Return the concrete event-type set for a trends query.
 
     When ``request_event_type`` is ``None`` the ``defaults`` set is used;
@@ -603,6 +603,7 @@ def _event_types(request_event_type: str | None, defaults: tuple[str, ...]) -> t
     """
     if request_event_type is None:
         return defaults
+
     return (request_event_type,)
 
 

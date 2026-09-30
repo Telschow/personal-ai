@@ -46,6 +46,10 @@ def connect_database(path: str | Path) -> sqlite3.Connection:
     """Open a SQLite connection configured for personal-AI storage."""
     connection = sqlite3.connect(path)
     connection.execute("PRAGMA foreign_keys = ON")
+    connection.execute("PRAGMA journal_mode = WAL")
+    connection.execute("PRAGMA busy_timeout = 5000")
+    connection.execute("PRAGMA secure_delete = ON")
+    connection.execute("PRAGMA synchronous = NORMAL")
     return connection
 
 

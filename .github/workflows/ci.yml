@@ -56,3 +56,32 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pip-audit
+        run: pipx install pip-audit
+
+      - name: Run pip-audit
+        run: pip-audit
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0.19.1
+        with:
+          format: cyclonedx-json
+          output-file: sbom.json
+        continue-on-error: true
+
+  codeql:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
