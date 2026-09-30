@@ -126,7 +126,7 @@ def _row_to_event(row: tuple[object, ...]) -> Event:
         url=_optional_str(row[5]),
         search_query=_optional_str(row[6]),
         channel_name=_optional_str(row[7]),
-        duration_seconds=float(row[8]) if row[8] is not None else None,
+        duration_seconds=float(str(row[8])) if row[8] is not None else None,
         metadata=json.loads(str(row[9])),
     )
 

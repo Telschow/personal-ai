@@ -319,7 +319,7 @@ def _row_to_chunk(row: tuple[object, ...]) -> DocumentChunk:
     return DocumentChunk(
         id=str(row[0]),
         document_id=str(row[1]),
-        page_number=row[3] if row[3] is None else int(row[3]),
+        page_number=row[3] if row[3] is None else int(str(row[3])),
         text=str(row[4]),
         metadata=json.loads(str(row[5])),
     )

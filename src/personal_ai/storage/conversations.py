@@ -157,14 +157,14 @@ def _row_to_message(row: tuple[object, ...]) -> ConversationMessage:
     return ConversationMessage(
         id=str(next(values)),
         conversation_id=str(next(values)),
-        message_index=int(next(values)),
+        message_index=int(str(next(values))),
         role=str(next(values)),
         speaker=str(next(values)),
         content_text=str(next(values)),
         content_type=str(next(values)),
         timestamp=_optional_str(next(values)),
         parent_message_id=_optional_str(next(values)),
-        is_active_branch=bool(int(next(values))),
+        is_active_branch=bool(int(str(next(values)))),
         metadata=json.loads(str(next(values))),
     )
 
@@ -188,7 +188,7 @@ def _row_to_attachment(row: tuple[object, ...]) -> ConversationAttachment:
         message_id=str(next(values)),
         filename=str(next(values)),
         mime_type=str(next(values)),
-        size_bytes=int(next(values)),
+        size_bytes=int(str(next(values))),
         blob_path=str(next(values)),
         metadata=json.loads(str(next(values))),
     )
