@@ -27,6 +27,8 @@ output/
 
 # Local opencode config (may contain credentials)
 opencode.json
+opencode.json.bak
+*.bak
 
 # Secrets
 secrets/
