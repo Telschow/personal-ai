@@ -25,6 +25,9 @@ tmp/
 cache/
 output/
 
+# Local opencode config (may contain credentials)
+opencode.json
+
 # Secrets
 secrets/
 credentials/
