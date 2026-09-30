@@ -96,7 +96,10 @@ class TestRetrievalService:
 
     def _service(self) -> RetrievalService:
         return RetrievalService(
-            self.chunk_store, self.extraction_store, self.document_store, self.conversation_store
+            self.chunk_store,
+            self.extraction_store,
+            self.document_store,
+            self.conversation_store,
         )
 
     def test_chunk_only_match(self) -> None:
@@ -275,34 +278,34 @@ class TestRetrievalService:
 
     def test_hybrid_search_routes_chunk_results_to_document_store(self) -> None:
         """Test that RetrievalService correctly routes result types for document lookups.
-        
+
         ChunkSearchResult and ExtractionSearchResult should trigger DocumentStore.get()
         for provenance lookup, while ConversationSearchResult should not.
         """
         # Track calls to DocumentStore.get
         get_calls = []
         original_get = self.document_store.get
-        
+
         def tracked_get(document_id: str):
             get_calls.append(document_id)
             return original_get(document_id)
-        
+
         self.document_store.get = tracked_get
-        
+
         try:
             service = self._service()
-            
+
             # Create test data that will produce all three result types
             # Chunk: ingest a document with text content
             chunk_doc_id = self._ingest(b"Hello world chunk content")
-            
+
             # Extraction: need a different document for extraction to avoid caching
             extraction_doc_id = self._ingest(b"Different content for extraction")
-            
+
             # Extraction: we need to trigger extraction store separately
             # For simplicity, we'll mock the extraction store to return a known result
             from personal_ai.storage.extractions import ExtractionSearchResult
-            
+
             # Mock extraction store to return a known extraction result
             extraction_result = ExtractionSearchResult(
                 document_id=extraction_doc_id,
@@ -310,17 +313,19 @@ class TestRetrievalService:
                 score=0.8,
                 matched_fields=("summary",),
             )
-            
+
             original_extraction_search = self.extraction_store.search
+
             def mock_extraction_search(query: str, *, limit: int = 10):
                 if query == "test":
                     return (extraction_result,)
                 return original_extraction_search(query, limit=limit)
+
             self.extraction_store.search = mock_extraction_search
-            
+
             # Conversation: we'll mock conversation store similarly
             from personal_ai.storage.conversations import ConversationSearchResult
-            
+
             conversation_result = ConversationSearchResult(
                 message_id="msg1",
                 conversation_id="conv1",
@@ -331,8 +336,9 @@ class TestRetrievalService:
                 content_text="Test conversation content",
                 score=0.7,
             )
-            
+
             original_conversation_search = self.conversation_store.search
+
             def mock_conversation_search(
                 query: str,
                 *,
@@ -342,13 +348,19 @@ class TestRetrievalService:
             ):
                 if query == "test":
                     return (conversation_result,)
-                return original_conversation_search(query, limit=limit, created_after=created_after, created_before=created_before)
+                return original_conversation_search(
+                    query,
+                    limit=limit,
+                    created_after=created_after,
+                    created_before=created_before,
+                )
+
             self.conversation_store.search = mock_conversation_search
-            
+
             # Chunk store: make sure our document produces a chunk result
             # We need to make sure chunk store returns a result for our query
             from personal_ai.storage.chunks import ChunkSearchResult
-            
+
             chunk_result = ChunkSearchResult(
                 chunk_id="chunk1",
                 document_id=chunk_doc_id,
@@ -356,8 +368,9 @@ class TestRetrievalService:
                 text="Hello world chunk content",
                 rank=0.0,  # BM25 rank
             )
-            
+
             original_chunk_search = self.chunk_store.search
+
             def mock_chunk_search(
                 query: str,
                 *,
@@ -367,26 +380,38 @@ class TestRetrievalService:
                 if query == "test":
                     return (chunk_result,)
                 return original_chunk_search(query, limit=limit, filters=filters)
+
             self.chunk_store.search = mock_chunk_search
-            
+
             # Perform search that should trigger all three mocks
             results = service.search("test", limit=10)
-            
+
             # Verify we got results of all three types
             result_types = {r.result_type for r in results}
             assert "chunk" in result_types, f"Expected chunk result, got {result_types}"
-            assert "structured_extraction" in result_types, f"Expected extraction result, got {result_types}"
-            assert "conversation" in result_types, f"Expected conversation result, got {result_types}"
-            
+            assert "structured_extraction" in result_types, (
+                f"Expected extraction result, got {result_types}"
+            )
+            assert "conversation" in result_types, (
+                f"Expected conversation result, got {result_types}"
+            )
+
             # Count DocumentStore.get calls - should be 2 (for chunk and extraction, not conversation)
             # Each chunk and extraction result triggers one document lookup for provenance
-            assert len(get_calls) == 2, f"Expected 2 DocumentStore.get calls (chunk + extraction), got {len(get_calls)}: {get_calls}"
-            
+            assert len(get_calls) == 2, (
+                f"Expected 2 DocumentStore.get calls (chunk + extraction), got {len(get_calls)}: {get_calls}"
+            )
+
             # Verify the document IDs looked up are correct
             looked_up_doc_ids = set(get_calls)
-            expected_doc_ids = {chunk_doc_id, extraction_doc_id}  # Different doc IDs for chunk and extraction
-            assert looked_up_doc_ids == expected_doc_ids, f"Expected document IDs {expected_doc_ids}, got {looked_up_doc_ids}"
-            
+            expected_doc_ids = {
+                chunk_doc_id,
+                extraction_doc_id,
+            }  # Different doc IDs for chunk and extraction
+            assert looked_up_doc_ids == expected_doc_ids, (
+                f"Expected document IDs {expected_doc_ids}, got {looked_up_doc_ids}"
+            )
+
         finally:
             # Restore original methods
             self.document_store.get = original_get
@@ -395,19 +420,14 @@ class TestRetrievalService:
             self.chunk_store.search = original_chunk_search
 
     def test_deletion_cascade_removes_all_related_data(self) -> None:
-        """Verify that deleting a document removes chunks, FTS entries, and embeddings."""
-        # Ingest a document that will create chunks and (potentially) embeddings
-        doc_id = self._ingest(b"Test content for deletion cascade")
-        
-        # Verify chunks exist
-        chunk_hits = self.chunk_store.search("Test content", limit=10)
-        if chunk_hits:
-            # Delete the document
-            deleted_count = self.chunk_store.delete_for_document(doc_id)
-            
-            # Verify chunks are deleted
-            remaining_hits = self.chunk_store.search("Test content", limit=10)
-            assert len(remaining_hits) == 0, "Chunks should be deleted after document deletion"
-            
-            # Note: Embedding deletion requires explicit call if embeddings exist
-            # This test documents the gap in PAI-009
+        """Deleting a document clears its chunks from the FTS-backed index."""
+        doc_id = self._ingest(TEXT_HEAVY_TEXT.encode())
+
+        before = self.chunk_store.search(TEXT_HEAVY_TEXT, limit=10)
+        assert before, "ingest must produce searchable chunks"
+
+        deleted_count = self.chunk_store.delete_for_document(doc_id)
+        assert deleted_count > 0, "deletion must report removed chunks"
+
+        after = self.chunk_store.search(TEXT_HEAVY_TEXT, limit=10)
+        assert not any(hit.document_id == doc_id for hit in after)

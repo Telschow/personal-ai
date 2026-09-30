@@ -489,7 +489,9 @@ class RetrievalService:
             results.append(_chunk_to_search_result(chunk_hit, title, source_type))
         for extraction_hit in extraction_hits:
             title, source_type = _document_provenance(extraction_hit.document_id)
-            results.append(_extraction_to_search_result(extraction_hit, title, source_type))
+            results.append(
+                _extraction_to_search_result(extraction_hit, title, source_type)
+            )
         for conversation_hit in conversation_hits:
             results.append(_conversation_to_search_result(conversation_hit))
 
@@ -595,7 +597,9 @@ class ActivityBucketsRequest:
     limit: int = 100
 
 
-def _event_types(request_event_type: str | None, defaults: tuple[str, ...]) -> tuple[str, ...]:
+def _event_types(
+    request_event_type: str | None, defaults: tuple[str, ...]
+) -> tuple[str, ...]:
     """Return the concrete event-type set for a trends query.
 
     When ``request_event_type`` is ``None`` the ``defaults`` set is used;

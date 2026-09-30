@@ -268,7 +268,7 @@ class PersonStore:
         limit: int = 20,
         offset: int = 0,
         role: str | None = None,
-) -> list[Person]:
+    ) -> list[Person]:
         """Return people whose name/identity/email matches a substring.
 
         Leading/trailing whitespace is stripped and SQL wildcards are treated
