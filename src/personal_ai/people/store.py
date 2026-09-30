@@ -3,7 +3,7 @@
 import json
 import sqlite3
 from types import TracebackType
-from typing import List, Self
+from typing import Self
 
 from personal_ai.people.canonicalize import canonical_identity
 from personal_ai.people.models import (
@@ -268,7 +268,7 @@ class PersonStore:
         limit: int = 20,
         offset: int = 0,
         role: str | None = None,
-) -> List[Person]:
+) -> list[Person]:
         """Return people whose name/identity/email matches a substring.
 
         Leading/trailing whitespace is stripped and SQL wildcards are treated
@@ -325,7 +325,7 @@ class PersonStore:
 
     def evidence_for(
         self, person_id: str, *, limit: int = 50, offset: int = 0
-    ) -> List[PersonEvidence]:
+    ) -> list[PersonEvidence]:
         """Bound the provenance rows for one person, newest-first."""
         sql = (
             "SELECT person_id, document_id, name, email, role, source_type, "

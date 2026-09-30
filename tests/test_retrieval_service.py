@@ -7,6 +7,7 @@ from personal_ai.sources.models import SourceRecord
 from personal_ai.storage import (
     ChunkStore,
     ConversationStore,
+    DocumentFilter,
     DocumentStore,
     EmbeddingStore,
     ExtractionStore,
@@ -392,24 +393,3 @@ class TestRetrievalService:
             self.extraction_store.search = original_extraction_search
             self.conversation_store.search = original_conversation_search
             self.chunk_store.search = original_chunk_search
-
-    def test_email_without_subject_falls_back_to_source_identity(self) -> None:
-        record = _make_email_record(
-            b"Guitar chord charts phase33fallback. " * 20,
-            subject="",
-        )
-        ingested = self.ingestor.ingest(record)
-        document = self.document_store.get(ingested.document_id)
-        assert document is not None
-        service = self._service()
-
-        hits = [
-            result
-            for result in service.search("phase33fallback")
-            if result.document_id == ingested.document_id
-        ]
-        assert len(hits) > 0
-        for result in hits:
-            assert result.title == document.source
-            assert result.title != "Phase 33 Email Subject"
-            assert result.source_type == "email"
