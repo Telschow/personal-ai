@@ -1,6 +1,73 @@
 # Personal AI
 
-Local-first personal knowledge and agent system. Ingests your own files, conversations, exports and activity into a SQLite knowledge base on your machine, and answers questions through a local model run by Ollama. No cloud APIs required for core operation.
+Local-first personal knowledge and agent platform: evidence-grounded retrieval, governed memory, tool use.
+
+[![CI](https://github.com/Telschow/personal-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/Telschow/personal-ai/actions/workflows/ci.yml)
+
+Personal AI ingests personal documents, conversations, email, browser history, YouTube, finance, events and vision data into a local SQLite knowledge base. Retrieval combines full-text and semantic search with hybrid RRF ranking. Reasoning runs on a local LLM with a bounded tool loop that returns evidence citations. Memory is scoped, confidence-weighted and reconciled over time.
+
+Memory lifecycle, provenance tracking and policy-gated tools keep personal data local. The system works offline; external models are optional.
+
+```mermaid
+flowchart LR
+    Sources[Sources<br/>documents, PDFs, chat exports, email, browser history, YouTube, finance, events, vision] --> Ingest[Ingest]
+    Ingest --> Stores[(Stores<br/>documents, chunks, conversations, embeddings, events, structured extractions, vision)]
+    Stores --> Retrieve[Retrieve<br/>FTS5 + semantic + RRF hybrid]
+    Retrieve --> Reason[Reason<br/>local LLM, bounded tool loop]
+    Reason --> Evidence[Evidence]
+    Evidence --> Memory[Memory & Tools]
+    Memory --> Apps[Applications<br/>Personal AI, Job Agent]
+```
+
+## Design decisions worth reading
+
+* Evidence/provenance-first answers — every answer links to source documents with content hashes. See `src/personal_ai/retrieval.py`, `docs/architecture/MEMORY_ARCHITECTURE.md`.
+* Hybrid retrieval with deterministic tie-breaking — FTS5 + semantic vectors combined via Reciprocal Rank Fusion with stable ordering. See `src/personal_ai/retrieval_factory.py`, `docs/retrieval.md`.
+* Memory lifecycle — confidence, importance, provenance, temporal scope; candidate → active → archive with reconciliation. See `src/personal_ai/memory/reconcile.py`, `docs/architecture/MEMORY_ARCHITECTURE.md`.
+* Bounded agent loop — max rounds, result-size limits, sanitized logging, tool registry. See `src/personal_ai/agent.py`, `docs/architecture/AGENT_ARCHITECTURE.md`.
+* Retrieval evaluation harness — recall@k, precision@k, hit@k, MRR; backend failures are surfaced, never turned into zero-result scores. See `src/personal_ai/retrieval_evaluation.py`.
+* Privacy policy — local-first, synthetic fixtures, no real PII in repo. See `PUBLIC_DATA_POLICY.md`, `docs/privacy.md`.
+
+## Repository map
+
+| Path | Purpose |
+|------|---------|
+| `src/` | Runtime code — personal-ai Python package |
+| `tests/` | Test suite — synthetic fixtures only |
+| `job_agent/` | Companion job search agent — runtime code |
+| `docs/` | Architecture, ADRs, user guides |
+| `.opencode/` | OpenCode workflow tooling — skills, agents, commands, plugins (dev workflow) |
+| `data/`, `previous_project_and_raw_data/` | Local data directories, gitignored |
+| `pyproject.toml`, `uv.lock` | Toolchain and dependencies |
+
+## Quick start
+
+```bash
+git clone https://github.com/Telschow/personal-ai
+cd personal-ai
+uv sync
+uv run pytest -q
+uv run ruff check src tests job_agent
+uv run ruff format --check src tests job_agent
+```
+
+CLI help:
+
+```bash
+uv run python -m personal_ai.cli --help
+```
+
+Tests pass on synthetic fixtures under `tests/fixtures/synthetic/`. See `CONTRIBUTING.md` for full setup.
+
+## Status and known limits
+
+* End-to-end answer quality and citation evaluation is in progress; retrieval evaluation harness exists but end-to-end metrics are not fully automated.
+* Local LLM quality depends on model choice and hardware.
+* Vector search is optional and requires an embedding model.
+* Ingestion is explicit; no automatic monitoring of personal directories.
+* Memory does not automatically expire; manual curation required.
+
+## Details
 
 ## What is Personal AI?
 
@@ -66,6 +133,17 @@ cp .env.example .env
 
 Configure `OLLAMA_BASE_URL`, data directories, and optional models. Never commit `.env`.
 
+### Local configuration
+
+OpenCode config may contain credentials. Do not commit it.
+
+```bash
+cp opencode.example.json opencode.json
+export FREELLMAPI_API_KEY=...
+```
+
+`opencode.json` is gitignored. The example uses `{env:FREELLMAPI_API_KEY}` substitution.
+
 ## Running locally
 
 ```bash
@@ -115,4 +193,3 @@ Contributions welcome. Follow privacy requirements: no real personal data in com
 ## License
 
 See `LICENSE`.
-
