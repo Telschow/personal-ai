@@ -1,2 +1,4 @@
 def test_smoke():
-    assert True
+    import personal_ai
+
+    assert personal_ai is not None

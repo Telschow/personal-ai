@@ -267,7 +267,8 @@ def test_registry_aggregates_disjoint_adapters() -> None:
     )
     assert registry.supports(EMAIL)
     assert registry.supports(ACTIVITY)
-    assert {registry.for_source(EMAIL).source_type for _ in ()} or True
+    assert registry.for_source(EMAIL) is not None
+    assert registry.for_source(EMAIL).supports(EMAIL)
     assert registry.for_source(FINANCIAL) is not None
     assert registry.for_source(ACTIVITY) is not None
     assert registry.for_source("chatgpt") is None
