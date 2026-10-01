@@ -27,7 +27,7 @@ from personal_ai.storage import (
 )
 
 FAKE_RESPONSE = {
-    "summary": "Daniel works at Example GmbH on Project Apollo.",
+    "summary": "Alice works at Example GmbH on Project Apollo.",
     "people": ["Alice Example"],
     "organizations": ["Example GmbH"],
     "projects": ["Project Apollo"],
@@ -38,7 +38,7 @@ FAKE_RESPONSE = {
 FAKE_RESPONSE_SECOND = {
     "summary": "Revised summary for the same document.",
     "people": ["Alice Example", "Alice"],
-    "organizations": ["Example GmbH", "BCG"],
+    "organizations": ["Example GmbH", "Example Consulting"],
     "projects": ["Project Apollo"],
     "goals": ["Learn local AI deployment", "Financial independence"],
     "topics": ["career", "AI"],
@@ -60,7 +60,7 @@ SYNTHETIC_TEXT = (
     "He is leading Project Apollo which started in January 2026. "
     "His goal is to learn local AI deployment and build a personal knowledge system. "
     "The project involves career development, AI research, and personal growth. "
-    "Daniel previously worked at BCG as a consultant. "
+    "Alice previously worked at Example Consulting as a consultant. "
     "He is based in Munich and focuses on technology and finance."
 ) * 10
 
@@ -293,7 +293,7 @@ class TestExtractionIntegration:
         import pathlib
 
         workspace = pathlib.Path(tmp_path)
-        page1_text = "Page one: Daniel works at Example GmbH. " * 15
+        page1_text = "Page one: Alice works at Example GmbH. " * 15
         page2_text = "Page two: Project Apollo goals and timeline. " * 15
         doc = pymupdf.open()
         for text in [page1_text, page2_text]:

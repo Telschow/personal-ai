@@ -2,81 +2,185 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test:
+  quality:
+    name: Ruff, mypy and tests (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.14 is the only interpreter the project declares: .python-version is
+        # 3.14 and pyproject.toml sets requires-python = ">=3.14". The matrix
+        # exists so a future version bump is a one-line change here.
+        python-version: ["3.14"]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install project
+        run: uv sync --locked --dev
+
+      # personal_ai.server exposes Job-Agent-backed HTTP endpoints, so the root
+      # suite has real tests for them (tests/test_server_job_agent.py and
+      # TestRoutes::test_discover_writes_to_app_job_db). Those tests skip when
+      # the Job-Agent discovery dependencies are absent, so install the
+      # workspace member to guarantee they actually execute here rather than
+      # reporting a green run that silently dropped 17 tests.
+      - name: Install Job-Agent for its HTTP surface
+        run: uv pip install -e ./job_agent
+
+      - name: Ruff lint
+        run: uv run ruff check src tests scripts
+
+      - name: Ruff format
+        run: uv run ruff format --check src tests scripts
+
+      # Runs mypy over the whole src/personal_ai package and fails on any
+      # error not already recorded in config/mypy-baseline.json. No error code
+      # is disabled. See docs/typing.md.
+      - name: Type check
+        run: uv run python scripts/mypy_ratchet.py
+
+      # The whole suite. There is no integration marker in this repository:
+      # no test carries it and it is not registered in pyproject.toml, so a
+      # `-m "not integration"` filter would imply a suite that does not exist
+      # while excluding nothing. The suite is hermetic by construction (temp
+      # SQLite, TestClient, fakes, no network), so it runs as one unit.
+      - name: Test
+        run: uv run pytest
+
+  job-agent:
+    name: Job-Agent tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: job_agent
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - name: Install Job-Agent
+        run: uv sync --locked --extra dev --extra all
+
+      - name: Job-Agent lint
+        run: uv run ruff check .
+
+      - name: Job-Agent tests
+        run: uv run pytest
+
+  build:
+    name: Build distributions
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v7
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.2.0
         with:
-          python-version: '3.14'
-          cache: 'uv'
+          enable-cache: true
+          python-version: "3.14"
 
-      - name: Install dependencies
+      - name: Build personal-ai
+        run: uv build
+
+      - name: Build personal-job-agent
+        run: uv build
+        working-directory: job_agent
+
+      # The wheels must be importable in a clean environment, otherwise a
+      # successful build can still ship a broken package. Both distributions are
+      # built here, so both are verified; importing one and ignoring the other
+      # would let a broken Job-Agent wheel ship unnoticed.
+      - name: Smoke test the personal-ai wheel
         run: |
-          uv sync --locked
+          uv venv /tmp/smoke
+          uv pip install --python /tmp/smoke dist/*.whl
+          /tmp/smoke/bin/python -c "import personal_ai, personal_ai.server"
 
-      - name: Ruff check
-        run: uv run ruff check src tests job_agent
+      - name: Smoke test the personal-job-agent wheel
+        run: |
+          uv venv /tmp/smoke-ja
+          uv pip install --python /tmp/smoke-ja job_agent/dist/*.whl
+          /tmp/smoke-ja/bin/python -c "import job_agent, job_agent.config"
 
-      - name: Ruff format check
-        run: uv run ruff format --check src tests job_agent
+  dependency-audit:
+    name: Dependency audit (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [".", "job_agent"]
+    defaults:
+      run:
+        working-directory: ${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v7
 
-      - name: MyPy
-        run: uv run --with mypy mypy src/personal_ai/__init__.py
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+          python-version: "3.14"
 
-      - name: Pytest
-        run: uv run pytest -m "not integration"
+      # Exports the exact locked production dependency set, including
+      # transitives, and audits that. Auditing the ambient environment instead
+      # would report on the runner's packages rather than the project's.
+      - name: Export locked runtime dependencies
+        run: uv export --frozen --no-dev --no-hashes --no-emit-project --format requirements-txt -o requirements-audit.txt
+
+      - name: Audit dependencies
+        run: uvx pip-audit --requirement requirements-audit.txt --progress-spinner off
 
   secret-scan:
+    name: Secret scan
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
+          # Scan the full history so a secret removed in a later commit is
+          # still detected. This repository is public.
           fetch-depth: 0
 
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
+      # Gitleaks Action v3 requires no licence for personal accounts, which is
+      # what this repository uses.
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v3
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup pip-audit
-        run: pipx install pip-audit
-
-      - name: Run pip-audit
-        run: pip-audit
-
-      - name: Generate SBOM
-        uses: anchore/sbom-action@v0.19.1
-        with:
-          format: cyclonedx-json
-          output-file: sbom.json
-        continue-on-error: true
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: false
 
   codeql:
+    name: CodeQL
     runs-on: ubuntu-latest
+    # Required to upload analysis results. The workflow-level default is
+    # contents: read, so this must be declared per job.
+    permissions:
+      contents: read
+      security-events: write
+      packages: read
+      actions: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v7
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -85,3 +189,19 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:python
+
+  sbom:
+    name: SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0.24.2
+        with:
+          format: cyclonedx-json
+          output-file: sbom.json
+          upload-artifact: true
+          artifact-name: sbom.cdx.json

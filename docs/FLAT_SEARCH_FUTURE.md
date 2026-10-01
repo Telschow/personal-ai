@@ -13,7 +13,7 @@ Reference: https://github.com/lukasthekid/flatscraper
 | Notification/alerting | Telegram/email alerts for new matches | Future: local notification (dashboard badge, optional webhook) |
 | Human-in-the-loop | User reviews before contact | Same: SAVED/REJECTED/APPLIED status; never auto-contact |
 | Application documents | Auto-generate application PDFs | Same pattern: master documents → tailored application → PDF export |
-| Multi-user | Designed for couples/households | Future: shared profile for Daniel + Sabina |
+| Multi-user | Designed for couples/households | Future: shared profile for two household members |
 
 ## Architecture Mapping
 

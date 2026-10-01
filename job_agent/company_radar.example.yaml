@@ -1,0 +1,44 @@
+# Personal AI job agent — example company radar.
+#
+# Copy to company_radar.yaml and adjust for your own job search. The radar is
+# optional: job_agent/company_radar.py returns an empty radar when this file is
+# absent, so a fresh checkout never fetches anything.
+#
+# Entries whose company name starts with "example" are placeholders and are
+# skipped by discovery, so the values below never trigger a network request.
+# All values here are synthetic.
+
+companies:
+  - name: example-autonomous-ai
+    location: Example City
+    industry: ["AI", "Autonomous Systems"]
+    greenhouse: example-token
+    ashby: null
+    lever: null
+    smartrecruiters: null
+
+  - name: example-data-platform
+    location: Example City
+    industry: ["Data Platform"]
+    greenhouse: null
+    ashby: example-board
+    lever: null
+    smartrecruiters: null
+
+  - name: example-cloud
+    location: Example City
+    industry: ["Cloud Infrastructure"]
+    greenhouse: null
+    ashby: null
+    lever: null
+    smartrecruiters: example-company
+
+  # Set disabled: true to keep an entry on file without searching it.
+  - name: example-disabled-entry
+    location: Example City
+    industry: ["Example Industry"]
+    greenhouse: example-token
+    ashby: null
+    lever: null
+    smartrecruiters: null
+    disabled: true

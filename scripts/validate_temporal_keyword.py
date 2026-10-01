@@ -130,8 +130,7 @@ def _filtered_is_subset(store: EventStore) -> None:
             r.count for r in top_searches(store, SearchTrendsRequest(keyword=keyword))
         )
         kw_channels = sum(
-            r.count
-            for r in top_channels(store, ChannelTrendsRequest(keyword=keyword))
+            r.count for r in top_channels(store, ChannelTrendsRequest(keyword=keyword))
         )
         kw_videos = sum(
             r.count for r in top_videos(store, VideoTrendsRequest(keyword=keyword))
@@ -148,17 +147,14 @@ def _time_range_check(store: EventStore) -> None:
     target = months[0].bucket
     start, end = f"{target}-01T00:00:00+00:00", f"{target}-31T23:59:59+00:00"
 
-    unfiltered = query_events(
-        store, EventQueryRequest(start_time=start, end_time=end)
-    )
+    unfiltered = query_events(store, EventQueryRequest(start_time=start, end_time=end))
     best = _CANDIDATE_KEYWORDS[0]
     filtered = query_events(
         store,
         EventQueryRequest(keyword=best, start_time=start, end_time=end),
     )
     assert len(filtered) <= len(unfiltered), (
-        f"keyword + time-range inflated events "
-        f"({len(filtered)} > {len(unfiltered)})"
+        f"keyword + time-range inflated events ({len(filtered)} > {len(unfiltered)})"
     )
     print(
         f"  keyword+time-range '{best}' in {target}: "

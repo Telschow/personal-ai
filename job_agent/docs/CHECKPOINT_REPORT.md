@@ -1,5 +1,10 @@
 # CHECKPOINT REPORT — Provider-Only Crawl + Fit Model Validation
 
+> **Historical validation report — validation performed 2026-09-21.**
+> Metrics below describe the local `jobs.sqlite3` database as it stood on that
+> date and at the commit named here. They are a point-in-time record, not a
+> current status claim.
+
 **Date**: 2026-09-21  
 **Database**: `job_agent/output/jobs.sqlite3`  
 **Git commit**: 123aaeb (feat(job-agent): operationalize career application workflow)

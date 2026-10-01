@@ -38,9 +38,9 @@ class TestExtractionSearch:
         self.store.save(
             _make_extraction(
                 "doc-1",
-                summary="Daniel works at BCG on consulting projects",
+                summary="Alice works at Example Consulting on consulting projects",
                 people=("Alice Example",),
-                organizations=("BCG",),
+                organizations=("Example Consulting",),
                 projects=("Project Apollo",),
                 goals=("Career advancement",),
                 topics=("consulting", "strategy"),
@@ -50,7 +50,7 @@ class TestExtractionSearch:
             _make_extraction(
                 "doc-2",
                 summary="Meeting notes about product development",
-                people=("Alice", "Bob"),
+                people=("Bob", "Carol"),
                 organizations=("Example GmbH",),
                 projects=("Product X",),
                 goals=("Ship by Q4",),
@@ -71,7 +71,7 @@ class TestExtractionSearch:
 
     def test_search_by_person(self) -> None:
         self._seed()
-        results = self.store.search("Daniel")
+        results = self.store.search("Alice")
         assert len(results) == 2
         doc_ids = {r.document_id for r in results}
         assert "doc-1" in doc_ids
@@ -79,7 +79,7 @@ class TestExtractionSearch:
 
     def test_search_by_organization(self) -> None:
         self._seed()
-        results = self.store.search("BCG")
+        results = self.store.search("Example Consulting")
         assert len(results) == 1
         assert results[0].document_id == "doc-1"
         assert "organizations" in results[0].matched_fields
@@ -114,9 +114,9 @@ class TestExtractionSearch:
 
     def test_case_insensitive(self) -> None:
         self._seed()
-        lower = self.store.search("bcg")
-        upper = self.store.search("BCG")
-        mixed = self.store.search("Bcg")
+        lower = self.store.search("example consulting")
+        upper = self.store.search("Example Consulting")
+        mixed = self.store.search("Example consulting")
         assert lower == upper == mixed
 
     def test_no_result_query(self) -> None:
@@ -131,15 +131,15 @@ class TestExtractionSearch:
 
     def test_limit_applied(self) -> None:
         self._seed()
-        results = self.store.search("Daniel", limit=1)
+        results = self.store.search("Alice", limit=1)
         assert len(results) == 1
 
     def test_score_ordering(self) -> None:
         self._seed()
-        results = self.store.search("Daniel")
+        results = self.store.search("Alice")
         assert len(results) >= 2
-        # doc-1 has Daniel in people AND summary match
-        # doc-3 has Daniel in people AND summary match
+        # doc-1 has Alice in people AND summary match
+        # doc-3 has Alice in people AND summary match
         # Both should have scores > 0
         for r in results:
             assert r.score > 0
@@ -149,8 +149,8 @@ class TestExtractionSearch:
         self.store.save(
             _make_extraction(
                 "doc-exact",
-                summary="BCG is a consulting firm",
-                organizations=("BCG",),
+                summary="Example Consulting is a consulting firm",
+                organizations=("Example Consulting",),
             )
         )
         self.store.save(
@@ -160,7 +160,7 @@ class TestExtractionSearch:
                 organizations=("ABC Corporation",),
             )
         )
-        results = self.store.search("BCG")
+        results = self.store.search("Example Consulting")
         assert len(results) >= 1
         assert results[0].document_id == "doc-exact"
 
@@ -178,14 +178,14 @@ class TestExtractionSearch:
 
     def test_matched_fields_populated(self) -> None:
         self._seed()
-        results = self.store.search("Daniel")
+        results = self.store.search("Alice")
         for r in results:
             assert len(r.matched_fields) > 0
 
     def test_deterministic_ordering(self) -> None:
         self._seed()
-        first = self.store.search("Daniel")
-        second = self.store.search("Daniel")
+        first = self.store.search("Alice")
+        second = self.store.search("Alice")
         assert first == second
 
     def test_empty_store(self) -> None:

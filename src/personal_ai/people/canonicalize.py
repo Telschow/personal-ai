@@ -9,12 +9,12 @@ nickname spellings into a single stable key:
   annotations (``(über TUM)``, ``(via Google Drive)``), room-code suffixes
   (``EF-703``), ``+``-joined surnames, and dot-joined ``alias.surname`` /
   ``surname.alias`` username forms;
-* unambiguous nickname aliases — ``Daniel`` / ``Dani`` / ``Dan`` share the
-  canonical given name ``daniel`` via ``GIVEN_NAME_ALIASES``.
+* unambiguous nickname aliases — ``Alice`` / ``Ali`` / ``Al`` share the
+  canonical given name ``alice`` via ``GIVEN_NAME_ALIASES``.
 
 It is deliberately NOT an email-anchored or structural merger: ``canonical_
 identity`` never folds a display form that carries no name-anchored structure
-(opaque usernames like ``dirk.telschow``, digits, address-shaped tokens) and
+(opaque usernames like ``dirk.example``, digits, address-shaped tokens) and
 ``PersonStore`` never folds by email alone — a shared mailbox alias on
 unrelated rows is not a personhood signal.
 

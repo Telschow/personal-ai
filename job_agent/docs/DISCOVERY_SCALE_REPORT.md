@@ -1,5 +1,10 @@
 # DISCOVERY SCALE REPORT
 
+> **Historical report — crawl performed 2026-09-21.**
+> The counts below come from the same provider-only crawl recorded in
+> `CHECKPOINT_REPORT.md` and are a point-in-time snapshot of a local dataset,
+> not a current measurement. Re-run discovery to obtain current figures.
+
 ## Market Reach & Yield Summary
 
 | Metric | Count |

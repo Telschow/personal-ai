@@ -101,3 +101,31 @@ def test_career_llm_timeout_override():
 
     s = CareerLlmSettings(timeout_seconds=120.0)
     assert s.timeout_seconds == 120.0
+
+
+def test_shipped_example_config_is_offline_and_commit_safe():
+    """The committed example must not trigger network calls or leak real data.
+
+    `config.example.yaml` is copied by users per job_agent/README.md, so an
+    example that fires live discovery queries or carries real job-search
+    preferences is both a privacy problem and a surprise on first run.
+    """
+    from pathlib import Path
+
+    from job_agent.discovery import build_sources
+
+    example = Path(__file__).resolve().parents[1] / "config.example.yaml"
+    cfg = load_config(example)
+
+    # No source is configured, and the CLI only runs global discovery when
+    # search.global_enabled is true, so a copied example performs no requests.
+    # planned_queries() itself still returns a plan built from the module's
+    # documented default location anchors, so it is not the thing to assert.
+    assert cfg.search.global_enabled is False
+    assert build_sources(cfg) == []
+
+    # No real job-search preferences may be committed in an example file.
+    assert cfg.search.countries == []
+    assert cfg.search.global_locations == []
+    assert cfg.search.target_roles == []
+    assert cfg.search.keywords_positive == []

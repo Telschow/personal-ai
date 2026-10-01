@@ -87,8 +87,8 @@ def seeded_database(tmp_path):
     people.upsert_reference(
         PersonReference(
             document_id=digest,
-            name="Sabina",
-            email="sabina@example.com",
+            name="Alice Example",
+            email="alice@example.invalid",
             role="to",
             source_type="email",
             seen_at="2030-01-02T00:00:00Z",
@@ -127,7 +127,7 @@ class TestBridgeReads:
         server = build_mcp_server(database)
         assert _call(server, "search_documents", {"query": "goals"})["results"] == []
         assert _call(server, "search_memory", {"query": "goals"})["memories"] == []
-        assert _call(server, "search_people", {"query": "daniel"})["count"] == 0
+        assert _call(server, "search_people", {"query": "nobody"})["count"] == 0
 
     def test_document_fetch_returns_seeded_chunks(self, seeded_database):
         server = build_mcp_server(seeded_database["database"])
@@ -146,9 +146,9 @@ class TestBridgeReads:
 
     def test_people_search_finds_seeded_person(self, seeded_database):
         server = build_mcp_server(seeded_database["database"])
-        result = _call(server, "search_people", {"query": "sabina"})
+        result = _call(server, "search_people", {"query": "alice"})
         assert result["count"] == 1
-        assert result["people"][0]["display_name"] == "Sabina"
+        assert result["people"][0]["display_name"] == "Alice Example"
 
     def test_seeded_limits_and_caps(self, seeded_database):
         server = build_mcp_server(seeded_database["database"])

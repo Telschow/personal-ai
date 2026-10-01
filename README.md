@@ -26,7 +26,7 @@ flowchart LR
 * Memory lifecycle — confidence, importance, provenance, temporal scope; candidate → active → archive with reconciliation. See `src/personal_ai/memory/reconcile.py`, `docs/architecture/MEMORY_ARCHITECTURE.md`.
 * Bounded agent loop — max rounds, result-size limits, sanitized logging, tool registry. See `src/personal_ai/agent.py`, `docs/architecture/AGENT_ARCHITECTURE.md`.
 * Retrieval evaluation harness — recall@k, precision@k, hit@k, MRR; backend failures are surfaced, never turned into zero-result scores. See `src/personal_ai/retrieval_evaluation.py`.
-* Privacy policy — local-first, synthetic fixtures, no real PII in repo. See `PUBLIC_DATA_POLICY.md`, `docs/privacy.md`.
+* Privacy policy — local-first, synthetic fixtures, enforced against real contact identifiers in tracked docs/config. See `PUBLIC_DATA_POLICY.md`, `docs/privacy.md`.
 
 ## Repository map
 
@@ -36,7 +36,7 @@ flowchart LR
 | `tests/` | Test suite — synthetic fixtures only |
 | `job_agent/` | Companion job search agent — runtime code |
 | `docs/` | Architecture, ADRs, user guides |
-| `.opencode/` | OpenCode workflow tooling — skills, agents, commands, plugins (dev workflow) |
+| `.opencode/` | OpenCode dev-workflow skills, agents, and commands (contributor tooling) |
 | `data/`, `previous_project_and_raw_data/` | Local data directories, gitignored |
 | `pyproject.toml`, `uv.lock` | Toolchain and dependencies |
 
@@ -45,10 +45,15 @@ flowchart LR
 ```bash
 git clone https://github.com/Telschow/personal-ai
 cd personal-ai
-uv sync
-uv run pytest -q
-uv run ruff check src tests job_agent
-uv run ruff format --check src tests job_agent
+uv sync --locked --dev
+# job_agent is a separate distribution, not a workspace member: the root suite
+# needs pytest>=9 while job_agent pins pytest<9. Without this line the 19
+# Job-Agent HTTP tests skip silently and you are not running what CI runs.
+uv pip install -e ./job_agent
+uv run pytest
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run python scripts/mypy_ratchet.py
 ```
 
 CLI help:
@@ -111,7 +116,10 @@ LOCAL = runs on your machine. OPTIONALLY EXTERNAL = only if you configure it.
 
 Personal data is intended to remain local. Private runtime data is not included in Git. Examples use synthetic data. Credentials belong in local configuration only. Users should inspect data sources before ingestion. External model providers may receive data only when explicitly configured. Local models can be used where supported.
 
-The repository contains no real personal data. See `docs/privacy.md`.
+The public repository excludes private source data, credentials, and runtime
+personal data. Tests and examples use synthetic data; `tests/test_privacy_regression.py`
+enforces this in CI. Personal runtime data (ingested documents, databases,
+career configuration) stays local and gitignored. See `docs/privacy.md`.
 
 ## Installation
 
@@ -132,6 +140,23 @@ cp .env.example .env
 ```
 
 Configure `OLLAMA_BASE_URL`, data directories, and optional models. Never commit `.env`.
+
+### Job Agent local configuration
+
+The Job Agent is configured from local YAML files that are gitignored because
+they describe a personal job search. The repository ships synthetic examples
+instead:
+
+```bash
+cp job_agent/config.example.yaml job_agent/config.yaml
+cp job_agent/company_radar.example.yaml job_agent/company_radar.yaml
+```
+
+Both are optional. `job_agent/config.py` falls back to built-in defaults when
+`config.yaml` is absent, and `job_agent/company_radar.py` treats a missing
+`company_radar.yaml` as an empty radar, so a fresh checkout never fetches
+anything. Values in the examples use synthetic placeholders that discovery
+skips.
 
 ### Local configuration
 
