@@ -100,7 +100,9 @@ class TraceClient(OllamaClient):
         return response
 
 
-def _build_registry(workspace: Path, database: Path) -> tuple[ToolRegistry, sqlite3.Connection]:
+def _build_registry(
+    workspace: Path, database: Path
+) -> tuple[ToolRegistry, sqlite3.Connection]:
     connection = connect_database(database)
     document_store = DocumentStore(connection)
     chunk_store = ChunkStore(connection)
@@ -125,11 +127,9 @@ def _build_registry(workspace: Path, database: Path) -> tuple[ToolRegistry, sqli
 def run_question(client: TraceClient, registry, prompt: str, workspace: Path) -> str:
     agent = Agent(client, registry)
     started = time.monotonic()
-    answer = agent.run(
-        [ChatMessage(role="user", content=prompt)]
-    )
+    answer = agent.run([ChatMessage(role="user", content=prompt)])
     elapsed = time.monotonic() - started
-    print(f"\n{'='*78}")
+    print(f"\n{'=' * 78}")
     print(f"QUESTION: {prompt}")
     print(f"latency: {elapsed:.1f}s  | rounds: {len(client.rounds)}")
     for index, round_ in enumerate(client.rounds, start=1):
@@ -142,7 +142,9 @@ def run_question(client: TraceClient, registry, prompt: str, workspace: Path) ->
             for call in calls:
                 print(f"  [round {index}] -> {call['name']}({call['arguments']})")
         elif index == len(client.rounds):
-            print(f"  [round {index}] (final answer) {answer[:200].replace(chr(10),' ')}...")
+            print(
+                f"  [round {index}] (final answer) {answer[:200].replace(chr(10), ' ')}..."
+            )
     print(f"\n--- FINAL ANSWER ---\n{answer}")
     return answer
 
@@ -162,7 +164,11 @@ def main() -> None:
     registry, connection = _build_registry(workspace, args.database.resolve())
     try:
         with TraceClient(model=args.model, timeout=300.0) as client:
-            indexes = [args.question] if args.question is not None else range(1, len(QUESTIONS) + 1)
+            indexes = (
+                [args.question]
+                if args.question is not None
+                else range(1, len(QUESTIONS) + 1)
+            )
             for idx in indexes:
                 client.rounds = []
                 run_question(client, registry, QUESTIONS[idx - 1], workspace)

@@ -59,52 +59,52 @@ class TestCanonicalParts:
     def test_clean_name_is_unchanged(self) -> None:
         assert canonical_parts("Alice Anders") == ("alice", frozenset({"anders"}))
 
-    def test_nickname_aliases_map_to_daniel(self) -> None:
+    def test_nickname_aliases_map_to_alice(self) -> None:
         assert GIVEN_NAME_ALIASES == {
-            "daniel": "daniel",
-            "dani": "daniel",
-            "dan": "daniel",
+            "alice": "alice",
+            "ali": "alice",
+            "al": "alice",
         }
         assert canonical_parts("Alice Example") == (
-            "daniel",
+            "alice",
             frozenset({"example"}),
         )
-        assert canonical_parts("Dani Example") == ("daniel", frozenset({"example"}))
-        assert canonical_parts("Dan Example") == ("daniel", frozenset({"example"}))
+        assert canonical_parts("Ali Example") == ("alice", frozenset({"example"}))
+        assert canonical_parts("Al Example") == ("alice", frozenset({"example"}))
 
     def test_alias_token_is_hoisted_to_front(self) -> None:
-        assert canonical_parts("Example Arjona Daniel") == (
-            "daniel",
+        assert canonical_parts("Example Arjona Alice") == (
+            "alice",
             frozenset({"example", "arjona"}),
         )
-        assert canonical_parts("Example, Daniel") == (
-            "daniel",
+        assert canonical_parts("Example, Alice") == (
+            "alice",
             frozenset({"example"}),
         )
 
     def test_quote_artifacts_stripped(self) -> None:
         assert canonical_parts("'Alice Example'") == (
-            "daniel",
+            "alice",
             frozenset({"example"}),
         )
         assert canonical_parts('"Alice Example"') == (
-            "daniel",
+            "alice",
             frozenset({"example"}),
         )
 
     def test_leading_n_tilde_artifact_stripped(self) -> None:
         assert canonical_parts("ñAlice Example") == (
-            "daniel",
+            "alice",
             frozenset({"example"}),
         )
         assert canonical_parts("'ñAlice Example'") == (
-            "daniel",
+            "alice",
             frozenset({"example"}),
         )
 
     def test_salutation_prefixes_stripped(self) -> None:
         assert canonical_parts("Guten Tag Alice Example") == (
-            "daniel",
+            "alice",
             frozenset({"example"}),
         )
         assert canonical_parts("Herr Example Arjona") == (
@@ -113,8 +113,8 @@ class TestCanonicalParts:
         )
 
     def test_parenthetical_annotations_stripped(self) -> None:
-        assert canonical_parts("Example Arjona Daniel (über TUM)") == (
-            "daniel",
+        assert canonical_parts("Example Arjona Alice (über TUM)") == (
+            "alice",
             frozenset({"example", "arjona"}),
         )
         assert canonical_parts("WG Grau Suárez Example (via Google Drive)") == (
@@ -128,24 +128,24 @@ class TestCanonicalParts:
 
     def test_plus_joins_to_space(self) -> None:
         assert canonical_parts("Alice Example+Arjona") == (
-            "daniel",
+            "alice",
             frozenset({"example", "arjona"}),
         )
 
     def test_room_code_annotation_stripped(self) -> None:
-        assert canonical_parts("Example Daniel, EF-703") == (
-            "daniel",
+        assert canonical_parts("Example Alice, EF-703") == (
+            "alice",
             frozenset({"example"}),
         )
 
     def test_dot_username_forms(self) -> None:
         assert canonical_parts("alice.example") == (
-            "daniel",
+            "alice",
             frozenset({"example"}),
         )
-        assert canonical_parts("dani.example") == ("daniel", frozenset({"example"}))
-        assert canonical_parts("example.daniel") == (
-            "daniel",
+        assert canonical_parts("ali.example") == ("alice", frozenset({"example"}))
+        assert canonical_parts("example.alice") == (
+            "alice",
             frozenset({"example"}),
         )
         # non-alias local part is opaque, never folded by structure alone
@@ -158,7 +158,7 @@ class TestCanonicalParts:
 
     def test_family_names_with_aliases_fold(self) -> None:
         # Nicolas and Dirks fold among themselves by exact given names; they
-        # never fold into Daniel because given differs.
+        # never fold into Alice because given differs.
         assert canonical_parts("Nicolas Example") == (
             "nicolas",
             frozenset({"example"}),
@@ -186,7 +186,7 @@ class TestCanonicalParts:
 
     def test_single_token_has_empty_surname_set(self) -> None:
         assert canonical_parts("Example") == ("example", frozenset())
-        assert canonical_parts("Daniel") == ("daniel", frozenset())
+        assert canonical_parts("Alice") == ("alice", frozenset())
 
     def test_empty_or_junk_name_is_none(self) -> None:
         assert canonical_parts("") is None
@@ -200,19 +200,19 @@ class TestCanonicalIdentity:
     def test_nickname_variants_share_identity(self) -> None:
         identities = {
             canonical_identity(name)
-            for name in ("Alice Example", "Dani Example", "Dan Example")
+            for name in ("Alice Example", "Ali Example", "Al Example")
         }
         assert identities == {normalize_identity("Alice Example")}
 
     def test_arjona_surname_variants_share_identity(self) -> None:
         assert canonical_identity("Alice Example") == canonical_identity(
-            "DANIEL TELSCHOW ARJONA"
+            "ALICE EXAMPLE ARJONA"
         )
         assert canonical_identity("Alice Example") == canonical_identity(
             "Alice Example+Arjona"
         )
         assert canonical_identity("Alice Example") == canonical_identity(
-            "Example Arjona Daniel (über TUM)"
+            "Example Arjona Alice (über TUM)"
         )
         assert canonical_identity("Alice Example") == canonical_identity(
             "Guten Tag Alice Example"
@@ -232,11 +232,11 @@ class TestCanonicalIdentity:
         )
 
     def test_identity_is_stable_across_repeated_calls(self) -> None:
-        name = "Dani Example"
+        name = "Ali Example"
         assert canonical_identity(canonical_identity(name)) == canonical_identity(name)
 
     def test_person_id_derives_from_canonical_identity(self) -> None:
-        assert person_id_for(canonical_identity("Dani Example")) == person_id_for(
+        assert person_id_for(canonical_identity("Ali Example")) == person_id_for(
             canonical_identity("Alice Example")
         )
 
@@ -249,15 +249,15 @@ class TestStoreCanonicalIdentity:
         self, store: PersonStore
     ) -> None:
         store.upsert_reference(make_reference(name="Alice Example", document_id="d1"))
-        store.upsert_reference(make_reference(name="Dani Example", document_id="d2"))
+        store.upsert_reference(make_reference(name="Ali Example", document_id="d2"))
         store.upsert_reference(
-            make_reference(name="DANIEL TELSCHOW ARJONA", document_id="d3")
+            make_reference(name="ALICE EXAMPLE ARJONA", document_id="d3")
         )
         assert store.count() == 1
         person = store.get(person_id_for(canonical_identity("Alice Example")))
         assert person is not None
         assert person.evidence_count == 3
-        assert person.display_name == "DANIEL TELSCHOW ARJONA"
+        assert person.display_name == "ALICE EXAMPLE ARJONA"
 
     def test_upsert_keeps_distinct_family_members(self, store: PersonStore) -> None:
         store.upsert_reference(make_reference(name="Alice Example", document_id="d1"))
@@ -300,7 +300,7 @@ def _seed_legacy(store: PersonStore, names: list[tuple[str, str]]) -> None:
 
 class TestStoreCanonicalize:
     def test_updates_store_identity_via_upsert(self, store: PersonStore) -> None:
-        store.upsert_reference(make_reference(name="Dani Example", document_id="d1"))
+        store.upsert_reference(make_reference(name="Ali Example", document_id="d1"))
         person = store.get(person_id_for(canonical_identity("Alice Example")))
         assert person is not None
         assert person.identity == canonical_identity("Alice Example")
@@ -310,8 +310,8 @@ class TestStoreCanonicalize:
             store,
             [
                 ("d0", "Alice Example"),
-                ("d1", "Dani Example"),
-                ("d2", "Example, Daniel"),
+                ("d1", "Ali Example"),
+                ("d2", "Example, Alice"),
                 ("d3", "Dirk Example"),
             ],
         )
@@ -330,19 +330,19 @@ class TestStoreCanonicalize:
             store,
             [
                 ("d0", "Alice Example"),
-                ("d1", "Dani Example"),
-                ("d2", "Example, Daniel"),
+                ("d1", "Ali Example"),
+                ("d2", "Example, Alice"),
                 ("d3", "Dirk Example"),
             ],
         )
         report = store.canonicalize(apply=True)
         assert report.applied
         assert store.count() == 2
-        daniel = store.get(person_id_for(canonical_identity("Alice Example")))
-        assert daniel is not None
-        assert daniel.evidence_count == 3
+        alice = store.get(person_id_for(canonical_identity("Alice Example")))
+        assert alice is not None
+        assert alice.evidence_count == 3
         # longest observed original form wins (16 chars), including artifacts.
-        assert daniel.display_name == "Example, Daniel"
+        assert alice.display_name == "Example, Alice"
         dirk = store.get(person_id_for(canonical_identity("Dirk Example")))
         assert dirk is not None and dirk.evidence_count == 1
 
@@ -351,7 +351,7 @@ class TestStoreCanonicalize:
             store,
             [
                 ("d0", "Alice Example"),
-                ("d1", "Dani Example"),
+                ("d1", "Ali Example"),
             ],
         )
         store.canonicalize(apply=True)
@@ -360,8 +360,8 @@ class TestStoreCanonicalize:
         assert again.people_after == 1
         assert again.people_rekeyed == 0
         assert again.merged_groups == 0
-        daniel = store.get(person_id_for(canonical_identity("Alice Example")))
-        assert daniel is not None and daniel.evidence_count == 2
+        alice = store.get(person_id_for(canonical_identity("Alice Example")))
+        assert alice is not None and alice.evidence_count == 2
 
     def test_canonicalize_empty_store(self, store: PersonStore) -> None:
         report = store.canonicalize(apply=True)
@@ -382,12 +382,12 @@ class TestStoreCanonicalizeCollection:
         "'Nicolas Example Arjona'",
         "'dirk.example'",
         "'ñAlice Example'",
-        "DANIEL TELSCHOW ARJONA",
-        "Dan Example",
-        "Dani Example",
+        "ALICE EXAMPLE ARJONA",
+        "Al Example",
+        "Ali Example",
         "Alice Example",
         "Alice Example+Arjona",
-        "Daniel, Example",
+        "Alice, Example",
         "Dirk Example",
         "Guten Tag Alice Example",
         "Herr Example Arjona",
@@ -396,18 +396,18 @@ class TestStoreCanonicalizeCollection:
         "Nicolas Example Arjona",
         "Example",
         "Example Arjona",
-        "Example Arjona Daniel",
-        "Example Arjona Daniel (über TUM)",
-        "Example Arjona, Daniel",
-        "Example Daniel, EF-703",
-        "Example, Daniel",
+        "Example Arjona Alice",
+        "Example Arjona Alice (über TUM)",
+        "Example Arjona, Alice",
+        "Example Alice, EF-703",
+        "Example, Alice",
         "WG Grau Suárez Example",
         "WG Grau Suárez Example (via Google Drive)",
         "d.example",
-        "dani.example",
+        "ali.example",
         "alice.example",
         "reddit.com (example)",
-        "example.daniel",
+        "example.alice",
         "example113",
     ]
 
@@ -422,25 +422,25 @@ class TestStoreCanonicalizeCollection:
     ) -> None:
         canonical = {canonical_identity(name) for name in self.FRAGMENTS}
         assert len(canonical) < len(self.FRAGMENTS)
-        daniel_forms = {
+        alice_forms = {
             "Alice Example",
-            "Dani Example",
-            "Dan Example",
-            "DANIEL TELSCHOW ARJONA",
+            "Ali Example",
+            "Al Example",
+            "ALICE EXAMPLE ARJONA",
             "Alice Example+Arjona",
-            "Daniel, Example",
+            "Alice, Example",
             "'Alice Example'",
             "'ñAlice Example'",
             "ñAlice Example",
             "Guten Tag Alice Example",
-            "Example Arjona Daniel",
-            "Example Arjona Daniel (über TUM)",
-            "Example Arjona, Daniel",
-            "Example Daniel, EF-703",
-            "Example, Daniel",
-            "dani.example",
+            "Example Arjona Alice",
+            "Example Arjona Alice (über TUM)",
+            "Example Arjona, Alice",
+            "Example Alice, EF-703",
+            "Example, Alice",
+            "ali.example",
             "alice.example",
-            "example.daniel",
+            "example.alice",
         }
-        daniel_ids = {canonical_identity(n) for n in daniel_forms}
-        assert len(daniel_ids) == 1
+        alice_ids = {canonical_identity(n) for n in alice_forms}
+        assert len(alice_ids) == 1

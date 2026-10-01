@@ -450,7 +450,13 @@ class TestRoutes:
         if not JOB_AGENT_AVAILABLE:
             pytest.skip("job_agent module not installed")
 
-        from job_agent import discovery_search, pipeline
+        # JOB_AGENT_AVAILABLE only proves job_agent.db imports; this test also
+        # exercises the discovery stack, which has its own third-party
+        # dependencies and may be absent from a root-only environment.
+        try:
+            from job_agent import discovery_search, pipeline
+        except ImportError:
+            pytest.skip("job_agent discovery dependencies not installed")
 
         job_db = tmp_path / "app-job.sqlite3"
 

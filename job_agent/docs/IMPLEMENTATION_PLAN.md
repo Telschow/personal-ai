@@ -745,7 +745,7 @@ tests exercise.
 Run against a scratch DB seeded with three **fixture** jobs (strong = Senior
 Product Owner, Autonomous Driving @ BMW Group; partial = Product Manager,
 Automotive Connectivity; poor = Junior Backend Engineer) and the **fixture**
-CV (`profile/profile.yaml` + `cv_daniel.txt`), `career.llm.enabled=true`
+CV (`profile/profile.yaml` + `cv_alice.txt`), `career.llm.enabled=true`
 against live local Ollama (`qwen3.5:9b`). Fixture-data-driven; real LLM
 wiring exercised.
 

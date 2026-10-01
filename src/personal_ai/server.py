@@ -52,7 +52,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -1854,14 +1854,21 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
         )
 
         form = await request.form()
-        file = form["file"]
+        uploaded = form.get("file")
         artifact_type_str = form.get("artifact_type")
 
-        filename = getattr(file, "filename", "")
-        if not file or not filename:
+        if not isinstance(uploaded, UploadFile):
             raise ApiError(
                 400,
-                f"Missing file upload. Got file: {type(file)}, filename: '{filename}'. File type: {getattr(file, 'content_type', 'N/A')}. Form keys: {list(form.keys())}",
+                f"Missing file upload. Got {type(uploaded).__name__} for field 'file'. Form keys: {list(form.keys())}",
+                error_type="invalid_request_error",
+            )
+        file = uploaded
+        filename = file.filename or ""
+        if not filename:
+            raise ApiError(
+                400,
+                f"Uploaded file has no filename. File type: {file.content_type or 'N/A'}. Form keys: {list(form.keys())}",
                 error_type="invalid_request_error",
             )
         if not artifact_type_str:
@@ -1926,9 +1933,9 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
             job_id=job_id,
             artifact_type=artifact_type,
             status=UserArtifactStatus.UPLOADED,
-            filename=file.filename,
+            filename=filename,
             mime_type=EXTENSION_TO_MIME.get(
-                Path(file.filename).suffix.lower(), "application/octet-stream"
+                Path(filename).suffix.lower(), "application/octet-stream"
             ),
             storage_path=str(storage_path),
             content_hash=file_hash,
@@ -2114,6 +2121,7 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
 
         try:
             run_started_at = datetime.now(UTC).isoformat(timespec="seconds")
+            run_id = uuid.uuid4().hex
             _run_started = time.monotonic()
 
             plan, jobs, provenance, errors, pacing_report = run_planned_discovery(
@@ -2158,6 +2166,8 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
                     )
                 job_db.record_discovery_run(
                     conn,
+                    run_id=run_id,
+                    started_at=run_started_at,
                     planned_queries=len(plan.queries()),
                     candidates_found=len(jobs),
                     jobs_persisted=jobs_persisted,

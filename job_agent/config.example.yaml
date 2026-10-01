@@ -1,7 +1,11 @@
 # Personal AI job agent — example configuration.
-# Copy to config.yaml and adjust. All values here are placeholders; the
-# "example-company" tokens match the built-in example guard and are skipped
-# by discovery, so a fresh checkout never hits the network.
+# Copy to config.yaml and adjust. All values here are placeholders and are
+# safe to commit: no real locations, roles, salary expectations, or personal
+# profile data. Sources are empty and `search.global_enabled` is false, so a
+# fresh copy of this file performs no network requests until you enable
+# discovery yourself. The built-in example guard additionally skips any
+# source entry whose identifying value starts with "example", "your-", or
+# "sample".
 
 profile_path: profile/profile.yaml
 database_path: output/jobs.sqlite3
@@ -18,21 +22,25 @@ llm:
                             # schema calls return real content (~20-40s)
 
 search:
-  global_enabled: true
+  # false keeps a freshly copied config entirely offline. Set true (and fill
+  # in the fields below) to enable web-search discovery.
+  global_enabled: false
   max_jobs_per_source: 250
   result_query_cap: 120
   results_per_query: 25
   max_global_pages: 400
-  countries: [DE]
-  global_locations: [Munich, Berlin]
-  target_roles: [Product Manager]
-  keywords_positive: [AI, machine learning]
-  keywords_negative: [junior, intern]
+  countries: []
+  global_locations: []
+  target_roles: []
+  keywords_positive: []
+  keywords_negative: []
 
 jobs:
   salary:
-    minimum_eur: 120000
-    target_eur: 150000
+    # Illustrative placeholders only, not real expectations. Set to 0 to
+    # disable a bound; both values must be positive when set.
+    minimum_eur: 1
+    target_eur: 1
   freshness_days: 30
   close_after_missing_scans: 2
   unknown_salary_reviewable: true

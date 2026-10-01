@@ -12,9 +12,32 @@ DEFAULT_MODEL = "qwen3.5:9b"
 
 
 def _job_agent_available() -> bool:
+    """True only when Job-Agent's HTTP surface is actually usable.
+
+    ``personal_ai.server.JOB_AGENT_AVAILABLE`` is a shallow probe: it imports
+    ``job_agent.db``, which needs none of the discovery stack's third-party
+    dependencies. The endpoints exercised here additionally pull in
+    ``job_agent.sources`` and friends, so this imports the real modules and
+    treats a missing dependency as "not installed" rather than failing later
+    deep inside a request handler.
+    """
     from personal_ai.server import JOB_AGENT_AVAILABLE
 
-    return JOB_AGENT_AVAILABLE
+    if not JOB_AGENT_AVAILABLE:
+        return False
+    try:
+        from job_agent.application import ALL_STAGES  # noqa: F401
+
+        from job_agent import db, discovery_search, pipeline  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
+pytestmark = pytest.mark.skipif(
+    not _job_agent_available(),
+    reason="job_agent not importable (missing runtime dependencies)",
+)
 
 
 def _make_app_with_job_db(tmp_path, seed) -> TestClient:
@@ -370,3 +393,34 @@ def test_discover_without_providers_backward_compatible(tmp_path):
         raw.close()
     finally:
         monkeypatch.undo()
+
+
+def test_upload_artifact_rejects_text_field_instead_of_file(client):
+    """A `file` field sent as plain form text is not an upload.
+
+    Regression test: the handler read `.filename` off whatever the form held.
+    A plain string has no `.filename`, so the request died with an unhandled
+    AttributeError (HTTP 500) instead of a client error the caller can act on.
+    """
+    with client:
+        res = client.post(
+            "/api/job-agent/jobs/remotive:1/artifacts",
+            data={"file": "not-an-upload", "artifact_type": "cv"},
+        )
+    assert res.status_code == 400
+    body = res.json()
+    assert body["error"]["type"] == "invalid_request_error"
+    # The message must name what actually arrived, so the caller can debug it.
+    assert "file" in body["error"]["message"]
+
+
+def test_upload_artifact_rejects_missing_file_field(client):
+    """No `file` key at all is a client error, not a crash."""
+    with client:
+        res = client.post(
+            "/api/job-agent/jobs/remotive:1/artifacts",
+            data={"artifact_type": "cv"},
+        )
+    assert res.status_code == 400
+    body = res.json()
+    assert body["error"]["type"] == "invalid_request_error"

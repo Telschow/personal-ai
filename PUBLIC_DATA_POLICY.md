@@ -42,8 +42,14 @@ All examples and test fixtures must use:
 
 What is actually enforced today:
 
-* **CI secret scanning** — the `secret-scan` job runs Gitleaks and `pip-audit`
-  on every push and pull request to `main` (`.github/workflows/ci.yml`).
+* **CI secret scanning** — the `secret-scan` job runs Gitleaks over the full
+  git history on every push and pull request to `main`
+  (`.github/workflows/ci.yml`).
+* **Dependency vulnerability audit** — the `dependency-audit` job exports the
+  locked runtime dependency set of both `personal-ai` and `personal-job-agent`
+  and runs `pip-audit` against it, so the audit covers the versions the project
+  actually resolves rather than the runner's own packages.
+* **SBOM** — the `sbom` job publishes a CycloneDX SBOM as a build artifact.
 * **Privacy regression tests** — `tests/test_privacy_regression.py` runs as
   part of the normal test suite in CI. It asserts that synthetic fixtures
   contain no real PII, and that tracked documentation and configuration files
@@ -51,7 +57,10 @@ What is actually enforced today:
   allow-list, phone numbers, or credential blocks). This is a narrow, explicit
   invariant — not a general PII detector — and does not replace human review.
 * **Static analysis** — Ruff, Ruff format, and MyPy gates run in CI alongside
-  a CodeQL analysis job.
+  a CodeQL analysis job. The MyPy gate checks the whole `src/personal_ai`
+  package and fails on any error not already recorded in
+  `config/mypy-baseline.json`; see `docs/typing.md` for what that means and
+  how the debt is reduced.
 * **`.gitignore`** — excludes private data directories, runtime databases
   (`*.db`, `*.sqlite3`, and WAL/SHM sidecars), personal job-search
   configuration, backup files, and local AI tooling state.

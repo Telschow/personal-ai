@@ -127,7 +127,7 @@ class TestBridgeReads:
         server = build_mcp_server(database)
         assert _call(server, "search_documents", {"query": "goals"})["results"] == []
         assert _call(server, "search_memory", {"query": "goals"})["memories"] == []
-        assert _call(server, "search_people", {"query": "daniel"})["count"] == 0
+        assert _call(server, "search_people", {"query": "nobody"})["count"] == 0
 
     def test_document_fetch_returns_seeded_chunks(self, seeded_database):
         server = build_mcp_server(seeded_database["database"])

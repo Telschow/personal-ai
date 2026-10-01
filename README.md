@@ -45,10 +45,15 @@ flowchart LR
 ```bash
 git clone https://github.com/Telschow/personal-ai
 cd personal-ai
-uv sync
-uv run pytest -q
-uv run ruff check src tests job_agent
-uv run ruff format --check src tests job_agent
+uv sync --locked --dev
+# job_agent is a separate distribution, not a workspace member: the root suite
+# needs pytest>=9 while job_agent pins pytest<9. Without this line the 19
+# Job-Agent HTTP tests skip silently and you are not running what CI runs.
+uv pip install -e ./job_agent
+uv run pytest
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run python scripts/mypy_ratchet.py
 ```
 
 CLI help:

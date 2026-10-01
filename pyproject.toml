@@ -14,9 +14,28 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "mypy>=1.19",
     "pytest>=9.1.1",
     "ruff>=0.16.4",
+    "types-PyYAML>=6.0.12",
+    "types-regex>=2026.9.10",
 ]
+
+[tool.mypy]
+python_version = "3.14"
+files = ["src/personal_ai"]
+# personal_ai/server.py imports the companion job_agent package, which is a
+# separate distribution (job_agent/pyproject.toml) and is not installed in the
+# root environment. Resolve it from the source tree so those imports are typed
+# rather than reported as missing.
+mypy_path = ["job_agent"]
+# Third-party boundaries that have no usable type information. These are
+# interop surfaces, not application logic; see docs/typing.md for the rationale
+# and the per-module error counts.
+[[tool.mypy.overrides]]
+module = ["job_agent.*"]
+ignore_missing_imports = true
+follow_imports = "skip"
 
 [build-system]
 requires = ["hatchling"]

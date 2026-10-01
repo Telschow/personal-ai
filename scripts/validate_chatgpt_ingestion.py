@@ -108,17 +108,25 @@ def run_validation() -> None:
                 inactive_count += 1
 
     print(f"  {conv_count} conversations verified")
-    print(f"  {msg_count} messages verified ({active_count} active, {inactive_count} inactive)")
+    print(
+        f"  {msg_count} messages verified ({active_count} active, {inactive_count} inactive)"
+    )
     print(f"  {summary.attachments_stored} attachments stored")
     print("  No duplicate IDs")
     print("  Unique message indices per conversation")
     print("  All message links valid")
 
     # Content type distribution
-    thoughts_count = store.count_messages_by_content_type("thoughts", source_type="chatgpt")
-    reasoning_count = store.count_messages_by_content_type("reasoning_recap", source_type="chatgpt")
+    thoughts_count = store.count_messages_by_content_type(
+        "thoughts", source_type="chatgpt"
+    )
+    reasoning_count = store.count_messages_by_content_type(
+        "reasoning_recap", source_type="chatgpt"
+    )
     text_count = msg_count - thoughts_count - reasoning_count
-    print(f"  Content types: {text_count} text, {thoughts_count} thoughts, {reasoning_count} reasoning_recap")
+    print(
+        f"  Content types: {text_count} text, {thoughts_count} thoughts, {reasoning_count} reasoning_recap"
+    )
 
     # Search validation
     print("\nSearch validation...")

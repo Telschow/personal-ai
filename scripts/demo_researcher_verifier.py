@@ -82,7 +82,14 @@ def run_demo(database: Path, objective: str) -> None:
     print("\n[board]")
     board = control.board(plan.plan_id)
     print(f"  status={board['status']}")
-    for column in ("ready", "running", "waiting_approval", "verifying", "done", "failed"):
+    for column in (
+        "ready",
+        "running",
+        "waiting_approval",
+        "verifying",
+        "done",
+        "failed",
+    ):
         cards = board["columns"][column]
         if cards:
             print(f"  {column}: {', '.join(c['task_id'] for c in cards)}")
