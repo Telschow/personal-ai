@@ -113,7 +113,7 @@ Layer 7: Configuration Layer
 - **Interface**: `save(person)`, `get(person_id)`, `list()`, `delete(person_id)`
 - **Storage**: SQLite table with columns for person_id, identity, display_name, emails_json, roles_json, sources_json, timestamps, evidence_count
 - **Key Features**:
-  - Name-anchored identity canonicalization (Daniel Telschow / Dani Telschow → same person)
+  - Name-anchored identity canonicalization (Alice Example / Ali Example → same person)
   - Email aliases and source-derived roles (email/financial) stored per person
   - Source tracking for provenance
   - Evidence count for engagement tracking

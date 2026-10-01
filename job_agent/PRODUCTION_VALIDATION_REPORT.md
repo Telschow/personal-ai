@@ -1,5 +1,13 @@
 # FINAL VALIDATION REPORT - Personal AI Career Search System
 
+> **Historical validation report — validation performed 2026-09-23.**
+>
+> The results and the readiness assessment below are preserved as a record of
+> that specific validation run against a specific local dataset. They are not a
+> current guarantee: the "READY_FOR_DAILY_USE" conclusion applied to the
+> configuration and data present on that date. Re-run the validation suite
+> before relying on it for today's state.
+
 ## EXECUTIVE SUMMARY
 
 The Personal AI Career Search System is **READY_FOR_DAILY_USE** with minor caveats related to network connectivity for ATS providers.

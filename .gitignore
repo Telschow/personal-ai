@@ -28,7 +28,15 @@ output/
 # Local opencode config (may contain credentials)
 opencode.json
 opencode.json.bak
+
+# Backup and editor temp files
 *.bak
+*.backup
+*.old
+*.orig
+*~
+*.swp
+*.swo
 
 # Secrets
 secrets/
@@ -42,16 +50,39 @@ raw_data.zip
 knowledge.db
 raw_data_extracted/
 
+# Runtime databases (never commit; see PUBLIC_DATA_POLICY.md)
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm
+
+# Personal job-search configuration (use the .example.yaml files instead;
+# see PUBLIC_DATA_POLICY.md)
+job_agent/config.yaml
+job_agent/company_radar.yaml
+job_agent/profile/profile.yaml
+career/
+career_output/
+
 # Private personal data (never committed)
 /Workouts/
 /Email_Outlook/
 /Financial_data/
 chat-export-*.json
+# Personal documents at repo root
+/*.pdf
+/*.docx
 /Alice Example CV.pdf
 docs/security/PRIVATE_DATA_INVENTORY.md
 # Allow data README
 !data/README.md
 data/*
-job_agent/profile/profile.yaml
-career/
-career_output/
+
+# Local AI / design tooling state (generated, not part of the product)
+.ua/
+design-md/
+.opencode/ponytail/
+.opencode/skills/archify/

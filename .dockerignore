@@ -13,11 +13,24 @@ raw_data_extracted
 # Local runtime data / SQLite databases.
 data
 knowledge.db
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm
 
 # Job-Agent private/derived data and local dev artifacts (the package itself,
 # sources_catalog.yaml, profile/ and templates/ stay in the image).
 job_agent/output
 job_agent/config.yaml
+job_agent/company_radar.yaml
+job_agent/profile/profile.yaml
+career
+career_output
+*.backup
+*.bak
 job_agent/.venv
 job_agent/.ruff_cache
 job_agent/.pytest_cache
@@ -47,6 +60,11 @@ tests
 docs
 scripts
 AGENTS.md
+
+# Generated local AI/design tooling state (not product, not needed in image).
+.ua
+design-md
+.opencode
 
 # Keep git/Docker meta files out of the image where harmless; README.md and
 # uv.lock / pyproject.toml stay in (hatchling needs README.md to build).

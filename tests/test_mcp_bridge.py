@@ -87,8 +87,8 @@ def seeded_database(tmp_path):
     people.upsert_reference(
         PersonReference(
             document_id=digest,
-            name="Sabina",
-            email="sabina@example.com",
+            name="Alice Example",
+            email="alice@example.invalid",
             role="to",
             source_type="email",
             seen_at="2030-01-02T00:00:00Z",
@@ -146,9 +146,9 @@ class TestBridgeReads:
 
     def test_people_search_finds_seeded_person(self, seeded_database):
         server = build_mcp_server(seeded_database["database"])
-        result = _call(server, "search_people", {"query": "sabina"})
+        result = _call(server, "search_people", {"query": "alice"})
         assert result["count"] == 1
-        assert result["people"][0]["display_name"] == "Sabina"
+        assert result["people"][0]["display_name"] == "Alice Example"
 
     def test_seeded_limits_and_caps(self, seeded_database):
         server = build_mcp_server(seeded_database["database"])
