@@ -169,7 +169,7 @@ class TestParseSemanticMapping:
 class TestRefineMapping:
     def test_no_client_disables(self) -> None:
         mapping = [_det("Agentic workflows", "ai_tooling")]
-        result = refine_mapping(mapping, [_ev("ev-a", "Built agentic tooling for BMW")], client=None)
+        result = refine_mapping(mapping, [_ev("ev-a", "Built agentic tooling for Nimbus Motors")], client=None)
         assert result.applied is False
         assert result.skipped == "disabled"
         assert result.mapping == mapping
@@ -182,7 +182,7 @@ class TestRefineMapping:
     def test_provider_error_falls_back(self) -> None:
         mapping = [_det("Agentic workflows", "ai_tooling")]
         client = _FakeClient(None, raise_exc=True)
-        result = refine_mapping(mapping, [_ev("ev-a", "Built agentic tooling for BMW")], client=client)
+        result = refine_mapping(mapping, [_ev("ev-a", "Built agentic tooling for Nimbus Motors")], client=client)
         assert result.applied is False
         assert result.skipped == "provider_error"
         assert result.mapping == mapping
@@ -190,12 +190,14 @@ class TestRefineMapping:
 
     def test_malformed_returns_none_falls_back(self) -> None:
         mapping = [_det("Agentic workflows", "ai_tooling")]
-        result = refine_mapping(mapping, [_ev("ev-a", "Built agentic tooling for BMW")], client=_FakeClient(None))
+        result = refine_mapping(
+            mapping, [_ev("ev-a", "Built agentic tooling for Nimbus Motors")], client=_FakeClient(None)
+        )
         assert result.applied is False
         assert result.skipped == "malformed"
 
     def test_positive_upgrade_applies(self) -> None:
-        evidence = [_ev("ev-a", "Built agentic tooling and LLM agents for BMW Group")]
+        evidence = [_ev("ev-a", "Built agentic tooling and LLM agents for Nimbus Motors")]
         mapping = [_det("Agentic workflows", "ai_tooling")]
         proposal = SemanticMapping(
             requirements=[
@@ -246,7 +248,7 @@ class TestRefineMapping:
         assert mapping[0].layer == "deterministic"
 
     def test_positive_proposal_without_ids_ignored(self) -> None:
-        evidence = [_ev("ev-a", "Built agentic tooling for BMW")]
+        evidence = [_ev("ev-a", "Built agentic tooling for Nimbus Motors")]
         mapping = [_det("Agentic workflows", "ai_tooling")]
         proposal = SemanticMapping(
             requirements=[
@@ -264,7 +266,7 @@ class TestRefineMapping:
         assert result.mapping == mapping
 
     def test_unknown_requirement_ignored(self) -> None:
-        evidence = [_ev("ev-a", "Built agentic tooling for BMW")]
+        evidence = [_ev("ev-a", "Built agentic tooling for Nimbus Motors")]
         mapping = [_det("Agentic workflows", "ai_tooling")]
         proposal = SemanticMapping(
             requirements=[
@@ -292,7 +294,7 @@ class TestRefineMapping:
         assert len(windows["ai_tooling"]) <= MAX_EVIDENCE_PER_CONCEPT
 
     def test_proposal_calls_carry_allowlist(self) -> None:
-        evidence = [_ev("ev-a", "Built agentic tooling for BMW")]
+        evidence = [_ev("ev-a", "Built agentic tooling for Nimbus Motors")]
         mapping = [_det("Agentic workflows", "ai_tooling")]
         client = _FakeClient(None)
         refine_mapping(mapping, evidence, client=client)
@@ -302,7 +304,7 @@ class TestRefineMapping:
         assert call["requirements"][0]["negative_evidence"] is False
 
     def test_reasoning_truncated(self) -> None:
-        evidence = [_ev("ev-a", "Built agentic tooling for BMW")]
+        evidence = [_ev("ev-a", "Built agentic tooling for Nimbus Motors")]
         mapping = [_det("Agentic workflows", "ai_tooling")]
         long = "x" * (MAX_REASONING_CHARS + 50)
         proposal = SemanticMapping(

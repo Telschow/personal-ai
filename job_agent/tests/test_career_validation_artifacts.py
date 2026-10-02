@@ -24,19 +24,19 @@ def _ev(claim: str, level: str = "documented", categories=None, source="doc-a") 
 def _evidence():
     return [
         _ev(
-            "Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)",
+            "Worked as Product Owner - Autonomous Driving at Nimbus Motors (2024-present)",
             "verified",
             ["product", "domain", "ai", "leadership"],
         ),
         _ev("Led the design of an Automated Valet Parking feature", "documented", ["product", "domain", "ai"]),
         _ev("Reduced reporting time by 30 percent", "verified", ["program"]),
-        _ev("Managed a team of 5 engineers at TUMCREATE (2015-2018)", "documented", ["leadership"]),
+        _ev("Managed a team of 5 engineers at Aurora Labs (2015-2018)", "documented", ["leadership"]),
     ]
 
 
 def test_claim_backed_by_evidence_is_supported():
     ev = _evidence()
-    v = validate_claim("Product Owner for Autonomous Driving at BMW Group", ev)
+    v = validate_claim("Product Owner for Autonomous Driving at Nimbus Motors", ev)
     assert v.problem is None
     assert v.matched_evidence_ids
 
@@ -61,7 +61,7 @@ def test_artifact_validated_when_every_bullet_is_backed():
         artifact_id="art-1",
         job_id="j-1",
         bullets=[
-            Bullet(text="Product Owner for Autonomous Driving at BMW Group", evidence_id=ev[0].evidence_id),
+            Bullet(text="Product Owner for Autonomous Driving at Nimbus Motors", evidence_id=ev[0].evidence_id),
             Bullet(text="Led design of Automated Valet Parking", evidence_id=ev[1].evidence_id),
         ],
     )
@@ -76,7 +76,7 @@ def test_artifact_requires_review_on_unsupported_bullet():
         artifact_id="art-2",
         job_id="j-1",
         bullets=[
-            Bullet(text="Product Owner for Autonomous Driving at BMW Group", evidence_id=ev[0].evidence_id),
+            Bullet(text="Product Owner for Autonomous Driving at Nimbus Motors", evidence_id=ev[0].evidence_id),
             Bullet(text="Drove company revenue growth to 10 million euros", evidence_id=None),
         ],
     )
@@ -100,7 +100,7 @@ def test_artifact_note_marks_proposal():
 
 def test_validate_artifact_claims_one_verdict_per_line():
     ev = _evidence()
-    claims = ["Product Owner for Autonomous Driving at BMW Group", "Scaled revenue by 900 percent"]
+    claims = ["Product Owner for Autonomous Driving at Nimbus Motors", "Scaled revenue by 900 percent"]
     verdicts = validate_artifact_claims(claims, ev)
     assert len(verdicts) == 2
     assert verdicts[1].problem == "numeric_unmatched"
@@ -111,7 +111,7 @@ def test_missing_or_dangling_evidence_id_requires_review():
     art = CVArtifact(
         artifact_id="art-5",
         job_id="j-1",
-        bullets=[Bullet(text="Product Owner for Autonomous Driving at BMW Group", evidence_id="nonexistent-id")],
+        bullets=[Bullet(text="Product Owner for Autonomous Driving at Nimbus Motors", evidence_id="nonexistent-id")],
     )
     status, _ = art.check_compliance(ev)
     assert status == ArtifactStatus.REQUIRES_REVIEW

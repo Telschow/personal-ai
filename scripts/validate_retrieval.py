@@ -91,15 +91,18 @@ def run_validation() -> None:
     print(f"Ingestion time: {elapsed:.1f}s")
 
     # Test queries
+    # Generic, clearly synthetic probes: this script only measures retrieval
+    # mechanics (latency, hit counts), so the corpus content is irrelevant.
+    # No real employer, person, or career topic may appear here.
     test_queries = [
-        "BCG",
-        "Daniel",
-        "career",
-        "finance",
-        "consulting",
-        "project management",
-        "goals",
-        "strategy",
+        "Example Corp",
+        "Alice Example",
+        "Project Atlas",
+        "quarterly planning",
+        "product strategy",
+        "systems engineering",
+        "team leadership",
+        "documentation",
     ]
 
     search_results = {}

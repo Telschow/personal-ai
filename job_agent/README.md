@@ -15,15 +15,20 @@ sources** (remoteok, Berlin startups) over the ATS surface. See
 STOP ENGINEERING after this checkpoint; future work belongs to explicitly
 scoped phases.
 
-## Current profile policy
+## Profile policy
 
-- Salary floor: **€120k** when compensation is explicitly published
-  (hard exclusion below the floor).
-- Target compensation: **€150k**.
-- Global / very aggressive discovery enabled.
-- Defence is treated as a **normal industry**, not penalized automatically.
+No career policy ships with the source. Every item below is a local decision
+you make in your git-ignored `config.yaml` or `profile/profile.yaml`:
+
+- Compensation floor / target: unset by default (`0`). Set both to positive EUR
+  values to enable the hard floor and target scoring.
+- Discovery scope: `search.global_enabled` is `false` by default.
+- Sector weighting: no sectors are preferred by default.
 - Unknown salary is reviewable rather than rejected.
-- Relocation is allowed.
+- Relocation is whatever `profile.constraints` says.
+
+The shipped defaults carry no employer, salary, sector, or city preference, so
+a fresh checkout never ranks postings by somebody else's personal policy.
 
 ## Concepts
 
@@ -202,10 +207,10 @@ The GUI opens at http://127.0.0.1:8501 and provides:
 ### Pages
 
 - **📊 Dashboard** — Latest crawl, new jobs, active jobs, high-fit jobs, jobs reviewed, applications, interviews
-- **📅 Daily Intelligence** — NEW, CHANGED, HIGH-FIT, HIGH-FIT Munich, HIGH-FIT AI/Autonomous, NEWLY SALARY-DISCLOSED, STALE/CLOSING
+- **📅 Daily Intelligence** — NEW, CHANGED, HIGH-FIT, NEWLY SALARY-DISCLOSED, STALE/CLOSING
 - **🔍 Job Explorer** — Searchable table with filters (company, provider, role family, location, salary, remote, fit range, application status, feedback status)
 - **📋 Calibration** — Feedback queue with next/previous/skip/label/note workflow
-- **📑 Shortlists** — Top overall, Munich, AI/Autonomous, Product Leadership, Career Pivot, International
+- **📑 Shortlists** — Top overall, preferred city, remote, international
 - **📄 CV Generation** — Generate tailored CV from real jobs with evidence manifest
 - **💼 LinkedIn** — Optimize LinkedIn profile with current vs recommended view
 - **📁 Projects** — Portfolio project recommendations with effort estimates

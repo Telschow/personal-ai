@@ -31,7 +31,7 @@ from personal_ai.storage import (
     ExtractionStore,
 )
 
-TEXT_HEAVY_TEXT = "Meeting note about BCG consulting project. " * 20
+TEXT_HEAVY_TEXT = "Meeting note about Example Corp consulting project. " * 20
 
 EVENT_TIME = "2026-01-10T09:00:00+00:00"
 
@@ -56,9 +56,9 @@ class FakeStructuredExtractor:
 
         return StructuredExtraction(
             document_id=extraction.document_id,
-            summary="Summary about BCG project",
+            summary="Summary about Example Corp project",
             people=("Alice Example",),
-            organizations=("BCG",),
+            organizations=("Example Corp",),
             projects=("Project Apollo",),
             goals=("Career advancement",),
             topics=("consulting", "strategy"),
@@ -148,7 +148,9 @@ class TestConnectAgentRegistry:
             )
 
             # search_knowledge executes against the real retrieval service.
-            knowledge_results = registry.execute("search_knowledge", {"query": "BCG"})
+            knowledge_results = registry.execute(
+                "search_knowledge", {"query": "Example Corp"}
+            )
             assert isinstance(knowledge_results, dict)
             assert knowledge_results["status"] == "results"
             hits = knowledge_results["results"]
@@ -156,7 +158,7 @@ class TestConnectAgentRegistry:
             texts = [
                 r["text"] for r in hits if r["result_type"] == "structured_extraction"
             ]
-            assert any("Summary about BCG project" in text for text in texts)
+            assert any("Summary about Example Corp project" in text for text in texts)
 
             # query_events executes against the real event store, including the
             # Phase 14 keyword filter.
@@ -190,7 +192,7 @@ class TestConnectAgentRegistry:
             conversation_store.save_conversation(
                 Conversation(
                     id="conv-1",
-                    title="BCG Career",
+                    title="Example Corp Career",
                     source_type="gemini",
                     created_at="2026-01-01T00:00:00+00:00",
                     modified_at="2026-02-16T00:00:00+00:00",
@@ -204,7 +206,7 @@ class TestConnectAgentRegistry:
                     message_index=0,
                     role="user",
                     speaker="User",
-                    content_text="BCG early January",
+                    content_text="Example Corp early January",
                     content_type="text",
                     timestamp="2026-01-15T00:00:00+00:00",
                 )
@@ -216,7 +218,7 @@ class TestConnectAgentRegistry:
                     message_index=1,
                     role="user",
                     speaker="User",
-                    content_text="BCG mid February",
+                    content_text="Example Corp mid February",
                     content_type="text",
                     timestamp="2026-02-15T00:00:00+00:00",
                 )
@@ -225,7 +227,7 @@ class TestConnectAgentRegistry:
             results = registry.execute(
                 "search_knowledge",
                 {
-                    "query": "BCG",
+                    "query": "Example Corp",
                     "filter": {"created_before": "2026-02-01T00:00:00+00:00"},
                 },
             )
@@ -234,8 +236,8 @@ class TestConnectAgentRegistry:
                 for r in results["results"]
                 if r["result_type"] == "conversation"
             ]
-            assert "BCG early January" in conv_texts
-            assert "BCG mid February" not in conv_texts
+            assert "Example Corp early January" in conv_texts
+            assert "Example Corp mid February" not in conv_texts
         finally:
             connection.close()
 
@@ -393,7 +395,7 @@ class TestVerboseMode:
                         {
                             "event": "tool_start",
                             "name": "search_knowledge",
-                            "arguments": {"query": "'BCG'"},
+                            "arguments": {"query": "'Example Corp'"},
                         }
                     )
                     observer({"event": "completed", "round": 1, "latency_sec": 1.5})

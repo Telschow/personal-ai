@@ -25,7 +25,7 @@ class TestKnowledgeSearchToolConversations:
                     document_id=None,
                     score=0.85,
                     title="Career Goals",
-                    text="I want to work at BCG",
+                    text="I want to work at Example Corp",
                     page_number=None,
                     matched_fields=("content_text",),
                     conversation_id="conv-1",
@@ -39,7 +39,7 @@ class TestKnowledgeSearchToolConversations:
             )
         )
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "BCG"})["results"]
+        results = tool.search_knowledge({"query": "Example Corp"})["results"]
         assert len(results) == 1
         r = results[0]
         assert r["result_type"] == "conversation"
@@ -65,14 +65,14 @@ class TestKnowledgeSearchToolConversations:
                     document_id="doc-1",
                     score=0.85,
                     title="meeting.txt",
-                    text="BCG consulting notes",
+                    text="Example Corp consulting notes",
                     page_number=None,
                     matched_fields=(),
                 ),
             )
         )
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "BCG"})["results"]
+        results = tool.search_knowledge({"query": "Example Corp"})["results"]
         r = results[0]
         assert r["result_type"] == "chunk"
         assert r["document_id"] == "doc-1"
@@ -106,7 +106,7 @@ class TestKnowledgeSearchToolConversations:
                     document_id="doc-1",
                     score=0.9,
                     title="meeting.txt",
-                    text="BCG notes",
+                    text="Example Corp notes",
                     page_number=None,
                     matched_fields=(),
                 ),
@@ -115,7 +115,7 @@ class TestKnowledgeSearchToolConversations:
                     document_id=None,
                     score=0.7,
                     title="Career Chat",
-                    text="BCG career discussion",
+                    text="Example Corp career discussion",
                     page_number=None,
                     matched_fields=("content_text",),
                     conversation_id="conv-1",
@@ -127,7 +127,7 @@ class TestKnowledgeSearchToolConversations:
             )
         )
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "BCG"})["results"]
+        results = tool.search_knowledge({"query": "Example Corp"})["results"]
         assert len(results) == 2
         types = {r["result_type"] for r in results}
         assert "chunk" in types
@@ -228,8 +228,8 @@ class TestKnowledgeSearchToolConversations:
                     result_type="conversation",
                     document_id=None,
                     score=0.7,
-                    title="BCG Prep",
-                    text="BCG case interview tips",
+                    title="Example Corp Prep",
+                    text="Example Corp case interview tips",
                     page_number=None,
                     matched_fields=("content_text",),
                     conversation_id="conv-1",
@@ -243,9 +243,9 @@ class TestKnowledgeSearchToolConversations:
             )
         )
         tool = KnowledgeSearchTool(service)
-        query = "BCG McKinsey Bain consulting business strategy case interview"
+        query = "Example Corp McKinsey Bain consulting business strategy case interview"
         results = tool.search_knowledge({"query": query, "limit": 12})["results"]
         assert service.last_query == query
         assert len(results) == 1
         assert results[0]["result_type"] == "conversation"
-        assert results[0]["text"] == "BCG case interview tips"
+        assert results[0]["text"] == "Example Corp case interview tips"

@@ -60,7 +60,7 @@ def _conv(conv_id: str, created_at: str = "2026-01-01T00:00:00+00:00") -> Conver
 
 
 def _msg(
-    msg_id: str, conv_id: str, content: str = "I work at BCG"
+    msg_id: str, conv_id: str, content: str = "I work at Example Corp"
 ) -> ConversationMessage:
     return ConversationMessage(
         id=msg_id,
@@ -80,7 +80,7 @@ def _proposal(
     evidence: tuple[str, ...] = ("m1",), **overrides: object
 ) -> dict[str, object]:
     proposal: dict[str, object] = {
-        "statement": "The user works at BCG",
+        "statement": "The user works at Example Corp",
         "kind": "work",
         "temporal_scope": "current",
         "confidence": 0.9,
@@ -334,7 +334,7 @@ def test_cli_audit_privacy_sensitive_never_leaks(
     assert "120k" not in blob
     assert "salary" not in blob
     assert "The user" not in blob
-    assert "BCG" not in blob
+    assert "Example Corp" not in blob
 
 
 # ---------------------------------------------------------------------------
@@ -426,7 +426,7 @@ def test_curate_all_processes_all_documented_sources(tmp_path: Path, capsys) -> 
     db = str(tmp_path / "db.sqlite")
     _seed(
         tmp_path / "db.sqlite",
-        (_conv("conv-1"), (_msg("m1", "conv-1", content="I work at BCG"),)),
+        (_conv("conv-1"), (_msg("m1", "conv-1", content="I work at Example Corp"),)),
     )
     cli.main(
         ["memory", "curate-all", "--database", db, "--mode", "deterministic", "--json"]

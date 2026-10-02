@@ -39,8 +39,8 @@ def test_diagnostics_aggregates_tracks_and_locations(tmp_path):
     assert diag.jobs_by_career_track.get("autonomous_driving") == 2
     assert diag.jobs_by_career_track.get("robotics") == 1
     assert diag.jobs_by_career_track.get("unknown") == 1
-    assert diag.jobs_by_location_tier.get("A_munich") == 1
-    assert diag.jobs_by_location_tier.get("D_germany") == 1
+    assert diag.jobs_by_location_tier.get("A_city_core") == 1
+    assert diag.jobs_by_location_tier.get("D_country") == 1
     assert diag.jobs_by_location_tier.get("F_remote") == 1
     assert diag.jobs_by_location_tier.get("unknown") == 1
     conn.close()

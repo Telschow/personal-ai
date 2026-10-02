@@ -85,8 +85,9 @@ def mini_catalog(tmp_path):
 
 
 def test_rotation_covers_distinct_sources_before_second_round(mini_catalog):
-    """Round-major rotation: every pair emits its Munich cell before any second location."""
+    """Round-major rotation: every pair emits its preferred-city cell first."""
     cfg = default_config()
+    cfg.career.location.preferred_city = "Munich"
     cfg.career.discovery.max_queries_total = 200
     cfg.career.discovery.max_queries_per_track = 200
     plan = build_query_plan(cfg, catalog=mini_catalog)
@@ -117,18 +118,19 @@ def test_eligibility_filters_by_category_affinity(mini_catalog):
 
 def test_reasons_are_attributed(mini_catalog):
     cfg = default_config()
+    cfg.career.location.preferred_city = "Munich"
     cfg.career.discovery.max_queries_total = 200
     cfg.career.discovery.max_queries_per_track = 200
     plan = build_query_plan(cfg, catalog=mini_catalog)
     reasons = {item.reason for item in plan.items}
     assert "source_rotation" in reasons
     assert "german_locality" in reasons
-    assert {"munich_priority", "category_affinity"} & reasons, f"unexpected reasons {reasons}"
+    assert {"preferred_city_priority", "category_affinity"} & reasons, f"unexpected reasons {reasons}"
     for item in plan.items:
         assert item.reason in {
             "source_rotation",
             "german_locality",
-            "munich_priority",
+            "preferred_city_priority",
             "category_affinity",
             "source_categories",
             "source_priority",
@@ -330,6 +332,7 @@ def test_paced_run_end_to_end_preserves_source_identity(mini_catalog, tmp_path):
 
 def test_paced_run_rate_limit_skips_then_continues(mini_catalog, tmp_path):
     cfg = _default_config(tmp_path)
+    cfg.career.location.preferred_city = "Munich"
     cfg.career.discovery.max_queries_total = 200
     cfg.career.discovery.max_queries_per_track = 200
 

@@ -176,8 +176,8 @@ def render_daily_intelligence():
             "NEW",
             "CHANGED",
             "HIGH-FIT",
-            "HIGH-FIT Munich",
-            "HIGH-FIT AI/Autonomous",
+            "HIGH-FIT LOCAL",
+            "HIGH-FIT DOMAIN",
             "NEWLY SALARY-DISCLOSED",
             "STALE/CLOSING",
         ]
@@ -216,12 +216,12 @@ def render_daily_intelligence():
         st.info("Jobs with overall fit score above threshold.")
 
     with tabs[3]:
-        st.subheader("High-Fit Munich Jobs")
-        st.info("High-fit jobs located in Munich.")
+        st.subheader("High-Fit Local Jobs")
+        st.info("High-fit jobs in your preferred city. Set one in config; none is assumed.")
 
     with tabs[4]:
-        st.subheader("High-Fit AI/Autonomous Jobs")
-        st.info("High-fit jobs in AI and autonomous systems.")
+        st.subheader("High-Fit Domain Jobs")
+        st.info("High-fit jobs in the sectors you configured.")
 
     with tabs[5]:
         st.subheader("Newly Salary-Disclosed Jobs")
@@ -429,7 +429,7 @@ def render_shortlists():
     st.title("📑 Shortlists")
 
     # Shortlist tabs
-    tabs = st.tabs(["Top Overall", "Munich", "AI / Autonomous", "Product Leadership", "Career Pivot", "International"])
+    tabs = st.tabs(["Top Overall", "Preferred City", "Remote", "Domain", "Seniority", "International"])
 
     with tabs[0]:
         st.subheader("Top Overall Jobs")
@@ -450,20 +450,20 @@ def render_shortlists():
             st.error(f"Error loading jobs: {e}")
 
     with tabs[1]:
-        st.subheader("Munich Jobs")
-        st.info("Jobs located in Munich.")
+        st.subheader("Preferred City")
+        st.info("Jobs in the city configured as preferred, if any.")
 
     with tabs[2]:
-        st.subheader("AI/Autonomous Jobs")
-        st.info("Jobs in AI and autonomous systems.")
+        st.subheader("Remote Jobs")
+        st.info("Remote postings regardless of location.")
 
     with tabs[3]:
-        st.subheader("Product Leadership Jobs")
-        st.info("Senior product leadership roles.")
+        st.subheader("Domain Jobs")
+        st.info("Jobs in the sectors you configured.")
 
     with tabs[4]:
-        st.subheader("Career Pivot Jobs")
-        st.info("Jobs for adjacent career moves.")
+        st.subheader("Senior Roles")
+        st.info("Roles at or above your configured seniority.")
 
     with tabs[5]:
         st.subheader("International Jobs")

@@ -56,14 +56,14 @@ QUESTIONS: tuple[str, ...] = (
         "about those topics?"
     ),
     (
-        "What was I researching around BCG in January 2026, and what did I "
-        "watch about it?"
+        "What was I researching around Example Corp in January 2026, and what "
+        "did I watch about it?"
     ),
     (
         "Summarize my January 2026 activity: what I searched, what I watched, "
         "and what I was working on."
     ),
-    "What did I know about BCG versus what was I doing online about BCG?",
+    "What did I know about Example Corp versus what was I doing online about Example Corp?",
 )
 
 

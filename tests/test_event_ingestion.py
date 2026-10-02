@@ -44,7 +44,7 @@ class TestIngestChromeHistory:
                 _visit("https://a.org", 1000000),
                 _visit("https://b.org", 2000000),
                 _visit(
-                    "https://www.google.de/search?q=bcg",
+                    "https://www.google.de/search?q=example+corp",
                     3000000,
                 ),
             ],

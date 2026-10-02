@@ -68,7 +68,7 @@ Provenance:
   efinancialcareers, eu-startups, workatastartup, himalayas,
   berlinstartupjobs, climatebase).
 - Additional curated/verified entries: munichstartupjobs, arbeitsagentur,
-  ai-jobs.net, energyjobline, ingenieur.de (Germany/Munich/EU focused) and
+  ai-jobs.net, energyjobline, ingenieur.de (regional and EU focused) and
   ATS platforms (Greenhouse/Lever/Ashby/…) used as `site:` seeds for career
   pages.
 - Disabled on purpose (ToS/anti-bot/aggregator): LinkedIn, Indeed, StepStone,
@@ -78,7 +78,8 @@ Behavior notes (from the 2026-09-18 validation slice):
 
 - `discover plan` is pure/deterministic: 120 queries = 5 tracks × 3 terms × 3
   locations (≤24 queries/track, ≤8 sources/track), every query carrying its
-  location (Munich-first) and quoted track term.
+  location (the configured preferred city first, else the national term) and a
+  quoted track term.
 - Under **default budgets the live surface is the first catalog-ordered ATS
   sources only** (greenhouse/lever/ashby); the 25+ non-ATS community boards are
   reachable only after per-track source caps are raised or source rotation is

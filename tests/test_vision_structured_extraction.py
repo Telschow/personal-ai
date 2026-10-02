@@ -176,11 +176,17 @@ class TestNormalizeStructuredExtraction:
         normalized = normalize_structured_extraction(
             StructuredExtraction(
                 document_id="d1",
-                topics=("BMW", "bmw", "BMW", "  BMW  ", "BMW"),
+                topics=(
+                    "Nimbus Motors",
+                    "nimbus",
+                    "Nimbus Motors",
+                    "  Nimbus Motors  ",
+                    "Nimbus Motors",
+                ),
             )
         )
 
-        assert normalized.topics == ("BMW", "bmw")
+        assert normalized.topics == ("Nimbus Motors", "nimbus")
 
     def test_accents_and_case_are_preserved(self) -> None:
         normalized = normalize_structured_extraction(
@@ -439,7 +445,7 @@ class TestVisionStructuredNormalizationThroughPipeline:
                 document_id=extraction.document_id,
                 summary="  board  ",
                 goals=("  run  ", "", "run"),
-                topics=("  beach house  ", "beach house", "BMW", "bmw"),
+                topics=("  beach house  ", "beach house", "Nimbus Motors", "nimbus"),
             )
         )
         harness = VisionStructuredHarness(structured, vision=vision)
@@ -451,14 +457,14 @@ class TestVisionStructuredNormalizationThroughPipeline:
             assert result.structured_extraction.goals == ("run",)
             assert result.structured_extraction.topics == (
                 "beach house",
-                "BMW",
-                "bmw",
+                "Nimbus Motors",
+                "nimbus",
             )
 
             stored = harness.extraction_store.get(result.document_id)
             assert stored is not None
             assert stored.summary == "board"
-            assert stored.topics == ("beach house", "BMW", "bmw")
+            assert stored.topics == ("beach house", "Nimbus Motors", "nimbus")
         finally:
             harness.close()
 

@@ -75,7 +75,7 @@ service down, export a token and it becomes mandatory:
 export PERSONAL_AI_API_TOKEN='some-secret'
 curl -H 'Authorization: Bearer some-secret' \
      -H 'Content-Type: application/json' \
-     -d '{"messages":[{"role":"user","content":"What do I know about BCG?"}]}' \
+     -d '{"messages":[{"role":"user","content":"What do I know about Example Corp?"}]}' \
      http://127.0.0.1:8000/v1/chat/completions
 ```
 
@@ -178,7 +178,7 @@ injected.
   "model": "personal-ai",
   "messages": [
     {"role": "system", "content": "Optional system context."},
-    {"role": "user", "content": "What do I know about BCG?"}
+    {"role": "user", "content": "What do I know about Example Corp?"}
   ]
 }
 ```
@@ -231,7 +231,7 @@ curl http://127.0.0.1:8000/v1/models
 
 # a real grounded personal question
 curl -H 'Content-Type: application/json' \
-     -d '{"messages":[{"role":"user","content":"What do I know about BCG?"}]}' \
+     -d '{"messages":[{"role":"user","content":"What do I know about Example Corp?"}]}' \
      http://127.0.0.1:8000/v1/chat/completions
 ```
 

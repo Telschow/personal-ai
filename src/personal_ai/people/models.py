@@ -5,7 +5,7 @@ appear in the user's personal corpus. Identity is deliberately conservative:
 a person is keyed by the canonical identity of their display name, so only
 name-anchored variants merge. The deterministic folding rules live in
 ``people/canonicalize.py``, so ``Alice Example`` / ``Dani Example`` /
-``Example, Daniel`` fuse while distinct people stay separate. Email
+``Example, Alice`` fuse while distinct people stay separate. Email
 addresses are stored as aliases and source-derived roles (``email`` /
 ``financial``) are kept per reference, but identity is NEVER fused by email
 alone and merchants/opaque usernames never fold into people. Everything here

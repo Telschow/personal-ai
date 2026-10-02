@@ -13,7 +13,7 @@ return a single JSON object with exactly these keys:
 
 ```json
 {
-  "query": "career BCG consulting",
+  "query": "project atlas planning",
   "status": "results",
   "results": [ { "…provenance…": "…" } ],
   "total_returned": 3,

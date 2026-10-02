@@ -17,8 +17,8 @@ This document maps Career-Ops concepts to our implementation decisions.
 | Provenance / source-of-truth | Markdown front-matter + Git | SQLite with content-hash identities, job_sources table, career_documents, career_evidence with verification levels | **KEEP** | Stronger: content-hash deduplication, evidence trust ladder, reconciliation |
 | Human-in-the-loop | Explicit approval steps | Every CV artifact status: DRAFT → VALIDATED/REQUIRES_REVIEW → APPROVED/REJECTED (human); application transitions require explicit action | **KEEP** | Hard boundary: never auto-submit |
 | ATS-oriented PDF generation | React-PDF / typst templates | Not yet implemented; deterministic artifact model ready for PDF backend | **DEFER** | Artifact model is source of truth; PDF rendering is separate concern |
-| Job legitimacy / ghost-job checks | Heuristics on posting age, company signals | Freshness tracking (stale/closed lifecycle), salary floor enforcement, source reputation via provider health | **ADAPT** | Deterministic signals only; no speculative heuristics |
-| Compensation analysis | Market data integration | Salary normalization to EUR; floor €120k / target €150k; unknown = reviewable | **KEEP** | Local-first; no external salary APIs |
+| Job legitimacy / ghost-job checks | Heuristics on posting age, company signals | Freshness tracking (stale/closed lifecycle), configurable salary floor enforcement, source reputation via provider health | **ADAPT** | Deterministic signals only; no speculative heuristics |
+| Compensation analysis | Market data integration | Salary normalization to EUR; floor/target configured locally (unconfigured = neutral, no hard reject); unknown = reviewable | **KEEP** | Local-first; no external salary APIs |
 | Career profile | YAML/Markdown files | Structured CareerProfile with per-field provenance (verified vs inferred); profile.yaml + career block | **KEEP** | Provenance-typed; explicit fields win over inference |
 | Evidence reconciliation | Manual review | Automated reconciliation (exact match / new / conflict) with checkpoint records; conflicts never auto-resolved | **ADAPT** | More systematic; idempotent document ingestion |
 

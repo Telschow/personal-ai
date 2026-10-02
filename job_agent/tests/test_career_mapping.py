@@ -68,7 +68,7 @@ def test_mapping_empty_concepts_empty():
 def test_mapping_direct_evidence_is_strong():
     attrs, career = _attrs("autonomous driving product owner")
     ev = _ev(
-        "Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)",
+        "Worked as Product Owner - Autonomous Driving at Nimbus Motors (2024-present)",
         "verified",
         categories=["product", "domain", "ai", "leadership"],
     )
@@ -119,7 +119,7 @@ def test_mapping_transferable_distinct_from_gap():
 def test_mapping_every_mapping_carries_evidence_ids_or_is_gap():
     attrs, career = _attrs("autonomous driving, backend engineering, data engineering")
     ev = _ev(
-        "Product Owner for Automated Valet Parking at BMW",
+        "Product Owner for Automated Valet Parking at Nimbus Motors",
         "verified",
         categories=["product", "domain", "ai", "leadership"],
     )
@@ -153,7 +153,7 @@ def test_mapping_confidence_bounded():
     career = derive_career_profile(_profile())
     attrs, _ = _attrs("autonomous driving")
     ev = _ev(
-        "Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)",
+        "Worked as Product Owner - Autonomous Driving at Nimbus Motors (2024-present)",
         "verified",
         categories=["product", "domain", "ai"],
     )

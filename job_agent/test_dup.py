@@ -19,7 +19,7 @@ print("radar metrics", metrics)
 profile = {}
 policy = scoring_policy_from_config(cfg.model_dump())
 sources = build_sources(cfg)
-src = sources[0]  # greenhouse helsing
+src = sources[0]  # first configured ATS board
 result = run_sources(conn, [src], profile, policy, run_id=run_id)
 print("run_sources total_fetched", result.total_fetched, "duplicates", result.total_duplicates)
 cnt = conn.execute("SELECT COUNT(*) AS n FROM jobs").fetchone()["n"]

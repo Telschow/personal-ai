@@ -84,9 +84,9 @@ RELEVANCE_ENVELOPE_KEYS = {
 class _QualityCorpus:
     """A synthetic document corpus with a known relevance ordering.
 
-    ``doc-bcg`` is clearly the most relevant to a "career BCG consulting"
-    query; ``doc-edu`` and ``doc-travel`` are decoys drawn from the same
-    vocabulary to force the ranker to discriminate.
+    ``doc-example-corp`` is clearly the most relevant to an "Example Corp
+    consulting" query; ``doc-edu`` and ``doc-travel`` are decoys drawn from the
+    same vocabulary to force the ranker to discriminate.
     """
 
     def __init__(self, *, failing: bool = False) -> None:
@@ -98,9 +98,9 @@ class _QualityCorpus:
 
         for doc_id, source, text in (
             (
-                "doc-bcg",
-                "career/bcg-strategy.md",
-                "BCG consulting case prep for a career in strategy consulting.",
+                "doc-example-corp",
+                "career/example-corp-strategy.md",
+                "Example Corp consulting case prep for a career in strategy consulting.",
             ),
             (
                 "doc-edu",
@@ -198,7 +198,9 @@ def test_envelope_serializes_exactly_the_canonical_keys(
     quality_corpus: _QualityCorpus, tmp_path: Path
 ):
     registry = _chat_registry(quality_corpus, tmp_path)
-    envelope = registry.execute("search_documents", {"query": "BCG consulting"})
+    envelope = registry.execute(
+        "search_documents", {"query": "Example Corp consulting"}
+    )
     assert isinstance(envelope, dict)
     assert set(envelope) == RELEVANCE_ENVELOPE_KEYS
     # The envelope is JSON-serializable (safe for tool-result transport).
@@ -209,13 +211,13 @@ def test_envelope_serializes_exactly_the_canonical_keys(
     assert envelope["error"] is None
     assert envelope["results"]
     assert envelope["total_returned"] == len(envelope["results"])
-    assert envelope["query_length"] == 14
+    assert envelope["query_length"] == len("Example Corp consulting")
 
 
 def test_statuses_are_mutually_exclusive_and_error_carries_category(
     quality_corpus: _QualityCorpus, tmp_path: Path
 ):
-    results = registry_status(quality_corpus, tmp_path, "BCG consulting")
+    results = registry_status(quality_corpus, tmp_path, "Example Corp consulting")
     no_match = registry_status(quality_corpus, tmp_path, "zeppelin orchestral")
     assert results == RETRIEVAL_STATUS_RESULTS
     assert no_match == RETRIEVAL_STATUS_NO_MATCHES
@@ -246,7 +248,9 @@ def test_operational_failure_is_error_not_empty_success(
         chunk_store=quality_corpus.chunk_store,
         retrieval_service=_BoomService(inner),
     )
-    envelope = registry.execute("search_knowledge", {"query": "BCG consulting"})
+    envelope = registry.execute(
+        "search_knowledge", {"query": "Example Corp consulting"}
+    )
     assert envelope["status"] == RETRIEVAL_STATUS_ERROR
     assert envelope["results"] == []
     assert envelope["error"] == RETRIEVAL_ERROR_UNAVAILABLE
@@ -271,7 +275,9 @@ def test_search_documents_operational_failure_is_error(
         chunk_store=_BoomChunkStore(),
         retrieval_service=quality_corpus.service,
     )
-    envelope = registry.execute("search_documents", {"query": "BCG consulting"})
+    envelope = registry.execute(
+        "search_documents", {"query": "Example Corp consulting"}
+    )
     assert envelope["status"] == RETRIEVAL_STATUS_ERROR
     assert envelope["results"] == []
     assert envelope["error"] == RETRIEVAL_ERROR_UNAVAILABLE
@@ -294,7 +300,9 @@ def test_error_envelope_never_leaks_stacktrace(
         chunk_store=quality_corpus.chunk_store,
         retrieval_service=_BoomService(quality_corpus.service),
     )
-    envelope = registry.execute("search_knowledge", {"query": "BCG consulting"})
+    envelope = registry.execute(
+        "search_knowledge", {"query": "Example Corp consulting"}
+    )
     serialized = str(envelope)
     assert RETRIEVAL_ERROR_UNAVAILABLE in serialized  # safe, generic category
     for leak in ("RuntimeError", "Traceback", "store unavailable", "line ", ".py"):
@@ -321,11 +329,11 @@ def test_limit_over_maximum_is_rejected(quality_corpus: _QualityCorpus, tmp_path
     registry = _chat_registry(quality_corpus, tmp_path)
     with pytest.raises(Exception, match="failed during execution"):
         registry.execute(
-            "search_documents", {"query": "BCG", "limit": MAX_SEARCH_LIMIT + 1}
+            "search_documents", {"query": "Example Corp", "limit": MAX_SEARCH_LIMIT + 1}
         )
     with pytest.raises(Exception, match="failed during execution"):
         registry.execute(
-            "search_knowledge", {"query": "BCG", "limit": MAX_SEARCH_LIMIT + 1}
+            "search_knowledge", {"query": "Example Corp", "limit": MAX_SEARCH_LIMIT + 1}
         )
 
 
@@ -347,19 +355,21 @@ def test_top_result_is_the_most_relevant_document(
     quality_corpus: _QualityCorpus, tmp_path: Path
 ):
     registry = _chat_registry(quality_corpus, tmp_path)
-    envelope = registry.execute("search_documents", {"query": "career BCG consulting"})
+    envelope = registry.execute(
+        "search_documents", {"query": "Example Corp consulting"}
+    )
     assert envelope["status"] == RETRIEVAL_STATUS_RESULTS
     first = envelope["results"][0]
-    assert first["document_id"] == "doc-bcg"
-    assert first["source"] == "career/bcg-strategy.md"
+    assert first["document_id"] == "doc-example-corp"
+    assert first["source"] == "career/example-corp-strategy.md"
 
 
 def test_repeated_queries_are_deterministically_ordered(
     quality_corpus: _QualityCorpus, tmp_path: Path
 ):
     registry = _chat_registry(quality_corpus, tmp_path)
-    first = registry.execute("search_documents", {"query": "career BCG consulting"})
-    second = registry.execute("search_documents", {"query": "career BCG consulting"})
+    first = registry.execute("search_documents", {"query": "project atlas planning"})
+    second = registry.execute("search_documents", {"query": "project atlas planning"})
     assert first["results"] == second["results"]
     assert [h["document_id"] for h in first["results"]] == [
         h["document_id"] for h in second["results"]
@@ -371,7 +381,7 @@ def test_limit_truncates_and_sets_truncated_flag(
 ):
     registry = _chat_registry(quality_corpus, tmp_path)
     envelope = registry.execute(
-        "search_documents", {"query": "BCG consulting strategy", "limit": 1}
+        "search_documents", {"query": "Example Corp consulting strategy", "limit": 1}
     )
     assert len(envelope["results"]) == 1
     assert envelope["total_returned"] == 1
@@ -470,8 +480,8 @@ def test_search_has_no_mutation_side_effects(
     before_docs = len(quality_corpus.document_store.list_documents())
     before_chunks = quality_corpus.chunk_store.count()
     registry = _chat_registry(quality_corpus, tmp_path)
-    registry.execute("search_documents", {"query": "BCG"})
-    registry.execute("search_knowledge", {"query": "BCG"})
+    registry.execute("search_documents", {"query": "Example Corp"})
+    registry.execute("search_knowledge", {"query": "Example Corp"})
     assert len(quality_corpus.document_store.list_documents()) == before_docs
     assert quality_corpus.chunk_store.count() == before_chunks
 
@@ -490,14 +500,14 @@ def test_observer_sees_tool_events_without_private_content(
             ToolCall(
                 id="c1",
                 name="search_documents",
-                arguments={"query": "BCG consulting", "limit": 5},
+                arguments={"query": "Example Corp consulting", "limit": 5},
             )
         ],
         final="found the career document",
     )
     events: list[dict[str, object]] = []
     agent = Agent(client, registry, observer=events.append)
-    agent.run([ChatMessage(role="user", content="docs about BCG?")])
+    agent.run([ChatMessage(role="user", content="docs about Example Corp?")])
 
     starts = [e for e in events if e["event"] == "tool_start"]
     ends = [e for e in events if e["event"] == "tool_end"]
@@ -522,7 +532,11 @@ def test_error_tool_event_is_recorded_as_error_status(
         retrieval_service=_BoomService(quality_corpus.service),
     )
     client = _ScriptedChat(
-        [ToolCall(id="c1", name="search_knowledge", arguments={"query": "BCG"})],
+        [
+            ToolCall(
+                id="c1", name="search_knowledge", arguments={"query": "Example Corp"}
+            )
+        ],
         final="done",
     )
     events: list[dict[str, object]] = []
@@ -566,11 +580,17 @@ def test_agent_receives_error_status_not_false_certainty(
         retrieval_service=_BoomService(quality_corpus.service),
     )
     client = _ScriptedChat(
-        [ToolCall(id="c1", name="search_knowledge", arguments={"query": "BCG"})],
+        [
+            ToolCall(
+                id="c1", name="search_knowledge", arguments={"query": "Example Corp"}
+            )
+        ],
         final="Retrieval is temporarily unavailable; I cannot confirm what exists.",
     )
     agent = Agent(client, registry)
-    answer = agent.run([ChatMessage(role="user", content="does any doc mention BCG?")])
+    answer = agent.run(
+        [ChatMessage(role="user", content="does any doc mention Example Corp?")]
+    )
     tool_msg = client.calls[1][2].content
     assert RETRIEVAL_STATUS_ERROR in tool_msg
     assert RETRIEVAL_ERROR_UNAVAILABLE in tool_msg

@@ -69,18 +69,15 @@ Measures how well the job's compensation matches the user's salary requirements.
   - Job: €200,000 salary → >1.0 (above target, continued increase)
 
 ### 4. Location Match (10%)
-Measures how well the job's location matches the user's location preferences.
-- **Calculation**: Based on location matching and remote work preferences
-- **Range**: 0.0 (completely unsuitable location) to 1.0 (ideal location)
-- **Factors**: 
-  - Geographic match (Munich, remote EU, etc.)
-  - Remote work compatibility (remote, hybrid, onsite)
-  - Willingness to relocate (from user profile)
-- **Examples**:
-  - Job: Munich, onsite, willing to relocate → 1.0
-  - Job: New York, onsite, not willing to relocate → 0.0
-  - Job: Remote, any location preference → 1.0
-  - Job: Berlin, hybrid, willing to relocate → 0.8
+Measures how well the job's location matches the configured location preferences.
+- **Calculation**: `tier_weight(parse_location(job.location).tier, weights)`
+- **Range**: `relocate_without_offer` (0.25) to `CITY_CORE` (1.0) with defaults
+- **Factors**:
+  - Proximity tier: exact city, metro, region, country, remote, Europe, unknown
+  - Willingness to relocate (from the local profile, for international roles)
+- **Notes**: the preferred city is local config and empty by default, so no
+  geographic preference is applied unless one is configured. See
+  "Location Preference Implementation" below for the tier table.
 
 ### 5. Leadership Match (20%)
 Measures the job's leadership requirements and opportunities.
@@ -251,9 +248,9 @@ The system distinguishes between hard constraints (must-haves) and soft preferen
 
 ### Hard Constraints (Score = 0 if Violated)
 These are absolute requirements that, if not met, result in automatic rejection:
-- **Salary Floor**: Below minimum acceptable salary (e.g., €120k)
+- **Salary Floor**: Below the configured minimum acceptable salary (disabled by default)
 - **Mandatory Requirements**: Non-negotiable job requirements (e.g., specific certification)
-- **Location Veto**: Absolute location requirements (e.g., must be in Munich)
+- **Location Veto**: Absolute location requirements
 - **Work Authorization**: Legal right to work in the job's location
 - **Security Clearance**: Required security clearance level
 
@@ -270,36 +267,44 @@ These are preferences that adjust the score but don't cause automatic rejection:
 Hard constraints are checked first - if any are violated, the job gets a score of 0 and is marked as a hard fail.
 Soft preferences are incorporated into the normal scoring dimensions.
 
-## Munich Preference Implementation
+## Location Preference Implementation
 
-The user's preference for Munich is implemented as part of the location match dimension:
+Location preference is configuration, not a built-in. The preferred city comes
+from local config (`career.location.preferred_city`) and is empty by default, so
+a fresh checkout applies no geographic preference at all. `preferred_city` is
+used for two things: query generation (which place terms the search planner
+emits) and ranking (which proximity tier ranks highest).
 
 ### Location Match Calculation
+
+A job's location string is parsed into a proximity *tier*, and the tier maps to
+a ranking weight. There is no multiplicative remote/relocation chain — remote
+mode is part of the tier, not a separate multiplier.
+
 ```
-base_location_score = geographic_match_score
-remote_modifier = remote_work_compatibility_score
-relocation_modifier = willingness_to_relocate_score
-
-location_score = base_location_score × remote_modifier × relocation_modifier
+location_score = tier_weight(parse_location(job.location).tier, weights)
 ```
 
-Where:
-- **geographic_match_score**: 
-  - Munich: 1.0
-  - Remote EU: 0.8
-  - Other EU: 0.6
-  - International: 0.4
-  - Non-EU: 0.2
-- **remote_work_compatibility_score**:
-  - Fully remote: 1.0
-  - Hybrid: 0.7
-  - Onsite only: 0.3
-- **willingness_to_relocate_score**:
-  - Willing to relocate anywhere: 1.0
-  - Willing to relocate within EU: 0.8
-  - Not willing to relocate: 0.3 (applies to non-current-location jobs)
+Tiers, most local first (`LocationTier`, from
+`job_agent/job_agent/location.py`):
 
-This creates a preference gradient where Munich jobs score highest, followed by remote EU jobs, etc.
+| Tier | Meaning | Default weight |
+|---|---|---:|
+| `CITY_CORE` | The exact configured city | 1.00 |
+| `METRO` | Commutable metro area around it | 0.92 |
+| `REGION` | Wider surrounding region | 0.88 |
+| `COUNTRY` | Elsewhere in the same country | 0.85 |
+| `REMOTE` | Remote or hybrid posting | 0.85 |
+| `EUROPE` | Elsewhere in Europe | 0.65 |
+| `UNKNOWN` | Not classifiable | 0.60 |
+| `NON_EUROPEAN` | Outside Europe | 0.25 (`relocate_without_offer`) |
+
+The last row is the one non-default-sensitive case: an international role scores
+`relocate_without_offer` only when the profile says the applicant is not willing
+to relocate. Every weight is a field on `LocationWeights` and can be overridden.
+
+Unknown locations rank at `unknown` rather than zero, so an unparsed location
+string never silently zeroes a job.
 
 ## Compensation Logic
 

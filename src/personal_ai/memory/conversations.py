@@ -1014,7 +1014,7 @@ def _contains_quotation(text: str) -> bool:
     double-quote gate. Apostrophe-shaped marks (ASCII apostrophe and the
     typographic right single quote) only count as quote delimiters when they
     are not strictly between two letters — so English contractions and
-    possessives still pass while "Peter said: 'I work at BMW'" is skipped.
+    possessives still pass while "Peter said: 'I work at Nimbus Motors'" is skipped.
     Missing a candidate is safe; never producing a quoted fact is the point.
     """
     if any(char in _QUOTATION_MARKS for char in text):

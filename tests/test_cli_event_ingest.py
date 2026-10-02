@@ -59,7 +59,7 @@ def _chrome_export(tmp_path: Path) -> Path:
         [
             _visit("https://a.org", 1000000),
             _visit("https://b.org", 2000000),
-            _visit("https://www.google.de/search?q=bcg", 3000000),
+            _visit("https://www.google.de/search?q=example+corp", 3000000),
         ],
     )
     return export

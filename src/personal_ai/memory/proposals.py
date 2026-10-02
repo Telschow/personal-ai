@@ -628,7 +628,7 @@ Rules:
   assistant claims, quoted text, hypotheticals, or requests into facts about
   the user.
 - Statement format: third person, starting with "The user", e.g.
-  "The user works at BCG as a product manager."
+  "The user works at Example Corp as a product manager."
 - The statement must be about the user (never about other people, companies,
   or external documents).
 - temporal_scope: "current" (still true today), "historical" (past),

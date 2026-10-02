@@ -6,7 +6,12 @@ import textwrap
 
 from job_agent.catalog import load_catalog
 from job_agent.config import default_config
-from job_agent.query_plan import build_query_plan, focal_locations, planned_queries
+from job_agent.query_plan import (
+    build_query_plan,
+    focal_locations,
+    planned_queries,
+    source_locations,
+)
 
 MINI = textwrap.dedent(
     """
@@ -72,6 +77,7 @@ def test_plan_respects_budgets(tmp_path):
 
 def test_plan_location_rotation(tmp_path):
     cfg = default_config()
+    cfg.career.location.preferred_city = "Munich"
     cfg.career.discovery.max_queries_total = 200
     cfg.career.discovery.max_queries_per_track = 200
     cfg.career.discovery.max_sources_per_track = 8
@@ -83,6 +89,17 @@ def test_plan_location_rotation(tmp_path):
     assert summary_locations(plan) == ["Munich", "Germany", "Remote Europe"]
     for item in plan.items:
         assert item.location_term in ("Munich", "Germany", "Remote Europe")
+
+
+def test_plan_without_preferred_city_has_no_default_city(tmp_path):
+    """A fresh config has no city preference; discovery must not invent one."""
+    cfg = default_config()
+    cfg.career.discovery.max_queries_total = 200
+    cfg.career.discovery.max_queries_per_track = 200
+    cfg.career.discovery.max_sources_per_track = 8
+    plan = build_query_plan(cfg, catalog=_catalog(tmp_path))
+    assert "Munich" not in summary_locations(plan)
+    assert summary_locations(plan) == ["Germany", "Remote Europe"]
 
 
 def test_plan_provenance_metadata(tmp_path):
@@ -141,6 +158,52 @@ def test_focal_locations():
     assert "Germany" in locs
     assert "Remote Europe" in locs
     assert focal_locations("Munich") == focal_locations("Munich")
+
+
+def test_focal_locations_without_a_preferred_city():
+    """No configured city means no invented one; scope terms still apply."""
+    locs = focal_locations("")
+    assert "Munich" not in locs
+    assert locs == ["Germany", "Remote Europe"]
+
+
+def test_focal_locations_fall_back_when_every_scope_flag_is_off():
+    """With nothing configured at all, the fallback is geography-free."""
+    assert focal_locations("", national=False, remote=False) == ["Remote Europe"]
+
+
+def test_dach_sources_drop_broad_remote_terms():
+    """A regional source gets concrete place terms only."""
+    from job_agent.catalog import SourceCatalogEntry
+
+    regional = SourceCatalogEntry(
+        source_id="de_board",
+        name="Regional Board",
+        url="https://example.test",
+        category="general",
+        country="DE",
+        region="DACH",
+        source_type="ats",
+    )
+    base = focal_locations("Munich")
+    assert source_locations(regional, base) == ["Munich", "Germany"]
+    # With no city configured the national term survives, remote does not.
+    assert source_locations(regional, focal_locations("")) == ["Germany"]
+
+
+def test_non_dach_source_keeps_the_full_base_set():
+    from job_agent.catalog import SourceCatalogEntry
+
+    global_source = SourceCatalogEntry(
+        source_id="global_board",
+        name="Global Board",
+        url="https://example.test",
+        category="general",
+        country="US",
+        source_type="ats",
+    )
+    base = focal_locations("Munich")
+    assert source_locations(global_source, base) == base
 
 
 def summary_locations(plan):

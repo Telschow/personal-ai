@@ -500,6 +500,7 @@ def cmd_fit(args: argparse.Namespace) -> int:
         attrs,
         evidence,
         weights=FitWeights(**cfg.career.weights.model_dump()),
+        salary_floor_eur=cfg.jobs.salary.minimum_eur if cfg.jobs.salary.minimum_eur > 0 else None,
     )
 
     if knowledge_notes:

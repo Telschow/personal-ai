@@ -9,7 +9,7 @@ from .role_archetypes import RoleArchetype
 
 
 class SearchPriority:
-    """Search priority calculation for Munich-first prioritization."""
+    """Search priority calculation for location-first prioritization."""
 
     job_id: str
     priority: float
@@ -29,7 +29,7 @@ def calculate_search_priority(
     career_direction: CareerDirection,
     career_profile: dict[str, Any],
 ) -> SearchPriority:
-    """Calculate search priority with Munich-first prioritization."""
+    """Calculate search priority with location-first prioritization."""
     # Implementation will go here
     # For now, return a placeholder priority
     return SearchPriority(

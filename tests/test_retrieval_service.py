@@ -14,7 +14,7 @@ from personal_ai.storage import (
     connect_database,
 )
 
-TEXT_HEAVY_TEXT = "Meeting note about BCG consulting project. " * 20
+TEXT_HEAVY_TEXT = "Meeting note about Example Corp consulting project. " * 20
 
 
 def _make_record(payload: bytes, source_key: str = "notes.txt") -> SourceRecord:
@@ -58,9 +58,9 @@ class FakeStructuredExtractor:
         self.calls += 1
         return StructuredExtraction(
             document_id=extraction.document_id,
-            summary=f"Summary about BCG project for document {self.calls}",
+            summary=f"Summary about Example Corp project for document {self.calls}",
             people=("Alice Example",),
-            organizations=("BCG",),
+            organizations=("Example Corp",),
             projects=("Project Apollo",),
             goals=("Career advancement",),
             topics=("consulting", "strategy"),
@@ -106,7 +106,7 @@ class TestRetrievalService:
         doc_id = self._ingest(TEXT_HEAVY_TEXT.encode())
         service = self._service()
 
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         chunk_results = [r for r in results if r.result_type == "chunk"]
         assert len(chunk_results) > 0
         assert any(r.document_id == doc_id for r in chunk_results)
@@ -126,7 +126,7 @@ class TestRetrievalService:
         self._ingest(TEXT_HEAVY_TEXT.encode())
         service = self._service()
 
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         types = {r.result_type for r in results}
         assert "chunk" in types
         assert "structured_extraction" in types
@@ -135,7 +135,7 @@ class TestRetrievalService:
         self._ingest(TEXT_HEAVY_TEXT.encode())
         service = self._service()
 
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         for r in results:
             assert r.document_id
             doc = self.document_store.get(r.document_id)
@@ -145,7 +145,7 @@ class TestRetrievalService:
         self._ingest(TEXT_HEAVY_TEXT.encode(), source_key="my_meeting.txt")
         service = self._service()
 
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         titles = {r.title for r in results}
         assert "my_meeting.txt" in titles
 
@@ -154,7 +154,7 @@ class TestRetrievalService:
         self._ingest(TEXT_HEAVY_TEXT.encode())
         service = self._service()
 
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         for r in results:
             if r.result_type == "chunk":
                 assert r.page_number is None
@@ -163,7 +163,7 @@ class TestRetrievalService:
         self._ingest(TEXT_HEAVY_TEXT.encode())
         service = self._service()
 
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         extraction_results = [
             r for r in results if r.result_type == "structured_extraction"
         ]
@@ -175,15 +175,15 @@ class TestRetrievalService:
         self._ingest(TEXT_HEAVY_TEXT.encode())
         service = self._service()
 
-        first = service.search("BCG")
-        second = service.search("BCG")
+        first = service.search("Example Corp")
+        second = service.search("Example Corp")
         assert first == second
 
     def test_limit_respected(self) -> None:
         self._ingest(TEXT_HEAVY_TEXT.encode())
         service = self._service()
 
-        results = service.search("BCG", limit=2)
+        results = service.search("Example Corp", limit=2)
         assert len(results) <= 2
 
     def test_empty_query(self) -> None:
@@ -204,7 +204,7 @@ class TestRetrievalService:
         self._ingest(TEXT_HEAVY_TEXT.encode())
         service = self._service()
 
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         assert len(results) > 0
         for r in results:
             assert isinstance(r, SearchResult)
@@ -222,7 +222,7 @@ class TestRetrievalService:
         )
         service = self._service()
 
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         doc_ids = {r.document_id for r in results}
         assert len(doc_ids) >= 1
 
@@ -232,7 +232,7 @@ class TestRetrievalService:
         self._ingest(TEXT_HEAVY_TEXT.encode())
         service = self._service()
 
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         assert len(results) > 0
         for result in results:
             assert result.source_type == "file"

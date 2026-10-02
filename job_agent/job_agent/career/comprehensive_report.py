@@ -200,11 +200,11 @@ class ComprehensiveCareerReport:
             lines.append("")
         
         lines.extend([
-            "## Munich Opportunities",
+            "## Preferred City Opportunities",
             "",
         ])
         
-        for job in report['shortlists']['munich'][:10]:
+        for job in report['shortlists']['preferred_city'][:10]:
             lines.append(f"- **{job['title']}** at {job['company']}")
         
         lines.extend([

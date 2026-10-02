@@ -109,8 +109,10 @@ class TestURLVisitParsing:
 class TestGoogleSearchQueryExtraction:
     def test_extracts_query_from_google_de(self) -> None:
         assert (
-            extract_search_query("https://www.google.de/search?q=bcg+interview+pdf")
-            == "bcg interview pdf"
+            extract_search_query(
+                "https://www.google.de/search?q=example+corp+interview+pdf"
+            )
+            == "example corp interview pdf"
         )
 
     def test_extracts_query_from_google_com(self) -> None:

@@ -288,40 +288,60 @@ def generate_linkedin_search_pack(job_corpus: list[Job], career_profile: dict[st
                 if len(word) > 4 and word.isalpha():
                     common_terms.add(word)
     
-    # Generate searches around common terms and career profile
-    searches = [
-        {
-            "intent": "Find Munich opportunities",
-            "query": f"{career_profile['current_role_family']} AND Munich",
-            "location": "Munich, Germany",
-            "experience": "Mid-Senior level",
-            "companies": "",
-            "why": "Target Munich opportunities for current role family",
-        },
-        {
-            "intent": "Find career acceleration opportunities",
-            "query": f"{career_profile['target_role_families'][0]} AND Germany",
-            "location": "Germany",
-            "experience": "Senior level",
-            "companies": "",
-            "why": "Find opportunities to accelerate career to target role family",
-        },
-        {
-            "intent": "Find AI/autonomous systems opportunities",
-            "query": f"{career_profile['current_role_family']} AND (AI OR autonomous OR robotics)",
-            "location": "Germany",
-            "experience": "Mid-Senior level",
-            "companies": "",
-            "why": "Find opportunities in AI/autonomous systems",
-        },
-        {
-            "intent": "Find remote opportunities",
-            "query": f"{career_profile['current_role_family']} AND remote",
-            "location": "Germany",
-            "experience": "Mid-Senior level",
-            "companies": "",
-            "why": "Find remote opportunities for current role family",
-        },
-    ]
-    
+    # The local search is operator policy, not source. It comes from config; with
+    # nothing configured there is no local search to generate.
+    local = _configured_city()
+
+    searches: list[dict[str, Any]] = []
+    if local:
+        searches.append(
+            {
+                "intent": "Find local opportunities",
+                "query": f"{career_profile['current_role_family']} AND {local}",
+                "location": local,
+                "experience": "Mid-Senior level",
+                "companies": "",
+                "why": "Target the configured preferred city for the current role family",
+            }
+        )
+
+    searches.extend(
+        [
+            {
+                "intent": "Find career acceleration opportunities",
+                "query": f"{career_profile['target_role_families'][0]} AND Germany",
+                "location": "Germany",
+                "experience": "Senior level",
+                "companies": "",
+                "why": "Find opportunities to accelerate career to target role family",
+            },
+            {
+                "intent": "Find AI/autonomous systems opportunities",
+                "query": f"{career_profile['current_role_family']} AND (AI OR autonomous OR robotics)",
+                "location": "Germany",
+                "experience": "Mid-Senior level",
+                "companies": "",
+                "why": "Find opportunities in AI/autonomous systems",
+            },
+            {
+                "intent": "Find remote opportunities",
+                "query": f"{career_profile['current_role_family']} AND remote",
+                "location": "Germany",
+                "experience": "Mid-Senior level",
+                "companies": "",
+                "why": "Find remote opportunities for current role family",
+            },
+        ]
+    )
+
     return searches
+
+
+def _configured_city() -> str:
+    """Configured preferred city, or "" when none is set."""
+    try:
+        from ..config import load_config
+
+        return load_config().career.location.preferred_city.strip()
+    except Exception:
+        return ""

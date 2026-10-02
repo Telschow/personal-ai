@@ -112,8 +112,8 @@ class TestEventStoreQueries:
                 _make_event(
                     event_type=EVENT_TYPE_SEARCH_QUERY,
                     event_time="2026-01-25T12:00:00+00:00",
-                    url="https://www.google.de/search?q=bcg",
-                    search_query="bcg",
+                    url="https://www.google.de/search?q=example+corp",
+                    search_query="example corp",
                 ),
             )
         )
@@ -150,7 +150,7 @@ class TestEventStoreQueries:
     def test_event_type_filter(self) -> None:
         results = self.store.search(EventQuery(event_type=EVENT_TYPE_SEARCH_QUERY))
         assert len(results) == 1
-        assert results[0].search_query == "bcg"
+        assert results[0].search_query == "example corp"
 
     def test_combined_filters(self) -> None:
         results = self.store.search(

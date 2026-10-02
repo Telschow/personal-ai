@@ -341,7 +341,7 @@ system does not invent content when there is no record.
 The assistant is most reliable when a question targets a single, well-scoped
 topic. Prefer these patterns:
 
-- **Personal knowledge recall** — "What do I know about BCG?"
+- **Personal knowledge recall** — "What do I know about Example Corp?"
 - **Activity recall** — "What did I search for recently?"
 - **Temporal activity** — "What was my most recent career-related activity?"
 - **Negative evidence** — "Do I have anything about fly fishing?" (It will
@@ -359,15 +359,16 @@ These come from the local 9B model, not from the retrieval system, and are
 intentionally not papered over.
 
 1. **Compound questions are unreliable.** A question spanning two evidence
-   domains in one sentence — for example "What did I watch about BCG, and what
-   do my notes say about it?" or "Compare what I know about BCG and McKinsey"
+   domains in one sentence — for example "What did I watch about Example Corp, and
+   what do my notes say about it?" or "Compare what I know about Example Corp and
+   Sample Industries"
    — may retrieve both domains correctly but then answer only one, drift into
    a generic how-to guide, or include noise. **Split such questions** into one
    single-domain sub-question each:
 
-   > What did I watch about BCG?
+   > What did I watch about Example Corp?
    >
-   > What do my notes say about BCG?
+   > What do my notes say about Example Corp?
 
 2. **"Most recent / recent" is approximate.** The assistant returns a real
    recent record, but on different runs it may surface a different one — it

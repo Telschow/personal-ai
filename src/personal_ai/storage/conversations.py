@@ -673,7 +673,7 @@ class ConversationStore:
         matches when *any* meaningful term appears (case-insensitively) in its
         content, its conversation title, or its speaker. Matching each term as
         a literal SQLite ``LIKE`` substring (with ``%``/``_``/``\\`` escaped)
-        keeps model-generated multi-word queries useful: ``"BCG career
+        keeps model-generated multi-word queries useful: ``"Example Corp career
         interview"`` finds messages mentioning any of those words rather than
         requiring the whole phrase contiguously.
 

@@ -93,9 +93,8 @@ ls output/reports/
 
 3. **Review shortlists**
    - Top 20 overall
-   - Munich opportunities
-   - Career acceleration
-   - AI/autonomous systems
+   - Opportunities in your preferred city
+   - Remote and international
 
 4. **Select for application**
    ```bash
@@ -252,15 +251,17 @@ Migrations are applied automatically:
 
 ```yaml
 name: Alice Example
-location: Munich, Germany
+location: Berlin, Germany
 languages: [...]
 education: [...]
 experience: [...]
 skills: [...]
 values: [...]
 constraints:
-  minimum_salary_eur: 120000
-  preferred_salary_eur: 150000
+  # Compensation expectations are personal policy. Omit the keys to disable
+  # the floor; supply both to enable it.
+  minimum_salary_eur: 0
+  preferred_salary_eur: 0
   willing_to_relocate: true
   family_compatibility_important: true
 ```

@@ -36,7 +36,7 @@ def _ev(claim: str, eid: str | None = None) -> CareerEvidence:
 
 
 def _art(conn, job_id: str = "p:1", artifact_id: str = "tailor:p:1") -> CVArtifact:
-    ev_a = _ev("Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)", "ev-a")
+    ev_a = _ev("Worked as Product Owner - Autonomous Driving at Nimbus Motors (2024-present)", "ev-a")
     ev_b = _ev("Led design of Automated Valet Parking feature", "ev-b")
     db.save_career_evidence(conn, ev_a)
     db.save_career_evidence(conn, ev_b)
@@ -46,7 +46,7 @@ def _art(conn, job_id: str = "p:1", artifact_id: str = "tailor:p:1") -> CVArtifa
         headline="Automotive AI delivery lead",
         summary="Owned autonomous driving projects.",
         bullets=[
-            Bullet(text="Product Owner for Autonomous Driving at BMW Group", evidence_id="ev-a"),
+            Bullet(text="Product Owner for Autonomous Driving at Nimbus Motors", evidence_id="ev-a"),
             Bullet(text="Led design of Automated Valet Parking feature", evidence_id="ev-b"),
         ],
         evidence_ids=["ev-a", "ev-b"],

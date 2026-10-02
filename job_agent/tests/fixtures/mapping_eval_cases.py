@@ -27,7 +27,7 @@ MAPPING_EVAL_CASES: list[MappingEvalCase] = [
     MappingEvalCase(
         id="d01", job_description="autonomous driving, ADAS experience required",
         capability="autonomous_driving",
-        evidence=(("Built autonomous valet parking at BMW", "verified",
+        evidence=(("Built autonomous valet parking at Nimbus Motors", "verified",
                     ("ai", "domain"), ("autonomous", "adas")),),
         category="DIRECT", expected_coverage="STRONG",
     ),

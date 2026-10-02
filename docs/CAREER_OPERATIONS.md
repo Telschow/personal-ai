@@ -1,41 +1,57 @@
 # Career Operations Mode
 
-## ACTIVE NOW
+This document records the operating cycle, not a personal search strategy.
+No search target, sector, compensation figure, or location preference belongs
+here: those live in gitignored local configuration.
 
-1. Discover real jobs
-2. Evaluate career fit
+## Operating Cycle
+
+1. Discover postings from configured sources
+2. Evaluate fit against the configured scoring policy
 3. Produce application-ready artifacts
 4. Review artifacts
 5. Apply manually
 6. Track applications
-7. Learn from results
+7. Learn from results and adjust configuration
 
-## PARKED
+Every step is local-first. Nothing is auto-submitted; the operator sends.
 
-- Munich flat scraper / flatscraper integration
-- apartment application automation
-- further generalized agents
-- generalized MCP/tool expansion
+## Stop Condition for Feature Work
+
+Feature work on this vertical is complete once:
+
+1. Docker deployment works
+2. Discovery works against configured sources
+3. Fit evaluation works
+4. Tailored document generation works
+5. Application lifecycle tracking works
+6. Reporting works
+7. Real postings have been discovered end to end
+8. Real application packets can be generated
+9. The operator can apply manually
+
+After that, effort goes into applying rather than into another development
+sprint. New feature work requires an explicitly scoped new phase.
+
+## Deferred
+
+Deferred items are not committed work. They are parked until the stop condition
+above is met and a new phase is opened:
+
+- a second vertical (see `docs/FLAT_SEARCH_FUTURE.md`)
+- generalized MCP / tool expansion
 - large discovery-provider expansion
-- autonomous browser application
-- automatic submission
+- any autonomous submission path (permanently out of scope, not merely parked)
 - speculative AI features
 - nonessential refactors
 
-## ENGINEERING STOP CONDITION
+## Hard Boundaries
 
-Once:
+These are not roadmap items and are not subject to the stop condition:
 
-1. Docker works
-2. discovery works
-3. career fit works
-4. tailored CV works
-5. application lifecycle works
-6. reports work
-7. real jobs have been discovered
-8. at least several real application packets can be generated
-9. the user can manually apply
-
-**STOP ENGINEERING.**
-
-The next action becomes real-world job applications, not another development sprint.
+- **No auto-submit.** Validation hard-blocks `auto_submit` and `auto_publish`.
+- **No scraping behind a login or with cookie access.**
+- **No personal data in the repository.** Profiles, company lists, reports, and
+  supporting documents are gitignored.
+- **No provider secrets in the repository.** Tokens come from environment
+  variables or gitignored local config.

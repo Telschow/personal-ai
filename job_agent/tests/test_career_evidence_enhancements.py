@@ -94,7 +94,7 @@ def test_build_profile_evidence_includes_new_fields() -> None:
             }
         ],
         "skills": ["Python", "Leadership"],
-        "education": [{"school": "TUM", "degree": "MSc Computer Science", "years": "2018-2020"}],
+        "education": [{"school": "Example University", "degree": "MSc Computer Science", "years": "2016-2019"}],
         "languages": ["English: fluent", "German: native"],
         "career": {
             "target_role_families": ["product_management"],
@@ -227,7 +227,7 @@ def test_candidate_evidence_from_document_includes_new_fields() -> None:
     """Test that candidate_evidence_from_document populates new fields."""
     with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
         f.write("Experience\n")
-        f.write("Worked as Product Manager at BMW Group (2020-2023)\n")
+        f.write("Worked as Product Manager at Nimbus Motors (2020-2023)\n")
         f.write("Led autonomous driving team of 15 engineers\n")
         f.write("\n")
         f.write("Skills\n")
@@ -319,7 +319,10 @@ def test_evidence_type_inference() -> None:
     assert _infer_evidence_type("Fluent in German and English", set()) == CareerEvidenceType.LANGUAGE
 
     # Career experience
-    assert _infer_evidence_type("Worked as Product Manager at BMW", set()) == CareerEvidenceType.CAREER_EXPERIENCE
+    assert (
+        _infer_evidence_type("Worked as Product Manager at Nimbus Motors", set())
+        == CareerEvidenceType.CAREER_EXPERIENCE
+    )
 
 
 def test_global_cache_singleton() -> None:

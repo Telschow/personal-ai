@@ -15,11 +15,15 @@ documented below.
 **STOP ENGINEERING AFTER THIS CHECKPOINT** — future work belongs to a new,
 explicitly-scoped phase, not to silent additions.
 
-## Current profile policy
+## Profile policy
 
-- Salary floor **€120k** (hard exclusion when published below), target **€150k**;
-  unknown salary = reviewable. Defence treated as a normal industry.
-- Munich-priority weighting is a score, never a filter; remote ≠ Munich.
+No personal policy ships in the source; these are local config decisions:
+
+- Compensation floor / target unset by default (`0/0`): no hard exclusion and a
+  neutral compensation score. Unknown salary = reviewable.
+- No sector is preferred by default.
+- Preferred-city weighting is a score, never a filter, and is a score of `0.0`
+  priority when no city is configured.
 
 ## Project structure
 
@@ -105,7 +109,8 @@ job_agent/
   enabled. **No `job_agent` code was modified for the benchmark.**
 - Groups (sources): ATS (greenhouse, lever, ashby) · AI boards (aijobs.net,
   aijobs.ai, mljobs.io, machinelearningjobs, deeplearningjobs) ·
-  Munich-Germany (munich_startup, berlin_startup, arbeitsagentur, ingenieur) ·
+  Regional-Germany (munich_startup, berlin_startup, arbeitsagentur,
+  ingenieur) ·
   Remote (weworkremotely, remoteok, remotive, himalayas, remote.co).
 - Tracks: product_management, program_management, autonomous_driving, ai_ml,
   robotics, engineering_leadership, defence_aerospace, mobility, deeptech.
@@ -118,7 +123,7 @@ job_agent/
 |-------|-------------:|-----:|-----------:|-------:|----------:|-------:|
 | **ATS** | 18 | 103 | 92 | 9 | 9 | **3** |
 | **AI boards** | 34 | 93 | 82 | 0 | 0 | 0 |
-| **Munich-Germany** | 30 | 76 | 72 | 1 | 1 | 1 |
+| **Regional-Germany** | 30 | 76 | 72 | 1 | 1 | 1 |
 | **Remote** | 35 | 119 | 116 | 11 | 11 | 5 |
 | **Total** | **117/144** | **391** | **362** | **21** | **21** | **9** |
 

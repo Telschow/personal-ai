@@ -3,10 +3,17 @@
 
 import os
 import sys
+from pathlib import Path
 
 # Set up environment for job_agent
 os.environ.setdefault("JOB_AGENT_DATABASE_PATH", "output/jobs.sqlite3")
-os.environ.setdefault("JOB_AGENT_LLM_BASE_URL", "http://host.docker.internal:11434")
+# Ollama runs on the host while these scripts run inside the container, so the
+# container reaches it via the host gateway. Outside Docker, plain loopback is
+# correct. Both are overridable with JOB_AGENT_LLM_BASE_URL.
+os.environ.setdefault(
+    "JOB_AGENT_LLM_BASE_URL",
+    "http://host.docker.internal:11434" if Path("/.dockerenv").exists() else "http://127.0.0.1:11434",
+)
 os.environ.setdefault("JOB_AGENT_LLM_MODEL", "qwen3.5:9b")
 
 # Add job_agent to path

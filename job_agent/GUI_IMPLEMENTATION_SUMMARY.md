@@ -18,10 +18,10 @@ No business logic duplicated. GUI only orchestrates existing backend services.
 ## Pages Implemented
 
 1. **📊 Dashboard** - Corpus stats, new jobs, active jobs, high-fit jobs, jobs reviewed, applications, interviews
-2. **📅 Daily Intelligence** - NEW, CHANGED, HIGH-FIT, HIGH-FIT Munich, HIGH-FIT AI/Autonomous, NEWLY SALARY-DISCLOSED, STALE/CLOSING
+2. **📅 Daily Intelligence** - NEW, CHANGED, HIGH-FIT, HIGH-FIT LOCAL, HIGH-FIT DOMAIN, NEWLY SALARY-DISCLOSED, STALE/CLOSING
 3. **🔍 Job Explorer** - Searchable table with filters (company, provider, role family, location, salary, remote, fit range, application status, feedback status)
 4. **📋 Calibration** - Feedback queue with metrics (relevant@K, false positives/negatives)
-5. **📑 Shortlists** - Top overall, Munich, AI/Autonomous, Product Leadership, Career Pivot, International
+5. **📑 Shortlists** - Top overall, preferred city, remote, domain, seniority, international
 6. **📄 CV Generation** - Generate tailored CV with evidence manifest, validation status, career move type
 7. **💼 LinkedIn** - Optimize LinkedIn profile with current vs recommended view (no auto-mutation)
 8. **📁 Projects** - Portfolio project recommendations with effort estimates

@@ -82,7 +82,7 @@ def seeded_database(tmp_path):
         ]
     )
     mem = memory.create_user_memory(
-        "The user wants to lead at BMW.", kind="goal", summary="career"
+        "The user wants to lead at Nimbus Motors.", kind="goal", summary="career"
     )
     people.upsert_reference(
         PersonReference(
@@ -140,7 +140,7 @@ class TestBridgeReads:
 
     def test_memory_search_finds_seeded_memory(self, seeded_database):
         server = build_mcp_server(seeded_database["database"])
-        result = _call(server, "search_memory", {"query": "BMW"})
+        result = _call(server, "search_memory", {"query": "Nimbus Motors"})
         assert result["memories"]
         assert result["memories"][0]["memory_id"] == seeded_database["memory_id"]
 

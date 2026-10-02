@@ -90,7 +90,7 @@ def test_positioning_headline_from_strong():
     attrs = _attrs("autonomous driving product owner at a leading OEM")
     ev = [
         _ev(
-            "Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)",
+            "Worked as Product Owner - Autonomous Driving at Nimbus Motors (2024-present)",
             "verified",
             categories=["product", "domain", "ai", "leadership"],
         ),
@@ -110,7 +110,7 @@ def test_positioning_references_evidence_ids():
     attrs = _attrs("autonomous driving and machine learning products")
     ev = [
         _ev(
-            "Product Owner for Autonomous Driving at BMW (2024-present)",
+            "Product Owner for Autonomous Driving at Nimbus Motors (2024-present)",
             "verified",
             categories=["product", "domain", "ai"],
         )
@@ -125,7 +125,9 @@ def test_positioning_lists_gaps_and_negative_evidence():
     career = derive_career_profile(_profile())
     attrs = _attrs("data engineering and autonomous driving")
     negative = _ev("I have no data engineering experience", "documented", categories=["technical"])
-    strong = _ev("Product Owner - Autonomous Driving at BMW Group", "verified", categories=["product", "domain", "ai"])
+    strong = _ev(
+        "Product Owner - Autonomous Driving at Nimbus Motors", "verified", categories=["product", "domain", "ai"]
+    )
     evs = [negative, strong]
     mapping = map_requirements(attrs, career, evs)
     plan = build_positioning_plan(career, mapping, evs)

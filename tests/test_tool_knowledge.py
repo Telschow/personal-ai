@@ -23,26 +23,26 @@ class TestKnowledgeSearchTool:
     def test_calls_service_with_query(self) -> None:
         service = FakeRetrievalService()
         tool = KnowledgeSearchTool(service)
-        tool.search_knowledge({"query": "BCG"})
-        assert service.last_query == "BCG"
+        tool.search_knowledge({"query": "Example Corp"})
+        assert service.last_query == "Example Corp"
 
     def test_calls_service_with_limit(self) -> None:
         service = FakeRetrievalService()
         tool = KnowledgeSearchTool(service)
-        tool.search_knowledge({"query": "BCG", "limit": 3})
+        tool.search_knowledge({"query": "Example Corp", "limit": 3})
         assert service.last_limit == 3
 
     def test_default_limit(self) -> None:
         service = FakeRetrievalService()
         tool = KnowledgeSearchTool(service)
-        tool.search_knowledge({"query": "BCG"})
+        tool.search_knowledge({"query": "Example Corp"})
         assert service.last_limit == 10
 
     def test_rejects_unknown_arguments(self) -> None:
         service = FakeRetrievalService()
         tool = KnowledgeSearchTool(service)
         with pytest.raises(ValueError, match="unsupported arguments"):
-            tool.search_knowledge({"query": "BCG", "injected": True})
+            tool.search_knowledge({"query": "Example Corp", "injected": True})
 
     def test_rejects_missing_query(self) -> None:
         service = FakeRetrievalService()
@@ -60,7 +60,7 @@ class TestKnowledgeSearchTool:
         service = FakeRetrievalService()
         tool = KnowledgeSearchTool(service)
         with pytest.raises(TypeError, match="limit must be an integer"):
-            tool.search_knowledge({"query": "BCG", "limit": "five"})
+            tool.search_knowledge({"query": "Example Corp", "limit": "five"})
 
     def test_returns_formatted_results(self) -> None:
         from personal_ai.retrieval import SearchResult
@@ -72,14 +72,14 @@ class TestKnowledgeSearchTool:
                     document_id="doc-1",
                     score=0.85,
                     title="meeting.txt",
-                    text="BCG consulting project notes",
+                    text="Example Corp consulting project notes",
                     page_number=None,
                     matched_fields=(),
                 ),
             )
         )
         tool = KnowledgeSearchTool(service)
-        envelope = tool.search_knowledge({"query": "BCG"})
+        envelope = tool.search_knowledge({"query": "Example Corp"})
         results = envelope["results"]
         assert envelope["status"] == "results"
         assert envelope["total_returned"] == 1
@@ -117,7 +117,7 @@ class TestKnowledgeSearchTool:
         tool = KnowledgeSearchTool(service)
         tool.search_knowledge(
             {
-                "query": "BCG",
+                "query": "Example Corp",
                 "filter": {
                     "source_types": ["file"],
                     "created_after": "2026-01-01T00:00:00+00:00",
@@ -134,7 +134,7 @@ class TestKnowledgeSearchTool:
         tool = KnowledgeSearchTool(service)
         tool.search_knowledge(
             {
-                "query": "BCG",
+                "query": "Example Corp",
                 "filter": {"mime_types": ["application/pdf"]},
             }
         )
@@ -145,7 +145,9 @@ class TestKnowledgeSearchTool:
         service = FakeRetrievalService()
         tool = KnowledgeSearchTool(service)
         with pytest.raises(ValueError, match="list of strings"):
-            tool.search_knowledge({"query": "BCG", "filter": {"mime_types": [1, 2, 3]}})
+            tool.search_knowledge(
+                {"query": "Example Corp", "filter": {"mime_types": [1, 2, 3]}}
+            )
 
     def test_output_includes_source_type(self) -> None:
         from personal_ai.retrieval import SearchResult
@@ -157,7 +159,7 @@ class TestKnowledgeSearchTool:
                     document_id="doc-1",
                     score=0.85,
                     title="Phase 33 Email Subject",
-                    text="BCG consulting project notes",
+                    text="Example Corp consulting project notes",
                     page_number=None,
                     matched_fields=(),
                     source_type="email",
@@ -165,7 +167,7 @@ class TestKnowledgeSearchTool:
             )
         )
         tool = KnowledgeSearchTool(service)
-        results = tool.search_knowledge({"query": "BCG"})["results"]
+        results = tool.search_knowledge({"query": "Example Corp"})["results"]
         assert results[0]["source_type"] == "email"
         assert results[0]["title"] == "Phase 33 Email Subject"
 
@@ -177,7 +179,7 @@ class TestKnowledgeSearchTool:
         tool = KnowledgeSearchTool(service)
         tool.search_knowledge(
             {
-                "query": "BCG",
+                "query": "Example Corp",
                 "filter": {"created_before": "2026-02-01T00:00:00+00:00"},
             }
         )
@@ -188,14 +190,16 @@ class TestKnowledgeSearchTool:
         service = FakeRetrievalService()
         tool = KnowledgeSearchTool(service)
         with pytest.raises(ValueError, match="unsupported fields"):
-            tool.search_knowledge({"query": "BCG", "filter": {"sneaky_field": "value"}})
+            tool.search_knowledge(
+                {"query": "Example Corp", "filter": {"sneaky_field": "value"}}
+            )
 
     def test_rejects_non_string_source_types(self) -> None:
         service = FakeRetrievalService()
         tool = KnowledgeSearchTool(service)
         with pytest.raises(ValueError, match="list of strings"):
             tool.search_knowledge(
-                {"query": "BCG", "filter": {"source_types": [1, 2, 3]}}
+                {"query": "Example Corp", "filter": {"source_types": [1, 2, 3]}}
             )
 
     def test_empty_results(self) -> None:

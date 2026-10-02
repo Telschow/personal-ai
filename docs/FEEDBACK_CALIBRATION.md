@@ -300,7 +300,7 @@ Based on feedback patterns:
 job-agent feedback add abc123 strong_interest --note "Great match for my skills"
 
 # Add negative feedback
-job-agent feedback add def456 wrong_location --note "Too far from Munich"
+job-agent feedback add def456 wrong_location --note "Too far from my preferred city"
 
 # Add neutral feedback
 job-agent feedback add ghi789 maybe --note "Interesting but needs more details"

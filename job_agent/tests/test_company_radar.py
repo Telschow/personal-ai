@@ -10,11 +10,24 @@ from job_agent.company_radar import _find_source_for_provider, _load_radar, disc
 from job_agent.config import Config
 
 
-def test_radar_configuration_load():
+def test_radar_configuration_load(tmp_path, monkeypatch):
+    """The radar parses when configured, and an absent radar is not an error.
+
+    company_radar.yaml is gitignored: it holds the operator's own target
+    employers, so no target may be asserted here. This test writes a synthetic
+    radar instead of reading whatever the developer happens to have locally.
+    """
+    radar_file = tmp_path / "company_radar.yaml"
+    radar_file.write_text(
+        "companies:\n  - name: Example Corp\n    disabled: false\n    greenhouse: tok-example\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr("job_agent.company_radar._RADAR_PATH", radar_file)
     radar = _load_radar()
-    assert len(radar) > 0
-    names = [c.name for c in radar]
-    assert "Helsinger" in names or "Databricks" in names
+    assert [c.name for c in radar] == ["Example Corp"]
+
+    monkeypatch.setattr("job_agent.company_radar._RADAR_PATH", tmp_path / "absent.yaml")
+    assert _load_radar() == []
 
 
 def test_disabled_company_not_queried():

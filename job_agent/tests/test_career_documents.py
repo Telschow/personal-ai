@@ -15,11 +15,11 @@ _SIMPLE = """Alice Example
 Product Owner - Autonomous Driving
 
 Experience
-BMW Group, 2024-present
+Nimbus Motors, 2024-present
 Product Owner - Automated Valet Parking
 
 Education
-Technical University of Munich, MSc Automotive and Combustion Engine Technology
+Example Technical University, MSc Systems Engineering
 
 Skills
 Product Management
@@ -30,7 +30,7 @@ _OTHER = """Alice Example
 Function Owner - Autonomous Driving
 
 Experience
-BMW Group, 2023-2024
+Nimbus Motors, 2023-2024
 Automated Maneuver Assistant
 """
 
@@ -127,14 +127,14 @@ def test_docx_roundtrip_text_extraction(tmp_path):
     d = Document()
     d.add_heading("Alice Example", 0)
     d.add_heading("Experience", 1)
-    d.add_paragraph("BMW Group, 2024-present — Product Owner - Automated Valet Parking")
+    d.add_paragraph("Nimbus Motors, 2024-present — Product Owner - Automated Valet Parking")
     d.add_paragraph("Led cross-functional autonomous-driving product team")
     d.save(str(p))
 
     doc = ingest_document(p)
     assert "wordprocessingml" in doc.mime_type
     joined = "\n".join(s.text for s in doc.sections)
-    assert "BMW Group" in joined
+    assert "Nimbus Motors" in joined
     assert "Product Owner" in joined
 
 
@@ -145,7 +145,7 @@ def test_docx_deterministic_despite_metadata(tmp_path):
     p1, p2 = tmp_path / "a.docx", tmp_path / "b.docx"
     for p in (p1, p2):
         d = Document()
-        d.add_paragraph("BMW Group, 2024-present — Product Owner")
+        d.add_paragraph("Nimbus Motors, 2024-present — Product Owner")
         d.add_paragraph("Autonomous driving product ownership")
         d.save(str(p))
     assert ingest_document(p1).content_hash == ingest_document(p2).content_hash
@@ -178,11 +178,11 @@ def _minimal_pdf(text: str) -> bytes:
 def test_pdf_roundtrip_text_extraction(tmp_path):
     pytest.importorskip("pypdf")
     p = tmp_path / "cv.pdf"
-    p.write_bytes(_minimal_pdf("BMW Group, 2024-present — Product Owner - Automated Valet Parking"))
+    p.write_bytes(_minimal_pdf("Nimbus Motors, 2024-present — Product Owner - Automated Valet Parking"))
     doc = ingest_document(p)
     assert doc.mime_type == "application/pdf"
     joined = "\n".join(s.text for s in doc.sections)
-    assert "BMW Group" in joined
+    assert "Nimbus Motors" in joined
     assert "Product Owner" in joined
     assert doc.sections[0].ref.get("page") == 1
 

@@ -15,7 +15,7 @@ _EXAMPLE_CV = """\
 Alice Example
 
 Experience
-Product Owner - Autonomous Driving at BMW Group, 2024-present
+Product Owner - Autonomous Driving at Nimbus Motors, 2024-present
 Led design of Automated Valet Parking feature
 
 Education

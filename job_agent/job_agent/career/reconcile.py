@@ -66,7 +66,7 @@ def _structured_key(claim: str) -> tuple[str, str] | None:
     # Strip trailing date range before matching.
     stripped = re.sub(r"\s*\(?(?:\d{4})\s*[-–—]\s*(?:\d{4}|present)\)?\s*$", "", claim.strip())
 
-    # "Product Owner at BMW Group" form (with or without stripped date range)
+    # "Product Owner at Nimbus Motors" form (with or without stripped date range)
     m = re.match(
         r"^(?P<title>[^,–—]{3,60}?)\s+at\s+(?P<company>[^,–—]{2,60})$",
         stripped,
@@ -74,7 +74,7 @@ def _structured_key(claim: str) -> tuple[str, str] | None:
     if m:
         return (m.group("company").strip().casefold(), m.group("title").strip().casefold())
 
-    # Comma-separated form: "BMW Group, 2024-present, Product Owner"
+    # Comma-separated form: "Nimbus Motors, 2024-present, Product Owner"
     parts = [p.strip() for p in re.split(r"[,;–—]", claim) if p.strip()]
     if len(parts) >= 2 and _YEAR_RE.search(parts[1]):
         company = parts[0].strip().casefold()

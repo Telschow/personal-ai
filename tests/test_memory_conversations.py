@@ -97,8 +97,8 @@ def _extract(
 
 
 def test_work_current() -> None:
-    (candidate,) = _extract(_conv(), (_msg("m1", "I work at BCG"),))
-    assert candidate.statement == "The user works at BCG"
+    (candidate,) = _extract(_conv(), (_msg("m1", "I work at Example Corp"),))
+    assert candidate.statement == "The user works at Example Corp"
     assert candidate.kind is MemoryKind.WORK
     assert candidate.temporal_scope is TemporalScope.CURRENT
 
@@ -205,7 +205,7 @@ def test_unsupported_source_type_yields_nothing() -> None:
 
 def test_assistant_messages_never_yield_candidates() -> None:
     conversation = _conv()
-    messages = (_msg("m1", "I work at BCG", role="assistant"),)
+    messages = (_msg("m1", "I work at Example Corp", role="assistant"),)
     assert _extract(conversation, messages) == ()
 
 
@@ -217,14 +217,14 @@ def test_inactive_branch_messages_are_skipped() -> None:
 
 def test_non_first_person_is_ignored() -> None:
     conversation = _conv()
-    messages = (_msg("m1", "BCG is a great consulting firm"),)
+    messages = (_msg("m1", "Example Corp is a great consulting firm"),)
     assert _extract(conversation, messages) == ()
 
 
 def test_negation_is_never_a_fact() -> None:
     for sentence in (
-        "I don't work at BCG",
-        "I do not work at BCG",
+        "I don't work at Example Corp",
+        "I do not work at Example Corp",
         "I did not graduate from MIT",
         "I never lived in Berlin",
         "I can't swim",
@@ -234,7 +234,7 @@ def test_negation_is_never_a_fact() -> None:
 
 def test_questions_are_skipped() -> None:
     conversation = _conv()
-    messages = (_msg("m1", "Do I work at BCG?"),)
+    messages = (_msg("m1", "Do I work at Example Corp?"),)
     assert _extract(conversation, messages) == ()
 
 
@@ -250,13 +250,13 @@ def test_requests_directed_at_the_model_are_skipped() -> None:
 
 def test_statements_turned_toward_you_are_skipped() -> None:
     conversation = _conv()
-    messages = (_msg("m1", "I work at BCG with you"),)
+    messages = (_msg("m1", "I work at Example Corp with you"),)
     assert _extract(conversation, messages) == ()
 
 
 def test_quoted_content_is_skipped() -> None:
     conversation = _conv()
-    messages = (_msg("m1", 'My boss said "I work at BCG"'),)
+    messages = (_msg("m1", 'My boss said "I work at Example Corp"'),)
     assert _extract(conversation, messages) == ()
 
 
@@ -296,8 +296,8 @@ def test_overlong_statements_are_skipped() -> None:
 def test_repeated_fact_within_conversation_collapses() -> None:
     conversation = _conv()
     messages = (
-        _msg("m1", "I work at BCG.", index=0),
-        _msg("m2", "I work at BCG", index=1),
+        _msg("m1", "I work at Example Corp.", index=0),
+        _msg("m2", "I work at Example Corp", index=1),
     )
     candidates = _extract(conversation, messages)
     assert len(candidates) == 1
@@ -310,7 +310,7 @@ def test_max_candidates_bounds() -> None:
         _msg(f"m{i}", sentence, index=i)
         for i, sentence in enumerate(
             (
-                "I work at BCG",
+                "I work at Example Corp",
                 "My name is John",
                 "I live in London",
                 "I like cooking",
@@ -325,11 +325,11 @@ def test_max_messages_bounds() -> None:
     extractor = ConversationMemoryExtractor(max_messages=1)
     conversation = _conv()
     messages = (
-        _msg("m1", "I work at BCG", index=0),
+        _msg("m1", "I work at Example Corp", index=0),
         _msg("m2", "My name is John", index=1),
     )
     candidates = extractor.extract(conversation, messages)
-    assert [c.statement for c in candidates] == ["The user works at BCG"]
+    assert [c.statement for c in candidates] == ["The user works at Example Corp"]
 
 
 def test_empty_and_whitespace_messages_yield_nothing() -> None:
@@ -343,7 +343,9 @@ def test_empty_and_whitespace_messages_yield_nothing() -> None:
 
 def test_evidence_points_at_the_message_without_content() -> None:
     conversation = _conv()
-    message = _msg("msg-42", "I work at BCG", timestamp="2026-01-15T10:30:00+00:00")
+    message = _msg(
+        "msg-42", "I work at Example Corp", timestamp="2026-01-15T10:30:00+00:00"
+    )
     (candidate,) = _extract(conversation, (message,))
 
     (ref,) = candidate.evidence
@@ -362,7 +364,7 @@ def test_evidence_points_at_the_message_without_content() -> None:
     }
 
     picked = ref
-    assert "BCG" not in str(picked.to_dict().values())
+    assert "Example Corp" not in str(picked.to_dict().values())
 
 
 def test_gemini_evidence_falls_back_to_conversation_timestamp() -> None:
@@ -395,7 +397,7 @@ def _store(*conversations):
 
 def _chatgpt_work_pair():
     return _conv(), (
-        _msg("m1", "I work at BCG", index=0),
+        _msg("m1", "I work at Example Corp", index=0),
         _msg("m2", "Can you draft a report?", role="assistant", index=1),
     )
 
@@ -436,7 +438,7 @@ def test_ingestor_applies_accepted_candidate_and_is_idempotent() -> None:
         assert service.counts()["active"] == 1
         memory = service.list()[0]
         assert memory.status is MemoryStatus.ACTIVE
-        assert memory.content == "The user works at BCG"
+        assert memory.content == "The user works at Example Corp"
         assert len(service.evidence_for(memory.memory_id)) == 1
     finally:
         connection.close()
@@ -448,7 +450,7 @@ def test_run_scans_only_the_requested_source_type() -> None:
     chatgpt_conv, _ = _chatgpt_work_pair()
     connection, store = _store(
         (gemini_conv, (_msg("m-g", "I live in Lisbon", conv_id="conv-g"),)),
-        (chatgpt_conv, (_msg("m1", "I work at BCG"),)),
+        (chatgpt_conv, (_msg("m1", "I work at Example Corp"),)),
     )
     try:
         ingestor = ConversationMemoryIngestor(store, service)
@@ -461,7 +463,7 @@ def test_run_scans_only_the_requested_source_type() -> None:
         assert service.counts()["active"] == 2
         statements = {memory.content for memory in service.list()}
         assert statements == {
-            "The user works at BCG",
+            "The user works at Example Corp",
             "The user lives in Lisbon",
         }
     finally:
@@ -495,7 +497,7 @@ def test_report_is_aggregate_only_and_content_free() -> None:
     rendered = json.dumps(report.summary())
     assert "render" not in rendered  # nothing content-shaped is serialized
     assert "statement" not in rendered
-    assert "BCG" not in rendered
+    assert "Example Corp" not in rendered
     assert report.summary()["source_type"] == "chatgpt"
     assert report.summary()["conversations_scanned"] == 1
 
@@ -505,7 +507,7 @@ def test_ingestor_reads_are_bounded() -> None:
     conversations = [
         (
             _conv(f"conv-{index}"),
-            (_msg(f"m-{index}", "I work at BCG", conv_id=f"conv-{index}"),),
+            (_msg(f"m-{index}", "I work at Example Corp", conv_id=f"conv-{index}"),),
         )
         for index in range(12)
     ]
@@ -584,9 +586,11 @@ def test_unknown_language_extraction_uses_english_rules() -> None:
 def test_unknown_language_canonical_statement_falls_back_to_english() -> None:
     """``_canonical_statement`` must not raise on the UNKNOWN language."""
 
-    statement = _canonical_statement("I work at BCG", ConversationLanguage.UNKNOWN)
+    statement = _canonical_statement(
+        "I work at Example Corp", ConversationLanguage.UNKNOWN
+    )
 
-    assert statement == "The user works at BCG"
+    assert statement == "The user works at Example Corp"
 
 
 def test_german_work_current() -> None:
@@ -601,7 +605,7 @@ def test_german_work_current() -> None:
 def test_german_work_historical() -> None:
     """German historical work statements should be extracted."""
     conv = _conv_de()
-    (candidate,) = _extract(conv, (_msg("m1", "Ich arbeitete bei BMW"),))
+    (candidate,) = _extract(conv, (_msg("m1", "Ich arbeitete bei Nimbus Motors"),))
     assert candidate.kind is MemoryKind.WORK
     assert candidate.temporal_scope is TemporalScope.HISTORICAL
 
@@ -661,7 +665,7 @@ def test_german_education_current() -> None:
 def test_german_negation_excluded() -> None:
     """German negated statements should not produce candidates."""
     for sentence in (
-        "Ich arbeite nicht bei BCG",
+        "Ich arbeite nicht bei Example Corp",
         "Ich wohne nicht in München",
         "Ich spreche kein Spanisch",
         "Ich habe keinen Hund",
@@ -865,7 +869,7 @@ def test_mixed_language_conversation() -> None:
     """Mixed language conversations should extract candidates per sentence language."""
     conv = _conv()
     messages = (
-        _msg("m1", "I work at BCG"),
+        _msg("m1", "I work at Example Corp"),
         _msg("m2", "Ich wohne in München"),
         _msg("m3", "Quiero mudarme a España"),
     )
@@ -905,18 +909,18 @@ def test_spanish_sensitive_rejected() -> None:
 @pytest.mark.parametrize(
     ("sentence", "conv"),
     [
-        ('Peter sagte: "Ich arbeite bei BMW"', _conv_de()),
-        ("Peter sagte: \u201eIch arbeite bei BMW\u201c", _conv_de()),
-        ("Peter sagte: \u201aIch arbeite bei BMW\u2018", _conv_de()),
-        ("Peter sagte: 'Ich arbeite bei BMW'", _conv_de()),
-        ("Peter sagte: `Ich arbeite bei BMW`", _conv_de()),
+        ('Peter sagte: "Ich arbeite bei Nimbus Motors"', _conv_de()),
+        ("Peter sagte: \u201eIch arbeite bei Nimbus Motors\u201c", _conv_de()),
+        ("Peter sagte: \u201aIch arbeite bei Nimbus Motors\u2018", _conv_de()),
+        ("Peter sagte: 'Ich arbeite bei Nimbus Motors'", _conv_de()),
+        ("Peter sagte: `Ich arbeite bei Nimbus Motors`", _conv_de()),
         ("María dice: «Trabajo en Google»", _conv_es()),
         ("«Trabajo en Google»", _conv_es()),
         ("María dice: 'Trabajo en Google'", _conv_es()),
-        ("Peter said: \u201cI work at BMW\u201d", _conv()),
-        ("Peter said: \u2018I work at BMW\u2019", _conv()),
-        ("Peter said: 'I work at BMW'", _conv()),
-        ("Peter said: `I work at BMW`", _conv()),
+        ("Peter said: \u201cI work at Nimbus Motors\u201d", _conv()),
+        ("Peter said: \u2018I work at Nimbus Motors\u2019", _conv()),
+        ("Peter said: 'I work at Nimbus Motors'", _conv()),
+        ("Peter said: `I work at Nimbus Motors`", _conv()),
     ],
 )
 def test_quoted_content_typographic_marks_are_skipped(sentence: str, conv) -> None:
@@ -937,8 +941,8 @@ def test_german_third_party_narratives_never_become_user_memories() -> None:
     by the separate relationship-consistency test below.
     """
     for sentence in (
-        "Peter sagt, er arbeitet bei BMW",
-        "Peter arbeitet bei BMW",
+        "Peter sagt, er arbeitet bei Nimbus Motors",
+        "Peter arbeitet bei Nimbus Motors",
         "Die Firma Siemens hat viele Mitarbeiter",
     ):
         assert _extract(_conv_de(), (_msg("m1", sentence),)) == (), sentence
@@ -1080,7 +1084,8 @@ def test_mixed_language_message_splits_per_sentence() -> None:
     """One message containing several languages extracts per-sentence facts."""
     conv = _conv()
     candidates = _extract(
-        conv, (_msg("m1", "Ich wohne in München. I work at BCG. Vivo en Madrid."),)
+        conv,
+        (_msg("m1", "Ich wohne in München. I work at Example Corp. Vivo en Madrid."),),
     )
     assert len(candidates) == 3
     kinds = {c.kind for c in candidates}
@@ -1088,6 +1093,8 @@ def test_mixed_language_message_splits_per_sentence() -> None:
     assert MemoryKind.WORK in kinds
     statements = {c.statement for c in candidates}
     assert "Der nutzer wohnt in München." in statements
-    assert "The user works at BCG." in statements
+    assert "The user works at Example Corp." in statements
     assert "El usuario vive en Madrid." in statements
-    assert all("München" in s or "BCG" in s or "Madrid" in s for s in statements)
+    assert all(
+        "München" in s or "Example Corp" in s or "Madrid" in s for s in statements
+    )

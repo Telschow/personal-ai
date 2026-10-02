@@ -1,12 +1,15 @@
 # FINAL VALIDATION REPORT - Personal AI Career Search System
 
-> **Historical validation report — validation performed 2026-09-23.**
+> **Historical validation report.**
 >
-> The results and the readiness assessment below are preserved as a record of
-> that specific validation run against a specific local dataset. They are not a
-> current guarantee: the "READY_FOR_DAILY_USE" conclusion applied to the
-> configuration and data present on that date. Re-run the validation suite
-> before relying on it for today's state.
+> The results and readiness assessment below are preserved as a record of one
+> validation run. They are not a current guarantee: the "READY_FOR_DAILY_USE"
+> conclusion applied to the configuration and data present on that date.
+> Re-run the validation suite before relying on it for today's state.
+>
+> The individual, employer, and search-target specifics of that run have been
+> removed. The engineering findings — what was validated, what each check
+> proved, and what remains limited — are what this document is kept for.
 
 ## EXECUTIVE SUMMARY
 
@@ -29,11 +32,11 @@ All core components are implemented, tested, and validated. The system successfu
 
 **Implemented Features:**
 - Run-level isolation with unique run IDs
-- Company radar discovery (Helsinger, Databricks, Snowflake, Google)
+- Company radar discovery (locally configured company list; no targets ship in the source)
 - Greenhouse pagination
 - Ashby pagination
 - SmartRecruiters integration
-- Direct source discovery (BMW, Quantum Systems, Rohde-Schwarz, Helsing)
+- Direct source discovery (locally configured domains; none ship in the source)
 - Cross-source deduplication
 - Role archetype classification
 - Location classification
@@ -61,27 +64,22 @@ All tests passing: 100%
 
 **Profile loaded from:** `profile/profile.yaml`
 
-```yaml
-name: Alice Example
-current_role: product_management
-target_roles: [product_management, product_leadership]
-target_seniority: 4
-leadership_direction: product
-industry_domains: [automotive, mobility, autonomous driving, industrial]
-languages: German native, Spanish native, English professional
-constraints:
-  minimum_salary_eur: 120000
-  preferred_salary_eur: 150000
-  willing_to_relocate: true
-  family_compatibility_important: true
-```
+The profile schema was exercised end to end: current role, target roles,
+seniority, leadership direction, industry domains, languages, and constraints
+all parsed and validated.
+
+**No profile values are reproduced here.** A career profile is personal policy.
+The committed example is a synthetic placeholder; a real profile stays in the
+gitignored local file. Compensation constraints in particular are a personal
+decision: the shipped default is unconfigured (`0`/`0`), which leaves published
+salary neutral instead of applying anyone's floor.
 
 ### 3. CV Ingestion ✅
 
-**CV source:** `/mnt/immich/projects/personal-ai/Alice Example CV.pdf`
+**CV source:** a local, gitignored PDF.
 
 **Status:** Successfully ingested
-- Document ID: cv-doc:76ad16be125899c9
+- Document ID recorded in the local run
 - Employment history extracted
 - Education verified
 - Skills identified
@@ -113,30 +111,23 @@ constraints:
 
 ### 6. Sample Corpus Validation
 
-**Test corpus:** 5 sample jobs with real classification
+**Test corpus:** a small synthetic corpus run through the real pipeline.
 
-| Metric | Value |
-|--------|-------|
+| Metric | Observed |
+|--------|----------|
 | Total jobs | 5 |
 | Raw candidates | 5 |
 | Normalized | 5 |
 | Distinct | 5 |
 | Active | 5 |
-| Salary disclosed | 80% |
-| Role classified | 100% |
-| Location classified | 100% |
+| Salary disclosed | 4 of 5 |
+| Role classified | 5 of 5 |
+| Location classified | 5 of 5 |
 
-**Role Distribution:**
-- product_management: 2
-- solutions_architecture: 1
-- product_leadership: 1
-- program_leadership: 1
-
-**Location Distribution:**
-- Munich: 2
-- Remote EU: 1
-- Germany: 1
-- International: 1
+Role and location distributions matched the corpus the run was built from, across
+four distinct role classes and four locality scopes (a city, its country, a
+region-wide remote scope, and an international scope). A classification rate
+below 100% is expected against real-world input and is not a defect.
 
 ### 7. Classification Validation
 
@@ -150,9 +141,9 @@ constraints:
 - Direction mapping correct
 
 **Location Classification:** ✅
-- Munich correctly identified
-- Remote/EU correctly categorized
-- Location scores accurate
+- City-level postings scored to the city tier
+- Remote and regional postings categorized correctly
+- Location scores matched the intended tier ordering
 
 ### 8. Compensation Validation
 
@@ -202,10 +193,9 @@ constraints:
 - No fake project claims
 - Factual consistency maintained
 
-**Variants generated for:**
-- Senior Technical Product Manager (BMW)
-- Product Manager AI (Conti)
-- Head of Product (InnovateAI)
+**Variants generated for:** one posting per distinct role class in the
+corpus, including a senior individual-contributor role, an AI-specialist role,
+and a leadership role.
 
 ### 11. Portfolio Projects
 

@@ -442,8 +442,8 @@ never yield candidates.
 
 Temporal scope comes from the trigger, not from guessing:
 
-- present-tense declarations ("I work at BCG") → `current`;
-- past-tense ("I worked at BCG") → `historical`;
+- present-tense declarations ("I work at Example Corp") → `current`;
+- past-tense ("I worked at Example Corp") → `historical`;
 - recurring-timeframe ("I go to the gym on Mondays") → `recurring`;
 - "I want to do X" is a `goal`, **never** an achieved fact.
 
@@ -869,7 +869,7 @@ bug and added regression coverage.
   (ASCII `'` and the right single quote `’`) count as quotes only when not
   strictly between two letters — English contractions/possessives ("I'm
   learning Portuguese", "a friend's company") still extract, while "Peter
-  said: 'I work at BMW'" is skipped. Curly-apostrophe contractions also
+  said: 'I work at Nimbus Motors'" is skipped. Curly-apostrophe contractions also
   canonicalize ("i’m" → "the user is"). Skipping a candidate is safe.
 - Handoff verified end-to-end for DE ("Der nutzer arbeitet bei Siemens") and
   ES ("El usuario vive en Madrid"): the stored statement is the original
