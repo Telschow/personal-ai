@@ -20,8 +20,18 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 class SalaryPolicy(BaseModel):
-    minimum_eur: float = 120_000
-    target_eur: float = 150_000
+    """Compensation expectations, in EUR.
+
+    ``minimum_eur`` / ``target_eur`` default to ``0``, which means *no
+    preference is configured*: the compensation gate is skipped entirely and
+    published salary carries no ranking weight. There is deliberately no
+    built-in floor or target — any such number is a personal career policy
+    decision that belongs in your own git-ignored ``config.yaml``, not in
+    shipped source. Set both to positive values to enable the gate.
+    """
+
+    minimum_eur: float = 0
+    target_eur: float = 0
 
 
 class JobsSettings(BaseModel):
@@ -42,7 +52,9 @@ class RankingWeights(BaseModel):
 
 
 class SearchSettings(BaseModel):
-    global_enabled: bool = True
+    # Network discovery is opt-in. A bare Config() must never reach the
+    # network; enable it deliberately in your own config.yaml.
+    global_enabled: bool = False
     max_jobs_per_source: int = 250
     result_query_cap: int = 120
     results_per_query: int = 25
@@ -52,12 +64,23 @@ class SearchSettings(BaseModel):
     target_roles: list[str] = Field(default_factory=list)
     keywords_positive: list[str] = Field(default_factory=list)
     keywords_negative: list[str] = Field(default_factory=list)
+    # Sectors that count as "purpose" alignment. Empty by default: which
+    # industries you want to work in is a personal direction, not a ranking
+    # constant.
+    industries_preferred: list[str] = Field(default_factory=list)
+    # Free-text markers of purpose-aligned work. Deliberately separate from
+    # keywords_positive: that list steers which postings are fetched, while
+    # this one steers how a fetched posting is scored. Sharing them would mean
+    # adding a term for discovery silently also moves scores.
+    purpose_keywords: list[str] = Field(default_factory=list)
 
 
 class LLMSettings(BaseModel):
     provider: str = "ollama"
     model: str = "qwen3.5:9b"
-    base_url: str = "http://host.docker.internal:11434"
+    # Loopback by default: correct for a local checkout. Point this at your own
+    # host from config.yaml (or JOB_AGENT_LLM_BASE_URL) when running elsewhere.
+    base_url: str = "http://127.0.0.1:11434"
     temperature: float = 0.15
     timeout_seconds: float = 300.0
 
@@ -96,9 +119,15 @@ class CareerFitWeights(BaseModel):
 
 
 class LocationSettings(BaseModel):
-    """Munich-anchored location preferences for ranking *and* discovery."""
+    """Location preferences for ranking *and* discovery.
 
-    preferred_city: str = "Munich"
+    ``preferred_city`` defaults to empty: with no configured city, discovery
+    falls back to national/remote scope and ranking weights apply to the
+    location tiers a posting actually resolves to. Any specific city is a
+    personal geography decision and belongs in your own config.
+    """
+
+    preferred_city: str = ""
     national: bool = True
     remote: bool = True
     weights: LocationWeights = Field(default_factory=LocationWeights)
@@ -209,8 +238,15 @@ class Config(BaseModel):
             raise ValueError("application.auto_submit must be false in this version")
         if self.projects.auto_publish:
             raise ValueError("projects.auto_publish must be false in this version")
-        if self.jobs.salary.minimum_eur <= 0 or self.jobs.salary.target_eur <= 0:
-            raise ValueError("salary thresholds must be positive")
+        if self.jobs.salary.minimum_eur < 0 or self.jobs.salary.target_eur < 0:
+            raise ValueError("salary thresholds must be non-negative")
+        salary = self.jobs.salary
+        # 0 means "no preference configured" (gate skipped). A partial policy
+        # is rejected: half a gate would silently rank on a missing bound.
+        if (salary.minimum_eur == 0) != (salary.target_eur == 0):
+            raise ValueError("salary thresholds must both be 0 (disabled) or both be positive (enabled)")
+        if salary.minimum_eur > 0 and salary.target_eur < salary.minimum_eur:
+            raise ValueError("salary target_eur must be >= minimum_eur")
         if self.career.knowledge.provider not in ("none", "personal_ai"):
             raise ValueError("career.knowledge.provider must be 'none' or 'personal_ai'")
         weight_total = sum(self.career.weights.model_dump().values())
@@ -246,8 +282,6 @@ class Config(BaseModel):
             raise ValueError("career.pacing.max_consecutive_failures must be >= 1")
         if min(self.career.location.weights.model_dump().values()) <= 0:
             raise ValueError("career.location.weights must be positive")
-        if not self.career.location.preferred_city.strip():
-            raise ValueError("career.location.preferred_city must not be empty")
         return self
 
     def catalog_path_resolved(self) -> Path:

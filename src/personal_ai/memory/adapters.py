@@ -434,7 +434,7 @@ Rules:
   Never propose facts about third parties, companies, or the documents
   themselves.
 - Statement format: third person, starting with "The user", e.g.
-  "The user works at BCG as a product manager."
+  "The user works at Example Corp as a product manager."
 - temporal_scope: "current" (still true today), "historical" (past),
   "recurring" (happens regularly), or "unknown" when unsure.
 - kind: one of work, education, goal, project_context, identity,

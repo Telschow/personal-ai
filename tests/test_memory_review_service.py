@@ -696,7 +696,7 @@ def test_approval_of_conflict_stores_alongside_never_over(tmp_path: Path) -> Non
     harness = _harness(tmp_path)
     try:
         harness.service.apply_candidate(
-            _candidate("The user works at BCG", evidence=_evidence("m-1"))
+            _candidate("The user works at Example Corp", evidence=_evidence("m-1"))
         )
         conflicting = _candidate("The user works at Google", evidence=_evidence("m-2"))
         with pytest.raises(Exception, match="ambiguous_related_fact|conflict"):
@@ -714,7 +714,10 @@ def test_approval_of_conflict_stores_alongside_never_over(tmp_path: Path) -> Non
         assert len(memories) == 2
         contents = {m.content for m in memories}
         # Both survive; the existing record was not overwritten or superseded.
-        assert contents == {"The user works at BCG", "The user works at Google"}
+        assert contents == {
+            "The user works at Example Corp",
+            "The user works at Google",
+        }
         assert all(m.status.value == "active" for m in memories)
         for memory in memories:
             evidence = harness.service.evidence_for(memory.memory_id)

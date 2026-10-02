@@ -28,9 +28,9 @@ def _evidence():
     return [
         CareerEvidence(
             evidence_id=evidence_id(
-                "Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)", "profile"
+                "Worked as Product Owner - Autonomous Driving at Nimbus Motors (2024-present)", "profile"
             ),
-            claim="Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)",
+            claim="Worked as Product Owner - Autonomous Driving at Nimbus Motors (2024-present)",
             level=VerificationLevel.VERIFIED,
             source="profile",
             evidence_type=CareerEvidenceType.CAREER_EXPERIENCE,
@@ -53,8 +53,8 @@ def _evidence():
             categories=["program"],
         ),
         CareerEvidence(
-            evidence_id=evidence_id("Managed a team of 5 engineers at TUMCREATE (2015-2018)", "profile"),
-            claim="Managed a team of 5 engineers at TUMCREATE (2015-2018)",
+            evidence_id=evidence_id("Managed a team of 5 engineers at Aurora Labs (2015-2018)", "profile"),
+            claim="Managed a team of 5 engineers at Aurora Labs (2015-2018)",
             level=VerificationLevel.DOCUMENTED,
             source="profile",
             evidence_type=CareerEvidenceType.LEADERSHIP,
@@ -62,10 +62,10 @@ def _evidence():
         ),
         CareerEvidence(
             evidence_id=evidence_id(
-                "MSc Automotive and Combustion Engine Technology from Technical University of Munich (2018-2021)",
+                "MSc Systems Engineering from Example Technical University (2016-2019)",
                 "profile",
             ),
-            claim="MSc Automotive and Combustion Engine Technology from Technical University of Munich (2018-2021)",
+            claim="MSc Systems Engineering from Example Technical University (2016-2019)",
             level=VerificationLevel.VERIFIED,
             source="profile",
             evidence_type=CareerEvidenceType.EDUCATION,
@@ -200,11 +200,11 @@ def test_optimize_linkedin_returns_recommendations():
     cv = generate_cv(career, attrs, evidence, job_id="p:1")
 
     linkedin_profile = LinkedInProfile(
-        headline="Product Owner at BMW",
+        headline="Product Owner at Nimbus Motors",
         about="Experienced product owner",
         current_role="Product Owner",
         experience=[
-            {"company": "BMW Group", "title": "Product Owner - Autonomous Driving", "facts": ["Led AVP project"]}
+            {"company": "Nimbus Motors", "title": "Product Owner - Autonomous Driving", "facts": ["Led AVP project"]}
         ],
         education=[],
         skills=["Product Management", "Python"],
@@ -241,11 +241,11 @@ def test_optimize_linkedin_separates_current_vs_recommended():
     cv = generate_cv(career, attrs, evidence, job_id="p:1")
 
     linkedin_profile = LinkedInProfile(
-        headline="Product Owner at BMW",
+        headline="Product Owner at Nimbus Motors",
         about="Experienced product owner",
         current_role="Product Owner",
         experience=[
-            {"company": "BMW Group", "title": "Product Owner - Autonomous Driving", "facts": ["Led AVP project"]}
+            {"company": "Nimbus Motors", "title": "Product Owner - Autonomous Driving", "facts": ["Led AVP project"]}
         ],
         education=[],
         skills=["Product Management", "Python"],
@@ -262,13 +262,13 @@ def test_optimize_linkedin_separates_current_vs_recommended():
     result = optimize_linkedin(linkedin_profile, career, evidence, cv)
 
     # Current profile should be unchanged
-    assert result.current_profile.headline == "Product Owner at BMW"
+    assert result.current_profile.headline == "Product Owner at Nimbus Motors"
     assert result.current_profile.about == "Experienced product owner"
 
     # Recommendations should have different values
     headline_rec = next(r for r in result.recommendations if r.section == "headline")
-    assert headline_rec.current == "Product Owner at BMW"
-    assert headline_rec.recommended != "Product Owner at BMW"
+    assert headline_rec.current == "Product Owner at Nimbus Motors"
+    assert headline_rec.recommended != "Product Owner at Nimbus Motors"
 
 
 def test_generate_cv_with_move_type_classification():

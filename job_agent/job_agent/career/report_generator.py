@@ -9,6 +9,7 @@ from typing import Any
 
 from .profile import derive_career_profile
 from ..config import load_config
+from ..canonical import normalize_location, split_locations
 from ..models import Job
 from ..normalizer import normalize_job
 
@@ -152,11 +153,18 @@ class CareerSearchReport:
         return {"top_20": top_20}
 
     def _shortlists_by_category(self, jobs: list[Job]) -> dict[str, list[dict[str, Any]]]:
-        """Generate category-specific shortlists."""
-        # Munich-first
-        munich = [j for j in jobs if j.location_scope == "munich"]
-        munich.sort(key=lambda j: (j.role_classification_confidence, j.location_score), reverse=True)
-        
+        """Generate category-specific shortlists.
+
+        The locality shortlist follows the configured preferred city. There is
+        no built-in city: with none configured the shortlist is simply empty
+        rather than defaulting to somebody else's location.
+        """
+        preferred = self._preferred_city()
+        # A posting location is usually "City, Country", so match the configured
+        # city against any location token rather than the whole string.
+        local = [j for j in jobs if preferred and preferred in split_locations(j.location)]
+        local.sort(key=lambda j: (j.role_classification_confidence, j.location_score), reverse=True)
+
         # AI/autonomous systems
         ai_related = [j for j in jobs if j.role_archetypes and any("AI" in str(a) or "autonomous" in str(a).lower() for a in j.role_archetypes)]
         ai_related.sort(key=lambda j: j.role_classification_confidence, reverse=True)
@@ -166,10 +174,18 @@ class CareerSearchReport:
         career_accel.sort(key=lambda j: j.role_classification_confidence, reverse=True)
         
         return {
-            "munich": self._format_jobs(munich[:20]),
+            "preferred_city": self._format_jobs(local[:20]),
             "ai_autonomous": self._format_jobs(ai_related[:20]),
             "career_acceleration": self._format_jobs(career_accel[:20]),
         }
+
+    def _preferred_city(self) -> str:
+        """Canonical form of the configured preferred city, or "" if unset."""
+        try:
+            city = load_config().career.location.preferred_city.strip()
+        except Exception:
+            return ""
+        return normalize_location(city) if city else ""
 
     def _format_jobs(self, jobs: list[Job]) -> list[dict[str, Any]]:
         """Format jobs for display."""

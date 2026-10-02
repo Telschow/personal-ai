@@ -29,8 +29,8 @@ def _ev(cid: str, claim: str, level: VerificationLevel = VerificationLevel.DOCUM
 
 class TestEmployerEntity:
     def test_employer_in_evidence(self) -> None:
-        claim = "Product Owner for Autonomous Driving at BMW Group"
-        evidence = [_ev("e1", "Worked as Product Owner at BMW Group (2024-present)")]
+        claim = "Product Owner for Autonomous Driving at Nimbus Motors"
+        evidence = [_ev("e1", "Worked as Product Owner at Nimbus Motors (2024-present)")]
         v = validate_claim(claim, evidence)
         assert v.problem is None
         assert v.matched_evidence_ids == ["e1"]
@@ -38,7 +38,7 @@ class TestEmployerEntity:
     def test_employer_not_in_evidence(self) -> None:
         # "at" + capitalized = employer; "tesla" not in evidence → entity_unmatched
         claim = "Led AI strategy implementation at Tesla"
-        evidence = [_ev("e1", "Led AI strategy implementation at BMW Group")]
+        evidence = [_ev("e1", "Led AI strategy implementation at Nimbus Motors")]
         v = validate_claim(claim, evidence)
         assert v.problem == "entity_unmatched"
         assert any(e.entity == "employer" and e.value == "Tesla" for e in v.unmatched_entities)
@@ -63,22 +63,22 @@ class TestEmployerEntity:
 
 class TestJobTitleEntity:
     def test_title_as_marker(self) -> None:
-        claim = "Worked as Product Owner at BMW Group"
-        evidence = [_ev("e1", "Worked as Product Owner at BMW Group (2024-present)")]
+        claim = "Worked as Product Owner at Nimbus Motors"
+        evidence = [_ev("e1", "Worked as Product Owner at Nimbus Motors (2024-present)")]
         v = validate_claim(claim, evidence)
         assert v.problem is None
 
     def test_title_fabricated(self) -> None:
         # "Worked as <Capitalized Role> on ..." — title is "Chief AI Officer"
-        claim = "Worked as Chief AI Officer on the BMW Group account"
-        evidence = [_ev("e1", "Worked as Product Owner on the BMW Group account")]
+        claim = "Worked as Chief AI Officer on the Nimbus Motors account"
+        evidence = [_ev("e1", "Worked as Product Owner on the Nimbus Motors account")]
         v = validate_claim(claim, evidence)
         assert v.problem == "entity_unmatched"
         assert any(e.entity == "job_title" and e.value == "Chief AI Officer" for e in v.unmatched_entities)
 
     def test_no_title_without_as_marker(self) -> None:
-        claim = "Product Owner for Autonomous Driving at BMW Group"
-        evidence = [_ev("e1", "Worked as Product Owner at BMW Group (2024-present)")]
+        claim = "Product Owner for Autonomous Driving at Nimbus Motors"
+        evidence = [_ev("e1", "Worked as Product Owner at Nimbus Motors (2024-present)")]
         v = validate_claim(claim, evidence)
         assert v.problem is None
         assert not any(e.entity == "job_title" for e in v.unmatched_entities)
@@ -124,14 +124,14 @@ class TestDatesEntity:
 class TestTeamSizeEntity:
     def test_team_size_in_evidence(self) -> None:
         claim = "Led a team of 5 engineers"
-        evidence = [_ev("e1", "Led a team of 5 engineers at BMW Group")]
+        evidence = [_ev("e1", "Led a team of 5 engineers at Nimbus Motors")]
         v = validate_claim(claim, evidence)
         assert v.problem is None
 
     def test_team_size_not_in_evidence(self) -> None:
         # Numbers 10 not in evidence → numeric_unmatched (correct: team size differs)
         claim = "Led a team of 10 engineers"
-        evidence = [_ev("e1", "Led a team of 5 engineers at BMW Group")]
+        evidence = [_ev("e1", "Led a team of 5 engineers at Nimbus Motors")]
         v = validate_claim(claim, evidence)
         assert v.problem == "numeric_unmatched"
 
@@ -169,8 +169,8 @@ class TestScopeEntity:
 
 class TestTechnologyEntity:
     def test_technology_in_evidence(self) -> None:
-        claim = "Built Python ETL pipelines at BMW"
-        evidence = [_ev("e1", "Built Python ETL pipelines at BMW Group")]
+        claim = "Built Python ETL pipelines at Nimbus Motors"
+        evidence = [_ev("e1", "Built Python ETL pipelines at Nimbus Motors")]
         v = validate_claim(claim, evidence)
         assert v.problem is None
 
@@ -195,8 +195,8 @@ class TestTechnologyEntity:
 
 class TestCredentialEntity:
     def test_credential_in_evidence(self) -> None:
-        claim = "MSc Data Science from TU Munich"
-        evidence = [_ev("e1", "MSc Data Science from TU Munich (2015)")]
+        claim = "MSc Data Science from Example University"
+        evidence = [_ev("e1", "MSc Data Science from Example University (2015)")]
         v = validate_claim(claim, evidence)
         assert v.problem is None
 
@@ -230,8 +230,8 @@ class TestUnverifiedSignals:
         assert any(e.entity == "publication" and e.status == "unknown" for e in v.unknown_entities)
 
     def test_no_unverified_signal_when_clean(self) -> None:
-        claim = "Built Python ETL pipelines at BMW Group"
-        evidence = [_ev("e1", "Built Python ETL pipelines at BMW Group")]
+        claim = "Built Python ETL pipelines at Nimbus Motors"
+        evidence = [_ev("e1", "Built Python ETL pipelines at Nimbus Motors")]
         v = validate_claim(claim, evidence)
         assert v.problem is None
         assert v.unknown_entities == []
@@ -244,11 +244,11 @@ class TestUnverifiedSignals:
 
 class TestExtractEntities:
     def test_employer_extraction(self) -> None:
-        verifiable, _ = extract_entities("Led AI strategy at BMW Group")
-        assert any(e.entity == "employer" and e.value == "BMW Group" for e in verifiable)
+        verifiable, _ = extract_entities("Led AI strategy at Nimbus Motors")
+        assert any(e.entity == "employer" and e.value == "Nimbus Motors" for e in verifiable)
 
     def test_title_extraction(self) -> None:
-        verifiable, _ = extract_entities("Worked as Product Owner at BMW Group")
+        verifiable, _ = extract_entities("Worked as Product Owner at Nimbus Motors")
         assert any(e.entity == "job_title" and e.value == "Product Owner" for e in verifiable)
 
     def test_date_range_extraction(self) -> None:
@@ -263,6 +263,33 @@ class TestExtractEntities:
         verifiable, _ = extract_entities("Led a team of 10 engineers")
         assert any(e.entity == "team_size" and "10" in e.value for e in verifiable)
 
+    def test_team_of_n_spelling_is_extracted(self) -> None:
+        """Regression: the "team of N" pattern was never reached.
+
+        The scan was written as
+        ``_SIZE_UNIT_RE.finditer(claim) or _TEAM_OF_RE.finditer(claim)``.
+        ``finditer()`` returns an iterator, which is always truthy, so the ``or``
+        short-circuited and the second pattern was dead code. "Led a team of 10"
+        -- the most natural way to state a team size -- produced no entity at
+        all, so it was never checked against the evidence text.
+        """
+        verifiable, _ = extract_entities("Led a team of 10")
+        assert any(e.entity == "team_size" and "10" in e.value for e in verifiable)
+
+    def test_alternative_team_of_n_spellings_are_extracted(self) -> None:
+        for claim in ("Managed a squad of 5", "Ran an organization of 12", "Led a group of 8"):
+            verifiable, _ = extract_entities(claim)
+            assert any(e.entity == "team_size" for e in verifiable), claim
+
+    def test_overlapping_team_size_patterns_are_not_double_counted(self) -> None:
+        """One claim, one finding: the two patterns overlap on real sentences."""
+        verifiable, _ = extract_entities("Led a team of 10 engineers")
+        assert len([e for e in verifiable if e.entity == "team_size"]) == 1
+
+    def test_two_separate_team_sizes_are_both_extracted(self) -> None:
+        verifiable, _ = extract_entities("Grew a team of 10 engineers and later led a squad of 5")
+        assert len([e for e in verifiable if e.entity == "team_size"]) == 2
+
     def test_scope_extraction(self) -> None:
         verifiable, _ = extract_entities("Delivered global rollout")
         assert any(e.entity == "scope" and e.value == "global" for e in verifiable)
@@ -272,7 +299,7 @@ class TestExtractEntities:
         assert any(e.entity == "technology" and e.value == "python" for e in verifiable)
 
     def test_credential_extraction(self) -> None:
-        verifiable, _ = extract_entities("MSc Data Science from TU Munich")
+        verifiable, _ = extract_entities("MSc Data Science from Example University")
         assert any(e.entity == "credential" and "MSc" in e.value for e in verifiable)
 
     def test_award_signal_extraction(self) -> None:
@@ -312,7 +339,7 @@ class TestProblemPrecedence:
     def test_entity_unmatched_when_evidence_matches_but_entity_fabricated(self) -> None:
         """Evidence supports some claims but a specific entity is fabricated."""
         claim = "Led AI strategy implementation at Tesla"
-        evidence = [_ev("e1", "Led AI strategy implementation at BMW Group")]
+        evidence = [_ev("e1", "Led AI strategy implementation at Nimbus Motors")]
         v = validate_claim(claim, evidence)
         assert v.problem == "entity_unmatched"
 
@@ -325,8 +352,8 @@ class TestProblemPrecedence:
 class TestBackwardCompatibility:
     EXISTING_CLAIMS_AND_EVIDENCE = [
         (
-            "Product Owner for Autonomous Driving at BMW Group",
-            ["Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)"],
+            "Product Owner for Autonomous Driving at Nimbus Motors",
+            ["Worked as Product Owner - Autonomous Driving at Nimbus Motors (2024-present)"],
         ),
         (
             "Led design of an Automated Valet Parking feature",

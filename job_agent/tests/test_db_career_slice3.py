@@ -14,12 +14,12 @@ def _conn(tmp_path):
 
 def _document(tmp_path) -> CareerDocument:
     path = tmp_path / "cv.txt"
-    path.write_text("Experience\nProduct Owner - Autonomous Driving at BMW Group, 2024-present\n", encoding="utf-8")
+    path.write_text("Experience\nProduct Owner - Autonomous Driving at Nimbus Motors, 2024-present\n", encoding="utf-8")
     return ingest_document(path)
 
 
 def _evidence() -> CareerEvidence:
-    claim = "Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)"
+    claim = "Worked as Product Owner - Autonomous Driving at Nimbus Motors (2024-present)"
     return CareerEvidence(
         evidence_id=evidence_id(claim, "doc-a"),
         claim=claim,
@@ -27,9 +27,9 @@ def _evidence() -> CareerEvidence:
         source="doc-a",
         source_type="cv_document",
         categories=["product", "domain", "ai"],
-        keywords=["autonomous driving", "bmw"],
+        keywords=["autonomous driving", "nimbus"],
         confidence=0.9,
-        normalized_fact="werkte als product owner - autonomous driving bij bmw group",
+        normalized_fact="werkte als product owner - autonomous driving bij nimbus motors",
         authority="cv_document",
     )
 
@@ -119,7 +119,7 @@ def test_artifact_save_overwrite_and_evidence_links(tmp_path):
         job_id="p:1",
         headline="Automotive AI delivery lead",
         summary="Owned autonomous driving projects.",
-        bullets=[Bullet(text="Product Owner for Autonomous Driving at BMW Group", evidence_id=ev.evidence_id)],
+        bullets=[Bullet(text="Product Owner for Autonomous Driving at Nimbus Motors", evidence_id=ev.evidence_id)],
         evidence_ids=[ev.evidence_id],
     )
     v1 = db.save_career_artifact(conn, art, source="llm")

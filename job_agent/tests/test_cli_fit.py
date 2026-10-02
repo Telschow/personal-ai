@@ -17,7 +17,7 @@ def _seed(tmp_path, name="seed.db") -> str:
         Job(
             id="fit:1",
             title="Senior Product Manager AI",
-            company="BMW Group",
+            company="Nimbus Motors",
             location="Munich",
             url="https://example.test/jobs/1",
             source="test",
@@ -39,7 +39,7 @@ def test_fit_human_output(tmp_path, capsys):
     assert "current_fit:" in out
     assert "career_upside:" in out
     assert "evidence_coverage:" in out
-    assert "BMW Group" in out
+    assert "Nimbus Motors" in out
 
 
 def test_fit_json_output(tmp_path, capsys):

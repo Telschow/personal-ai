@@ -95,7 +95,7 @@ def _msg(
 
 
 def _prop(
-    statement: str = "The user works at BCG",
+    statement: str = "The user works at Example Corp",
     kind: str = "work",
     temporal: str = "current",
     confidence: float = 0.9,
@@ -150,7 +150,7 @@ def _store(*conversations):
 
 
 def _work_pair() -> tuple[Conversation, tuple[ConversationMessage, ...]]:
-    return _conv(), (_msg("m1", "I work at BCG"),)
+    return _conv(), (_msg("m1", "I work at Example Corp"),)
 
 
 # ---- model-output parsing ----------------------------------------------------
@@ -316,12 +316,14 @@ def test_proposal_is_never_repaired() -> None:
 
 
 def _convert(proposal: MemoryProposal):
-    return to_memory_candidate(proposal, _conv(), (_msg("m1", "I work at BCG"),))
+    return to_memory_candidate(
+        proposal, _conv(), (_msg("m1", "I work at Example Corp"),)
+    )
 
 
 def test_conversion_evidence_unknown_is_dropped() -> None:
     proposal = MemoryProposal(
-        statement="The user works at BCG",
+        statement="The user works at Example Corp",
         kind="work",
         temporal_scope="current",
         confidence=0.9,
@@ -332,7 +334,7 @@ def test_conversion_evidence_unknown_is_dropped() -> None:
 
 def test_conversion_evidence_not_user_is_dropped() -> None:
     proposal = MemoryProposal(
-        statement="The user works at BCG",
+        statement="The user works at Example Corp",
         kind="work",
         temporal_scope="current",
         confidence=0.9,
@@ -341,7 +343,7 @@ def test_conversion_evidence_not_user_is_dropped() -> None:
     candidate, reason = to_memory_candidate(
         proposal,
         _conv(),
-        (_msg("a1", "The user works at BCG", role="assistant"),),
+        (_msg("a1", "The user works at Example Corp", role="assistant"),),
     )
     assert candidate is None
     assert reason == "evidence_not_user"
@@ -371,7 +373,7 @@ def test_conversion_evidence_not_claim_is_dropped() -> None:
 
 def test_conversion_third_party_statement_is_dropped() -> None:
     proposal = MemoryProposal(
-        statement="Alice works at BCG",
+        statement="Alice works at Example Corp",
         kind="work",
         temporal_scope="current",
         confidence=0.9,
@@ -398,7 +400,7 @@ def test_conversion_sensitive_form_is_dropped() -> None:
 
 def test_conversion_question_statement_is_dropped() -> None:
     proposal = MemoryProposal(
-        statement="The user works at BCG?",
+        statement="The user works at Example Corp?",
         kind="work",
         temporal_scope="current",
         confidence=0.9,
@@ -409,7 +411,7 @@ def test_conversion_question_statement_is_dropped() -> None:
 
 def test_conversion_negation_is_dropped() -> None:
     for negated in (
-        "The user does not work at BCG",
+        "The user does not work at Example Corp",
         "The user never runs",
         "The user no longer lives in Berlin",
     ):
@@ -490,7 +492,7 @@ def test_conversion_application_sets_all_non_proposed_scores() -> None:
 
 def test_conversion_evidence_is_provenance_only() -> None:
     proposal = MemoryProposal(
-        statement="I work at BCG",
+        statement="I work at Example Corp",
         kind="work",
         temporal_scope="current",
         confidence=0.9,
@@ -499,7 +501,7 @@ def test_conversion_evidence_is_provenance_only() -> None:
     candidate, reason = to_memory_candidate(
         proposal,
         _conv(),
-        (_msg("m1", "I work at BCG", timestamp="2026-01-15T10:30:00+00:00"),),
+        (_msg("m1", "I work at Example Corp", timestamp="2026-01-15T10:30:00+00:00"),),
     )
     assert reason is None
     assert candidate is not None
@@ -509,7 +511,7 @@ def test_conversion_evidence_is_provenance_only() -> None:
     assert ref.source_document_id == "m1"
     assert ref.source_timestamp == "2026-01-15T10:30:00+00:00"
     rendered = json.dumps(ref.to_dict())
-    assert "BCG" not in rendered
+    assert "Example Corp" not in rendered
 
 
 # ---- extractor: bounded model interaction ------------------------------------
@@ -542,7 +544,7 @@ def test_extractor_bounded_window_truncates_transcript() -> None:
 def test_extractor_ollama_failure_retries_then_reports() -> None:
     client = _FakeModelClient(OllamaConnectionError("boom"))
     extractor = LLMMemoryProposalExtractor(client, max_retries=2)
-    result = extractor.extract(_conv(), (_msg("m1", "I work at BCG"),))
+    result = extractor.extract(_conv(), (_msg("m1", "I work at Example Corp"),))
     assert result.candidates == ()
     assert result.failed is True
     assert result.failure_reason == "ollama_error"
@@ -552,7 +554,7 @@ def test_extractor_ollama_failure_retries_then_reports() -> None:
 def test_extractor_malformed_output_retries_then_reports() -> None:
     client = _FakeModelClient("definitely not json")
     extractor = LLMMemoryProposalExtractor(client, max_retries=1)
-    result = extractor.extract(_conv(), (_msg("m1", "I work at BCG"),))
+    result = extractor.extract(_conv(), (_msg("m1", "I work at Example Corp"),))
     assert result.failed is True
     assert result.failure_reason == "malformed_output"
     assert result.candidates == ()
@@ -564,17 +566,17 @@ def test_extractor_retry_then_success_recovers() -> None:
         _batch_json(_prop()),
     )
     extractor = LLMMemoryProposalExtractor(client, max_retries=2)
-    result = extractor.extract(_conv(), (_msg("m1", "I work at BCG"),))
+    result = extractor.extract(_conv(), (_msg("m1", "I work at Example Corp"),))
     assert result.failed is False
     assert result.model_calls == 2
     (candidate,) = result.candidates
-    assert candidate.statement == "The user works at BCG"
+    assert candidate.statement == "The user works at Example Corp"
 
 
 def test_extractor_empty_response_is_success_without_candidates() -> None:
     client = _FakeModelClient(json.dumps({"proposals": []}))
     extractor = LLMMemoryProposalExtractor(client)
-    result = extractor.extract(_conv(), (_msg("m1", "I work at BCG"),))
+    result = extractor.extract(_conv(), (_msg("m1", "I work at Example Corp"),))
     assert result.candidates == ()
     assert result.failed is False
     assert result.model_calls == 1
@@ -598,7 +600,7 @@ def test_extractor_dedupes_proposals_within_a_unit() -> None:
     body = _batch_json(_prop(), _prop())
     client = _FakeModelClient(body)
     extractor = LLMMemoryProposalExtractor(client)
-    result = extractor.extract(_conv(), (_msg("m1", "I work at BCG"),))
+    result = extractor.extract(_conv(), (_msg("m1", "I work at Example Corp"),))
     assert len(result.candidates) == 1
     assert result.proposals_parsed == 2
 
@@ -607,7 +609,7 @@ def test_extractor_counts_dropped_proposals() -> None:
     body = _batch_json(_prop(), _prop(kind="not_a_kind"))
     client = _FakeModelClient(body)
     extractor = LLMMemoryProposalExtractor(client)
-    result = extractor.extract(_conv(), (_msg("m1", "I work at BCG"),))
+    result = extractor.extract(_conv(), (_msg("m1", "I work at Example Corp"),))
     assert len(result.candidates) == 1
     assert result.proposals_parsed == 1
     assert result.proposals_dropped == 1
@@ -616,7 +618,7 @@ def test_extractor_counts_dropped_proposals() -> None:
 def test_extractor_model_calls_bounded_by_retry_limit() -> None:
     client = _FakeModelClient(OllamaConnectionError("boom"))
     extractor = LLMMemoryProposalExtractor(client, max_retries=0)
-    result = extractor.extract(_conv(), (_msg("m1", "I work at BCG"),))
+    result = extractor.extract(_conv(), (_msg("m1", "I work at Example Corp"),))
     assert result.model_calls == 1
     assert result.failed is True
 
@@ -673,7 +675,7 @@ def test_ingestor_applies_accepted_candidate_and_is_idempotent() -> None:
         assert service.counts()["active"] == 1
         memory = service.list()[0]
         assert memory.status is MemoryStatus.ACTIVE
-        assert memory.content == "The user works at BCG"
+        assert memory.content == "The user works at Example Corp"
         assert len(service.evidence_for(memory.memory_id)) == 1
     finally:
         connection.close()
@@ -760,7 +762,10 @@ def test_ingestor_sensitive_writes_with_interactive_approver() -> None:
 def test_ingestor_assistant_claim_never_becomes_candidate() -> None:
     service = _service()
     connection, store = _store(
-        (_conv(), (_msg("m1", "I suggest the user works at BCG", role="assistant"),))
+        (
+            _conv(),
+            (_msg("m1", "I suggest the user works at Example Corp", role="assistant"),),
+        )
     )
     try:
         client = _FakeModelClient()
@@ -799,8 +804,8 @@ def test_ingestor_partial_failure_does_not_corrupt_run() -> None:
     good = _conv("conv-good")
     bad = _conv("conv-bad")
     connection, store = _store(
-        (bad, (_msg("mb", "I work at BCG", conv_id="conv-bad"),)),
-        (good, (_msg("mg", "I work at BCG", conv_id="conv-good"),)),
+        (bad, (_msg("mb", "I work at Example Corp", conv_id="conv-bad"),)),
+        (good, (_msg("mg", "I work at Example Corp", conv_id="conv-good"),)),
     )
     try:
         client = _FakeModelClient(
@@ -824,7 +829,7 @@ def test_ingestor_bounded_conversations_with_offset() -> None:
     conversations = [
         (
             _conv(f"conv-{index}"),
-            (_msg(f"m-{index}", "I work at BCG", conv_id=f"conv-{index}"),),
+            (_msg(f"m-{index}", "I work at Example Corp", conv_id=f"conv-{index}"),),
         )
         for index in range(8)
     ]
@@ -848,7 +853,7 @@ def test_ingestor_bounded_conversations_with_offset() -> None:
         assert report.tally.created == 1
         assert report.tally.updated == 2
         active = [m.content for m in service.list()]
-        assert active == ["The user works at BCG"]
+        assert active == ["The user works at Example Corp"]
         memory = service.list()[0]
         assert len(service.evidence_for(memory.memory_id)) == 3
     finally:
@@ -866,7 +871,7 @@ def test_ingestor_report_is_aggregate_only_and_content_free() -> None:
         connection.close()
     assert isinstance(report, LLMConversationMemoryReport)
     rendered = json.dumps(report.summary())
-    assert "BCG" not in rendered
+    assert "Example Corp" not in rendered
     assert "statement" not in rendered
     assert report.summary()["source_type"] == "chatgpt"
     assert report.summary()["conversations_scanned"] == 1
@@ -916,11 +921,12 @@ def test_conversion_german_identity() -> None:
 
 def test_conversion_german_work() -> None:
     candidate, reason = _convert_ml(
-        _de_prop("Ich arbeite bei BCG.", "work"), "Ich arbeite bei BCG."
+        _de_prop("Ich arbeite bei Example Corp.", "work"),
+        "Ich arbeite bei Example Corp.",
     )
     assert reason is None
     assert candidate is not None
-    assert candidate.statement == "Der nutzer arbeitet bei BCG."
+    assert candidate.statement == "Der nutzer arbeitet bei Example Corp."
     assert candidate.kind is MemoryKind.WORK
 
 
@@ -1125,9 +1131,9 @@ def test_conversion_spanish_historical() -> None:
 
 def test_conversion_no_cross_language_semantic_drift() -> None:
     cases = (
-        ("Ich arbeite bei BCG.", "Der nutzer arbeitet bei BCG."),
-        ("Trabajo en BCG.", "El usuario trabaja en BCG."),
-        ("I work at BCG.", "The user works at BCG."),
+        ("Ich arbeite bei Example Corp.", "Der nutzer arbeitet bei Example Corp."),
+        ("Trabajo en Example Corp.", "El usuario trabaja en Example Corp."),
+        ("I work at Example Corp.", "The user works at Example Corp."),
     )
     for proposed, expected in cases:
         candidate, reason = _convert_ml(_de_prop(proposed, "work"), proposed)
@@ -1138,7 +1144,10 @@ def test_conversion_no_cross_language_semantic_drift() -> None:
 
 def test_conversion_german_negation_dropped() -> None:
     for negated, evidence in (
-        ("Der nutzer arbeitet nicht bei BCG.", "Ich arbeite nicht bei BCG."),
+        (
+            "Der nutzer arbeitet nicht bei Example Corp.",
+            "Ich arbeite nicht bei Example Corp.",
+        ),
         ("Der nutzer hat kein Auto.", "Ich habe kein Auto."),
         ("Der nutzer läuft nie.", "Ich laufe nie."),
     ):
@@ -1176,7 +1185,7 @@ def test_conversion_spanish_question_dropped() -> None:
 
 def test_conversion_german_third_party_dropped() -> None:
     for third_party in (
-        "Alice arbeitet bei BCG.",
+        "Alice arbeitet bei Example Corp.",
         "Maria wohnt in Hamburg.",
         "Der Nachbar kocht gut.",
     ):
@@ -1195,13 +1204,13 @@ def test_conversion_spanish_third_party_dropped() -> None:
 
 def test_conversion_quoted_statement_dropped_all_forms() -> None:
     for quoted in (
-        'The user said "I work at BCG"',
-        "The user said \u201cI work at BCG\u201d",
-        "The user said \u2018he works at BCG\u2019",
-        "Der Partner sagte \u201eDer nutzer arbeitet bei BCG\u201c",
-        "Der Partner sagte \u201eDer nutzer arbeitet bei BCG\u201d",
-        "El jefe dijo \u00abEl usuario trabaja en BCG\u00bb",
-        "El jefe dijo \u201cel usuario trabaja en BCG\u201d",
+        'The user said "I work at Example Corp"',
+        "The user said \u201cI work at Example Corp\u201d",
+        "The user said \u2018he works at Example Corp\u2019",
+        "Der Partner sagte \u201eDer nutzer arbeitet bei Example Corp\u201c",
+        "Der Partner sagte \u201eDer nutzer arbeitet bei Example Corp\u201d",
+        "El jefe dijo \u00abEl usuario trabaja en Example Corp\u00bb",
+        "El jefe dijo \u201cel usuario trabaja en Example Corp\u201d",
     ):
         candidate, reason = _convert_ml(_de_prop(quoted, "fact"), "Test")
         assert (candidate, reason) == (None, "quoted"), quoted
@@ -1209,12 +1218,12 @@ def test_conversion_quoted_statement_dropped_all_forms() -> None:
 
 def test_conversion_apostrophe_possessive_is_not_a_quote() -> None:
     candidate, reason = _convert_ml(
-        _de_prop("The user's team works at BCG.", "work"),
-        "My team works at BCG.",
+        _de_prop("The user's team works at Example Corp.", "work"),
+        "My team works at Example Corp.",
     )
     assert reason is None
     assert candidate is not None
-    assert candidate.statement == "The user's team works at BCG."
+    assert candidate.statement == "The user's team works at Example Corp."
 
 
 def test_conversion_german_sensitive_material_never_forms_candidates() -> None:
@@ -1389,7 +1398,7 @@ def test_ingestor_multilingual_writes_idempotently_original_language() -> None:
     conversations = (
         (
             _conv("conv-en"),
-            (_msg("m-en", "I work at BCG", conv_id="conv-en"),),
+            (_msg("m-en", "I work at Example Corp", conv_id="conv-en"),),
         ),
         (
             _conv("conv-de", source_type="gemini"),
@@ -1403,7 +1412,9 @@ def test_ingestor_multilingual_writes_idempotently_original_language() -> None:
     connection, store = _store(*conversations)
     try:
         client = _FakeModelClient(
-            _batch_json(_prop(statement="The user works at BCG", evidence=("m-en",))),
+            _batch_json(
+                _prop(statement="The user works at Example Corp", evidence=("m-en",))
+            ),
             _batch_json(
                 _prop(
                     statement="El usuario vive en Madrid",
@@ -1434,14 +1445,16 @@ def test_ingestor_multilingual_writes_idempotently_original_language() -> None:
 
         active = {memory.content for memory in service.list()}
         assert active == {
-            "The user works at BCG",
+            "The user works at Example Corp",
             "Der nutzer wohnt in München",
             "El usuario vive en Madrid",
         }
         assert service.counts()["active"] == 3
 
         client = _FakeModelClient(
-            _batch_json(_prop(statement="The user works at BCG", evidence=("m-en",))),
+            _batch_json(
+                _prop(statement="The user works at Example Corp", evidence=("m-en",))
+            ),
             _batch_json(
                 _prop(
                     statement="El usuario vive en Madrid",

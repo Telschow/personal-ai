@@ -44,9 +44,10 @@ ROLE FAMILY × DOMAIN × SENIORITY × GEOGRAPHY × SPECIALIZATION
 
 ### Geographic Focus (4 tiers)
 
-1. Munich / Bavaria (highest priority)
-2. Germany (Berlin, Hamburg, Frankfurt, Stuttgart, Karlsruhe)
-3. Remote Europe (EU timezone compatible)
+1. Configured preferred city (highest priority; **absent unless the operator
+   sets one**, in which case discovery starts at the national tier)
+2. Country (from config or source locality)
+3. Regional remote scope (timezone compatible)
 4. International (relocation-friendly roles)
 
 ### Specialization Areas (8 areas)
@@ -67,16 +68,18 @@ ROLE FAMILY × DOMAIN × SENIORITY × GEOGRAPHY × SPECIALIZATION
 Generate queries from meaningful combinations rather than Cartesian product explosion:
 
 **Example Query Patterns:**
-- `"Technical Product Manager" "Autonomous Driving" Munich`
-- `"AI Product Lead" "Machine Learning" Remote Europe`
+- `"Technical Product Manager" "Autonomous Driving" <preferred city>`
+- `"AI Product Lead" "Machine Learning" <remote scope>`
 - `"Program Manager" "Robotics" Germany`
-- `"Head of AI" "Computer Vision" Defence`
+- `"Head of AI" "Computer Vision" <configured sector>`
 
 ### Geographic Scoping Rules
 
-1. **German sources**: Query with Munich + Germany locations only
-2. **Global sources**: Use full geographic rotation (Munich → Germany → Remote Europe → International)
-3. **Remote-first sources**: Prioritize Remote Europe + International terms
+1. **Regional sources**: query with the configured preferred city + country only
+2. **Global sources**: full rotation (preferred city → country → remote scope → international)
+3. **Remote-first sources**: prioritize remote-scope and international terms
+4. **No preferred city configured**: the city tier is dropped from the rotation
+   entirely rather than being filled with a default
 
 ### Source-Specific Term Limits
 

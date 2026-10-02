@@ -34,13 +34,21 @@ search:
   target_roles: []
   keywords_positive: []
   keywords_negative: []
+  industries_preferred: []   # sectors you count as "purpose" alignment
+  # Free-text markers of purpose-aligned work, scored separately from
+  # discovery keywords above. Empty by default.
+  purpose_keywords: []
 
 jobs:
   salary:
-    # Illustrative placeholders only, not real expectations. Set to 0 to
-    # disable a bound; both values must be positive when set.
-    minimum_eur: 1
-    target_eur: 1
+    # 0 (the default) means "no compensation preference": the hard floor is
+    # skipped and published salary carries no ranking weight. Set both to
+    # positive EUR values to enable the gate — target must be >= minimum.
+    # There is deliberately no built-in floor or target in the source; any
+    # such number is a personal policy decision that belongs here, in your own
+    # git-ignored config.yaml.
+    minimum_eur: 0
+    target_eur: 0
   freshness_days: 30
   close_after_missing_scans: 2
   unknown_salary_reviewable: true
@@ -67,6 +75,20 @@ application:
   never_submit: true
 
 career:
+  location:
+    # Empty means "no city preference": discovery falls back to
+    # national/remote scope. Set your own city to make it the first
+    # location term and to rank local postings higher.
+    preferred_city: ""
+    national: true
+    remote: true
+  discovery:
+    # Bounded discovery budgets; discovery is never unbounded.
+    max_queries_total: 120
+    max_queries_per_track: 24
+    max_queries_per_source: 6
+    max_sources_per_track: 8
+    max_results_per_query: 25
   knowledge:
     # provider: "none" (profile-only evidence) | "personal_ai" (read-only
     # retrieval against the parent personal_ai database).

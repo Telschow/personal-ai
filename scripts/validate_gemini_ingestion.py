@@ -110,7 +110,8 @@ def run_validation() -> None:
     document_store = DocumentStore(connection)
     service = RetrievalService(chunk_store, extraction_store, document_store, store)
 
-    test_queries = ["BCG", "career", "goals", "interview", "AI"]
+    # Synthetic probes: these scripts only measure ingestion/retrieval mechanics.
+    test_queries = ["Example Corp", "Project Atlas", "planning", "interview", "AI"]
     for query in test_queries:
         results = service.search(query, limit=3)
         conv_results = [r for r in results if r.result_type == "conversation"]

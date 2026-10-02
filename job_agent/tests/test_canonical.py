@@ -7,7 +7,11 @@ def test_company_legal_suffix_stripped():
 
 
 def test_company_ag():
-    assert normalize_company("Rohde & Schwarz AG") == "rohde & schwarz"
+    assert normalize_company("Ravenscroft Instruments AG") == "ravenscroft instruments"
+
+
+def test_company_ampersand_preserved():
+    assert normalize_company("Ashby & Gage AG") == "ashby & gage"
 
 
 def test_title_mwd_stripped():

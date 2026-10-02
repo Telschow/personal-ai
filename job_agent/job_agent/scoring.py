@@ -9,6 +9,7 @@ historical decisions remain explainable after algorithm changes.
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 
 from rapidfuzz.fuzz import token_set_ratio
@@ -110,25 +111,17 @@ def leadership_score(job: Job) -> float:
     return 0.3
 
 
-def purpose_score(job: Job, industries_preferred: list[str]) -> float:
+def purpose_score(job: Job, industries_preferred: Sequence[str], purpose_terms: Sequence[str] = ()) -> float:
+    """Score mission/purpose alignment.
+
+    Both term lists are supplied by the caller (ultimately
+    ``career.purpose_*`` in config). There is no built-in list: which sectors
+    count as "purpose" is a personal career-direction decision, not a property
+    of the ranking engine. With no terms configured every job scores the
+    neutral 0.45 baseline, which keeps the dimension deterministic and its
+    weight comparable without embedding someone's sector preferences.
+    """
     text = normalize_text(job.title + " " + job.description + " " + job.location)
-    purpose_terms = [
-        "ai",
-        "artificial intelligence",
-        "robotics",
-        "deep tech",
-        "autonomous",
-        "innovation",
-        "energy",
-        "aerospace",
-        "defence",
-        "defense",
-        "climate",
-        "medical technology",
-        "electric",
-        "quantum",
-        "space",
-    ]
     if any(k in text for k in purpose_terms):
         return 1.0
     for industry in industries_preferred:
@@ -160,6 +153,7 @@ def wlb_score(job: Job) -> float:
 class ScoringPolicy:
     """Frozen snapshot of the scoring configuration (for version pinning)."""
 
+    # 0 means "no compensation preference configured" — the gate is skipped.
     salary_min: float
     salary_target: float
     similarity_weight: float
@@ -170,9 +164,15 @@ class ScoringPolicy:
     purpose_weight: float
     wlb_weight: float
     industries: tuple[str, ...]
+    purpose_terms: tuple[str, ...]
     negative_keywords: tuple[str, ...]
     target_roles: tuple[str, ...]
     location_weights: LocationWeights = field(default_factory=LocationWeights)
+
+    @property
+    def salary_enabled(self) -> bool:
+        """True when a compensation floor/target pair is configured."""
+        return self.salary_min > 0 and self.salary_target > 0
 
     @property
     def version(self) -> str:
@@ -196,6 +196,7 @@ class ScoringPolicy:
         )
         blob += "|loc=" + "|".join(f"{k}:{v}" for k, v in self.location_weights.model_dump().items())
         blob += "|" + "|".join(sorted(self.industries))
+        blob += "|" + "|".join(sorted(self.purpose_terms))
         blob += "|" + "|".join(sorted(self.negative_keywords))
         blob += "|" + "|".join(sorted(self.target_roles))
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
@@ -209,20 +210,14 @@ def scoring_policy_from_config(policy: dict) -> ScoringPolicy:
     search = policy.get("search", {})
     career = policy.get("career", {})
     location_cfg = career.get("location", {})
-    industries = policy.get("industries_preferred") or [
-        "AI",
-        "DeepTech",
-        "Robotics",
-        "Mobility",
-        "Industrial Technology",
-        "Aerospace",
-        "Defence",
-        "Energy",
-    ]
+    # No built-in industry list: preferred sectors are a personal career
+    # direction, configured via search.industries_preferred.
+    industries = search.get("industries_preferred", [])
+    purpose_terms = search.get("purpose_keywords", [])
     location_weights = LocationWeights.model_validate(location_cfg.get("weights", {}) or {})
     return ScoringPolicy(
-        salary_min=float(salary.get("minimum_eur", 120_000)),
-        salary_target=float(salary.get("target_eur", 150_000)),
+        salary_min=float(salary.get("minimum_eur", 0)),
+        salary_target=float(salary.get("target_eur", 0)),
         similarity_weight=float(ranking.get("similarity_weight", 0.25)),
         ai_weight=float(ranking.get("ai_relevance_weight", 0.20)),
         compensation_weight=float(ranking.get("compensation_weight", 0.15)),
@@ -231,6 +226,7 @@ def scoring_policy_from_config(policy: dict) -> ScoringPolicy:
         purpose_weight=float(ranking.get("purpose_weight", 0.05)),
         wlb_weight=float(ranking.get("wlb_weight", 0.05)),
         industries=tuple(x for x in industries),
+        purpose_terms=tuple(x for x in purpose_terms),
         negative_keywords=tuple(search.get("keywords_negative", [])),
         target_roles=tuple(search.get("target_roles", [])),
         location_weights=location_weights,
@@ -278,17 +274,20 @@ def score(job: Job, profile: dict, policy: ScoringPolicy) -> Score:
         policy.salary_min,
         policy.salary_target,
     )
-    if salary.min_eur is None and salary.max_eur is None:
-        gaps.append(f"no published compensation (target €{policy.salary_target:,.0f}+)")
-    elif comp_score == 0.0:
-        hard.append(f"compensation below floor €{policy.salary_min:,.0f}")
-    elif comp_uncertain:
-        gaps.append("compensation needs FX conversion — treat as approximate")
+    if policy.salary_enabled:
+        if salary.min_eur is None and salary.max_eur is None:
+            gaps.append(f"no published compensation (target €{policy.salary_target:,.0f}+)")
+        elif comp_score == 0.0:
+            hard.append(f"compensation below floor €{policy.salary_min:,.0f}")
+        elif comp_uncertain:
+            gaps.append("compensation needs FX conversion — treat as approximate")
+    elif salary.min_eur is None and salary.max_eur is None:
+        gaps.append("no published compensation")
     if job.salary_converted:
         gaps.append("compensation converted from foreign currency")
 
     lead = leadership_score(job)
-    purpose = purpose_score(job, list(policy.industries))
+    purpose = purpose_score(job, policy.industries, policy.purpose_terms)
     wlb = wlb_score(job)
 
     total = 100 * (
@@ -319,10 +318,11 @@ def score(job: Job, profile: dict, policy: ScoringPolicy) -> Score:
         reasons.append("AI-relevant scope")
     if lead >= 0.8:
         reasons.append("leadership responsibility appears relevant")
-    if salary_reaches_target(salary, policy.salary_target):
-        reasons.append(f"compensation ≥ target €{policy.salary_target:,.0f}")
-    elif salary_exceeds_floor(salary, policy.salary_min):
-        reasons.append(f"compensation ≥ floor €{policy.salary_min:,.0f}")
+    if policy.salary_enabled:
+        if salary_reaches_target(salary, policy.salary_target):
+            reasons.append(f"compensation ≥ target €{policy.salary_target:,.0f}")
+        elif salary_exceeds_floor(salary, policy.salary_min):
+            reasons.append(f"compensation ≥ floor €{policy.salary_min:,.0f}")
     if loc_parse.region == "international":
         gaps.append("requires relocation/remote flexibility")
 
@@ -367,8 +367,15 @@ def _salary_score(salary: SalaryInfo, minimum: float, target: float) -> tuple[fl
     Returns (score, uncertain) where uncertain means a conversion was applied
     or the value came from a range with possible non-EUR meaning. Unknown
     salary is reviewable (0.55) — never auto-rejected.
+
+    When no floor/target is configured (``minimum`` and ``target`` both 0)
+    compensation is not a preference, so every job scores the same neutral
+    0.55: the dimension stays deterministic and comparable but cannot
+    discriminate between postings on a policy that was never set.
     """
     if salary.min_eur is None and salary.max_eur is None:
+        return 0.55, False
+    if minimum <= 0 or target <= 0:
         return 0.55, False
     # Use the *lower bound* if present else max.
     value = salary.min_eur if salary.min_eur is not None else salary.max_eur

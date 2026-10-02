@@ -26,8 +26,11 @@ def _write_conversation(
 ) -> Path:
     if messages is None:
         messages = [
-            {"role": "user", "content": "Tell me about BCG consulting"},
-            {"role": "assistant", "content": "BCG is Boston Consulting Group."},
+            {"role": "user", "content": "Tell me about Example Corp planning"},
+            {
+                "role": "assistant",
+                "content": "Example Corp is a fictional sample employer.",
+            },
         ]
     data = {
         "id": conv_id,
@@ -64,34 +67,34 @@ class TestConversationRetrieval:
     def test_conversation_searchable(self, tmp_path: Path) -> None:
         _write_conversation(
             tmp_path,
-            "20260101_BCG_aaa.json",
-            title="BCG Career Discussion",
+            "20260101_Example Corp_aaa.json",
+            title="Example Corp Project Discussion",
             messages=[
-                {"role": "user", "content": "What do you know about BCG?"},
+                {"role": "user", "content": "What do you know about Example Corp?"},
                 {
                     "role": "assistant",
-                    "content": "BCG stands for Boston Consulting Group.",
+                    "content": "Example Corp is a fictional sample employer.",
                 },
             ],
         )
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         conv_results = [r for r in results if r.result_type == "conversation"]
         assert len(conv_results) > 0
 
     def test_role_preserved(self, tmp_path: Path) -> None:
         _write_conversation(
             tmp_path,
-            "20260101_BCG_aaa.json",
+            "20260101_Example Corp_aaa.json",
             messages=[
-                {"role": "user", "content": "Hello BCG"},
+                {"role": "user", "content": "Hello Example Corp"},
                 {"role": "assistant", "content": "Hi there"},
             ],
         )
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         conv_results = [r for r in results if r.result_type == "conversation"]
         for r in conv_results:
             assert r.role in ("user", "assistant")
@@ -100,28 +103,28 @@ class TestConversationRetrieval:
     def test_conversation_title_preserved(self, tmp_path: Path) -> None:
         _write_conversation(
             tmp_path,
-            "20260101_BCG_aaa.json",
-            title="Career Goals at BCG",
+            "20260101_Example Corp_aaa.json",
+            title="Project Goals at Example Corp",
         )
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         conv_results = [r for r in results if r.result_type == "conversation"]
-        assert any(r.title == "Career Goals at BCG" for r in conv_results)
+        assert any(r.title == "Project Goals at Example Corp" for r in conv_results)
 
     def test_message_index_preserved(self, tmp_path: Path) -> None:
         _write_conversation(
             tmp_path,
-            "20260101_BCG_aaa.json",
+            "20260101_Example Corp_aaa.json",
             messages=[
-                {"role": "user", "content": "First question about BCG"},
+                {"role": "user", "content": "First question about Example Corp"},
                 {"role": "assistant", "content": "First answer"},
-                {"role": "user", "content": "Second question about BCG"},
+                {"role": "user", "content": "Second question about Example Corp"},
             ],
         )
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         conv_results = [r for r in results if r.result_type == "conversation"]
         assert any(r.message_index == 0 for r in conv_results)
         assert any(r.message_index == 2 for r in conv_results)
@@ -129,12 +132,12 @@ class TestConversationRetrieval:
     def test_conversation_id_preserved(self, tmp_path: Path) -> None:
         _write_conversation(
             tmp_path,
-            "20260101_BCG_aaa.json",
+            "20260101_Example Corp_aaa.json",
             conv_id="test123",
         )
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         conv_results = [r for r in results if r.result_type == "conversation"]
         for r in conv_results:
             assert r.conversation_id is not None
@@ -143,49 +146,49 @@ class TestConversationRetrieval:
         # Ensure document search isn't broken by adding conversation search
         _write_conversation(
             tmp_path,
-            "20260101_BCG_aaa.json",
+            "20260101_Example Corp_aaa.json",
         )
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
         # Searching should return at least conversation results
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         assert len(results) > 0
 
     def test_empty_search_returns_nothing(self, tmp_path: Path) -> None:
-        _write_conversation(tmp_path, "20260101_BCG_aaa.json")
+        _write_conversation(tmp_path, "20260101_Example Corp_aaa.json")
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
         assert service.search("") == ()
         assert service.search("  ") == ()
 
     def test_no_match(self, tmp_path: Path) -> None:
-        _write_conversation(tmp_path, "20260101_BCG_aaa.json")
+        _write_conversation(tmp_path, "20260101_Example Corp_aaa.json")
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
         results = service.search("zzzznonexistent")
         assert results == ()
 
     def test_deterministic_ordering(self, tmp_path: Path) -> None:
-        _write_conversation(tmp_path, "20260101_BCG_aaa.json")
+        _write_conversation(tmp_path, "20260101_Example Corp_aaa.json")
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
-        first = service.search("BCG")
-        second = service.search("BCG")
+        first = service.search("Example Corp")
+        second = service.search("Example Corp")
         assert first == second
 
     def test_result_type_field(self, tmp_path: Path) -> None:
-        _write_conversation(tmp_path, "20260101_BCG_aaa.json")
+        _write_conversation(tmp_path, "20260101_Example Corp_aaa.json")
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         for r in results:
             assert r.result_type == "conversation"
 
     def test_conversation_result_fields(self, tmp_path: Path) -> None:
-        _write_conversation(tmp_path, "20260101_BCG_aaa.json")
+        _write_conversation(tmp_path, "20260101_Example Corp_aaa.json")
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         for r in results:
             assert isinstance(r, SearchResult)
             assert r.document_id is None
@@ -206,10 +209,10 @@ class TestConversationRetrieval:
 
     def test_timestamp_in_result(self, tmp_path: Path) -> None:
         """Search results should include timestamp from conversation messages."""
-        _write_conversation(tmp_path, "20260101_BCG_aaa.json")
+        _write_conversation(tmp_path, "20260101_Example Corp_aaa.json")
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         conv_results = [r for r in results if r.result_type == "conversation"]
         for r in conv_results:
             # Gemini messages have None timestamps
@@ -217,10 +220,10 @@ class TestConversationRetrieval:
 
     def test_is_active_branch_in_result(self, tmp_path: Path) -> None:
         """Search results should include is_active_branch."""
-        _write_conversation(tmp_path, "20260101_BCG_aaa.json")
+        _write_conversation(tmp_path, "20260101_Example Corp_aaa.json")
         ingest_gemini_conversations(tmp_path, self.conversation_store)
         service = self._service()
-        results = service.search("BCG")
+        results = service.search("Example Corp")
         conv_results = [r for r in results if r.result_type == "conversation"]
         for r in conv_results:
             # Gemini messages are always active
@@ -242,7 +245,7 @@ class TestConversationTemporalRegression:
         self.conversation_store.save_conversation(
             Conversation(
                 id="conv-1",
-                title="BCG Career Discussion",
+                title="Example Corp Project Discussion",
                 source_type="gemini",
                 created_at="2026-01-01T00:00:00+00:00",
                 modified_at="2026-02-16T00:00:00+00:00",
@@ -256,7 +259,7 @@ class TestConversationTemporalRegression:
                 message_index=0,
                 role="user",
                 speaker="User",
-                content_text="BCG early January",
+                content_text="Example Corp early January",
                 content_type="text",
                 timestamp=self.JUST_AFTER,
                 parent_message_id=None,
@@ -271,7 +274,7 @@ class TestConversationTemporalRegression:
                 message_index=1,
                 role="user",
                 speaker="User",
-                content_text="BCG mid February",
+                content_text="Example Corp mid February",
                 content_type="text",
                 timestamp=self.JUST_BEFORE,
                 parent_message_id=None,
@@ -294,16 +297,17 @@ class TestConversationTemporalRegression:
     def test_created_before_filters_conversation_results(self) -> None:
         service = self._service()
         results = service.search(
-            "BCG", filters=DocumentFilter(created_before="2026-02-01T00:00:00+00:00")
+            "Example Corp",
+            filters=DocumentFilter(created_before="2026-02-01T00:00:00+00:00"),
         )
         conv_texts = [r.text for r in results if r.result_type == "conversation"]
-        assert "BCG early January" in conv_texts
-        assert "BCG mid February" not in conv_texts
+        assert "Example Corp early January" in conv_texts
+        assert "Example Corp mid February" not in conv_texts
 
     def test_window_both_ends_applies_to_conversations(self) -> None:
         service = self._service()
         results = service.search(
-            "BCG",
+            "Example Corp",
             filters=DocumentFilter(
                 created_after=self.JUST_AFTER,
                 created_before=self.JUST_BEFORE,
@@ -311,19 +315,22 @@ class TestConversationTemporalRegression:
         )
         conv_texts = [r.text for r in results if r.result_type == "conversation"]
         # Both boundaries inclusive: both messages match.
-        assert set(conv_texts) == {"BCG early January", "BCG mid February"}
+        assert set(conv_texts) == {
+            "Example Corp early January",
+            "Example Corp mid February",
+        }
 
     def test_multi_term_query_with_bounds_through_service(self) -> None:
         """A natural multi-word query combined with temporal bounds must flow
         all the way through RetrievalService into ConversationStore."""
         service = self._service()
         results = service.search(
-            "BCG McKinsey consulting strategy",
+            "Example Corp McKinsey consulting strategy",
             filters=DocumentFilter(created_before="2026-02-01T00:00:00+00:00"),
         )
         conv_texts = [r.text for r in results if r.result_type == "conversation"]
-        assert "BCG early January" in conv_texts
-        assert "BCG mid February" not in conv_texts
+        assert "Example Corp early January" in conv_texts
+        assert "Example Corp mid February" not in conv_texts
 
     def test_without_conversation_store_still_works(self) -> None:
         service = RetrievalService(
@@ -332,7 +339,8 @@ class TestConversationTemporalRegression:
             self.document_store,
         )
         results = service.search(
-            "BCG", filters=DocumentFilter(created_before="2026-02-01T00:00:00+00:00")
+            "Example Corp",
+            filters=DocumentFilter(created_before="2026-02-01T00:00:00+00:00"),
         )
         assert results == ()
 
@@ -346,7 +354,7 @@ class TestConversationMultiTermRetrieval:
         self.extraction_store = ExtractionStore(self.connection)
         self.document_store = DocumentStore(self.connection)
         self.conversation_store = ConversationStore(self.connection)
-        self._add("conv-bcg", "BCG case prep notes")
+        self._add("conv-example", "Example Corp case prep notes")
         self._add("conv-career", "Career planning discussion")
         self._add("conv-other", "Cooking recipes and food")
 
@@ -390,20 +398,20 @@ class TestConversationMultiTermRetrieval:
 
     def test_multi_word_query_finds_any_term_match(self) -> None:
         service = self._service()
-        results = service.search("BCG McKinsey Bain consulting")
+        results = service.search("Example Corp McKinsey Bain consulting")
         conv_texts = [r.text for r in results if r.result_type == "conversation"]
-        assert "BCG case prep notes" in conv_texts
+        assert "Example Corp case prep notes" in conv_texts
         assert "Cooking recipes and food" not in conv_texts
 
     def test_multi_word_query_ranks_more_terms_higher(self) -> None:
         self._add("conv-case-only", "A case study example document")
         service = self._service()
-        results = service.search("BCG case interview")
+        results = service.search("Example Corp case interview")
         by_id = {r.message_id: r.score for r in results}
-        # m-conv-bcg matches "BCG"+"case"; m-conv-case-only matches "case" only.
-        assert by_id["m-conv-bcg"] > by_id["m-conv-case-only"]
+        # m-conv-example matches "Example Corp"+"case"; m-conv-case-only matches "case" only.
+        assert by_id["m-conv-example"] > by_id["m-conv-case-only"]
 
     def test_multi_word_query_respects_limit(self) -> None:
         service = self._service()
-        results = service.search("BCG career food", limit=1)
+        results = service.search("Example Corp career food", limit=1)
         assert len(results) <= 1

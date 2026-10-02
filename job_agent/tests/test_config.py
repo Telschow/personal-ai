@@ -21,9 +21,25 @@ def test_defaults_satisfied():
     cfg = default_config()
     assert cfg.application.auto_submit is False
     assert cfg.projects.auto_publish is False
-    assert cfg.jobs.salary.minimum_eur == 120000
-    assert cfg.jobs.salary.target_eur == 150000
-    assert cfg.search.global_enabled is True
+    # Shipped defaults must carry no personal career policy: no compensation
+    # floor, no preferred city, no sector preferences, no network access.
+    assert cfg.jobs.salary.minimum_eur == 0
+    assert cfg.jobs.salary.target_eur == 0
+    assert cfg.search.global_enabled is False
+    assert cfg.career.location.preferred_city == ""
+    assert cfg.search.industries_preferred == []
+    assert cfg.llm.base_url == "http://127.0.0.1:11434"
+
+
+def test_salary_floor_requires_both_or_neither():
+    with pytest.raises(ValueError):
+        Config(jobs={"salary": {"minimum_eur": 100000, "target_eur": 0}})
+    with pytest.raises(ValueError):
+        Config(jobs={"salary": {"minimum_eur": 0, "target_eur": 100000}})
+    with pytest.raises(ValueError):
+        Config(jobs={"salary": {"minimum_eur": 150000, "target_eur": 100000}})
+    cfg = Config(jobs={"salary": {"minimum_eur": 100000, "target_eur": 150000}})
+    assert cfg.jobs.salary.minimum_eur == 100000
 
 
 def test_auto_submit_blocked():
@@ -47,7 +63,8 @@ def test_load_config_from_file(tmp_path):
     cfg = load_config(str(p))
     assert cfg.database_path == "/x.db"
     assert cfg.jobs.freshness_days == 14
-    assert cfg.jobs.salary.minimum_eur == 120000  # default salary preserved
+    assert cfg.jobs.salary.minimum_eur == 0  # no built-in compensation floor
+    assert cfg.jobs.salary.target_eur == 0
 
 
 def test_load_config_bad_structure(tmp_path):

@@ -17,6 +17,7 @@ edits user claims.
 
 from __future__ import annotations
 
+import itertools
 import re
 
 from pydantic import BaseModel, Field
@@ -233,7 +234,24 @@ def extract_entities(
                 seen.add(("dates", y))
 
     # team/org size
-    for m in _SIZE_UNIT_RE.finditer(claim) or _TEAM_OF_RE.finditer(claim):
+    #
+    # Both patterns must be scanned. `finditer()` returns an iterator, which is
+    # always truthy, so `a.finditer(c) or b.finditer(c)` short-circuits after `a`
+    # and never reaches `b` -- the "team of N" spelling was silently unvalidated
+    # while the matching helper below did handle it.
+    #
+    # The two patterns overlap ("a team of 10 engineers" matches both), so
+    # overlapping spans are collapsed and the longest match wins. Reporting the
+    # same claim twice would inflate the unverified-claim count.
+    size_matches = sorted(
+        itertools.chain(_SIZE_UNIT_RE.finditer(claim), _TEAM_OF_RE.finditer(claim)),
+        key=lambda m: (m.start(), -m.end()),
+    )
+    consumed_to = -1
+    for m in size_matches:
+        if m.start() < consumed_to:
+            continue
+        consumed_to = m.end()
         value = m.group(0)
         if ("team_size", value) not in seen:
             verifiable.append(EntityFinding(entity="team_size", value=value, status="unmatched"))

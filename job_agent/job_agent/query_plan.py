@@ -26,14 +26,14 @@ receive a first query before any source receives a second one, and that a
 source is never starved by an earlier track block. Priorities still order the
 candidates; the caps bound the allocation.
 
-Eligibility and Munich-weighting
---------------------------------
+Eligibility and location weighting
+----------------------------------
 A source is eligible for a track when it is enabled, its ``source_type`` is
 among the track's ``source_categories`` (if any), and its catalog ``category``
 is among the track's ``category_affinities`` (if any; the ``general`` category
 always matches conservative breadth). Sources from Germany / DACH are queried
-with Munich + Germany locations only (locality scoping). Munich is *ordering*,
-never a filter: the preferred city is always the first location term.
+with the locality terms only (locality scoping). The configured preferred city
+is *ordering*, never a filter: it is always the first location term when set.
 Everything here is pure and deterministic — the same configuration always
 yields the same query list.
 """
@@ -47,7 +47,10 @@ from .catalog import SourceCatalog, SourceCatalogEntry, load_catalog
 from .config import Config
 from .location import normalize_location
 
-_DEFAULT_FALLBACK_LOCATIONS = ("Munich", "Germany", "Remote Europe")
+# Fallback when neither a preferred city nor any scope flag yields a term.
+# Deliberately geography-free: a hardcoded city here would be one person's
+# location baked into shipped discovery defaults.
+_DEFAULT_FALLBACK_LOCATIONS = ("Remote Europe",)
 
 _RATE_LIMIT_CLASSES = ("low", "medium", "high")
 
@@ -147,13 +150,19 @@ def _is_dach(source: SourceCatalogEntry) -> bool:
 def source_locations(source: SourceCatalogEntry, base_locations: list[str] | tuple[str, ...]) -> list[str]:
     """Location terms for a source.
 
-    German / DACH sources are locality-scoped to the Munich + Germany terms
-    (when the base contains them); everything else keeps the full base set.
-    Returns the base set unchanged when scoping would produce nothing.
+    German / DACH sources are locality-scoped to the concrete place terms
+    (the configured preferred city and the national term) when the base
+    contains them; broad terms such as "Remote Europe" are dropped for those
+    sources because they match no local posting. Everything else keeps the full
+    base set. Returns the base set unchanged when scoping would produce nothing.
     """
     if not _is_dach(source):
         return list(base_locations)
-    scoped = [loc for loc in base_locations if loc.casefold() in ("munich", "germany")]
+    scoped = [
+        loc
+        for loc in base_locations
+        if "remote" not in loc.casefold() and "europe" not in loc.casefold() and loc.strip()
+    ]
     return scoped or list(base_locations)
 
 
@@ -171,7 +180,7 @@ def _reason_for(track, source: SourceCatalogEntry, cell_loc: str, base_locations
     if _is_dach(source):
         return "german_locality"
     if base_locations and cell_loc == base_locations[0]:
-        return "munich_priority"
+        return "preferred_city_priority"
     return _eligibility_reason(track, source)
 
 

@@ -55,7 +55,7 @@
 - [ ] Add job filtering by role archetype, career direction, and location
 - [ ] Show score decomposition and evidence for each job
 - [ ] Implement feedback controls directly in the interface
-- [ ] Add career views (Best Overall, Munich, AI/Autonomous, etc.)
+- [ ] Add career views (Best Overall, preferred city, remote, domain, etc.)
 - [ ] Include application tracking views (Interested, Applied, Interview, etc.)
 - [ ] Add CV/LinkedIn optimization actions
 

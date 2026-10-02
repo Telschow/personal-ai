@@ -22,7 +22,7 @@ def gemini_export(tmp_path: Path) -> Path:
         "id": "conv-1",
         "title": "Career",
         "messages": [
-            {"role": "user", "content": "I work at BCG"},
+            {"role": "user", "content": "I work at Example Corp"},
             {"role": "assistant", "content": "That sounds great!"},
         ],
         "createdAt": "2026-01-15T10:00:00Z",
@@ -53,7 +53,7 @@ def chatgpt_export(tmp_path: Path) -> Path:
                         "create_time": 1767236400.0,
                         "content": {
                             "content_type": "text",
-                            "parts": ["I work at BCG"],
+                            "parts": ["I work at Example Corp"],
                         },
                     },
                     "parent": "node-root",
@@ -208,7 +208,7 @@ def test_ingest_gemini_with_memory_writes_durable_memory(
         ).fetchone()[0]
     finally:
         connection.close()
-    assert statement == "The user works at BCG"
+    assert statement == "The user works at Example Corp"
     assert source_type == "gemini"
 
 
@@ -255,12 +255,12 @@ def test_ingested_chatgpt_conversation_is_searchable(
 
     connection = connect_database(database)
     try:
-        hits = ConversationStore(connection).search("BCG")
+        hits = ConversationStore(connection).search("Example Corp")
     finally:
         connection.close()
 
     assert len(hits) == 1
-    assert "BCG" in hits[0].content_text
+    assert "Example Corp" in hits[0].content_text
 
 
 def test_memory_flag_requires_conversation_source(

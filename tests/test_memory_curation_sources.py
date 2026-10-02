@@ -110,7 +110,7 @@ def _chunk(doc_id: str, text: str) -> DocumentChunk:
 
 
 def _email_docs(
-    domain: str = "bcg.com",
+    domain: str = "example-corp.example.org",
     *,
     months: tuple[str, ...] = ("2026-01", "2026-02", "2026-03"),
     per_month: int = 3,
@@ -167,7 +167,7 @@ def _cfg(source_type: str, **overrides) -> CurationConfig:
 def _doc_proposal(
     doc_id: str,
     *,
-    statement: str = "The user works at BCG as a product manager.",
+    statement: str = "The user works at Example Corp as a product manager.",
     kind: str = "work",
 ) -> str:
     proposal: dict[str, object] = {
@@ -198,7 +198,7 @@ class _CountingEchoClient:
         doc_id = match.group(1) if match else "email-2026-01-0"
         statement, kind = self._statements.get(
             doc_id,
-            ("The user works at BCG as a product manager.", "work"),
+            ("The user works at Example Corp as a product manager.", "work"),
         )
         return ChatResponse(
             content=_doc_proposal(doc_id, statement=statement, kind=kind),
@@ -295,7 +295,9 @@ def test_email_discover_keeps_only_recurring_non_webmail_domains() -> None:
     docs: list[Document] = []
     # One recurring corporate domain: kept.
     docs += _email_docs(
-        "bcg.com", months=("2026-01", "2026-02", "2026-03"), prefix="email-bcg"
+        "example-corp.example.org",
+        months=("2026-01", "2026-02", "2026-03"),
+        prefix="email-example",
     )
     # A single month of mail from a small company: dropped.
     docs += _email_docs("acme.io", months=("2026-01",), prefix="email-acme")
@@ -310,7 +312,7 @@ def test_email_discover_keeps_only_recurring_non_webmail_domains() -> None:
         assert len(units) == 1
         unit = units[0]
         assert unit.source_type == EMAIL
-        assert str(unit.context.domain) == "bcg.com"  # type: ignore[union-attr]
+        assert str(unit.context.domain) == "example-corp.example.org"  # type: ignore[union-attr]
         assert unit.signal == 9
         assert unit.records  # windows exist
         # Deterministic windows are content-free: no snippets at all and the
@@ -358,7 +360,7 @@ def test_email_deterministic_candidate_uses_monthly_id_only_evidence() -> None:
         connection.close()
     assert candidate.kind is MemoryKind.INTEREST  # type: ignore[union-attr]
     assert candidate.temporal_scope.value == "recurring"  # type: ignore[union-attr]
-    assert "bcg.com" in candidate.statement  # type: ignore[union-attr,index]
+    assert "example-corp.example.org" in candidate.statement  # type: ignore[union-attr,index]
     # One id-only evidence ref per distinct month, never content.
     assert len(candidate.evidence) == 3  # type: ignore[union-attr]
     assert sorted(ref.source_document_id for ref in candidate.evidence) == sorted(
@@ -401,7 +403,7 @@ def test_email_runner_auto_accepts_high_signal_and_is_idempotent() -> None:
         assert second.counters.tally.created == 0
         assert service.counts()["active"] == 1
         (memory,) = service.list()
-        assert "bcg.com" in memory.content
+        assert "example-corp.example.org" in memory.content
         assert all(
             ref["source_type"] == EMAIL
             for ref in service.evidence_for(memory.memory_id)
@@ -478,7 +480,7 @@ def test_generic_document_deterministic_proposes_nothing_and_reads_no_chunks() -
     connection, store = _seed_documents([doc])
     try:
         chunk_store = ChunkStore(connection)
-        chunk_store.add(_chunk("d-1", "The user works at BCG."))
+        chunk_store.add(_chunk("d-1", "The user works at Example Corp."))
         adapter = DocumentCurationAdapter(store, chunk_store)
         units = adapter.discover(_cfg(GENERIC_DOCUMENT_SOURCE, limit=10))
         (unit,) = units
@@ -496,7 +498,7 @@ def test_generic_document_llm_proposal_is_gated_on_allowed_documents() -> None:
 
     good = to_document_candidate(
         DocumentProposal(
-            statement="The user works at BCG",
+            statement="The user works at Example Corp",
             kind="work",
             temporal_scope="current",
             confidence=0.9,
@@ -512,7 +514,7 @@ def test_generic_document_llm_proposal_is_gated_on_allowed_documents() -> None:
 
     unknown_ref = to_document_candidate(
         DocumentProposal(
-            statement="The user works at BCG",
+            statement="The user works at Example Corp",
             kind="work",
             temporal_scope="current",
             confidence=0.9,
@@ -546,12 +548,14 @@ def test_generic_document_llm_runner_creates_and_reruns_idempotently() -> None:
         for document in docs:
             store.add(document)
         chunk_store = ChunkStore(connection)
-        chunk_store.add(_chunk("d-1", "Product work at BCG, building AI tooling."))
+        chunk_store.add(
+            _chunk("d-1", "Product work at Example Corp, building AI tooling.")
+        )
         chunk_store.add(_chunk("d-2", "Personal notes on local-first software."))
         service = _service()
         client = _CountingEchoClient(
             {
-                "d-1": ("The user works at BCG as a product manager.", "work"),
+                "d-1": ("The user works at Example Corp as a product manager.", "work"),
                 "d-2": ("The user prefers local-first software tools.", "preference"),
             }
         )
@@ -766,9 +770,9 @@ def test_min_signal_downgrades_low_signal_llm_email_units() -> None:
 def test_sample_budget_limits_llm_calls_across_units() -> None:
     docs: list[Document] = []
     docs += _email_docs(
-        "bcg.com",
+        "example-corp.example.org",
         months=("2026-01", "2026-02", "2026-03", "2026-04"),
-        prefix="email-bcg",
+        prefix="email-example",
     )
     docs += _email_docs(
         "acme.io", months=("2026-01", "2026-02", "2026-03"), prefix="email-acme"
@@ -861,7 +865,9 @@ def test_source_report_summary_is_aggregate_only() -> None:
     service = _service()
     try:
         chunk_store = ChunkStore(connection)
-        chunk_store.add(_chunk("d-1", "The user works at BCG as a product manager."))
+        chunk_store.add(
+            _chunk("d-1", "The user works at Example Corp as a product manager.")
+        )
         adapter = DocumentCurationAdapter(store, chunk_store, client=_FakeModelClient())
         reports: list[CurationReport] = []
         runner = MemoryCurationRunner(
@@ -873,7 +879,7 @@ def test_source_report_summary_is_aggregate_only() -> None:
         )
         for report in reports:
             summary = json.dumps(report.summary(), sort_keys=True)
-            assert "bcg.com" not in summary
+            assert "example-corp.example.org" not in summary
             assert "d-1" not in summary
             assert "product manager" not in summary
             assert "Weekly update" not in summary

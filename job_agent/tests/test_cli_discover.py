@@ -101,7 +101,9 @@ def test_plan_mode_offline_yaml(tmp_path, capsys):
     out = capsys.readouterr().out
     payload = json.loads(out)
     assert payload["query_count"] == 12
-    assert payload["locations"][0] == "Munich"
+    # A default config carries no city preference, so the plan starts at the
+    # national scope term.
+    assert payload["locations"][0] == "Germany"
     assert payload["queries"]
     assert payload["queries_by_source"]
 

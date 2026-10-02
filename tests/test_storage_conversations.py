@@ -511,13 +511,16 @@ class TestSearchTemporalBounds:
             _msg(
                 "m1",
                 index=0,
-                content="BCG early",
+                content="Example Corp early",
                 timestamp="2026-01-15T00:00:00+00:00",
             )
         )
         self.store.save_message(
             _msg(
-                "m2", index=1, content="BCG late", timestamp="2026-02-15T00:00:00+00:00"
+                "m2",
+                index=1,
+                content="Example Corp late",
+                timestamp="2026-02-15T00:00:00+00:00",
             )
         )
 
@@ -525,48 +528,70 @@ class TestSearchTemporalBounds:
         self.connection.close()
 
     def test_created_after_includes_exact_boundary(self) -> None:
-        results = self.store.search("BCG", created_after="2026-01-15T00:00:00+00:00")
-        assert [r.content_text for r in results] == ["BCG early", "BCG late"]
+        results = self.store.search(
+            "Example Corp", created_after="2026-01-15T00:00:00+00:00"
+        )
+        assert [r.content_text for r in results] == [
+            "Example Corp early",
+            "Example Corp late",
+        ]
 
     def test_created_after_excludes_earlier(self) -> None:
-        results = self.store.search("BCG", created_after="2026-02-01T00:00:00+00:00")
-        assert [r.content_text for r in results] == ["BCG late"]
+        results = self.store.search(
+            "Example Corp", created_after="2026-02-01T00:00:00+00:00"
+        )
+        assert [r.content_text for r in results] == ["Example Corp late"]
 
     def test_created_before_includes_exact_boundary(self) -> None:
-        results = self.store.search("BCG", created_before="2026-02-15T00:00:00+00:00")
-        assert [r.content_text for r in results] == ["BCG early", "BCG late"]
+        results = self.store.search(
+            "Example Corp", created_before="2026-02-15T00:00:00+00:00"
+        )
+        assert [r.content_text for r in results] == [
+            "Example Corp early",
+            "Example Corp late",
+        ]
 
     def test_created_before_excludes_later(self) -> None:
-        results = self.store.search("BCG", created_before="2026-02-01T00:00:00+00:00")
-        assert [r.content_text for r in results] == ["BCG early"]
+        results = self.store.search(
+            "Example Corp", created_before="2026-02-01T00:00:00+00:00"
+        )
+        assert [r.content_text for r in results] == ["Example Corp early"]
 
     def test_both_bounds_restrict_range(self) -> None:
         results = self.store.search(
-            "BCG",
+            "Example Corp",
             created_after="2026-01-20T00:00:00+00:00",
             created_before="2026-02-20T00:00:00+00:00",
         )
-        assert [r.content_text for r in results] == ["BCG late"]
+        assert [r.content_text for r in results] == ["Example Corp late"]
 
     def test_no_bounds_returns_all(self) -> None:
-        results = self.store.search("BCG")
-        assert [r.content_text for r in results] == ["BCG early", "BCG late"]
+        results = self.store.search("Example Corp")
+        assert [r.content_text for r in results] == [
+            "Example Corp early",
+            "Example Corp late",
+        ]
 
     def test_no_timestamp_never_matches_bounded_window(self) -> None:
-        self.store.save_message(_msg("m3", index=2, content="BCG untimed"))
-        results = self.store.search("BCG", created_after="2026-01-01T00:00:00+00:00")
-        assert [r.content_text for r in results] == ["BCG early", "BCG late"]
+        self.store.save_message(_msg("m3", index=2, content="Example Corp untimed"))
+        results = self.store.search(
+            "Example Corp", created_after="2026-01-01T00:00:00+00:00"
+        )
+        assert [r.content_text for r in results] == [
+            "Example Corp early",
+            "Example Corp late",
+        ]
 
     def test_malformed_timestamp_bound_rejected(self) -> None:
         with pytest.raises(ValueError, match="ISO-8601"):
-            self.store.search("BCG", created_after="not-a-timestamp")
+            self.store.search("Example Corp", created_after="not-a-timestamp")
         with pytest.raises(ValueError, match="ISO-8601"):
-            self.store.search("BCG", created_before="not-a-timestamp")
+            self.store.search("Example Corp", created_before="not-a-timestamp")
 
     def test_inverted_range_rejected(self) -> None:
         with pytest.raises(ValueError, match="must not be later"):
             self.store.search(
-                "BCG",
+                "Example Corp",
                 created_after="2026-02-15T00:00:00+00:00",
                 created_before="2026-01-15T00:00:00+00:00",
             )
@@ -574,14 +599,18 @@ class TestSearchTemporalBounds:
     def test_mixed_offset_bounds_rejected(self) -> None:
         with pytest.raises(ValueError, match="mix offset-naive"):
             self.store.search(
-                "BCG",
+                "Example Corp",
                 created_after="2026-01-15T00:00:00",
                 created_before="2026-02-15T00:00:00+00:00",
             )
 
     def test_results_deterministic(self) -> None:
-        first = self.store.search("BCG", created_after="2026-01-01T00:00:00+00:00")
-        second = self.store.search("BCG", created_after="2026-01-01T00:00:00+00:00")
+        first = self.store.search(
+            "Example Corp", created_after="2026-01-01T00:00:00+00:00"
+        )
+        second = self.store.search(
+            "Example Corp", created_after="2026-01-01T00:00:00+00:00"
+        )
         assert first == second
 
 
@@ -596,7 +625,7 @@ class TestSearchMultiTerm:
     def setup_method(self) -> None:
         self.connection = connect_database(":memory:")
         self.store = ConversationStore(self.connection)
-        self._add("m-bcg", "BCG case prep")
+        self._add("m-example", "Example Corp case prep")
         self._add("m-career", "Career growth plan")
         self._add("m-interview", "Interview tips and strategy")
         self._add("m-none", "Cooking a simple dinner")
@@ -619,24 +648,24 @@ class TestSearchMultiTerm:
         assert texts == ["Career growth plan"]
 
     def test_multi_term_query_retrieves_any_match(self) -> None:
-        texts = self._texts("BCG career interview")
-        assert "BCG case prep" in texts
+        texts = self._texts("Example Corp career interview")
+        assert "Example Corp case prep" in texts
         assert "Career growth plan" in texts
         assert "Interview tips and strategy" in texts
         assert "Cooking a simple dinner" not in texts
 
     def test_partial_term_isolation(self) -> None:
         # A multi-term query requires no single term -- a message matching
-        # just "BCG" is enough even when McKinsey/Bain/consulting are absent.
-        texts = self._texts("BCG McKinsey Bain consulting")
-        assert "BCG case prep" in texts
+        # just "Example Corp" is enough even when McKinsey/Bain/consulting are absent.
+        texts = self._texts("Example Corp McKinsey Bain consulting")
+        assert "Example Corp case prep" in texts
 
     def test_more_terms_rank_higher(self) -> None:
-        results = self.store.search("BCG interview prep")
-        m_bcg = next(r for r in results if r.message_id == "m-bcg")
+        results = self.store.search("Example Corp interview prep")
+        m_example = next(r for r in results if r.message_id == "m-example")
         m_interview = next(r for r in results if r.message_id == "m-interview")
-        # m-bcg matches "BCG" and "prep"; m-interview matches "interview" only.
-        assert m_bcg.score > m_interview.score
+        # m-example matches "Example Corp" and "prep"; m-interview matches "interview" only.
+        assert m_example.score > m_interview.score
 
     def test_specific_concept_outranks_equal_coverage(self) -> None:
         # Same number of matched terms, but "career transition" is a contiguous
@@ -686,17 +715,19 @@ class TestSearchMultiTerm:
         assert ranks["m-concept"] > 0.25
 
     def test_case_insensitive(self) -> None:
-        texts = self._texts("bCg CaReEr")
-        assert "BCG case prep" in texts
+        texts = self._texts("eXaMpLe CoRp CaReEr")
+        assert "Example Corp case prep" in texts
         assert "Career growth plan" in texts
 
     def test_title_match_contributes(self) -> None:
         # A term appearing in the conversation title is a valid match.
-        self.store.save_conversation(_conv("conv-title", title="BCG Careers Overview"))
+        self.store.save_conversation(
+            _conv("conv-title", title="Example Corp Careers Overview")
+        )
         self.store.save_message(
             _msg("m-title", conv_id="conv-title", content="Unrelated body text")
         )
-        texts = self._texts("BCG")
+        texts = self._texts("Example Corp")
         assert "Unrelated body text" in texts
 
     def test_speaker_match_contributes(self) -> None:
@@ -733,18 +764,18 @@ class TestSearchMultiTerm:
     def test_created_after_with_multi_term(self) -> None:
         self._add(
             "m-late",
-            "BCG late interview",
+            "Example Corp late interview",
             timestamp="2026-02-20T00:00:00+00:00",
         )
         texts = self._texts(
-            "BCG McKinsey consulting",
+            "Example Corp McKinsey consulting",
             created_after="2026-02-01T00:00:00+00:00",
         )
-        assert texts == ["BCG late interview"]
+        assert texts == ["Example Corp late interview"]
 
     def test_created_before_with_multi_term(self) -> None:
         texts = self._texts(
-            "BCG McKinsey consulting",
+            "Example Corp McKinsey consulting",
             created_before="2026-01-01T00:00:00+00:00",
         )
         # Untimed messages never match a bounded window; none qualify here.
@@ -753,29 +784,29 @@ class TestSearchMultiTerm:
     def test_both_bounds_restrict_multi_term(self) -> None:
         self._add(
             "m-window",
-            "BCG window interview",
+            "Example Corp window interview",
             timestamp="2026-03-15T00:00:00+00:00",
         )
         texts = self._texts(
-            "BCG McKinsey consulting",
+            "Example Corp McKinsey consulting",
             created_after="2026-03-01T00:00:00+00:00",
             created_before="2026-03-31T00:00:00+00:00",
         )
-        assert texts == ["BCG window interview"]
+        assert texts == ["Example Corp window interview"]
 
     def test_null_timestamp_not_in_bounded_multi_term(self) -> None:
         texts = self._texts(
-            "BCG McKinsey consulting",
+            "Example Corp McKinsey consulting",
             created_after="2026-01-01T00:00:00+00:00",
         )
         # None of the untimed fixture messages may match a bounded window.
         assert texts == []
 
     def test_multi_term_deterministic(self) -> None:
-        first = self.store.search("BCG career interview")
-        second = self.store.search("BCG career interview")
+        first = self.store.search("Example Corp career interview")
+        second = self.store.search("Example Corp career interview")
         assert first == second
 
     def test_limit_respected(self) -> None:
-        results = self.store.search("BCG career interview", limit=2)
+        results = self.store.search("Example Corp career interview", limit=2)
         assert len(results) <= 2

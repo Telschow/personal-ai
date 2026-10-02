@@ -83,7 +83,7 @@ def _evidence_from_case(case: MappingEvalCase, career: CareerProfile) -> list:
 # the real profile.yaml (which can change between runs).
 _BASE_PROFILE: dict = {
     "name": "Eval User",
-    "education": [{"school": "TU Munich", "degree": "M.Sc. Automotive", "years": "2018-2021"}],
+    "education": [{"school": "Example Technical University", "degree": "M.Sc. Engineering", "years": "2018-2021"}],
     "experience": [
         {"company": "ACME", "title": "Product Owner - Autonomous Driving", "dates": "2024-present", "facts": ["AVP"]},
     ],

@@ -97,7 +97,7 @@ def _msg(
 
 
 def _prop(
-    statement: str = "The user works at BCG",
+    statement: str = "The user works at Example Corp",
     kind: str = "work",
     temporal: str = "current",
     confidence: float = 0.9,
@@ -177,7 +177,7 @@ def _cfg(**overrides) -> CurationConfig:
 
 def _work_pair(created_at: str = "2026-01-01T00:00:00+00:00", conv_id: str = "conv-1"):
     return _conv(conv_id, created_at=created_at), (
-        _msg(f"m-{conv_id}", "I work at BCG", conv_id=conv_id),
+        _msg(f"m-{conv_id}", "I work at Example Corp", conv_id=conv_id),
     )
 
 
@@ -255,7 +255,7 @@ def test_deterministic_fresh_run_creates_memory() -> None:
         assert report.counters.tally.created == 1
         assert service.counts()["active"] == 1
         memory = service.list()[0]
-        assert memory.content == "The user works at BCG"
+        assert memory.content == "The user works at Example Corp"
         assert len(service.evidence_for(memory.memory_id)) == 1
     finally:
         connection.close()
@@ -271,7 +271,9 @@ def test_deterministic_rerun_is_idempotent_and_accumulates_evidence() -> None:
         # A second conversation expressing the same fact adds evidence to the
         # single memory rather than creating a duplicate.
         store.save_conversation(_conv("conv-2", created_at="2026-01-02T00:00:00+00:00"))
-        store.save_messages((_msg("m-conv-2", "I work at BCG", conv_id="conv-2"),))
+        store.save_messages(
+            (_msg("m-conv-2", "I work at Example Corp", conv_id="conv-2"),)
+        )
         second = runner.run(_cfg(limit=1, offset=1))
         assert first.counters.tally.created == 1
         assert second.counters.tally.writes == 1
@@ -472,7 +474,7 @@ def test_conflict_is_counted_and_not_written() -> None:
         _work_pair(created_at="2026-01-01T00:00:00+00:00", conv_id="conv-a"),
         (
             _conv("conv-b", created_at="2026-01-02T00:00:00+00:00"),
-            (_msg("m2", "I'm a software engineer at BCG", conv_id="conv-b"),),
+            (_msg("m2", "I'm a software engineer at Example Corp", conv_id="conv-b"),),
         ),
     )
     service = _service()
@@ -596,7 +598,7 @@ def _evidence_refs(*document_ids: str) -> str:
 
 def _review_kwargs(
     *,
-    statement: str = "The user works at BCG",
+    statement: str = "The user works at Example Corp",
     category: str = "conflict",
     reason: str = "ambiguous_related_fact",
     kind: str = "work",
@@ -717,14 +719,14 @@ def test_review_dedupe_is_language_agnostic() -> None:
     connection = connect_database(":memory:")
     curation = CurationStore(connection)
     try:
-        de = _review_kwargs(statement="Der Nutzer arbeitet bei BCG")
+        de = _review_kwargs(statement="Der Nutzer arbeitet bei Example Corp")
         created, de_id = curation.enqueue_review_if_missing(**de)
         again, de_id2 = curation.enqueue_review_if_missing(**de)
         assert created and not again
         assert de_id2 == de_id
 
         es = _review_kwargs(
-            statement="El usuario trabaja en BCG", category="require_approval"
+            statement="El usuario trabaja en Example Corp", category="require_approval"
         )
         created, es_id = curation.enqueue_review_if_missing(**es)
         again, es_id2 = curation.enqueue_review_if_missing(**es)
@@ -781,7 +783,13 @@ def test_review_dedupe_reruns_share_single_conflict_review_row() -> None:
         _work_pair(created_at="2026-01-01T00:00:00+00:00", conv_id="conv-a"),
         (
             _conv("conv-b", created_at="2026-01-02T00:00:00+00:00"),
-            (_msg("m-conv-b", "I'm a software engineer at BCG", conv_id="conv-b"),),
+            (
+                _msg(
+                    "m-conv-b",
+                    "I'm a software engineer at Example Corp",
+                    conv_id="conv-b",
+                ),
+            ),
         ),
     )
     service = _service()
@@ -814,11 +822,21 @@ def test_review_dedupe_distinct_conflicts_stay_distinct() -> None:
         _work_pair(created_at="2026-01-01T00:00:00+00:00", conv_id="conv-a"),
         (
             _conv("conv-b", created_at="2026-01-02T00:00:00+00:00"),
-            (_msg("m-conv-b", "I'm a software engineer at BCG", conv_id="conv-b"),),
+            (
+                _msg(
+                    "m-conv-b",
+                    "I'm a software engineer at Example Corp",
+                    conv_id="conv-b",
+                ),
+            ),
         ),
         (
             _conv("conv-c", created_at="2026-01-03T00:00:00+00:00"),
-            (_msg("m-conv-c", "I work as a manager at BCG", conv_id="conv-c"),),
+            (
+                _msg(
+                    "m-conv-c", "I work as a manager at Example Corp", conv_id="conv-c"
+                ),
+            ),
         ),
     )
     service = _service()
@@ -1113,7 +1131,13 @@ def test_resume_after_conflict_deduplicates_review_and_memory() -> None:
         _work_pair(created_at="2026-01-01T00:00:00+00:00", conv_id="conv-a"),
         (
             _conv("conv-b", created_at="2026-01-02T00:00:00+00:00"),
-            (_msg("m-conv-b", "I'm a software engineer at BCG", conv_id="conv-b"),),
+            (
+                _msg(
+                    "m-conv-b",
+                    "I'm a software engineer at Example Corp",
+                    conv_id="conv-b",
+                ),
+            ),
         ),
     )
     service = _service()
@@ -1164,7 +1188,13 @@ def test_orchestration_aggregates_review_queued_and_deduplicated() -> None:
         _work_pair(created_at="2026-01-01T00:00:00+00:00", conv_id="conv-a"),
         (
             _conv("conv-b", created_at="2026-01-02T00:00:00+00:00"),
-            (_msg("m-conv-b", "I'm a software engineer at BCG", conv_id="conv-b"),),
+            (
+                _msg(
+                    "m-conv-b",
+                    "I'm a software engineer at Example Corp",
+                    conv_id="conv-b",
+                ),
+            ),
         ),
     )
     service = _service()

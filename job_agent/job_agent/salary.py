@@ -1,9 +1,10 @@
 """Salary normalization.
 
-The user's actual floor is EUR 120k and target EUR 150k+. Different sources
-report compensation in different currencies; nominal values must never be
-compared directly. This module converts to EUR while keeping the uncertainty
-explicit (approximate mid-market conversion rates, flagged when applied).
+Different sources report compensation in different currencies; nominal values
+must never be compared directly. This module converts to EUR while keeping the
+uncertainty explicit (approximate mid-market conversion rates, flagged when
+applied). Floor and target expectations are supplied by the caller — this
+module holds no built-in compensation policy.
 """
 
 from __future__ import annotations

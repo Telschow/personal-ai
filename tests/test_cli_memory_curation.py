@@ -59,7 +59,7 @@ def _conv(conv_id: str, created_at: str = "2026-01-01T00:00:00+00:00") -> Conver
 
 
 def _msg(
-    msg_id: str, conv_id: str, content: str = "I work at BCG"
+    msg_id: str, conv_id: str, content: str = "I work at Example Corp"
 ) -> ConversationMessage:
     return ConversationMessage(
         id=msg_id,
@@ -79,7 +79,7 @@ def _proposal(
     evidence: tuple[str, ...] = ("m1",), **overrides: object
 ) -> dict[str, object]:
     proposal: dict[str, object] = {
-        "statement": "The user works at BCG",
+        "statement": "The user works at Example Corp",
         "kind": "work",
         "temporal_scope": "current",
         "confidence": 0.9,
@@ -182,7 +182,7 @@ class _DocEchoClient:
                 {
                     "proposals": [
                         {
-                            "statement": "The user works at BCG as a product manager.",
+                            "statement": "The user works at Example Corp as a product manager.",
                             "kind": "work",
                             "temporal_scope": "current",
                             "confidence": 0.9,
@@ -216,7 +216,7 @@ def test_cli_memory_curate_deterministic_writes_and_reports(
     assert "tally:" in out
     assert "created: 1" in out
     # Aggregate-only: statement content never leaks into the report.
-    assert "works at BCG" not in out
+    assert "works at Example Corp" not in out
     assert "conv-1" not in out
 
 
@@ -446,7 +446,7 @@ def test_cli_memory_curate_email_deterministic(
             f"email-{month}-{index}",
             month=month,
             day=index + 1,
-            sender=f"c{index}@bcg.com",
+            sender=f"c{index}@example-corp.example.org",
         )
         for month in ("2026-01", "2026-02", "2026-03")
         for index in range(3)
@@ -463,7 +463,7 @@ def test_cli_memory_curate_email_deterministic(
     assert data["tally"]["deferred"] == 1
     assert data["tally"]["writes"] == 0
     # Aggregate-only: the sender domain and subjects never leak.
-    assert "bcg.com" not in json.dumps(data)
+    assert "example-corp.example.org" not in json.dumps(data)
     assert "Weekly update" not in json.dumps(data)
 
 
@@ -533,7 +533,9 @@ def test_cli_memory_curate_generic_document_llm(
             )
         )
         ChunkStore(connection).add(
-            DocumentChunk(id="c-d-1", document_id="d-1", text="Product work at BCG.")
+            DocumentChunk(
+                id="c-d-1", document_id="d-1", text="Product work at Example Corp."
+            )
         )
     finally:
         connection.close()
@@ -676,10 +678,10 @@ def test_cli_review_dedupe_conflict_reruns_single_pending_row(
     db = tmp_path / "curation.db"
     _seed(
         db,
-        (_conv("conv-a"), (_msg("m-a", "conv-a", "I work at BCG"),)),
+        (_conv("conv-a"), (_msg("m-a", "conv-a", "I work at Example Corp"),)),
         (
             _conv("conv-b", created_at="2026-01-02T00:00:00+00:00"),
-            (_msg("m-b", "conv-b", "I'm a software engineer at BCG"),),
+            (_msg("m-b", "conv-b", "I'm a software engineer at Example Corp"),),
         ),
     )
 

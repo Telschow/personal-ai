@@ -91,6 +91,7 @@ POLICY = ScoringPolicy(
     purpose_weight=0.05,
     wlb_weight=0.05,
     industries=("AI",),
+    purpose_terms=("ai",),
     negative_keywords=("junior",),
     target_roles=("Product Manager",),
 )

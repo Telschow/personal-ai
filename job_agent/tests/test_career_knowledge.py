@@ -68,7 +68,7 @@ def _new_personal_db(tmp_path) -> str:
         Memory(
             memory_id=new_memory_id(),
             kind=MemoryKind.WORK,
-            content="Alice Example is a Product Owner at BMW Group",
+            content="Alice Example is a Product Owner at Nimbus Motors",
             summary="work identity",
             source_type=MemorySourceType.IMPORTED,
             source_id="conv-1",
@@ -112,7 +112,7 @@ def test_adapter_memory_and_corpus_search(tmp_path):
     knowledge = PersonalAiCareerKnowledge(path)
     try:
         assert knowledge.health() is True
-        mem = knowledge.memory_search("Product Owner BMW", limit=5)
+        mem = knowledge.memory_search("Product Owner Nimbus Motors", limit=5)
         assert len(mem) == 1
         assert mem[0].level.value == "documented"
         assert mem[0].source == "personal_ai_memory"
@@ -130,7 +130,7 @@ def test_adapter_respects_memory_kinds_filter(tmp_path):
     knowledge = PersonalAiCareerKnowledge(path, memory_kinds=["goal"])
     try:
         assert knowledge.health() is True
-        mem = knowledge.memory_search("Product Owner BMW", limit=5)
+        mem = knowledge.memory_search("Product Owner Nimbus Motors", limit=5)
         assert len(mem) == 0  # 'work' filtered out
     finally:
         knowledge.close()

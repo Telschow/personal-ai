@@ -208,8 +208,14 @@ def analyze_fit(
     *,
     weights: FitWeights | None = None,
     narrative: Any = None,
+    salary_floor_eur: float | None = None,
 ) -> FitAssessment:
-    """Deterministic fit assessment; never mutates state."""
+    """Deterministic fit assessment; never mutates state.
+
+    ``salary_floor_eur`` is the caller's configured compensation floor. It is
+    ``None`` by default (no floor configured) and then produces no salary risk
+    note at all — the floor is a personal policy input, never a built-in.
+    """
     w = weights or FitWeights()
     total_w = max(w.total, 0.001)
 
@@ -287,8 +293,8 @@ def analyze_fit(
             gaps.append(Gap(dimension=dim, capability=dim, note=f"low requirement match ({m:.2f})"))
 
     risks: list[str] = []
-    if job.salary_min_eur is not None and job.salary_min_eur < 120_000:
-        risks.append("published bottom of range is below the €120k salary floor")
+    if salary_floor_eur is not None and job.salary_min_eur is not None and job.salary_min_eur < salary_floor_eur:
+        risks.append(f"published bottom of range is below the €{salary_floor_eur:,.0f} salary floor")
     if attrs.security_clearance and not any(e.source == "profile" for e in evidence):
         risks.append("security clearance required; no clearance evidence found")
     if attrs.people_management and not coverage_map.get("team_leadership"):

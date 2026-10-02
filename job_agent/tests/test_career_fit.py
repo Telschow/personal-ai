@@ -110,8 +110,21 @@ def test_gaps_for_missing_concepts():
 
 def test_salary_floor_risk():
     attrs = extract_job_attributes(_job("product strategy roadmap"))
-    a = analyze_fit(_job("", salary_min=80000), CAREER, attrs, _evidence())
+    a = analyze_fit(
+        _job("", salary_min=80000),
+        CAREER,
+        attrs,
+        _evidence(),
+        salary_floor_eur=120000,
+    )
     assert any(r for r in a.risks if "salary floor" in r)
+
+
+def test_no_salary_floor_risk_when_unconfigured():
+    """With no configured floor, the assessment must not invent one."""
+    attrs = extract_job_attributes(_job("product strategy roadmap"))
+    a = analyze_fit(_job("", salary_min=80000), CAREER, attrs, _evidence())
+    assert not any("salary floor" in r for r in a.risks)
 
 
 def test_people_management_risk():

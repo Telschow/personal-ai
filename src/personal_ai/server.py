@@ -52,9 +52,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, Request, UploadFile
+from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.datastructures import UploadFile as StarletteUploadFile
 
 from personal_ai import cli, config
 from personal_ai.agent import AgentError, MaxToolRoundsError
@@ -1424,6 +1425,59 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
             where_clauses.append("j.source = ?")
             params.append(source)
 
+        # Snapshot of the ownership/lifecycle predicates. The track probe below
+        # has to read every candidate row's title and description, and reusing
+        # the accumulated list would either double-bind or drop predicates.
+        base_clauses = list(where_clauses)
+        base_params = list(params)
+
+        # Every filter below is applied in SQL, before LIMIT/OFFSET, so that the
+        # page the caller receives is the first page *of the matches* and the
+        # reported count is the number of matches. Filtering after pagination
+        # returns short or empty pages and a count that ignores the filter.
+        if location:
+            where_clauses.append("LOWER(COALESCE(j.location, '')) LIKE ?")
+            params.append(f"%{location.lower()}%")
+
+        if min_fit is not None:
+            # `evaluations.total` is stored 0..100; the API takes 0..1.
+            where_clauses.append("e.total >= ?")
+            params.append(min_fit * 100)
+
+        if analyzed is True:
+            where_clauses.append(
+                "EXISTS (SELECT 1 FROM evaluations ea WHERE ea.job_id = j.id)"
+            )
+        elif analyzed is False:
+            where_clauses.append(
+                "NOT EXISTS (SELECT 1 FROM evaluations ea WHERE ea.job_id = j.id)"
+            )
+
+        if track:
+            # Track classification reads the title and description, so it cannot
+            # be expressed as a SQL predicate. Resolve the matching ids first and
+            # constrain the page query with them, rather than dropping
+            # non-matching rows after the page window has already been chosen.
+            from job_agent.career_tracks import classify_track
+
+            probe_sql = "SELECT j.id AS id, j.title AS title, j.description AS description FROM jobs j"
+            if base_clauses:
+                probe_sql += " WHERE " + " AND ".join(base_clauses)
+            track_ids = [
+                r["id"]
+                for r in job_db_conn.execute(probe_sql, base_params).fetchall()
+                if (m := classify_track(r["title"] or "", r["description"] or ""))
+                is not None
+                and m.track_id == track
+            ]
+            if not track_ids:
+                return JSONResponse(
+                    status_code=200,
+                    content={"jobs": [], "count": 0, "limit": limit, "offset": offset},
+                )
+            where_clauses.append("j.id IN (" + ",".join("?" * len(track_ids)) + ")")
+            params.extend(track_ids)
+
         where_sql = (" WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
 
         # Determine ORDER BY clause
@@ -1453,53 +1507,18 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
 
         rows = job_db_conn.execute(query, params).fetchall()
 
-        # Apply remaining filters that can't be done in SQL easily
-        filtered_jobs: list[Job] = []
+        from job_agent.career_tracks import classify_track
+
+        jobs_out = []
         for row in rows:
             job = _job_from_row(row)
             if job is None:
                 continue
-            if track:
-                from job_agent.career_tracks import classify_track
-
-                t = classify_track(job.title, job.description)
-                if not t or t.track_id != track:
-                    continue
-            if location and location.lower() not in (job.location or "").lower():
-                continue
-            if min_fit is not None:
-                # Check if job has evaluation with sufficient score
-                eval_row = job_db_conn.execute(
-                    "SELECT total FROM evaluations WHERE job_id=? AND total >= ?",
-                    (job.id, min_fit * 100),
-                ).fetchone()
-                if not eval_row:
-                    continue
-            if analyzed is not None:
-                has_eval = job_db_conn.execute(
-                    "SELECT 1 FROM evaluations WHERE job_id=?", (job.id,)
-                ).fetchone()
-                if analyzed and not has_eval:
-                    continue
-                if not analyzed and has_eval:
-                    continue
-            filtered_jobs.append(job)
-
-        # Batch-load evaluation totals for the response (already have e_total from query)
-        from job_agent.career_tracks import classify_track
-
-        jobs_out = []
-        for job in filtered_jobs:
             item = _job_with_score_dict(job)
-            # Use e_total from the query if available, otherwise fetch
-            eval_total = None
-            for row in rows:
-                if row["id"] == job.id and row["e_total"] is not None:
-                    eval_total = row["e_total"] / 100.0
-                    break
-            if eval_total is None:
-                eval_total = None
-            item["fit_score"] = eval_total
+            # `e_total` came back on the same row, so no per-job query is needed.
+            item["fit_score"] = (
+                row["e_total"] / 100.0 if row["e_total"] is not None else None
+            )
             t = classify_track(job.title, job.description)
             item["track"] = t.track_id if t else None
             jobs_out.append(item)
@@ -1857,7 +1876,12 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
         uploaded = form.get("file")
         artifact_type_str = form.get("artifact_type")
 
-        if not isinstance(uploaded, UploadFile):
+        # This handler parses the multipart body itself with `Request.form()`
+        # instead of declaring `file: UploadFile = File(...)`, so what arrives is
+        # always `starlette.datastructures.UploadFile`. `fastapi.UploadFile` is a
+        # *subclass* of it, so testing against the fastapi class rejected every
+        # valid upload. Accept the starlette base class, which covers both.
+        if not isinstance(uploaded, StarletteUploadFile):
             raise ApiError(
                 400,
                 f"Missing file upload. Got {type(uploaded).__name__} for field 'file'. Form keys: {list(form.keys())}",
@@ -2120,16 +2144,23 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
         conn = job_db.connect(":memory:" if dry_run else db_path)
 
         try:
+            # Network I/O in an async handler blocks the whole event loop, so one
+            # slow or hostile provider stalls every other request on the worker.
+            # `run_planned_discovery` is synchronous and issues real HTTP calls.
+            from starlette.concurrency import run_in_threadpool
+
             run_started_at = datetime.now(UTC).isoformat(timespec="seconds")
             run_id = uuid.uuid4().hex
             _run_started = time.monotonic()
 
-            plan, jobs, provenance, errors, pacing_report = run_planned_discovery(
-                cfg,
-                max_pages=max_pages or cfg.search.max_global_pages,
-                max_results=cfg.career.discovery.max_results_per_query,
-                limit_total=limit_total,
-                limit_per_track=limit_per_track,
+            plan, jobs, provenance, errors, pacing_report = await run_in_threadpool(
+                lambda: run_planned_discovery(
+                    cfg,
+                    max_pages=max_pages or cfg.search.max_global_pages,
+                    max_results=cfg.career.discovery.max_results_per_query,
+                    limit_total=limit_total,
+                    limit_per_track=limit_per_track,
+                )
             )
             result = ingest_global_jobs(
                 conn,
@@ -2201,6 +2232,12 @@ def _mount_job_agent_endpoints(app: FastAPI) -> None:
             raise ApiError(
                 500, f"Discovery failed: {exc}", error_type="server_error"
             ) from exc
+        finally:
+            # Every request opened its own connection and previously never closed
+            # it, on the success path and on the error path alike. That leaked a
+            # SQLite handle and a file descriptor per call, and under `dry_run`
+            # an in-memory database with its schema and migrations.
+            conn.close()
 
 
 # Mount the job-agent endpoints

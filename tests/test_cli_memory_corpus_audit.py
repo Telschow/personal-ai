@@ -21,7 +21,10 @@ def _write_gemini_export(directory: Path) -> None:
         "id": "conv-1",
         "title": "Career",
         "messages": [
-            {"role": "user", "content": "I work at BCG and I want to move to Spain."},
+            {
+                "role": "user",
+                "content": "I work at Example Corp and I want to move to Spain.",
+            },
             {"role": "assistant", "content": "That sounds great!"},
         ],
         "createdAt": "2026-01-15T10:00:00Z",
@@ -65,7 +68,7 @@ def test_corpus_audit_requires_no_database(
     assert "llm_proposal_layer: not_exercised" in out
     assert "idempotent: True" in out  # default scratch DB is a disposable tempfile
     # No content may ever be printed.
-    assert "BCG" not in out
+    assert "Example Corp" not in out
     assert "Spain" not in out
     assert "conv-1" not in out
 

@@ -19,7 +19,7 @@ def _seed(tmp_path, name="seed.db") -> str:
         Job(
             id="smoke:1",
             title="Senior Product Manager AI",
-            company="BMW Group",
+            company="Nimbus Motors",
             location="Munich",
             url="https://example.test/jobs/1",
             source="test",

@@ -1,9 +1,9 @@
 """Deterministic location intelligence.
 
 A job's location string is mapped onto a small, explicit *tier* model so that
-ranking can reason about Munich-first fit without ever turning Munich into a
-binary filter. Remote is its own tier and is never treated as Munich; an
-unrecognized location resolves to ``unknown`` and never silently becomes a
+ranking can reason about how local a posting is without ever turning a city
+into a binary filter. Remote is its own tier and is never treated as a place;
+an unrecognized location resolves to ``unknown`` and never silently becomes a
 preferred city.
 
 Pure functions only: no I/O, no network, no model calls.
@@ -24,10 +24,13 @@ _WS = re.compile(r"\s+")
 class LocationTier(StrEnum):
     """Ordered preference tiers (higher rank = preferred)."""
 
-    MUNICH = "A_munich"
+    # Tier names describe relative proximity, not a specific geography. The
+    # vocabularies behind them are real place names; the *ordering* is a
+    # generic commute ladder (city core -> wider metro -> region -> country).
+    CITY_CORE = "A_city_core"
     METRO = "B_metro"
-    BAVARIA = "C_bavaria"
-    GERMANY = "D_germany"
+    REGION = "C_region"
+    COUNTRY = "D_country"
     REMOTE = "F_remote"
     EUROPE = "E_europe"
     UNKNOWN = "unknown"
@@ -35,10 +38,10 @@ class LocationTier(StrEnum):
 
 # Explicit ranking so 'best tier among tokens' is deterministic and auditable.
 TIER_RANK: dict[LocationTier, int] = {
-    LocationTier.MUNICH: 6,
+    LocationTier.CITY_CORE: 6,
     LocationTier.METRO: 5,
-    LocationTier.BAVARIA: 4,
-    LocationTier.GERMANY: 3,
+    LocationTier.REGION: 4,
+    LocationTier.COUNTRY: 3,
     LocationTier.REMOTE: 2,
     LocationTier.EUROPE: 1,
     LocationTier.UNKNOWN: 0,
@@ -54,7 +57,11 @@ class RemoteScope(StrEnum):
 
 
 class LocationWeights(BaseModel):
-    """Ranking contribution of each tier (configurable, defaults Munich-first)."""
+    """Ranking contribution of each proximity tier.
+
+    Defaults rank the most local tier highest and fall off outwards, which is
+    a generic commute-preference ladder. Every value is configurable.
+    """
 
     exact_city: float = 1.00
     metro: float = 0.92
@@ -527,10 +534,10 @@ def parse_location(raw: str | None, *, remote_mode: str | None = None) -> Locati
     confidence = 0.3
 
     for group, group_region, group_tier in (
-        (_MUNICH_CORE, "munich", LocationTier.MUNICH),
+        (_MUNICH_CORE, "munich", LocationTier.CITY_CORE),
         (_MUNICH_METRO, "munich", LocationTier.METRO),
-        (_BAVARIA, "bavaria", LocationTier.BAVARIA),
-        (_GERMANY, "germany", LocationTier.GERMANY),
+        (_BAVARIA, "bavaria", LocationTier.REGION),
+        (_GERMANY, "germany", LocationTier.COUNTRY),
         (_EUROPE, "europe", LocationTier.EUROPE),
         (_INTERNATIONAL, "international", LocationTier.EUROPE),
     ):
@@ -541,7 +548,7 @@ def parse_location(raw: str | None, *, remote_mode: str | None = None) -> Locati
         if TIER_RANK[group_tier] > TIER_RANK[tier]:
             tier = group_tier
             region = group_region
-            confidence = 1.0 if group_tier in (LocationTier.MUNICH, LocationTier.METRO) else 0.7
+            confidence = 1.0 if group_tier in (LocationTier.CITY_CORE, LocationTier.METRO) else 0.7
             if group_region == "international":
                 confidence = 0.6
 
@@ -563,7 +570,7 @@ def parse_location(raw: str | None, *, remote_mode: str | None = None) -> Locati
         confidence = 0.4 if scope is RemoteScope.UNKNOWN else 0.6
 
     if tier is LocationTier.UNKNOWN and remote_mode == "hybrid":
-        # Hybrid without a recognized place: keep unknown, do not presume Munich.
+        # Hybrid without a recognized place: keep unknown, do not presume a city.
         confidence = 0.2
 
     return LocationParse(
@@ -580,10 +587,10 @@ def parse_location(raw: str | None, *, remote_mode: str | None = None) -> Locati
 def tier_weight(tier: LocationTier, weights: LocationWeights) -> float:
     """Map a tier onto its ranking contribution."""
     return {
-        LocationTier.MUNICH: weights.exact_city,
+        LocationTier.CITY_CORE: weights.exact_city,
         LocationTier.METRO: weights.metro,
-        LocationTier.BAVARIA: weights.regional,
-        LocationTier.GERMANY: weights.country,
+        LocationTier.REGION: weights.regional,
+        LocationTier.COUNTRY: weights.country,
         LocationTier.REMOTE: weights.remote,
         LocationTier.EUROPE: weights.europe,
         LocationTier.UNKNOWN: weights.unknown,

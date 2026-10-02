@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from .models import Job
 
 # Location scope categories
@@ -13,6 +15,8 @@ LOCATION_SCOPES = {
     "eu": "EU",
     "remote_eu": "Remote EU",
     "international": "International",
+    "onsite_unspecified": "On-site, city unspecified",
+    "hybrid_unspecified": "Hybrid, city unspecified",
     "unknown": "Unknown",
 }
 
@@ -25,6 +29,8 @@ LOCATION_SCORE_WEIGHTS = {
     "remote_germany": 0.5,
     "eu": 0.4,
     "remote_eu": 0.3,
+    "onsite_unspecified": 0.3,
+    "hybrid_unspecified": 0.4,
     "international": 0.2,
     "unknown": 0.0,
 }
@@ -194,6 +200,15 @@ def _normalize_text(text: str) -> str:
     return " ".join(text.lower().strip().split())
 
 
+def _contains(haystack: str, keywords: list[str]) -> bool:
+    """Word-boundary keyword match.
+
+    Plain ``in`` was wrong for short tokens: ``"eu" in "Team für Steuer"``
+    is True, and so is ``"global" in "globalization"``. Only whole words count.
+    """
+    return any(re.search(rf"(?<!\w){re.escape(kw)}(?!\w)", haystack) for kw in keywords)
+
+
 def classify_location(job: Job) -> tuple[str, str, float, str]:
     """Classify a job's location based on the location string and description.
 
@@ -215,7 +230,7 @@ def classify_location(job: Job) -> tuple[str, str, float, str]:
     reason_parts = []
 
     # Check for Munich
-    if any(kw in combined for kw in MUNICH_CITY_KEYWORDS):
+    if _contains(combined, MUNICH_CITY_KEYWORDS):
         location_city = "Munich"
         location_country = "Germany"
         location_scope = "munich"
@@ -223,7 +238,7 @@ def classify_location(job: Job) -> tuple[str, str, float, str]:
         reason_parts.append("Munich city detected")
 
     # Check for Munich region
-    elif any(kw in combined for kw in MUNICH_REGION_KEYWORDS):
+    elif _contains(combined, MUNICH_REGION_KEYWORDS):
         location_city = "Munich"
         location_country = "Germany"
         location_scope = "munich"
@@ -231,54 +246,59 @@ def classify_location(job: Job) -> tuple[str, str, float, str]:
         reason_parts.append("Munich region detected")
 
     # Check for Germany
-    elif any(kw in combined for kw in GERMANY_KEYWORDS):
+    elif _contains(combined, GERMANY_KEYWORDS):
         location_country = "Germany"
         location_scope = "germany"
         location_score = LOCATION_SCORE_WEIGHTS["germany"]
         reason_parts.append("Germany detected")
 
     # Check for Remote Germany
-    elif any(kw in combined for kw in REMOTE_GERMANY_KEYWORDS):
+    elif _contains(combined, REMOTE_GERMANY_KEYWORDS):
         location_country = "Germany"
         location_scope = "remote_germany"
         location_score = LOCATION_SCORE_WEIGHTS["remote_germany"]
         reason_parts.append("Remote Germany detected")
 
     # Check for EU
-    elif any(kw in combined for kw in EU_KEYWORDS):
+    elif _contains(combined, EU_KEYWORDS):
         location_scope = "eu"
         location_score = LOCATION_SCORE_WEIGHTS["eu"]
         reason_parts.append("EU detected")
 
     # Check for Remote EU
-    elif any(kw in combined for kw in REMOTE_EU_KEYWORDS):
+    elif _contains(combined, REMOTE_EU_KEYWORDS):
         location_scope = "remote_eu"
         location_score = LOCATION_SCORE_WEIGHTS["remote_eu"]
         reason_parts.append("Remote EU detected")
 
     # Check for International
-    elif any(kw in combined for kw in INTERNATIONAL_KEYWORDS):
+    elif _contains(combined, INTERNATIONAL_KEYWORDS):
         location_scope = "international"
         location_score = LOCATION_SCORE_WEIGHTS["international"]
         reason_parts.append("International detected")
 
     # If no location found, check for remote/hybrid/onsite
+    #
+    # These fallbacks record only the *work mode*, never a place. An earlier
+    # version mapped on-site to the `munich` scope and score 1.0, so a job in
+    # New York or Tokyo that simply mentioned no known keyword was ranked as
+    # the most preferred location in the corpus.
     if location_scope == "unknown":
-        if any(kw in combined for kw in REMOTE_KEYWORDS):
+        if _contains(combined, REMOTE_KEYWORDS):
             location_scope = "remote_eu"
             location_score = LOCATION_SCORE_WEIGHTS["remote_eu"]
             reason_parts.append("Remote detected")
-        elif any(kw in combined for kw in HYBRID_KEYWORDS):
-            location_scope = "munich_region"
-            location_score = LOCATION_SCORE_WEIGHTS["munich_region"]
-            reason_parts.append("Hybrid detected")
-        elif any(kw in combined for kw in ONSITE_KEYWORDS):
-            location_scope = "munich"
-            location_score = LOCATION_SCORE_WEIGHTS["munich"]
-            reason_parts.append("On-site detected")
+        elif _contains(combined, HYBRID_KEYWORDS):
+            location_scope = "hybrid_unspecified"
+            location_score = LOCATION_SCORE_WEIGHTS["hybrid_unspecified"]
+            reason_parts.append("Hybrid detected, city unspecified")
+        elif _contains(combined, ONSITE_KEYWORDS):
+            location_scope = "onsite_unspecified"
+            location_score = LOCATION_SCORE_WEIGHTS["onsite_unspecified"]
+            reason_parts.append("On-site detected, city unspecified")
 
     # If still unknown, check for Munich in the location string
-    if location_scope == "unknown" and any(kw in location for kw in MUNICH_CITY_KEYWORDS):
+    if location_scope == "unknown" and _contains(location, MUNICH_CITY_KEYWORDS):
         location_city = "Munich"
         location_country = "Germany"
         location_scope = "munich"
@@ -286,7 +306,7 @@ def classify_location(job: Job) -> tuple[str, str, float, str]:
         reason_parts.append("Munich detected in location string")
 
     # If still unknown, check for Munich region in the location string
-    elif location_scope == "unknown" and any(kw in location for kw in MUNICH_REGION_KEYWORDS):
+    elif location_scope == "unknown" and _contains(location, MUNICH_REGION_KEYWORDS):
         location_city = "Munich"
         location_country = "Germany"
         location_scope = "munich_region"
@@ -294,33 +314,33 @@ def classify_location(job: Job) -> tuple[str, str, float, str]:
         reason_parts.append("Munich region detected in location string")
 
     # If still unknown, check for Germany in the location string
-    elif location_scope == "unknown" and any(kw in location for kw in GERMANY_KEYWORDS):
+    elif location_scope == "unknown" and _contains(location, GERMANY_KEYWORDS):
         location_country = "Germany"
         location_scope = "germany"
         location_score = LOCATION_SCORE_WEIGHTS["germany"]
         reason_parts.append("Germany detected in location string")
 
     # If still unknown, check for Remote Germany in the location string
-    elif location_scope == "unknown" and any(kw in location for kw in REMOTE_GERMANY_KEYWORDS):
+    elif location_scope == "unknown" and _contains(location, REMOTE_GERMANY_KEYWORDS):
         location_country = "Germany"
         location_scope = "remote_germany"
         location_score = LOCATION_SCORE_WEIGHTS["remote_germany"]
         reason_parts.append("Remote Germany detected in location string")
 
     # If still unknown, check for EU in the location string
-    elif location_scope == "unknown" and any(kw in location for kw in EU_KEYWORDS):
+    elif location_scope == "unknown" and _contains(location, EU_KEYWORDS):
         location_scope = "eu"
         location_score = LOCATION_SCORE_WEIGHTS["eu"]
         reason_parts.append("EU detected in location string")
 
     # If still unknown, check for Remote EU in the location string
-    elif location_scope == "unknown" and any(kw in location for kw in REMOTE_EU_KEYWORDS):
+    elif location_scope == "unknown" and _contains(location, REMOTE_EU_KEYWORDS):
         location_scope = "remote_eu"
         location_score = LOCATION_SCORE_WEIGHTS["remote_eu"]
         reason_parts.append("Remote EU detected in location string")
 
     # If still unknown, check for International in the location string
-    elif location_scope == "unknown" and any(kw in location for kw in INTERNATIONAL_KEYWORDS):
+    elif location_scope == "unknown" and _contains(location, INTERNATIONAL_KEYWORDS):
         location_scope = "international"
         location_score = LOCATION_SCORE_WEIGHTS["international"]
         reason_parts.append("International detected in location string")

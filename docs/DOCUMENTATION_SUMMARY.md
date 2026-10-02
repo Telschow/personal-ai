@@ -76,7 +76,7 @@ I have created a comprehensive technical and product documentation baseline for 
    - Score decomposition and transparency
    - Evidence integration (effect on confidence and risk notes, strengths/gaps identification)
    - Hard constraints vs soft preferences
-   - Munich preference implementation
+   - preferred-city preference implementation
    - Compensation logic (piecewise linear with hard floor)
    - Score thresholds and calibration (through feedback, not automatic adjustment)
    - Implementation details and flow

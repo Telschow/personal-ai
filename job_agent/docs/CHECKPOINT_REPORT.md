@@ -1,9 +1,14 @@
 # CHECKPOINT REPORT — Provider-Only Crawl + Fit Model Validation
 
-> **Historical validation report — validation performed 2026-09-21.**
-> Metrics below describe the local `jobs.sqlite3` database as it stood on that
-> date and at the commit named here. They are a point-in-time record, not a
-> current status claim.
+> **Historical validation report.**
+> Metrics below describe one local `jobs.sqlite3` database at one point in time.
+> They are a point-in-time record, not a current status claim.
+>
+> The individual search target behind that run — career tracks, sector
+> preferences, compensation floor, and employer list — has been removed. What is
+> kept is the engineering diagnosis: which failure modes the fit model and the
+> discovery pipeline showed, and which of them are inherent to the code rather
+> than to any one operator's preferences.
 
 **Date**: 2026-09-21  
 **Database**: `job_agent/output/jobs.sqlite3`  
@@ -83,31 +88,43 @@ Run with `provider_only=true`, `skip_search_engines=true`, using real ATS slugs 
 |----------|------|----------:|-----:|-------:|-------:|--------:|--------:|--------|
 | RemoteOK | API | 1 | 99 | 99 | ~30 | 100% | 1.3s | OK |
 | Remotive | API | 1 | 20 | 20 | ~2 | 100% | 0.8s | OK |
-| Greenhouse (helsing, databricks, snowflake) | ATS API | 3 | 0 | 0 | 0 | 0% | — | OK (zero yield) |
+| Greenhouse (three example boards) | ATS API | 3 | 0 | 0 | 0 | 0% | — | OK (zero yield) |
 | Lever | ATS API | 0 | — | — | — | — | — | Not configured |
-| Ashby (snowflake) | ATS API | 1 | 20 | 20 | ~5 | 100% | 1.0s | OK |
-| SmartRecruiters (google) | ATS API | 1 | 0 | 0 | 0 | 0% | — | OK (zero yield) |
+| Ashby (one example board) | ATS API | 1 | 20 | 20 | ~5 | 100% | 1.0s | OK |
+| SmartRecruiters (one example board) | ATS API | 1 | 0 | 0 | 0 | 0% | — | OK (zero yield) |
 
 **Totals**: 56 jobs persisted (43 from providers, 13 from search fallback), 33 fetch errors.
 
-**Key Finding**: Greenhouse boards still zero jobs (likely no open roles matching keywords). Ashby snowflake yields 20 jobs. RemoteOK and Remotive remain primary volume sources.
+**Key Finding**: Greenhouse boards still zero jobs (likely no open roles matching keywords). The Ashby example board yields 20 jobs. RemoteOK and Remotive remain primary volume sources.
 
 ---
 
 ## COMPENSATION AUDIT
 
-Current salary handling:
-- Database shows **0 jobs with salary_min_eur / salary_max_eur** (all NULL).
-- Config floor €120k, target €150k.
-- Scoring uses lower bound of range; unknown salary → 0.55 reviewable.
-- 76% of rejections due to "compensation below floor €120,000".
+Current salary handling observed in that run:
+- The database contained **no parsed salary on any row** (all NULL).
+- A compensation floor was configured for that run.
+- Scoring used the **lower bound** of a published range, so a wide range
+  starting well below the floor scored as a miss.
+- Missing salary scored 0.55 and stayed reviewable — it never hard-rejected.
+- The configured floor was by a wide margin the most frequent rejection reason,
+  and it rejected mostly on **absent or wide-range** salary rather than on
+  salary that was actually disclosed and genuinely low.
+
+That last point is the transferable finding: when a hard compensation floor is
+enabled and salary disclosure is sparse, the floor mostly measures *disclosure
+rate* rather than *role quality*.
 
 Proposed counterfactual scenarios:
 1. **Unknown-neutral**: treat missing salary as neutral (0.5) instead of reviewable (0.55) — reduces false negatives.
 2. **Range-interval**: use midpoint of published range for scoring, not lower bound.
-3. **Soft floor**: make €120k a penalty weight rather than hard exclusion.
+3. **Soft floor**: make the floor a penalty weight rather than hard exclusion.
+4. **Unconfigured default**: ship with no floor at all, so the floor is opt-in
+   rather than something every operator inherits by default.
 
-Next step: implement unit tests for compensation logic and run scenario analysis.
+Next step: unit tests for compensation logic and scenario analysis. Scenarios 1-3
+are only reachable when an operator configures a floor, which is why the shipped
+default is now unconfigured.
 
 ---
 
@@ -116,7 +133,7 @@ Next step: implement unit tests for compensation logic and run scenario analysis
 - Role archetype classification (`role_archetypes.py`)
 - Company-to-ATS resolution (`config.yaml` → provider client)
 - Compensation range handling (lower bound vs midpoint, unknown-neutral)
-- Location preference separation (Munich vs remote vs other)
+- Location preference separation (preferred city vs national vs remote)
 
 These will be added to `job_agent/tests/` and run in CI.
 
@@ -134,24 +151,23 @@ These will be added to `job_agent/tests/` and run in CI.
 
 ---
 
-## CAREER COVERAGE (from current 90 active jobs)
+## CAREER COVERAGE
 
-| Track | Jobs | Notes |
-|-------|-----:|-------|
-| Product Management | 8 | |
-| Program Management | 12 | |
-| AI / ML | 12 | |
-| Autonomous Driving | 14 | |
-| Robotics / Autonomy | 7 | |
-| Engineering Leadership | 3 | |
-| Defence / Aerospace | 1 | |
-| DeepTech | 0 | |
-| Mobility | 14 | |
-| Data Platform | 1 | |
-| Innovation Strategy | 0 | |
-| Energy / Cleantech | 0 | |
+That run measured job counts per track against the operator's configured target
+tracks. Those specific tracks — and the per-track counts, which describe one
+person's search rather than the code — are removed here.
 
-**Gaps**: Defence, DeepTech, Energy/Cleantech, Data Platform have minimal coverage.
+The transferable finding is structural and still holds:
+
+**Some configured tracks receive near-zero provider coverage.** A track is only
+as discoverable as the sources indexed for it. Where coverage is near zero the
+cause is nearly always upstream of scoring: no configured source carries that
+sector, or the search fallback returns too few results per query. Adding tracks
+to configuration without adding a source for them produces a scoring system that
+can never rank anything for those tracks.
+
+Coverage per configured track is worth measuring as a standing check, before
+concluding that the fit model is at fault.
 
 ---
 
@@ -165,17 +181,17 @@ These will be added to `job_agent/tests/` and run in CI.
 ### Why So Few High-Fit Jobs?
 
 #### Category A — Discovery Failure (Right Roles Not Entering Dataset)
-- **Defence/DeepTech/Energy tracks**: Near-zero provider coverage
+- **Some configured tracks**: near-zero provider coverage
 - **ATS providers broken**: Greenhouse, Lever, Ashby return 404 (need real tokens/boards)
 - **Search engines throttled**: DDGS returns ~1.8 jobs/query with heavy rate limiting
 - **Senior roles**: Search queries don't explicitly target "Staff/Principal/Director/VP" levels
 
 #### Category B — Scoring Model Failure (Right Roles Enter But Score Low)
-- **Compensation floor (€120k) is the #1 rejection reason**: 76% of rejections are "compensation below floor €120,000"
-- Many EU/remote jobs don't publish salary → get 0.55 (reviewable, never high-fit)
-- Salary scoring uses **lower bound** of range → €80k-€150k becomes €80k (below floor)
+- **A configured compensation floor was the dominant rejection reason**, overwhelmingly against postings that published no salary or a wide range
+- Many postings don't publish salary → score 0.55 (reviewable, never high-fit)
+- Salary scoring uses the **lower bound** of a range, so a range spanning a wide band scored as its minimum
 - Leadership score triggers on "product owner"/"program manager" but not on technical lead without people mgmt
-- Location scoring penalizes non-Munich/non-Germany heavily (0.10 weight but tiered)
+- Location scoring penalizes postings outside the configured preferred city and country heavily (0.10 weight but tiered)
 
 #### Category C — Genuine Low Fit
 - Generic software engineering roles (no product/program/AI/autonomy)
@@ -184,14 +200,22 @@ These will be added to `job_agent/tests/` and run in CI.
 
 ### Representative Rejection Reasons
 ```
-"hard exclusion: compensation below floor €120,000"  ← 76% of rejections
-"strong AI relevance", "leadership responsibility appears relevant"  ← on rejected jobs
-"no published compensation (target €150,000+)"  ← on review jobs
+"hard exclusion: compensation below configured floor"   ← dominant rejection reason
+"strong domain relevance", "leadership responsibility appears relevant"  ← on rejected jobs
+"no published compensation (configured target not met)"  ← on review jobs
 ```
 
+The pattern worth noting: jobs rejected on compensation were frequently jobs
+the fit model *otherwise* scored well.
+
 ### Key Insight
-> The problem is **primarily Category A (discovery)** + **Category B (compensation scoring)**.  
-> The dataset lacks the right roles (Defence, DeepTech, senior Product/Program), and when relevant roles do appear, the compensation floor kills them.
+> The problem was **primarily Category A (discovery)** plus **Category B (compensation scoring)**.
+> The dataset lacked the target roles, and where relevant roles did appear, the
+> configured compensation floor removed them.
+>
+> Neither half of that is inherent to a fresh checkout today: there is no
+> built-in floor to inherit, and the track/industry definitions are
+> configuration rather than source.
 
 ---
 
@@ -229,14 +253,14 @@ These will be added to `job_agent/tests/` and run in CI.
 1. **Only 2/11 providers functional** (RemoteOK, Remotive)
 2. **ATS providers need credentials/fixes** (Greenhouse, Lever, Ashby return 404)
 3. **Search engines severely throttled** (~1.8 jobs/query)
-4. **Defence/DeepTech tracks have zero provider coverage**
+4. **Some configured tracks have zero provider coverage**
 
 ### Specific Bottlenecks
 | Bottleneck | Impact | Fix Required |
 |------------|--------|--------------|
 | Greenhouse/Lever/Ashby 404 | Zero enterprise ATS jobs | Real tokens/board names in config |
-| No Defence/DeepTech providers | Zero coverage for priority tracks | Add provider implementations or search fallbacks |
-| Salary floor hard exclusion | Kills 76% of potential matches | Make floor configurable/soft or add "salary unknown" tier |
+| No provider covers a configured track | Zero coverage for that track | Add a provider implementation or a search fallback |
+| Salary floor hard exclusion | Removed a large share of matches, mostly on undisclosed or wide-range salary | Floor is configurable and **unconfigured by default**; when enabled, prefer a soft penalty or an explicit "salary unknown" tier |
 | Search engine throttling | Cannot scale discovery | Fix ATS providers first |
 
 ---
@@ -246,7 +270,9 @@ These will be added to `job_agent/tests/` and run in CI.
 **Fix the ATS provider endpoints** — this is the highest-leverage single action.
 
 ### Immediate Steps
-1. **Get real Greenhouse tokens** for target companies (BMW, Helsing, Quantum Systems, Rohde & Schwarz, etc.)
+1. **Obtain real ATS tokens** for the companies you want to track. No target
+   companies ship in the source: `company_radar.yaml` is gitignored and holds the
+   operator's own employer list.
 2. **Get real Lever sites** for target companies
 3. **Get real Ashby board names** for target companies
 4. **Test each ATS provider** with `provider_only=true` mode
@@ -257,11 +283,11 @@ These will be added to `job_agent/tests/` and run in CI.
 # job_agent/config.yaml — replace example tokens
 sources:
   greenhouse:
-    - token: "bmwgroup"  # real token
+    - token: "nimbusmotors"  # real token
   lever:
-    - site: "bmw"  # real site
+    - site: "nimbus"  # real site
   ashby:
-    - board: "bmw"  # real board
+    - board: "nimbus"  # real board
 ```
 
 ### Validation Test

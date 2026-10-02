@@ -1,139 +1,156 @@
-# Flat Search — Future Architecture
+# Second Vertical — Architecture Notes
 
-Reference: https://github.com/lukasthekid/flatscraper
+This project is a personal knowledge and agent system. The job-search vertical
+is the first implementation of a reusable shape: **multi-source discovery →
+typed normalization → deduplication → deterministic scoring → persistence →
+human-in-the-loop review → document generation**.
 
-## Flatscraper Ideas Worth Borrowing
+A second vertical (for example housing search, price tracking, or grant
+applications) is the same shape with different domain models. The notes below
+record that mapping. They deliberately contain no search target, budget, city,
+or household policy: those are operator decisions made in local, gitignored
+configuration, never in the repository.
 
-| Idea | Flatscraper Implementation | Our Adaptation |
-|------|---------------------------|----------------|
-| Provider-based discovery | Multiple real estate APIs + search fallback | Same pattern: native APIs (ImmobilienScout24, ImmoWelt, WG-Gesucht) + search fallback |
-| Structured normalization | Parse listings into typed models | Same: Flat model with canonical_key, location normalization, price normalization |
-| Deduplication | Content-hash + URL-based dedup | Same: content-hash identity + canonical_url |
-| Scoring/filtering | User preferences → ranked results | Same: deterministic scoring policy + user preferences |
-| Notification/alerting | Telegram/email alerts for new matches | Future: local notification (dashboard badge, optional webhook) |
-| Human-in-the-loop | User reviews before contact | Same: SAVED/REJECTED/APPLIED status; never auto-contact |
-| Application documents | Auto-generate application PDFs | Same pattern: master documents → tailored application → PDF export |
-| Multi-user | Designed for couples/households | Future: shared profile for two household members |
+Reference implementation consulted for the pattern:
+<https://github.com/lukasthekid/flatscraper>
 
-## Architecture Mapping
+## What Transfers Directly
 
-| Component | Job-Agent Equivalent | Flat Search Equivalent |
-|-----------|---------------------|------------------------|
-| Source catalog | `sources_catalog.yaml` (42 sources) | Flat catalog (ImmobilienScout24, ImmoWelt, WG-Gesucht, eBay Kleinanzeigen, etc.) |
-| Provider adapters | `providers.py` (RemoteOK, Remotive) | Flat providers (IS24 API, ImmoWelt API, WG-Gesucht RSS) |
-| Normalization | `normalizer.py` (Job model) | `flat_normalizer.py` (Flat model) |
-| Canonicalization | `canonical.py` (canonical_key) | Same pattern |
-| Scoring | `scoring.py` + `career/fit.py` | `flat_scoring.py` (price, location, size, rooms, commute) |
-| Discovery | `discovery.py` + `query_plan.py` | `flat_discovery.py` (area-based queries, price tiers) |
-| Persistence | SQLite (jobs, evaluations, applications) | SQLite (flats, evaluations, applications) |
-| UI | Dashboard + job list + detail | Dashboard + flat list + detail |
-| Documents | CV/cover letter artifacts | Mieterselbstauskunft, Schufa, income proof, rental history |
+| Concern | Job vertical today | Second vertical |
+|---------|--------------------|-----------------|
+| Source catalog | `sources_catalog.yaml` | Catalog of the vertical's sources |
+| Provider adapters | `providers.py` | One adapter per provider |
+| Search fallback | `query_plan.py` | Vertical's query planner |
+| Normalization | `normalizer.py` | Vertical's typed record |
+| Canonicalization | `canonical.py` | Same pattern: content identity + canonical URL |
+| Scoring | `scoring.py` + `career/fit.py` | Vertical's scoring policy |
+| Persistence | SQLite | Same tables, vertical-specific columns |
+| Review UI | Dashboard + list + detail | Same |
+| Documents | CV/cover letter artifacts | Vertical's document set |
+| Notifications | Dashboard badge | Same, plus optional webhook |
 
-## Required Providers (Munich)
+## What Does Not Transfer
 
-| Provider | Type | Auth | Notes |
-|----------|------|------|-------|
-| ImmobilienScout24 (IS24) | API | OAuth2 / API key | Primary; structured data; rate-limited |
-| ImmoWelt | API | API key | Secondary; good coverage |
-| WG-Gesucht | RSS/HTML | None | WG-focused; also complete apartments |
-| eBay Kleinanzeigen | HTML/search | None | High volume; no API; search fallback |
-| Munich.de / Stadt München | Official | None | Social housing (Wohnberechtigungsschein) |
-| Vonovia / LEG / large landlords | Direct | None | Company career pages pattern |
+- **The scoring dimensions.** Price/commute/size is not role/skill/seniority.
+  The vertical defines its own dimensions and weights.
+- **The scoring policy must be configurable, not hardcoded.** The job vertical
+  originally embedded a default compensation floor and a default preferred city
+  in source. That was a design error: it made every operator inherit someone
+  else's policy, and it meant a fresh checkout ranked postings against personal
+  preferences nobody in the repo had chosen. Every dimension and every bound now
+  comes from configuration and defaults to neutral.
+- **The domain vocabulary.** Provider names and sector terms are vertical
+  specific and belong in config and catalogs, not in module-level constants.
 
-## Munich-Specific Constraints
+## Reusable Design Rules
 
-- **Complete apartment only** — not WG (Wohngemeinschaft)
-- **2-person household** — minimum 2 rooms, ~60m²+
-- **Munich city + nearby** — MVV zones 1-3 (Munich, Dachau, Freising, Ebersberg, Starnberg)
-- **Budget** — warm rent €1800-2500/month (market 2024/2025)
-- **Application documents** — Mieterselbstauskunft, Schufa, last 3 salary slips, employer confirmation, rental history, optionally Mietschuldenfreiheitsbescheinigung
-- **WBS (Wohnberechtigungsschein)** — check eligibility; separate track
-- **Competition** — high; speed matters (apply within hours of listing)
-- **Besichtigungstermine** — scheduling coordination for two people
+1. **Never auto-submit.** The agent prepares; a human sends. This holds for any
+   vertical, and is enforced by validation (`auto_submit` / `auto_publish` are
+   hard-blocked).
+2. **All state local.** SQLite on a data volume. Nothing personal in git or in a
+   container image.
+3. **Sensitive documents never leave the sandbox.** Generated locally, reviewed
+   before sending.
+4. **Deterministic scoring.** Reproducible, explainable, versioned. An LLM may
+   assist with unstructured extraction, never with the score itself.
+5. **Evidence and provenance on every decision.** Any claim a document or
+   ranking rests on must be traceable to a source the system actually read.
+6. **Providers fail in isolation.** One bad source degrades that source, not the
+   run.
 
-## Documents Required
+## Second Vertical Provider Shape
 
-| Document | Source | Frequency |
-|----------|--------|-----------|
-| Mieterselbstauskunft | Template (fill once, reuse) | Per application |
-| Schufa-Auskunft | Schufa (online) | Every ~3 months |
-| Gehaltsnachweise (3 months) | Employer | Per application |
-| Arbeitgeberbestätigung | Employer | Per application |
-| Mietschuldenfreiheitsbescheinigung | Previous landlord | Per application |
-| Einkommensteuerbescheid | Finanzamt | Optional |
-| Personalausweis copy | User | Per application |
+Whatever the vertical, the adapter contract is the same:
 
-## Automation Boundary
+| Field | Meaning |
+|-------|---------|
+| Provider kind | API / RSS / HTML / direct company page |
+| Auth | None / API key / OAuth2 |
+| Enabled | Operator toggle, per source |
+| Priority | Rotation order |
+| Rate-limit class | Governs pacing |
+| Failure isolation | Per-source error capture, never fatal |
+
+Local municipal or official sources (public housing allocations, government
+benefit registers) are a normal provider kind: official, unauthenticated, and
+lower volume but higher value than aggregators.
+
+## Vertical-Neutral Data Model
+
+```sql
+-- Records, like jobs
+records:
+  id, title, subject, city, region, lat, lon,
+  amount_min, amount_max, amount_currency, amount_period,
+  size, category, attributes_json,
+  source, source_type, canonical_url, canonical_key,
+  status (active/stale/closed/duplicate), discovered_at, last_seen
+
+-- Evaluations, like job evaluations
+record_evaluations:
+  record_id, total_score, decision, reasons, gaps,
+  scoring_version, evaluated_at
+
+-- Operator status, like job user_status
+record_user_status:
+  record_id, user_status (NEW/SAVED/REJECTED/APPLIED/…), updated_at
+
+-- Applications / claims, like job applications
+record_applications:
+  record_id, stage, notes, applied_at, next_action_at,
+  documents_json, follow_up_at
+
+-- Documents, like career_documents / user_artifacts
+record_documents:
+  id, record_id, type, status (draft/generated/approved/sent),
+  path, generated_at, approved_at
+```
+
+Everything a vertical needs beyond these columns goes in `attributes_json` or in
+vertical-specific tables. The shared tables stay stable so that UI, evidence,
+and audit code are written once.
+
+## Vertical-Neutral Automation Boundary
 
 ```
 READ (provider APIs, search)
   ↓
 NORMALIZE + DEDUP + SCORE
   ↓
-FILTER (user preferences: price, size, location, rooms, WBS)
+FILTER (configured preferences)
   ↓
 PRESENT (dashboard: new matches, saved, applied)
   ↓
-HUMAN REVIEW (save / reject / apply)
+HUMAN REVIEW (save / reject / proceed)
   ↓
-GENERATE APPLICATION DOCUMENTS (tailored Mieterselbstauskunft + attachments)
+GENERATE DOCUMENTS (tailored from master documents)
   ↓
-HUMAN APPROVAL (review PDF)
+HUMAN APPROVAL (review output)
   ↓
 MANUAL SUBMIT (email / portal / post)
   ↓
-TRACK (applied → viewing → offer → signed → moved)
+TRACK (submitted → pending → outcome → closed)
 ```
 
-**Never auto-submit.** Human decides which flats to apply to and sends the application.
+## Future UI (shared shape)
 
-## Future Data Model
-
-```sql
--- Flats (like jobs)
-flats:
-  id, title, address, city, district, lat, lon, price_cold, price_warm,
-  size_m2, rooms, floor, has_balcony, has_parking, wbs_required,
-  available_from, source, source_type, canonical_url, canonical_key,
-  status (active/stale/closed/duplicate), discovered_at, last_seen
-
--- Evaluations (like job evaluations)
-flat_evaluations:
-  flat_id, total_score, decision, reasons, gaps, scoring_version, evaluated_at
-
--- User status (like job user_status)
-flat_user_status:
-  flat_id, user_status (NEW/SAVED/REJECTED/APPLIED/VIEWING/OFFER/SIGNED), updated_at
-
--- Applications (like job applications)
-flat_applications:
-  flat_id, stage, notes, applied_at, viewing_at, offer_at, signed_at,
-  documents_json (list of generated document paths), follow_up_at
-
--- Documents (like career_documents / user_artifacts)
-flat_documents:
-  id, flat_id, type (self_declaration/schufa/salary/employer/rental_history/id),
-  status (draft/generated/approved/sent), path, generated_at, approved_at
-```
-
-## Future UI
-
-- **Dashboard**: New matches (cards with photo, price, size, location, score), saved, applied, viewing, offers
-- **Map view**: Munich map with pins color-coded by status
-- **Flat detail**: Photos, facts, score breakdown, commute time (MVV), application panel
-- **Document center**: Master documents → generate tailored set per flat → review → download
-- **Calendar**: Besichtigungstermine with reminders
-- **Notifications**: New high-score flats (toast + optional webhook)
+- **Dashboard**: new matches, saved, in progress, closed
+- **Map view**: geographic pins color-coded by status
+- **Detail view**: photos/facts, score breakdown, criteria, document panel
+- **Document center**: master documents → tailored set per record → review →
+  download
+- **Calendar**: scheduled actions with reminders
+- **Notifications**: new high-score matches (toast + optional webhook)
 
 ## Privacy Considerations
 
-- All data local (SQLite on /data volume)
-- No personal documents in git / Docker image
-- Schufa/salary docs never leave sandbox
-- Application documents generated locally, user reviews before sending
-- No external APIs for core loop (provider APIs are public listing data only)
+- All data local (SQLite on a data volume)
+- No personal documents in git or in the Docker image
+- Sensitive supporting documents never leave the sandbox
+- Documents generated locally and reviewed before sending
+- No external APIs in the core loop; provider APIs carry public listing data only
 
-## Not Implementing in This Slice
+## Not in This Slice
 
-This is a **future project**. The current slice is Career Operating System MVP.
-Flat search will be a separate phase after Career MVP is stable and in daily use.
+A second vertical is a separate phase. The reusable shape above is what makes
+it cheap later; no second-vertical code ships with the first.

@@ -19,6 +19,7 @@ def policy():
         purpose_weight=0.05,
         wlb_weight=0.05,
         industries=("AI", "Defence"),
+        purpose_terms=("ai",),
         negative_keywords=("junior",),
         target_roles=("Product Manager", "Technical Program Manager"),
     )
@@ -149,6 +150,7 @@ def test_international_job_not_hard_rejected_for_intern():
         purpose_weight=0.05,
         wlb_weight=0.05,
         industries=("AI", "Defence"),
+        purpose_terms=("ai",),
         negative_keywords=("intern", "junior"),
         target_roles=("Product Manager", "Technical Program Manager"),
     )
@@ -178,6 +180,7 @@ def test_internship_job_rejected_for_intern():
         purpose_weight=0.05,
         wlb_weight=0.05,
         industries=("AI", "Defence"),
+        purpose_terms=("ai",),
         negative_keywords=("intern", "junior"),
         target_roles=("Product Manager", "Technical Program Manager"),
     )

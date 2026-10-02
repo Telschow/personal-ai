@@ -33,13 +33,13 @@ def _ev(claim: str, level: str = "documented", categories=None, source="doc-a") 
 def _evidence():
     return [
         _ev(
-            "Worked as Product Owner - Autonomous Driving at BMW Group (2024-present)",
+            "Worked as Product Owner - Autonomous Driving at Nimbus Motors (2024-present)",
             "verified",
             ["product", "domain", "ai", "leadership"],
         ),
         _ev("Led the design of an Automated Valet Parking feature", "documented", ["product", "domain", "ai"]),
         _ev("Reduced reporting time by 30 percent", "verified", ["program"]),
-        _ev("Managed a team of 5 engineers at TUMCREATE (2015-2018)", "documented", ["leadership"]),
+        _ev("Managed a team of 5 engineers at Aurora Labs (2015-2018)", "documented", ["leadership"]),
     ]
 
 
@@ -98,7 +98,7 @@ def test_tailor_llm_proposal_is_revalidated():
         headline="Automotive AI delivery lead",
         summary="Owned autonomous driving projects end-to-end.",
         bullets=[
-            {"text": "Product Owner for Autonomous Driving at BMW Group", "evidence_id": evidence[0].evidence_id},
+            {"text": "Product Owner for Autonomous Driving at Nimbus Motors", "evidence_id": evidence[0].evidence_id},
         ],
     )
     client = _FakeCvClient(proposal)

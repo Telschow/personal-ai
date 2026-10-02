@@ -5,9 +5,10 @@
   hard-blocked by validation; example placeholders never reach the network.
 - SQLite schema under `PRAGMA user_version` migrations (v1..v2); idempotent
   `upsert_job`; canonical dedup; time-based lifecycle (stale → closed).
-- Salary policy: < **€120k** published = hard exclusion; unknown = reviewable;
-  **€150k+** = target hit. Multi-currency normalization to EUR (incl. German
-  `70.000` forms).
+- Salary policy: **no built-in floor or target**. While unconfigured
+  (`0/0`), published compensation scores neutrally and never hard-rejects;
+  unknown stays reviewable. Configuring both values enables the floor/target
+  gate. Multi-currency normalization to EUR (incl. German `70.000` forms).
 - Source taxonomy + adapters: Greenhouse, Lever, Ashby, SmartRecruiters,
   Workable, RSS/JSON, sitemap, direct `JobPosting` pages; per-source failure
   isolation; token-redacted `sources list`.
@@ -22,9 +23,9 @@
   query_host, rate_limit_class, enabled/disabled reasons), provenance =
   `emredurukn/awesome-job-boards` for 12 entries + curated additions +
   explicitly disabled bot-hostile aggregators (LinkedIn/Indeed/StepStone/…).
-- `location.py` tiered/scoped parsing (Munich/Metro/Bavaria/Germany/DACH-EU/
-  Remote-DE/Remote-EU/International/Unknown); Munich = weight, never a filter;
-  remote ≠ Munich.
+- `location.py` tiered/scoped parsing (city core / metro / region / country /
+  DACH-EU / remote-DE / remote-EU / international / unknown); the preferred
+  city is a weight, never a filter, and remote is not the same tier.
 - `career_tracks.py` taxonomy (product/program/AI-ML/ADAS/mobility/defence/…) +
   `query_plan.build_query_plan` — pure, deterministic 120-query plan
   (5 tracks × 3 terms × 3 locations, ≤24 queries/track, ≤8 sources/track).

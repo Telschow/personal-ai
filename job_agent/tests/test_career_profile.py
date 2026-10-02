@@ -7,7 +7,7 @@ def _prof(**overrides):
     data = {
         "name": "Jane Doe",
         "languages": ["English: native"],
-        "education": [{"school": "TU", "degree": "MSc", "years": "2018-2021"}],
+        "education": [{"school": "Example University", "degree": "MSc", "years": "2016-2019"}],
         "experience": [
             {"company": "ACME", "title": "Product Owner - AI", "dates": "2024-present"},
             {"company": "Beta", "title": "Development Engineer", "dates": "2021-2024"},

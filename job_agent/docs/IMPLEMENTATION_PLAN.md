@@ -22,8 +22,8 @@ slices. It describes what Slice 1 delivers and what later slices defer.
 - `templates/` is empty; `profile/profile.yaml` is a hand-maintained career
   profile; no CV is present yet.
 - Tests: 6 passing (scoring x4, JSON-LD source, validate). No Ruff / mypy / CI.
-- Salary policy was hard-coded via config `career.*` (110k/130k); the new policy
-  is 120k floor / 150k target and lives in a typed config section.
+- Salary policy was hard-coded via config `career.*`; the new policy is a local
+  config value (floor / target, both 0 = disabled) and lives in a typed config section.
 
 ## Slice 1 — Foundation hardening (THIS DELIVERABLE)
 
@@ -35,7 +35,7 @@ Scope:
 1. SQLite migrations via `PRAGMA user_version` — schema versioning from day one.
 2. Persistent canonical deduplication across sources.
 3. Job lifecycle: active / stale / closed + `missing_scans` + freshness rules.
-4. Salary normalization to EUR with explicit FX uncertainty; policy 120k/150k.
+4. Salary normalization to EUR with explicit FX uncertainty; policy is configured locally (no built-in floor).
 5. Source taxonomy (`ApiSource`, `RssJsonSource`, `MCPSource`,
    `StructuredPageSource`, `AtsBoardSource`, `BrowserAutomationSource`,
    `RestrictedSource`) + Workable adapter + wiring of sitemap + RSS/JSON shell.
@@ -743,7 +743,7 @@ tests exercise.
 ## Real-World Pilot
 
 Run against a scratch DB seeded with three **fixture** jobs (strong = Senior
-Product Owner, Autonomous Driving @ BMW Group; partial = Product Manager,
+Product Owner, Autonomous Driving @ Nimbus Motors; partial = Product Manager,
 Automotive Connectivity; poor = Junior Backend Engineer) and the **fixture**
 CV (`profile/profile.yaml` + `cv_alice.txt`), `career.llm.enabled=true`
 against live local Ollama (`qwen3.5:9b`). Fixture-data-driven; real LLM
