@@ -64,8 +64,11 @@ raw_data_extracted/
 job_agent/config.yaml
 job_agent/company_radar.yaml
 job_agent/profile/profile.yaml
-career/
-career_output/
+# Anchored to the repo root on purpose. Unanchored, these two patterns also
+# matched job_agent/job_agent/career/ — the source package — which silently
+# excluded new modules from the release. Keep the leading slash.
+/career/
+/career_output/
 
 # Private personal data (never committed)
 /Workouts/
@@ -86,3 +89,6 @@ data/*
 design-md/
 .opencode/ponytail/
 .opencode/skills/archify/
+
+# Generated demo artifacts (regenerate: uv run python -m personal_ai.demo)
+/artifacts/

@@ -100,6 +100,85 @@ flowchart LR
 
 LOCAL = runs on your machine. OPTIONALLY EXTERNAL = only if you configure it.
 
+## See it in action
+
+![The eight stages of the personal-ai pipeline: synthetic private input flows through ingestion, BM25 retrieval, evidence and provenance, local reasoning, and then meets a policy boundary that stops at human approval, leaving zero actions performed.](docs/architecture/demo-snapshot.png)
+
+A deterministic, offline demo runs this repository's own ingestion, retrieval,
+provenance, and policy code against a fixed synthetic corpus, then stops at the
+human approval boundary.
+
+### The eight stages
+
+| # | Stage | What actually happens |
+|---|-------|----------------------|
+| 1 | Private input | Two fixed synthetic documents enter the process. Nothing is read from disk and no external service is contacted. |
+| 2 | Ingest | `DocumentIngestor` canonicalises, classifies both documents as `text_heavy`, and produces 2 deterministic chunks. |
+| 3 | Retrieve | The keyword backend (`SQLiteChunkIndex`, FTS5 native BM25) returns 2 ranked hits. No embedding model is involved. |
+| 4 | Evidence | Each hit resolves to a chunk id, document id, source key, and content hash. Provenance is complete for every hit. |
+| 5 | Local reasoning | A structured summary is assembled deterministically from the retrieval outcome. No language model is called, so there is no chain-of-thought to show. |
+| 6 | Policy | `PolicyEngine` evaluates the proposed outbound action and returns `approval_required` for `Permission.network`. |
+| 7 | Human approval | `PolicyEngine.execute` raises `ApprovalRequiredError`; the handler never runs. The plan state machine also refuses `needs_approval` to `completed`. |
+| 8 | Bounded action | Zero actions are performed. The run ends here on purpose. |
+
+Stage output is written to `artifacts/demo/results.json` (what happened) and
+`artifacts/demo/metadata.json` (provenance of the run itself).
+
+### Explore it interactively
+
+[`docs/architecture/demo.html`](docs/architecture/demo.html) is a single
+self-contained file: no external fonts, scripts, or CDN requests, so it opens
+straight from disk or from a clone.
+
+### Regenerate everything
+
+```bash
+uv run python -m personal_ai.demo                  # results.json + metadata.json
+uv run python scripts/render_demo_snapshot.py      # snapshot.png
+```
+
+To rebuild the interactive diagram from its checked-in specification
+(`docs/architecture/demo.workflow.json`) you need the `archify` skill:
+
+```bash
+node .opencode/skills/archify/bin/archify.mjs deliver workflow \
+  artifacts/demo/demo.workflow.json artifacts/demo/demo.html --quality showcase
+uv run python scripts/render_demo_snapshot.py --html artifacts/demo/demo.html \
+  --out docs/architecture/demo-snapshot.png
+```
+
+### What this demo is not
+
+* **It is not a benchmark.** It shows architecture. No accuracy, latency,
+  recall, or throughput number is measured, claimed, or implied. The BM25 ranks
+  in `results.json` are raw ranking values from this run, not a quality score.
+* **It says nothing about model quality.** No language model is called. The
+  reasoning stage is a deterministic summary of retrieved evidence.
+* **It is not autonomous.** The system performs no action without explicit
+  human approval. Steps 7 and 8 exist to prove that, and
+  `tests/test_demo.py` fails if the boundary ever stops holding.
+* **It contains no real data.** No personal documents, CV, email, finances, or
+  job-search history. Addresses use the reserved `example.invalid` domain.
+* **It is not a production-readiness claim.** It is a narrow, synthetic
+  illustration of one path through the code.
+
+### Determinism and privacy
+
+* **Synthetic only.** Every corpus string carries a `SYNTHETIC-DEMO-DATA`
+  marker, asserted by the test suite.
+* **Offline.** No network call, no LLM, and no local model. Tests run the demo
+  with `socket` and the Ollama client disabled, and fail if the demo package
+  ever gains a network or model-client import.
+* **Deterministic.** Fixed corpus and fixed timestamps, no wall-clock reads,
+  BM25 ties broken on chunk id. Both JSON artifacts are byte-identical across
+  runs and across machines.
+* **No hidden reasoning.** Only user-facing structured metadata and the chunk
+  identifiers it cited are recorded.
+
+Generated run output under `artifacts/` is gitignored; the diagram, its
+specification, and the snapshot are checked in so this README renders. The
+properties above are asserted in `tests/test_demo.py`.
+
 ## Features
 
 * Document ingestion with deterministic chunking and optional embeddings
