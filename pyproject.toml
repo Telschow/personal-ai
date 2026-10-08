@@ -15,7 +15,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "mypy>=1.19",
+    "mypy>=2.4.0",
     "pytest>=9.1.1",
     "ruff>=0.16.4",
     "types-PyYAML>=6.0.12",
