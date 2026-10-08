@@ -1,6 +1,6 @@
 {
   "synthetic": "SYNTHETIC-DEMO-DATA",
-  "status": "Drafted by an AI assistant. Not yet reviewed by a person: a reviewer should confirm each verdict before the scorer is described as human-checked.",
+  "status": "Drafted by an AI assistant, then re-read in a second pass that agreed with all 27 verdicts. Not reviewed by a person: a reviewer should confirm each verdict before the scorer is described as human-checked. The q60 facts are a judgement call, because the question is open-ended.",
   "rule": "supported is true iff the cited chunks together state every fact the answer needs, with the meaning the question asks about.",
   "labels": [
     {"question": "q26", "cited": ["d01-c2"], "supported": true},
