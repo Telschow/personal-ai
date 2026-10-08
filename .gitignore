@@ -1,0 +1,85 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+.env
+.env.*
+!.env.example
+
+*.log
+
+.DS_Store
+
+.vscode/
+.idea/
+
+dist/
+build/
+*.egg-info/
+
+# Local data
+data/
+tmp/
+cache/
+output/
+
+# Local opencode config (may contain credentials)
+opencode.json
+opencode.json.bak
+
+# Backup and editor temp files
+*.bak
+*.backup
+*.old
+*.orig
+*~
+*.swp
+*.swo
+
+# Secrets
+secrets/
+credentials/
+
+# Local raw project data
+previous_project_and_raw_data/
+raw_data.zip
+
+# Local/generated data
+knowledge.db
+raw_data_extracted/
+
+# Runtime databases (never commit; see PUBLIC_DATA_POLICY.md)
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm
+
+
+# Private personal data (never committed)
+/Workouts/
+/Email_Outlook/
+/Financial_data/
+chat-export-*.json
+# Personal documents at repo root
+/*.pdf
+/*.docx
+/Alice Example CV.pdf
+docs/security/PRIVATE_DATA_INVENTORY.md
+# Allow data README
+!data/README.md
+data/*
+
+# Local AI / design tooling state (generated, not part of the product)
+.ua/
+design-md/
+.opencode/ponytail/
+.opencode/skills/archify/
+
+# Generated demo artifacts (regenerate: uv run python -m personal_ai.demo)
+/artifacts/
+.privacy-denylist.local

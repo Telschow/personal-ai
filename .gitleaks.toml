@@ -1,0 +1,24 @@
+title = "personal-ai gitleaks config"
+
+[extend]
+# Keep every default rule and add the project rule below.
+useDefault = true
+
+[[rules]]
+id = "freellmapi-key"
+description = "freellmapi API key"
+# The key prefix followed by a long token. The environment variable name
+# FREELLMAPI_API_KEY is upper case with underscores and does not match.
+regex = '''freellmapi-[A-Za-z0-9_\-]{16,}'''
+keywords = ["freellmapi-"]
+tags = ["key", "freellmapi"]
+
+[[allowlists]]
+# Detection tests and example docs contain synthetic secret-shaped strings on
+# purpose. tests/test_privacy_regression.py scans these paths for the
+# freellmapi key shape separately, so they are not blind spots for that rule.
+description = "Synthetic secret-shaped strings used on purpose in tests and example docs"
+paths = [
+  '''(^|/)tests/''',
+  '''(^|/)\.opencode/''',
+]

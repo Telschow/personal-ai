@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "freellmapi/auto",
+  "provider": {
+    "freellmapi": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "FreeLLMAPI",
+      "options": {
+        "baseURL": "http://localhost:3001/v1",
+        "apiKey": "{env:FREELLMAPI_API_KEY}"
+      },
+      "models": {
+        "auto": {
+          "name": "Auto Router (Best Free Model)"
+        },
+        "auto:smart": {
+          "name": "Auto Router (Smartest / Reasoning)"
+        },
+        "auto:fast": {
+          "name": "Auto Router (Fastest / Low Latency)"
+        }
+      }
+    },
+    "local": {
+      "disabled": true
+    },
+    "ollama": {
+      "disabled": true
+    }
+  }
+}

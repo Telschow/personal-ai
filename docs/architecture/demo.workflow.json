@@ -1,0 +1,264 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Evidence Before Action",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "private-to-evidence",
+        "label": "Private data to evidence",
+        "focus": [
+          "private_input",
+          "ingest",
+          "retrieve",
+          "evidence"
+        ],
+        "note": "Local documents are ingested, chunked, and retrieved without leaving the machine."
+      },
+      {
+        "id": "reasoning",
+        "label": "Local reasoning",
+        "focus": [
+          "retrieve",
+          "evidence",
+          "reasoning"
+        ],
+        "note": "A structured answer is assembled from retrieved evidence. No language model is called."
+      },
+      {
+        "id": "approval-gate",
+        "label": "Policy and approval",
+        "focus": [
+          "reasoning",
+          "policy",
+          "approval",
+          "bounded_action"
+        ],
+        "note": "The proposed action meets a policy boundary and stops pending explicit human approval."
+      }
+    ],
+    "output": "artifacts/demo/demo.html"
+  },
+  "lanes": [
+    {
+      "id": "input",
+      "label": "Private Input"
+    },
+    {
+      "id": "local",
+      "label": "Local Pipeline"
+    },
+    {
+      "id": "gate",
+      "label": "Policy and Approval",
+      "variant": "exception"
+    },
+    {
+      "id": "outcome",
+      "label": "Outcome"
+    }
+  ],
+  "phases": [
+    {
+      "id": "intake",
+      "label": "Ingest",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "retrieval",
+      "label": "Retrieve and evidence",
+      "fromCol": 2,
+      "toCol": 3
+    },
+    {
+      "id": "decision",
+      "label": "Approve before acting",
+      "fromCol": 4,
+      "toCol": 5
+    }
+  ],
+  "groups": [
+    {
+      "id": "evidence_path",
+      "label": "Evidence path",
+      "lane": "local",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "dashed"
+    },
+    {
+      "id": "approval_boundary",
+      "label": "Human approval boundary",
+      "lane": "gate",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "security"
+    }
+  ],
+  "mainPath": [
+    "private_input",
+    "ingest",
+    "retrieve",
+    "evidence",
+    "reasoning",
+    "policy",
+    "approval",
+    "bounded_action"
+  ],
+  "nodes": [
+    {
+      "id": "private_input",
+      "lane": "input",
+      "col": 0,
+      "type": "database",
+      "label": "Private Input",
+      "sublabel": "2 synthetic docs",
+      "tag": "local only",
+      "width": 124
+    },
+    {
+      "id": "ingest",
+      "lane": "local",
+      "col": 1,
+      "type": "backend",
+      "label": "Ingest",
+      "sublabel": "DocumentIngestor",
+      "tag": "2 docs, 2 chunks",
+      "width": 124
+    },
+    {
+      "id": "retrieve",
+      "lane": "local",
+      "col": 2,
+      "type": "backend",
+      "label": "Retrieve",
+      "sublabel": "FTS5 BM25 keyword",
+      "tag": "2 ranked hits",
+      "width": 124
+    },
+    {
+      "id": "evidence",
+      "lane": "local",
+      "col": 3,
+      "type": "database",
+      "label": "Evidence",
+      "sublabel": "chunk + doc id",
+      "tag": "provenance kept",
+      "width": 124
+    },
+    {
+      "id": "reasoning",
+      "lane": "local",
+      "col": 4,
+      "type": "backend",
+      "label": "Local Reasoning",
+      "sublabel": "no LLM invoked",
+      "tag": "cites 2 chunks",
+      "width": 124
+    },
+    {
+      "id": "policy",
+      "lane": "gate",
+      "col": 4,
+      "type": "security",
+      "label": "Policy",
+      "sublabel": "Permission.network",
+      "tag": "approval required",
+      "width": 124
+    },
+    {
+      "id": "approval",
+      "lane": "gate",
+      "col": 5,
+      "type": "security",
+      "label": "Human Approval",
+      "sublabel": "awaiting consent",
+      "tag": "execution blocked",
+      "width": 124
+    },
+    {
+      "id": "bounded_action",
+      "lane": "outcome",
+      "col": 5,
+      "type": "messagebus",
+      "label": "Bounded Action",
+      "sublabel": "nothing performed",
+      "tag": "0 actions",
+      "width": 124
+    }
+  ],
+  "edges": [
+    {
+      "id": "input-ingest",
+      "from": "private_input",
+      "to": "ingest",
+      "label": "local read",
+      "variant": "default"
+    },
+    {
+      "id": "ingest-retrieve",
+      "from": "ingest",
+      "to": "retrieve",
+      "label": "indexed chunks",
+      "variant": "default"
+    },
+    {
+      "id": "retrieve-evidence",
+      "from": "retrieve",
+      "to": "evidence",
+      "label": "ranked hits",
+      "variant": "emphasis"
+    },
+    {
+      "id": "evidence-reasoning",
+      "from": "evidence",
+      "to": "reasoning",
+      "label": "cited evidence",
+      "variant": "default"
+    },
+    {
+      "id": "reasoning-policy",
+      "from": "reasoning",
+      "to": "policy",
+      "label": "proposed action",
+      "variant": "security"
+    },
+    {
+      "id": "policy-approval",
+      "from": "policy",
+      "to": "approval",
+      "label": "approval required",
+      "variant": "security"
+    },
+    {
+      "id": "approval-held",
+      "from": "approval",
+      "to": "bounded_action",
+      "label": "held, nothing sent",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Executed, Not Illustrated",
+      "items": [
+        "Every count, rank, and identifier is read from a real run",
+        "Synthetic corpus, fixed timestamps, byte-identical output",
+        "No network call, no LLM, no local model required"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Not Autonomous",
+      "items": [
+        "The policy engine refuses the outbound action",
+        "No plan transition from needs approval to completed",
+        "Evidence before action, human approval at the boundary"
+      ]
+    }
+  ]
+}

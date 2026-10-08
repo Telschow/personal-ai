@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Ruff, mypy and tests (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The supported range: requires-python is >=3.12. The floor is checked
+        # alongside the newest release so 3.14-only syntax cannot slip back in.
+        python-version: ["3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install project
+        run: uv sync --locked --dev
+
+      - name: Ruff lint
+        run: uv run ruff check src tests scripts
+
+      - name: Ruff format
+        run: uv run ruff format --check src tests scripts
+
+      # Runs mypy over the whole src/personal_ai package and fails on any
+      # error not already recorded in config/mypy-baseline.json. No error code
+      # is disabled. See docs/typing.md.
+      - name: Type check
+        run: uv run python scripts/mypy_ratchet.py
+
+      # The whole suite. There is no integration marker in this repository:
+      # no test carries it and it is not registered in pyproject.toml, so a
+      # `-m "not integration"` filter would imply a suite that does not exist
+      # while excluding nothing. The suite is hermetic by construction (temp
+      # SQLite, TestClient, fakes, no network), so it runs as one unit.
+      - name: Test
+        run: uv run pytest
+
+  build:
+    name: Build distributions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+          python-version: "3.12"
+
+      - name: Build personal-ai
+        run: uv build
+
+      # The wheel must be importable in a clean environment, otherwise a
+      # successful build can still ship a broken package.
+      - name: Smoke test the personal-ai wheel
+        run: |
+          uv venv /tmp/smoke
+          uv pip install --python /tmp/smoke dist/*.whl
+          /tmp/smoke/bin/python -c "import personal_ai, personal_ai.server"
+
+  dependency-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+          python-version: "3.12"
+
+      # Exports the exact locked production dependency set, including
+      # transitives, and audits that. Auditing the ambient environment instead
+      # would report on the runner's packages rather than the project's.
+      - name: Export locked runtime dependencies
+        run: uv export --frozen --no-dev --no-hashes --no-emit-project --format requirements-txt -o requirements-audit.txt
+
+      - name: Audit dependencies
+        run: uvx pip-audit --requirement requirements-audit.txt --progress-spinner off
+
+  sbom:
+    name: SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0.24.2
+        with:
+          format: cyclonedx-json
+          output-file: sbom.json
+          upload-artifact: true
+          artifact-name: sbom.cdx.json
