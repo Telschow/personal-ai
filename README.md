@@ -111,9 +111,13 @@ A Docker image and compose file are in `docker/`.
 * There is no encryption at rest. Use disk encryption and file permissions.
 * Single user, single machine. There is no multi-tenant isolation.
 
-## How this was built
+## Why this exists
 
-This project was built with AI coding assistants (OpenCode with the skills in `.opencode/`, and Claude Code). The assistants wrote much of the code and tests. The constraints they worked under are the author's and are written down in `AGENTS.md`: local-first, Ollama only at the infrastructure boundary, explicit tools with no `eval`, shell or dynamic imports, a filesystem sandbox as a hard boundary, synthetic data only in the repository, and no action without policy approval. The test suite, the privacy regression test and CI are the checks that enforce those constraints.
+Personal documents, chats and email are the most sensitive data a person has, and an agent that works on them needs hard limits. This project explores whether a useful assistant over such data can stay on one machine, cite the evidence behind every answer, and still be unable to act without a human saying yes.
+
+## How it was built
+
+The constraints are written down in `AGENTS.md`: local-first, the model provider isolated behind one client module, explicit tools with no `eval`, shell or dynamic imports, a filesystem sandbox as a hard boundary, synthetic data only in the repository, and no action without policy approval. Much of the code and test volume was produced with AI assistance. What makes it trustworthy is verification, not authorship: a hermetic test suite, a privacy regression test, lint, type and security gates in CI, and a demo test that fails if the approval boundary ever stops holding.
 
 ## Roadmap, security, contributing
 
