@@ -34,7 +34,7 @@ The command regenerates the table, compares it with the README, and fails on any
 * An agent evaluation harness over synthetic tasks: tool-call correctness, refusal of disallowed actions, and no action without approval.
 * A regression gate in CI that fails when any of those scores drop below the committed baseline.
 
-**Status:** built: the agent evaluation harness over 18 synthetic tasks, the committed baseline and the CI gate. Not built: the 30-second governance demo GIF. The harness scores the system around a scripted model; it says nothing about the behaviour of a real model.
+**Status:** built: the agent evaluation harness over 18 synthetic tasks, the committed baseline, the CI gate, and the 30-second governance GIF, which is rendered from a real control-plane run by `scripts/render_governance_gif.py`. The harness scores the system around a scripted model; it says nothing about the behaviour of a real model. The GIF is not regenerated in CI because image bytes depend on the Pillow version; its transcript is tested.
 
 **Exit test**
 
