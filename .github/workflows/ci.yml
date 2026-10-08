@@ -47,6 +47,11 @@ jobs:
       - name: Type check
         run: uv run python scripts/mypy_ratchet.py
 
+      # Regenerates the retrieval quality table, fails if it differs from the
+      # README block or if a backend drops below the committed thresholds.
+      - name: Retrieval evaluation
+        run: uv run python scripts/eval_retrieval.py --check
+
       # The whole suite. There is no integration marker in this repository:
       # no test carries it and it is not registered in pyproject.toml, so a
       # `-m "not integration"` filter would imply a suite that does not exist

@@ -1,0 +1,148 @@
+{
+  "synthetic": "SYNTHETIC-DEMO-DATA",
+  "documents": [
+    {
+      "id": "d01",
+      "topic": "backup runbook",
+      "chunks": [
+        "The nightly backup of the ledger database starts at 02:00 and writes compressed archives to the cold storage bucket.",
+        "Backup archives are kept for 35 days. After that, a lifecycle rule deletes them automatically.",
+        "To restore the ledger database, an operator runs the restore script with the snapshot identifier and waits for the integrity check to finish.",
+        "Backup encryption uses a key stored in the hardware vault; the key is rotated every ninety days.",
+        "Ticket RB-1042 tracks the failed backup on the staging cluster caused by a full disk."
+      ]
+    },
+    {
+      "id": "d02",
+      "topic": "login outage postmortem",
+      "chunks": [
+        "On the morning of the outage, the login service rejected every request because an expired signing certificate was not renewed.",
+        "The on-call engineer paged the platform team at 06:15 and the certificate was replaced within forty minutes.",
+        "Root cause: the renewal job silently failed after a permissions change, and no alert watched its exit status.",
+        "Follow-up action AI-3307: add an alert on certificate expiry fourteen days ahead.",
+        "Customers were unable to sign in for roughly forty minutes; no data was lost."
+      ]
+    },
+    {
+      "id": "d03",
+      "topic": "hiring process",
+      "chunks": [
+        "Every interview panel has three members: a hiring manager, a peer, and a person from another team.",
+        "Candidates receive a take-home exercise that should take no more than two hours.",
+        "Feedback forms must be submitted within one working day of the interview.",
+        "Offers are approved by the department head and the finance partner before they are sent.",
+        "Reference checks happen only after a candidate has accepted the conditional offer."
+      ]
+    },
+    {
+      "id": "d04",
+      "topic": "product roadmap",
+      "chunks": [
+        "The mobile app redesign is scheduled for the third quarter and focuses on faster onboarding.",
+        "Dark mode ships in version 4.2, alongside accessibility fixes for the settings screen.",
+        "The public API v2 enters beta in August with cursor-based pagination.",
+        "Deprecation of the legacy export format is postponed until the migration tool is finished.",
+        "Customer interviews showed that search is the most requested improvement."
+      ]
+    },
+    {
+      "id": "d05",
+      "topic": "travel policy",
+      "chunks": [
+        "Flights must be booked at least fourteen days in advance and in economy class for trips under six hours.",
+        "Hotel stays are reimbursed up to a nightly cap that depends on the city tier.",
+        "Meals during travel are covered with receipts; alcohol is not reimbursable.",
+        "Expense reports are due within thirty days after the trip ends.",
+        "Rail is preferred over flying for distances below five hundred kilometres."
+      ]
+    },
+    {
+      "id": "d06",
+      "topic": "garden notes",
+      "chunks": [
+        "Tomato seedlings go outside after the last frost, usually in the middle of May.",
+        "The compost bin needs a mix of green kitchen scraps and dry leaves to avoid bad smells.",
+        "Water the herbs in the morning; basil dislikes wet leaves overnight.",
+        "Prune the apple tree in late winter while it is still dormant.",
+        "Slugs gather near the lettuce bed after rain, so beer traps help."
+      ]
+    },
+    {
+      "id": "d07",
+      "topic": "recipes",
+      "chunks": [
+        "For the lentil soup, simmer red lentils with carrot, onion and cumin for twenty minutes.",
+        "The sourdough needs a twelve hour rise at room temperature before shaping.",
+        "Shakshuka: cook peppers and tomatoes with paprika, then crack eggs into the sauce and cover the pan.",
+        "Pancake batter rests for thirty minutes so the flour can absorb the milk.",
+        "Roasted vegetables turn crisp at high heat; toss them with oil and avoid crowding the tray."
+      ]
+    },
+    {
+      "id": "d08",
+      "topic": "database study notes",
+      "chunks": [
+        "Third normal form removes transitive dependencies, so every non-key attribute depends only on the key.",
+        "A B-tree index keeps keys sorted and supports range queries in logarithmic time.",
+        "Isolation level serializable prevents phantom reads but reduces concurrency.",
+        "Write-ahead logging records changes in a log before the data pages are modified, enabling crash recovery.",
+        "A hash join builds an in-memory table on the smaller input and probes it with the larger one."
+      ]
+    },
+    {
+      "id": "d09",
+      "topic": "machine learning study notes",
+      "chunks": [
+        "Overfitting occurs when a model memorises noise in the training data and performs worse on unseen data.",
+        "Cross-validation splits the data into folds and averages the validation error across them.",
+        "The bias variance tradeoff describes how simpler models underfit while flexible models vary strongly between samples.",
+        "Regularisation adds a penalty on large coefficients to the loss function.",
+        "A confusion matrix counts true positives, false positives, true negatives and false negatives."
+      ]
+    },
+    {
+      "id": "d10",
+      "topic": "team sync notes",
+      "chunks": [
+        "The sync on Tuesday agreed to freeze the release branch on Friday afternoon.",
+        "Alice Example will own the migration checklist and report progress weekly.",
+        "Budget for the conference booth was reduced by a quarter; the team will share one table with sales.",
+        "Action: Bob Example sends the updated vendor comparison before the next sync.",
+        "The retrospective highlighted that code reviews wait too long, with a median of two days."
+      ]
+    },
+    {
+      "id": "d11",
+      "topic": "apartment notes",
+      "chunks": [
+        "The boiler service is due every autumn; the technician needs access to the basement.",
+        "Rent is paid on the first of each month by standing order.",
+        "The internet contract renews in March and can be cancelled with a one month notice.",
+        "Smoke detector batteries are replaced every January.",
+        "Waste collection: paper on Mondays, plastic every second Thursday, and bulky items by appointment."
+      ]
+    },
+    {
+      "id": "d12",
+      "topic": "training log",
+      "chunks": [
+        "Week one: three easy runs of five kilometres and one strength session.",
+        "The long run on Sunday reached fifteen kilometres at a conversational pace.",
+        "Knee pain after the hill session means a rest day and mobility work.",
+        "Target for the spring race is a finish time below two hours for the half marathon.",
+        "Sleep averaged seven hours, which is below the goal of eight."
+      ]
+    },
+    {
+      "id": "d13",
+      "topic": "security policy",
+      "chunks": [
+        "Passwords must be at least fourteen characters long and are checked against a list of breached passwords.",
+        "Multi-factor authentication is mandatory for all administrative accounts.",
+        "Access reviews run each quarter, and managers confirm or revoke permissions for their reports.",
+        "Lost laptops must be reported to the security desk within four hours so the device can be wiped remotely.",
+        "Ticket SEC-2210 documents the exception granted for the legacy printer account."
+      ]
+    }
+  ]
+}
