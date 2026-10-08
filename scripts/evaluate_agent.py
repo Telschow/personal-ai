@@ -1,8 +1,8 @@
-"""Manual/private evaluation of the real Personal AI agent.
+"""Manual evaluation of the Personal AI agent against a local corpus database.
 
 This is a manual evaluation harness (mirroring the other scripts/validate_*
 helpers). It is deliberately NOT part of the automated pytest suite: it
-requires a live, locally hosted Ollama model and the real personal corpus,
+requires a live, locally hosted Ollama model and a corpus database you built,
 so it must never be a mandatory test dependency.
 
 It drives the real Agent against a locally built corpus database (events +
@@ -16,7 +16,7 @@ cli._connect_agent_registry to wire the same tool registry the CLI uses.
 
 Usage:
 
-    uv run python scripts/evaluate_agent.py --database /tmp/ph18_corpus.db
+    uv run python scripts/evaluate_agent.py --database path/to/corpus.db
 
 It prints a per-question transcript: each model round (requested tool-call
 names + arguments, and any narration) followed by the final answer.
@@ -151,10 +151,12 @@ def run_question(client: TraceClient, registry, prompt: str, workspace: Path) ->
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Manually evaluate the real agent on the real corpus."
+        description="Manually evaluate the agent on a local corpus database."
     )
     parser.add_argument("--database", type=Path, required=True)
-    parser.add_argument("--workspace", type=Path, default=Path("/tmp/ph18_ws"))
+    parser.add_argument(
+        "--workspace", type=Path, default=Path("/tmp/personal_ai_eval_workspace")
+    )
     parser.add_argument("--model", default=MODEL)
     parser.add_argument("--question", type=int, default=None)
     args = parser.parse_args()

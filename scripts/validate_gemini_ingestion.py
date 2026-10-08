@@ -19,7 +19,7 @@ GEMINI_DIR = Path("raw_data_extracted/raw_data/Gemini")
 
 
 def smoke_test() -> None:
-    """Quick structural validation without the real corpus."""
+    """Quick structural validation without your own corpus."""
     connection = connect_database(":memory:")
     store = ConversationStore(connection)
 
@@ -143,7 +143,7 @@ def main() -> None:
     parser.add_argument(
         "--smoke-only",
         action="store_true",
-        help="Run smoke test without real corpus",
+        help="Run smoke test without your own corpus",
     )
     args = parser.parse_args()
     if args.smoke_only:

@@ -101,7 +101,7 @@ class TestDiscoverShards:
         assert len(shards) == 1
 
     def test_ignores_non_conversation_json(self, tmp_path: Path) -> None:
-        (tmp_path / "user.json").write_text(json.dumps({"email": "test@test.com"}))
+        (tmp_path / "user.json").write_text(json.dumps({"email": "test@example.com"}))
         (tmp_path / "conversations-000.json").write_text(
             json.dumps(
                 [

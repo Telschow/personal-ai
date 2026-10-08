@@ -104,7 +104,7 @@ def test_aggregates_are_sorted_and_deduped(store: PersonStore) -> None:
     store.upsert_reference(
         make_reference(
             name="Alice Anders",
-            email="alice@work.com",
+            email="alice@mail.example.com",
             role="email",
             source_type="email",
             document_id="doc-2",
@@ -121,7 +121,7 @@ def test_aggregates_are_sorted_and_deduped(store: PersonStore) -> None:
     )
     person = store.get(person_id_for(normalize_identity("Alice Anders")))
     assert person is not None
-    assert person.emails == ("alice@example.com", "alice@work.com")
+    assert person.emails == ("alice@example.com", "alice@mail.example.com")
     assert person.roles == ("email", "financial")
     assert person.sources == ("email", "financial")
     assert person.evidence_count == 3

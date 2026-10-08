@@ -2,7 +2,7 @@
 
 The adapter canonicalizes fixed-format financial CSV exports into a
 deterministic, privacy-reduced searchable payload. These tests use synthetic
-fixtures matching the audited schemas of the real corpus; they never touch
+fixtures matching the adapter's documented schemas; they never touch
 real personal data.
 """
 
@@ -68,7 +68,7 @@ BANK_ROWS = [
 ]
 
 BANK_PREAMBLE = [
-    'Girokonto;"DE16120300001085646543"',
+    'Girokonto;"DE89370400440532013000"',
     "Zeitraum:;2024",
     "Kontostand vom 31.12.2024:;1234,56",
 ]
@@ -226,7 +226,7 @@ class TestBankCanonicalization:
     def test_preamble_is_excluded_from_canonical_content(self) -> None:
         result = canonicalize_csv(bank_csv_builder().encode(), filename="u.csv")
         assert "Girokonto" not in result.canonical_text
-        assert "DE16120300001085646543" not in result.canonical_text
+        assert "DE89370400440532013000" not in result.canonical_text
         assert "Zeitraum" not in result.canonical_text
         assert "Kontostand" not in result.canonical_text
 
@@ -286,7 +286,7 @@ class TestBankCanonicalization:
             (
                 ["b.csv"],
                 (
-                    'Girokonto;"DE16120300001085646543"\r\nZeitraum:;2024\r\n'
+                    'Girokonto;"DE89370400440532013000"\r\nZeitraum:;2024\r\n'
                     + _render(BANK_COLUMNS, BANK_ROWS, ",", line_ending="\r\n")
                 ).encode("utf-8"),
             ),

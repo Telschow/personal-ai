@@ -1,4 +1,4 @@
-"""Manual researcher -> verifier orchestration demo against a real corpus.
+"""Manual researcher -> verifier orchestration demo against a local corpus.
 
 This is a manual demonstration of the Phase 39A/39B agent-orchestration
 framework. It wires an existing (already-indexed) personal corpus SQLite
@@ -7,7 +7,7 @@ verifier workflow) and prints the resulting plan, tasks, events, board, and
 final verdict.
 
 It is deliberately NOT part of the automated pytest suite:
-* it reads a real personal corpus database (privacy-sensitive), and
+* it reads a local corpus database (privacy-sensitive), and
 * it expects ``--database`` to contain documents/chunks/extractions to search.
 
 The retrieval used by the researcher tool is keyword/provenance search over
