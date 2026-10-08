@@ -41,6 +41,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import platform
 import re
 import sys
@@ -51,8 +52,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from personal_ai.documents import Document, DocumentChunk, Embedding
+from personal_ai.documents.embedding import EmbeddingProvider
 from personal_ai.documents.models import compute_content_hash
 from personal_ai.hybrid_index import HybridChunkIndex
+from personal_ai.ollama_client import DEFAULT_BASE_URL, OllamaClient
+from personal_ai.ollama_embeddings import OllamaEmbedder, probe_embedding_backend
 from personal_ai.retrieval_evaluation import (
     ChunkSearcher,
     EvaluationCase,
@@ -200,13 +204,15 @@ def label_mismatches(fixture: Fixture, labels_path: Path) -> list[str]:
     return mismatches
 
 
-def build_backends(fixture: Fixture) -> tuple[Mapping[str, ChunkSearcher], object]:
+def build_backends(
+    fixture: Fixture, embedder: EmbeddingProvider | None = None
+) -> tuple[Mapping[str, ChunkSearcher], object]:
     """Seed an in-memory database and return the three backends plus the connection."""
     connection = connect_database(":memory:")
     documents = DocumentStore(connection)
     chunks = ChunkStore(connection)
     embeddings = EmbeddingStore(connection)
-    embedder = HashedNgramEmbedder()
+    embedder = embedder or HashedNgramEmbedder()
     for document_id in sorted({document_id for _, document_id, _ in fixture.chunks}):
         documents.add(
             Document(
@@ -295,8 +301,10 @@ def score(fixture: Fixture, results: Sequence[EvaluationResult]) -> Report:
     )
 
 
-def run_evaluation(fixture: Fixture) -> Report:
-    backends, connection = build_backends(fixture)
+def run_evaluation(
+    fixture: Fixture, embedder: EmbeddingProvider | None = None
+) -> Report:
+    backends, connection = build_backends(fixture, embedder)
     try:
         results: list[EvaluationResult] = []
         for question in fixture.questions:
@@ -311,16 +319,26 @@ def run_evaluation(fixture: Fixture) -> Report:
     return score(fixture, results)
 
 
-def render_block(report: Report) -> str:
-    """Render the deterministic Markdown block that lives in the README."""
+SUPPORT_NOTE = (
+    "Evidence support@5 is the share of questions whose five cited chunks "
+    "contain every fact the answer needs; it does not score generated text."
+)
+
+
+def render_block(report: Report, embedder_note: str | None = None) -> str:
+    """Render the Markdown block that lives in the README.
+
+    ``embedder_note`` replaces the default sentence naming the offline n-gram
+    vectoriser; only the real-model run passes it.
+    """
+    note = embedder_note or (
+        f"The semantic backend uses `{EMBEDDING_MODEL}`, an offline hashed word "
+        "and character n-gram vectoriser, not a neural embedding model."
+    )
     lines = [
         (
             f"Measured on {report.question_count} synthetic questions over "
-            f"{report.chunk_count} chunks, k={K}. The semantic backend uses "
-            f"`{EMBEDDING_MODEL}`, an offline hashed word and character n-gram "
-            "vectoriser, not a neural embedding model. Evidence support@5 is the "
-            "share of questions whose five cited chunks contain every fact the "
-            "answer needs; it does not score generated text."
+            f"{report.chunk_count} chunks, k={K}. {note} {SUPPORT_NOTE}"
         ),
         "",
         f"| Backend | recall@{K} | MRR@{K} | evidence support@{K} |",
@@ -406,9 +424,11 @@ def percentile(sorted_values: Sequence[float], fraction: float) -> float:
     return sorted_values[index]
 
 
-def measure_latency(fixture: Fixture, repeats: int) -> dict[str, tuple[float, float]]:
+def measure_latency(
+    fixture: Fixture, repeats: int, embedder: EmbeddingProvider | None = None
+) -> dict[str, tuple[float, float]]:
     """Return ``(p50_ms, p95_ms)`` of one ``search`` call per backend."""
-    backends, connection = build_backends(fixture)
+    backends, connection = build_backends(fixture, embedder)
     try:
         samples: dict[str, list[float]] = {backend: [] for backend in BACKENDS}
         for _ in range(repeats):
@@ -439,19 +459,30 @@ def _cpu_name() -> str:
 
 
 def render_latency_block(
-    fixture: Fixture, latency: Mapping[str, tuple[float, float]], repeats: int
+    fixture: Fixture,
+    latency: Mapping[str, tuple[float, float]],
+    repeats: int,
+    *,
+    embedder_text: str | None = None,
 ) -> str:
     """Render the machine-dependent latency block for the README."""
+    setup = embedder_text or (
+        f"in-memory SQLite, embedder `{EMBEDDING_MODEL}`, no model server"
+    )
+    tail = (
+        ""
+        if embedder_text
+        else " A real embedding model adds its own query-embedding time, "
+        "which is not measured here."
+    )
     lines = [
         (
             f"Latency of one `search` call (limit={K}) over "
-            f"{len(fixture.questions)} queries x {repeats} repeats, in-memory "
-            f"SQLite, embedder `{EMBEDDING_MODEL}`, no model server. Measured on "
-            f"Python {platform.python_version()}, {platform.system()} "
-            f"{platform.machine()}, {_cpu_name()}. These numbers depend on the "
-            "machine: regenerate them with `--write-latency`; `--check` does not "
-            "compare them. A real embedding model adds its own query-embedding "
-            "time, which is not measured here."
+            f"{len(fixture.questions)} queries x {repeats} repeats, {setup}. "
+            f"Measured on Python {platform.python_version()}, "
+            f"{platform.system()} {platform.machine()}, {_cpu_name()}. These "
+            "numbers depend on the machine: regenerate them with "
+            "`--write-latency`; `--check` does not compare them." + tail
         ),
         "",
         "| Backend | p50 ms | p95 ms |",
@@ -463,6 +494,57 @@ def render_latency_block(
     return "\n".join(lines)
 
 
+def run_ollama(
+    fixture: Fixture,
+    model: str,
+    base_url: str,
+    repeats: int,
+    *,
+    transport: object | None = None,
+) -> tuple[int, str]:
+    """Run the evaluation with a real Ollama embedding model.
+
+    Returns ``(exit_code, text)``. The text is a README-ready block with the
+    model name and hardware. It is never compared by ``--check``, because the
+    numbers depend on the model, its quantisation and the machine.
+    """
+    ready = probe_embedding_backend(
+        model,
+        base_url=base_url,
+        transport=transport,  # type: ignore[arg-type]
+    )
+    if not ready.model_ready:
+        return 2, f"Ollama embedding model {model!r} is not ready: {ready.detail}"
+    with OllamaClient(
+        model=model,
+        base_url=base_url,
+        timeout=120.0,
+        transport=transport,  # type: ignore[arg-type]
+    ) as client:
+        embedder = OllamaEmbedder(client)
+        report = run_evaluation(fixture, embedder)
+        latency = measure_latency(fixture, repeats, embedder)
+    note = (
+        f"The semantic backend uses the Ollama embedding model `{model}` "
+        f"({ready.dimensions} dimensions) on {platform.system()} "
+        f"{platform.machine()}, {_cpu_name()}. This run is not checked by CI."
+    )
+    text = (
+        render_block(report, embedder_note=note)
+        + "\n\n"
+        + render_latency_block(
+            fixture,
+            latency,
+            repeats,
+            embedder_text=(
+                f"Ollama model `{model}`; the semantic and hybrid rows include the "
+                "query-embedding request"
+            ),
+        )
+    )
+    return 0, text
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     mode = parser.add_mutually_exclusive_group()
@@ -472,12 +554,37 @@ def main(argv: Sequence[str] | None = None) -> int:
     mode.add_argument(
         "--write-latency", action="store_true", help="refresh README latency block"
     )
-    parser.add_argument("--repeats", type=int, default=20)
+    parser.add_argument(
+        "--ollama-model",
+        default=None,
+        help="run the evaluation with this Ollama embedding model and print a "
+        "README-ready block (not checked by CI)",
+    )
+    parser.add_argument(
+        "--ollama-url",
+        default=os.environ.get("OLLAMA_BASE_URL", DEFAULT_BASE_URL),
+        help="Ollama endpoint (default: OLLAMA_BASE_URL or %(default)s)",
+    )
+    parser.add_argument("--repeats", type=int, default=None)
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR)
     parser.add_argument("--readme", type=Path, default=README)
     args = parser.parse_args(argv)
 
     fixture = load_fixture(args.data_dir)
+
+    if args.ollama_model is not None:
+        if args.check or args.write or args.latency or args.write_latency:
+            parser.error("--ollama-model cannot be combined with other modes")
+        code, text = run_ollama(
+            fixture,
+            args.ollama_model,
+            args.ollama_url,
+            args.repeats if args.repeats is not None else 3,
+        )
+        print(text, file=sys.stderr if code else sys.stdout)
+        return code
+    if args.repeats is None:
+        args.repeats = 20
 
     if args.latency or args.write_latency:
         latency = measure_latency(fixture, args.repeats)

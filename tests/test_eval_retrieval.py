@@ -296,3 +296,72 @@ def test_percentile_uses_nearest_rank(script) -> None:
     values = [float(n) for n in range(1, 101)]
     assert script.percentile(values, 0.50) == 50.0
     assert script.percentile(values, 0.95) == 95.0
+
+
+# --- Real embedding model run (stubbed Ollama) ---------------------------------
+
+
+def _stub_ollama(script: ModuleType, status: int = 200):
+    import httpx
+
+    embedder = script.HashedNgramEmbedder()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if status != 200:
+            return httpx.Response(status, text="model not found")
+        payload = json.loads(request.content)
+        vector = list(embedder.embed(payload["input"]).vector)
+        return httpx.Response(
+            200, json={"model": payload["model"], "embeddings": [vector]}
+        )
+
+    return httpx.MockTransport(handler)
+
+
+def test_ollama_run_reports_the_model_and_is_not_a_ci_claim(script, fixture) -> None:
+    code, text = script.run_ollama(
+        fixture,
+        "stub-model",
+        "http://ollama.invalid",
+        1,
+        transport=_stub_ollama(script),
+    )
+    assert code == 0
+    assert "`stub-model`" in text
+    assert "not checked by CI" in text
+    assert "| hybrid |" in text
+    assert "query-embedding request" in text
+
+
+def test_ollama_run_with_a_stub_matches_the_offline_semantic_scores(
+    script, fixture
+) -> None:
+    code, text = script.run_ollama(
+        fixture,
+        "stub-model",
+        "http://ollama.invalid",
+        1,
+        transport=_stub_ollama(script),
+    )
+    offline = script.render_block(script.run_evaluation(fixture))
+    semantic_row = next(
+        line for line in offline.splitlines() if line.startswith("| semantic |")
+    )
+    assert code == 0 and semantic_row in text
+
+
+def test_ollama_run_reports_an_unavailable_model(script, fixture) -> None:
+    code, text = script.run_ollama(
+        fixture,
+        "missing-model",
+        "http://ollama.invalid",
+        1,
+        transport=_stub_ollama(script, status=404),
+    )
+    assert code == 2
+    assert "not ready" in text and "missing-model" in text
+
+
+def test_ollama_mode_cannot_be_combined_with_check(script) -> None:
+    with pytest.raises(SystemExit):
+        script.main(["--ollama-model", "x", "--check"])
