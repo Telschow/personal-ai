@@ -1,6 +1,6 @@
 # Roadmap
 
-Three milestones, each with an exit test that a reviewer can run. A milestone is done only when its exit test passes in CI. The commands below are the targets: the scripts and flags they name are built as part of each milestone, and none of them exists yet except `personal_ai.demo`, `scripts/eval_retrieval.py` and the manual `scripts/evaluate_agent.py`. No number appears in the README unless a command in this repository produces it.
+Three milestones, each with an exit test that a reviewer can run. A milestone is done only when its exit test passes in CI. The commands below are the targets: the scripts and flags they name are built as part of each milestone, and none of them exists yet except `personal_ai.demo`, `scripts/eval_retrieval.py` and `scripts/evaluate_agent.py`. No number appears in the README unless a command in this repository produces it.
 
 ## Milestone 1: Measured retrieval and answer quality
 
@@ -33,6 +33,8 @@ The command regenerates the table, compares it with the README, and fails on any
 * A 30-second governance demo GIF: the agent proposes a network action, the policy blocks it, a human approves, the audit log records the decision. It replaces the placeholder in the README.
 * An agent evaluation harness over synthetic tasks: tool-call correctness, refusal of disallowed actions, and no action without approval.
 * A regression gate in CI that fails when any of those scores drop below the committed baseline.
+
+**Status:** built: the agent evaluation harness over 18 synthetic tasks, the committed baseline and the CI gate. Not built: the 30-second governance demo GIF. The harness scores the system around a scripted model; it says nothing about the behaviour of a real model.
 
 **Exit test**
 

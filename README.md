@@ -48,6 +48,10 @@ Latency of one `search` call (limit=5) over 64 queries x 20 repeats, in-memory S
 | hybrid | 6.783 | 9.609 |
 <!-- retrieval-latency:end -->
 
+## Agent evaluation
+
+`uv run python scripts/evaluate_agent.py --synthetic --check` replays scripted model turns through the real agent loop, tool registry, filesystem sandbox and policy engine. It fails if tool-call correctness, refusal of disallowed actions or the approval boundary falls below `tests/fixtures/synthetic/agent_eval/baseline.json`. The tasks include a model that requests unknown tools, one that never stops, and one that obeys an instruction injected into retrieved text. A scripted model stands in for the language model, so this measures the system around the model, not any model's judgement. Without `--synthetic`, the same script runs a manual evaluation against a local Ollama model and a corpus database you built.
+
 ## See it in action
 
 ![The eight stages of the personal-ai pipeline: synthetic private input flows through ingestion, BM25 retrieval, evidence and provenance, local reasoning, and then meets a policy boundary that stops at human approval, leaving zero actions performed.](docs/architecture/demo-snapshot.png)
@@ -124,7 +128,7 @@ uv run ruff format --check src tests scripts
 uv run python scripts/mypy_ratchet.py
 ```
 
-On Python 3.12 the suite reports `3116 passed, 4 skipped`. It is hermetic: temporary SQLite databases, fakes, no network.
+On Python 3.12 the suite reports `3127 passed, 4 skipped`. It is hermetic: temporary SQLite databases, fakes, no network.
 
 To run against a local model, install [Ollama](https://ollama.com), copy `.env.example` to `.env` and set `OLLAMA_BASE_URL` and the model names. Never commit `.env`. See `docs/configuration.md`.
 

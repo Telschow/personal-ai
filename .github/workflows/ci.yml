@@ -52,6 +52,12 @@ jobs:
       - name: Retrieval evaluation
         run: uv run python scripts/eval_retrieval.py --check
 
+      # Replays scripted model turns through the real agent loop, sandbox and
+      # policy engine; fails if tool-call correctness, refusal or the approval
+      # boundary drops below tests/fixtures/synthetic/agent_eval/baseline.json.
+      - name: Agent evaluation
+        run: uv run python scripts/evaluate_agent.py --synthetic --check
+
       # The whole suite. There is no integration marker in this repository:
       # no test carries it and it is not registered in pyproject.toml, so a
       # `-m "not integration"` filter would imply a suite that does not exist
