@@ -13,12 +13,13 @@ regex = '''freellmapi-[A-Za-z0-9_\-]{16,}'''
 keywords = ["freellmapi-"]
 tags = ["key", "freellmapi"]
 
-[[allowlists]]
-# Detection tests and example docs contain synthetic secret-shaped strings on
-# purpose. tests/test_privacy_regression.py scans these paths for the
-# freellmapi key shape separately, so they are not blind spots for that rule.
-description = "Synthetic secret-shaped strings used on purpose in tests and example docs"
+[allowlist]
+# Detection tests contain synthetic secret-shaped strings on purpose.
+# tests/test_privacy_regression.py scans this path for the freellmapi key shape
+# separately, so it is not a blind spot for that rule. The singular
+# [allowlist] table is used because gitleaks 8.24.x (the version the action
+# installs) ignores the plural [[allowlists]] form.
+description = "Synthetic secret-shaped strings used on purpose in tests"
 paths = [
   '''(^|/)tests/''',
-  '''(^|/)\.opencode/''',
 ]
