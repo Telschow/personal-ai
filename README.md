@@ -58,7 +58,9 @@ Latency of one `search` call (limit=5) over 64 queries x 20 repeats, in-memory S
 
 A deterministic, offline demo runs this repository's own ingestion, retrieval, provenance and policy code against a fixed synthetic corpus, then stops at the human approval boundary.
 
-> Governance demo GIF (30 s): placeholder. Planned content: the agent proposes a network action, the policy blocks it, a human approves, the audit log records the decision.
+![A 30 second governance demo: an agent proposes a network action, the policy engine blocks it and pauses for approval, a human approves, and the audit log records the decision. The run is real and the data is synthetic.](docs/architecture/governance-demo.gif)
+
+Every status, count and event name in the GIF is read from a real `ControlPlane` run against a probe tool, so the frames state "handler runs 0" before approval and "handler runs 1" after as measured values. Regenerate it with `uv run --with pillow python scripts/render_governance_gif.py`; `--text` prints the same transcript without Pillow.
 
 ### The eight stages
 
@@ -128,7 +130,7 @@ uv run ruff format --check src tests scripts
 uv run python scripts/mypy_ratchet.py
 ```
 
-On Python 3.12 the suite reports `3127 passed, 4 skipped`. It is hermetic: temporary SQLite databases, fakes, no network.
+On Python 3.12 the suite reports `3132 passed, 5 skipped`. It is hermetic: temporary SQLite databases, fakes, no network.
 
 To run against a local model, install [Ollama](https://ollama.com), copy `.env.example` to `.env` and set `OLLAMA_BASE_URL` and the model names. Never commit `.env`. See `docs/configuration.md`.
 
