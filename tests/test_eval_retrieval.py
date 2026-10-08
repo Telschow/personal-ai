@@ -74,6 +74,21 @@ def fixture(script: ModuleType):
     return script.load_fixture()
 
 
+def _empty_readme(script: ModuleType) -> str:
+    return (
+        f"{script.BEGIN_MARKER}\n{script.END_MARKER}\n"
+        f"{script.LATENCY_BEGIN_MARKER}\n{script.LATENCY_END_MARKER}\n"
+    )
+
+
+def _copy_data(tmp_path: Path) -> Path:
+    data = tmp_path / "data"
+    data.mkdir()
+    for path in DATA_DIR.glob("retrieval_*.json"):
+        (data / path.name).write_text(path.read_text("utf-8"), "utf-8")
+    return data
+
+
 def _words(text: str) -> set[str]:
     return set(re.findall(r"[a-z0-9]+", text.lower()))
 
@@ -133,6 +148,7 @@ def test_load_fixture_rejects_unknown_relevant_chunk(script, tmp_path: Path) -> 
                         "category": "keyword",
                         "query": "alpha",
                         "relevant": ["d1-c9"],
+                        "facts": ["alpha"],
                     }
                 ]
             }
@@ -169,7 +185,9 @@ def test_readme_table_and_thresholds_hold(script) -> None:
 def test_check_fails_when_readme_table_drifts(script, tmp_path: Path, capsys) -> None:
     readme = tmp_path / "README.md"
     readme.write_text(
-        f"{script.BEGIN_MARKER}\n| stale table |\n{script.END_MARKER}\n", "utf-8"
+        f"{script.BEGIN_MARKER}\n| stale table |\n{script.END_MARKER}\n"
+        f"{script.LATENCY_BEGIN_MARKER}\n{script.LATENCY_END_MARKER}\n",
+        "utf-8",
     )
     assert script.main(["--check", "--readme", str(readme)]) == 1
     assert "differs" in capsys.readouterr().err
@@ -183,7 +201,7 @@ def test_check_fails_without_markers(script, tmp_path: Path) -> None:
 
 def test_write_then_check_round_trips(script, tmp_path: Path) -> None:
     readme = tmp_path / "README.md"
-    readme.write_text(f"{script.BEGIN_MARKER}\n{script.END_MARKER}\n", "utf-8")
+    readme.write_text(_empty_readme(script), "utf-8")
     assert script.main(["--write", "--readme", str(readme)]) == 0
     assert script.main(["--check", "--readme", str(readme)]) == 0
 
@@ -191,20 +209,87 @@ def test_write_then_check_round_trips(script, tmp_path: Path) -> None:
 def test_check_fails_when_a_threshold_is_raised_above_the_measurement(
     script, tmp_path: Path, capsys
 ) -> None:
-    data = tmp_path / "data"
-    data.mkdir()
-    for name in ("retrieval_corpus.json", "retrieval_questions.json"):
-        (data / name).write_text((DATA_DIR / name).read_text("utf-8"), "utf-8")
-    thresholds = json.loads((DATA_DIR / "retrieval_thresholds.json").read_text("utf-8"))
+    data = _copy_data(tmp_path)
+    thresholds = json.loads((data / "retrieval_thresholds.json").read_text("utf-8"))
     thresholds["recall_at_5"]["hybrid"] = 0.99
     (data / "retrieval_thresholds.json").write_text(json.dumps(thresholds), "utf-8")
     readme = tmp_path / "README.md"
-    readme.write_text(f"{script.BEGIN_MARKER}\n{script.END_MARKER}\n", "utf-8")
+    readme.write_text(_empty_readme(script), "utf-8")
     script.main(["--write", "--readme", str(readme), "--data-dir", str(data)])
     assert (
         script.main(["--check", "--readme", str(readme), "--data-dir", str(data)]) == 1
     )
     assert "hybrid recall_at_5" in capsys.readouterr().err
+
+
+def test_every_question_has_facts_stated_by_its_labelled_chunks(
+    script, fixture
+) -> None:
+    for question in fixture.questions:
+        assert question.facts
+        assert script.evidence_supports(fixture, question, sorted(question.relevant))
+
+
+def test_load_fixture_rejects_a_fact_missing_from_the_labelled_chunk(
+    script, tmp_path: Path
+) -> None:
+    data = _copy_data(tmp_path)
+    questions = json.loads((data / "retrieval_questions.json").read_text("utf-8"))
+    questions["questions"][0]["facts"] = ["not in the chunk"]
+    (data / "retrieval_questions.json").write_text(json.dumps(questions), "utf-8")
+    with pytest.raises(ValueError, match="q01"):
+        script.load_fixture(data)
+
+
+def test_evidence_support_needs_every_fact_in_the_cited_chunks(script, fixture) -> None:
+    multi = next(q for q in fixture.questions if q.id == "q57")
+    assert script.evidence_supports(fixture, multi, sorted(multi.relevant))
+    assert not script.evidence_supports(fixture, multi, ["d01-c1", "d01-c2"])
+    assert not script.evidence_supports(fixture, multi, [])
+
+
+def test_scorer_agrees_with_every_labelled_citation(script, fixture) -> None:
+    labels = DATA_DIR / "retrieval_citation_labels.json"
+    assert script.label_mismatches(fixture, labels) == []
+    data = json.loads(labels.read_text("utf-8"))
+    assert {label["supported"] for label in data["labels"]} == {True, False}
+
+
+def test_check_fails_when_the_scorer_disagrees_with_a_label(
+    script, tmp_path: Path, capsys
+) -> None:
+    data = _copy_data(tmp_path)
+    labels = json.loads((data / "retrieval_citation_labels.json").read_text("utf-8"))
+    labels["labels"][0]["supported"] = not labels["labels"][0]["supported"]
+    (data / "retrieval_citation_labels.json").write_text(json.dumps(labels), "utf-8")
+    readme = tmp_path / "README.md"
+    readme.write_text(_empty_readme(script), "utf-8")
+    script.main(["--write", "--readme", str(readme), "--data-dir", str(data)])
+    assert (
+        script.main(["--check", "--readme", str(readme), "--data-dir", str(data)]) == 1
+    )
+    assert "scorer says" in capsys.readouterr().err
+
+
+def test_write_latency_fills_only_the_latency_block(script, tmp_path: Path) -> None:
+    readme = tmp_path / "README.md"
+    readme.write_text(_empty_readme(script), "utf-8")
+    code = script.main(["--write-latency", "--repeats", "1", "--readme", str(readme)])
+    text = readme.read_text("utf-8")
+    assert code == 0
+    latency = script.extract_block(
+        text, script.LATENCY_BEGIN_MARKER, script.LATENCY_END_MARKER
+    )
+    assert latency is not None and "| hybrid |" in latency
+    assert script.extract_block(text) == ""
+
+
+def test_check_requires_the_latency_markers(script, tmp_path: Path, capsys) -> None:
+    readme = tmp_path / "README.md"
+    readme.write_text(f"{script.BEGIN_MARKER}\n{script.END_MARKER}\n", "utf-8")
+    script.main(["--write", "--readme", str(readme)])
+    assert script.main(["--check", "--readme", str(readme)]) == 1
+    assert script.LATENCY_BEGIN_MARKER in capsys.readouterr().err
 
 
 def test_percentile_uses_nearest_rank(script) -> None:

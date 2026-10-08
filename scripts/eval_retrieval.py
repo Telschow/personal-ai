@@ -2,7 +2,7 @@
 
 Compares the three production ``ChunkIndex`` backends (keyword BM25, semantic
 cosine, hybrid RRF) on the fixtures in ``tests/fixtures/synthetic/eval/`` and
-scores them with recall@5 and MRR@5. Everything is offline and deterministic:
+scores them with recall@5, MRR@5 and evidence support@5. Everything is offline and deterministic:
 an in-memory SQLite database, no network, no Ollama, no wall-clock reads in the
 quality numbers.
 
@@ -18,12 +18,21 @@ Usage:
     uv run python scripts/eval_retrieval.py            # print the tables
     uv run python scripts/eval_retrieval.py --write    # refresh the README block
     uv run python scripts/eval_retrieval.py --check    # CI gate, exit 1 on drift
-    uv run python scripts/eval_retrieval.py --latency  # p50/p95, not checked
+    uv run python scripts/eval_retrieval.py --latency  # print p50/p95
+    uv run python scripts/eval_retrieval.py --write-latency  # refresh latency block
+
+Evidence support@5 asks: do the five chunks a backend would cite for a question
+together contain every fact the answer needs (``facts`` in the question file)?
+It measures whether a grounded answer is possible from the cited evidence. It
+does NOT score the faithfulness of generated text, which needs a model. The
+scorer itself is checked against ``retrieval_citation_labels.json``.
 
 ``--check`` regenerates the tables, fails if they differ from the block in
-``README.md`` between the ``retrieval-eval`` markers, and fails if any backend
-falls below ``tests/fixtures/synthetic/eval/retrieval_thresholds.json``.
-Latency depends on the machine, so it is never part of the checked block.
+``README.md`` between the ``retrieval-eval`` markers, fails if any backend
+falls below ``tests/fixtures/synthetic/eval/retrieval_thresholds.json``, and
+fails if the scorer disagrees with a labelled citation. Latency depends on the
+machine, so ``--write-latency`` fills its own README block, which ``--check``
+only requires to exist.
 """
 
 from __future__ import annotations
@@ -70,6 +79,8 @@ CATEGORIES = ("keyword", "identifier", "question", "paraphrase", "multi")
 
 BEGIN_MARKER = "<!-- retrieval-eval:begin -->"
 END_MARKER = "<!-- retrieval-eval:end -->"
+LATENCY_BEGIN_MARKER = "<!-- retrieval-latency:begin -->"
+LATENCY_END_MARKER = "<!-- retrieval-latency:end -->"
 FIXED_TIMESTAMP = "2024-01-01T00:00:00+00:00"
 
 _WORD = re.compile(r"[a-z0-9]+")
@@ -106,12 +117,24 @@ class Question:
     category: str
     query: str
     relevant: frozenset[str]
+    facts: tuple[str, ...]  # lowercase substrings the cited evidence must contain
 
 
 @dataclass(frozen=True, slots=True)
 class Fixture:
     chunks: tuple[tuple[str, str, str], ...]  # (chunk id, document id, text)
     questions: tuple[Question, ...]
+
+    def text_of(self, chunk_id: str) -> str:
+        return next(text for cid, _, text in self.chunks if cid == chunk_id)
+
+
+def evidence_supports(
+    fixture: Fixture, question: Question, cited: Sequence[str]
+) -> bool:
+    """True iff every required fact occurs in at least one cited chunk."""
+    texts = [fixture.text_of(chunk_id).lower() for chunk_id in cited]
+    return all(any(fact in text for text in texts) for fact in question.facts)
 
 
 def load_fixture(data_dir: Path = DATA_DIR) -> Fixture:
@@ -135,6 +158,7 @@ def load_fixture(data_dir: Path = DATA_DIR) -> Fixture:
             category=item["category"],
             query=item["query"],
             relevant=frozenset(item["relevant"]),
+            facts=tuple(item["facts"]),
         )
         for item in raw_questions["questions"]
     )
@@ -149,7 +173,31 @@ def load_fixture(data_dir: Path = DATA_DIR) -> Fixture:
     if len({question.id for question in questions}) != len(questions):
         msg = "duplicate question ids in retrieval_questions.json"
         raise ValueError(msg)
-    return Fixture(chunks=chunks, questions=questions)
+    fixture = Fixture(chunks=chunks, questions=questions)
+    for question in questions:
+        if not question.facts or any(f != f.lower() for f in question.facts):
+            msg = f"{question.id}: facts must be non-empty and lowercase"
+            raise ValueError(msg)
+        if not evidence_supports(fixture, question, sorted(question.relevant)):
+            msg = f"{question.id}: the labelled chunks do not contain every fact"
+            raise ValueError(msg)
+    return fixture
+
+
+def label_mismatches(fixture: Fixture, labels_path: Path) -> list[str]:
+    """Return one message per labelled citation the scorer judges differently."""
+    labels = json.loads(labels_path.read_text("utf-8"))["labels"]
+    by_id = {question.id: question for question in fixture.questions}
+    mismatches = []
+    for label in labels:
+        question = by_id[label["question"]]
+        verdict = evidence_supports(fixture, question, label["cited"])
+        if verdict != label["supported"]:
+            mismatches.append(
+                f"{label['question']} cited {label['cited']}: scorer says "
+                f"{verdict}, label says {label['supported']}"
+            )
+    return mismatches
 
 
 def build_backends(fixture: Fixture) -> tuple[Mapping[str, ChunkSearcher], object]:
@@ -187,6 +235,7 @@ def build_backends(fixture: Fixture) -> tuple[Mapping[str, ChunkSearcher], objec
 class Scores:
     recall: float
     mrr: float
+    support: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -203,6 +252,7 @@ def _mean(values: Sequence[float]) -> float:
 
 
 def score(fixture: Fixture, results: Sequence[EvaluationResult]) -> Report:
+    question_of = {question.id: question for question in fixture.questions}
     category_of = {question.id: question.category for question in fixture.questions}
     overall: dict[str, Scores] = {}
     by_category: dict[str, dict[str, float]] = {}
@@ -211,6 +261,18 @@ def score(fixture: Fixture, results: Sequence[EvaluationResult]) -> Report:
         overall[backend] = Scores(
             recall=_mean([result.recall for result in own]),
             mrr=_mean([result.reciprocal_rank for result in own]),
+            support=_mean(
+                [
+                    float(
+                        evidence_supports(
+                            fixture,
+                            question_of[result.case.name],
+                            result.returned_chunk_ids,
+                        )
+                    )
+                    for result in own
+                ]
+            ),
         )
         grouped: dict[str, list[float]] = defaultdict(list)
         for result in own:
@@ -256,15 +318,20 @@ def render_block(report: Report) -> str:
             f"Measured on {report.question_count} synthetic questions over "
             f"{report.chunk_count} chunks, k={K}. The semantic backend uses "
             f"`{EMBEDDING_MODEL}`, an offline hashed word and character n-gram "
-            "vectoriser, not a neural embedding model."
+            "vectoriser, not a neural embedding model. Evidence support@5 is the "
+            "share of questions whose five cited chunks contain every fact the "
+            "answer needs; it does not score generated text."
         ),
         "",
-        f"| Backend | recall@{K} | MRR@{K} |",
-        "|---------|-----------:|--------:|",
+        f"| Backend | recall@{K} | MRR@{K} | evidence support@{K} |",
+        "|---------|-----------:|--------:|---------------------:|",
     ]
     for backend in BACKENDS:
         scores = report.overall[backend]
-        lines.append(f"| {backend} | {scores.recall:.3f} | {scores.mrr:.3f} |")
+        lines.append(
+            f"| {backend} | {scores.recall:.3f} | {scores.mrr:.3f} "
+            f"| {scores.support:.3f} |"
+        )
     header = " | ".join(
         f"{category} ({report.category_counts[category]})" for category in CATEGORIES
     )
@@ -283,27 +350,34 @@ def render_block(report: Report) -> str:
     return "\n".join(lines)
 
 
-def extract_block(readme_text: str) -> str | None:
-    start = readme_text.find(BEGIN_MARKER)
-    end = readme_text.find(END_MARKER)
-    if start == -1 or end == -1 or end < start:
+def _span(
+    text: str, begin: str = BEGIN_MARKER, end: str = END_MARKER
+) -> tuple[int, int] | None:
+    start = text.find(begin)
+    stop = text.find(end)
+    if start == -1 or stop == -1 or stop < start:
         return None
-    return readme_text[start + len(BEGIN_MARKER) : end].strip("\n")
+    return start + len(begin), stop
 
 
-def replace_block(readme_text: str, block: str) -> str:
-    start = readme_text.find(BEGIN_MARKER)
-    end = readme_text.find(END_MARKER)
-    if start == -1 or end == -1 or end < start:
-        msg = f"README is missing the {BEGIN_MARKER} / {END_MARKER} markers"
+def extract_block(
+    readme_text: str, begin: str = BEGIN_MARKER, end: str = END_MARKER
+) -> str | None:
+    span = _span(readme_text, begin, end)
+    return None if span is None else readme_text[span[0] : span[1]].strip("\n")
+
+
+def replace_block(
+    readme_text: str,
+    block: str,
+    begin: str = BEGIN_MARKER,
+    end: str = END_MARKER,
+) -> str:
+    span = _span(readme_text, begin, end)
+    if span is None:
+        msg = f"README is missing the {begin} / {end} markers"
         raise ValueError(msg)
-    return (
-        readme_text[: start + len(BEGIN_MARKER)]
-        + "\n"
-        + block
-        + "\n"
-        + readme_text[end:]
-    )
+    return readme_text[: span[0]] + "\n" + block + "\n" + readme_text[span[1] :]
 
 
 def threshold_failures(report: Report, thresholds: Mapping[str, object]) -> list[str]:
@@ -312,6 +386,7 @@ def threshold_failures(report: Report, thresholds: Mapping[str, object]) -> list
     floors = {
         "recall_at_5": {b: s.recall for b, s in report.overall.items()},
         "mrr_at_5": {b: s.mrr for b, s in report.overall.items()},
+        "support_at_5": {b: s.support for b, s in report.overall.items()},
     }
     for metric, measured in floors.items():
         minimums = thresholds[metric]
@@ -363,12 +438,40 @@ def _cpu_name() -> str:
     return platform.processor() or platform.machine()
 
 
+def render_latency_block(
+    fixture: Fixture, latency: Mapping[str, tuple[float, float]], repeats: int
+) -> str:
+    """Render the machine-dependent latency block for the README."""
+    lines = [
+        (
+            f"Latency of one `search` call (limit={K}) over "
+            f"{len(fixture.questions)} queries x {repeats} repeats, in-memory "
+            f"SQLite, embedder `{EMBEDDING_MODEL}`, no model server. Measured on "
+            f"Python {platform.python_version()}, {platform.system()} "
+            f"{platform.machine()}, {_cpu_name()}. These numbers depend on the "
+            "machine: regenerate them with `--write-latency`; `--check` does not "
+            "compare them. A real embedding model adds its own query-embedding "
+            "time, which is not measured here."
+        ),
+        "",
+        "| Backend | p50 ms | p95 ms |",
+        "|---------|-------:|-------:|",
+    ]
+    for backend in BACKENDS:
+        p50, p95 = latency[backend]
+        lines.append(f"| {backend} | {p50:.3f} | {p95:.3f} |")
+    return "\n".join(lines)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--check", action="store_true", help="compare with README")
     mode.add_argument("--write", action="store_true", help="refresh README block")
     mode.add_argument("--latency", action="store_true", help="print p50/p95")
+    mode.add_argument(
+        "--write-latency", action="store_true", help="refresh README latency block"
+    )
     parser.add_argument("--repeats", type=int, default=20)
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR)
     parser.add_argument("--readme", type=Path, default=README)
@@ -376,20 +479,22 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     fixture = load_fixture(args.data_dir)
 
-    if args.latency:
+    if args.latency or args.write_latency:
         latency = measure_latency(fixture, args.repeats)
-        print(
-            f"{len(fixture.questions)} queries x {args.repeats} repeats, "
-            f"limit={K}, embedder={EMBEDDING_MODEL}, no model server"
-        )
-        print(
-            f"python {platform.python_version()} on {platform.system()} "
-            f"{platform.machine()}, cpu: {_cpu_name()}"
-        )
-        print("backend    p50_ms  p95_ms")
-        for backend in BACKENDS:
-            p50, p95 = latency[backend]
-            print(f"{backend:<9} {p50:>7.3f} {p95:>7.3f}")
+        latency_block = render_latency_block(fixture, latency, args.repeats)
+        if args.write_latency:
+            args.readme.write_text(
+                replace_block(
+                    args.readme.read_text("utf-8"),
+                    latency_block,
+                    LATENCY_BEGIN_MARKER,
+                    LATENCY_END_MARKER,
+                ),
+                "utf-8",
+            )
+            print(f"updated {args.readme}")
+        else:
+            print(latency_block)
         return 0
 
     report = run_evaluation(fixture)
@@ -407,7 +512,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     problems = []
-    current = extract_block(args.readme.read_text("utf-8"))
+    readme_text = args.readme.read_text("utf-8")
+    current = extract_block(readme_text)
     if current is None:
         problems.append(f"README is missing the {BEGIN_MARKER} markers")
     elif current.strip() != block.strip():
@@ -415,15 +521,20 @@ def main(argv: Sequence[str] | None = None) -> int:
             "README table differs from the measured table; run "
             "`uv run python scripts/eval_retrieval.py --write`"
         )
+    if extract_block(readme_text, LATENCY_BEGIN_MARKER, LATENCY_END_MARKER) is None:
+        problems.append(f"README is missing the {LATENCY_BEGIN_MARKER} markers")
     thresholds = json.loads(
         (args.data_dir / "retrieval_thresholds.json").read_text("utf-8")
     )
     problems.extend(threshold_failures(report, thresholds))
+    problems.extend(
+        label_mismatches(fixture, args.data_dir / "retrieval_citation_labels.json")
+    )
     for problem in problems:
         print(f"FAIL: {problem}", file=sys.stderr)
     if problems:
         return 1
-    print("ok: README table matches and all thresholds hold")
+    print("ok: README table matches, thresholds hold, scorer agrees with labels")
     return 0
 
 
