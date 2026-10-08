@@ -68,7 +68,7 @@ BANK_COLUMNS = [
 ]
 
 BANK_PREAMBLE = [
-    'Girokonto;"DE16120300001085646543"',
+    'Girokonto;"DE89370400440532013000"',
     "Zeitraum:;2024",
     "Kontostand vom 31.12.2024:;1234,56",
 ]

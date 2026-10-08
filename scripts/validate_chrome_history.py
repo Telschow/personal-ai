@@ -34,7 +34,7 @@ def _chrome_dir() -> Path:
 
 
 def smoke_test() -> None:
-    """Quick structural validation without the real corpus."""
+    """Quick structural validation without your own corpus."""
     connection = connect_database(":memory:")
     try:
         store = EventStore(connection)
@@ -169,7 +169,7 @@ def main() -> None:
     parser.add_argument(
         "--smoke-only",
         action="store_true",
-        help="Run smoke test without real corpus",
+        help="Run smoke test without your own corpus",
     )
     parser.add_argument(
         "--database",

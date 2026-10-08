@@ -25,9 +25,6 @@ tmp/
 cache/
 output/
 
-# Local opencode config (may contain credentials)
-opencode.json
-opencode.json.bak
 
 # Backup and editor temp files
 *.bak
@@ -77,8 +74,6 @@ data/*
 # Local AI / design tooling state (generated, not part of the product)
 .ua/
 design-md/
-.opencode/ponytail/
-.opencode/skills/archify/
 
 # Generated demo artifacts (regenerate: uv run python -m personal_ai.demo)
 /artifacts/

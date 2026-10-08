@@ -169,7 +169,7 @@ def _render(columns, rows, delimiter):
 
 def _built_bank_csv():
     return (
-        'Girokonto;"DE16120300001085646543"\r\n'
+        'Girokonto;"DE89370400440532013000"\r\n'
         "Zeitraum:;2024\r\n"
         "Kontostand vom 31.12.2024:;1234,56\r\n" + _render(BANK_COLUMNS, BANK_ROWS, ";")
     )
@@ -177,7 +177,7 @@ def _built_bank_csv():
 
 def _built_bank_csv_with(rows):
     return (
-        'Girokonto;"DE16120300001085646543"\r\n'
+        'Girokonto;"DE89370400440532013000"\r\n'
         "Zeitraum:;2024\r\n"
         "Kontostand vom 31.12.2024:;1234,56\r\n" + _render(BANK_COLUMNS, rows, ";")
     )

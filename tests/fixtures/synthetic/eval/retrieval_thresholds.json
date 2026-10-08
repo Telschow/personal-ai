@@ -1,0 +1,6 @@
+{
+  "note": "Floors set from the first measured run (scripts/eval_retrieval.py), rounded down to two decimals. Raise them when retrieval improves; lowering one needs a reviewer.",
+  "recall_at_5": {"keyword": 0.48, "semantic": 0.79, "hybrid": 0.79},
+  "mrr_at_5": {"keyword": 0.48, "semantic": 0.78, "hybrid": 0.78},
+  "support_at_5": {"keyword": 0.48, "semantic": 0.79, "hybrid": 0.79}
+}

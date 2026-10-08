@@ -46,7 +46,6 @@ AGENTS.md
 # Generated local AI/design tooling state (not product, not needed in image).
 .ua
 design-md
-.opencode
 
 # Keep git/Docker meta files out of the image where harmless; README.md and
 # uv.lock / pyproject.toml stay in (hatchling needs README.md to build).

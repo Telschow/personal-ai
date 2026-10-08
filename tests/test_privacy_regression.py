@@ -88,12 +88,9 @@ PUBLISHED_PATTERNS = [
 ]
 
 # Directories that can never appear in `git ls-files`, listed so their absence
-# from a scan is a deliberate decision rather than an oversight.
-#
-# `.opencode` was pruned here on the grounds that agent config is "local state".
-# That was wrong: 25 files under .opencode/ are tracked, and an agent or command
-# definition is exactly where somebody pastes a provider key. The scan covers it
-# now. The policy governs what is committed, and these files are committed.
+# from a scan is a deliberate decision rather than an oversight. Agent or tool
+# configuration directories are NOT listed: if one is ever tracked, it is
+# exactly where somebody pastes a provider key, so the scan must cover it.
 NEVER_TRACKED_DIRS = {
     ".venv",
     "__pycache__",
@@ -122,7 +119,7 @@ def _tracked_published_files() -> list[pathlib.Path]:
 
     Every other tracked file is scanned, not just .md/.yaml/.yml. Restricting the
     scan to those three suffixes left src/, *.json, *.toml and *.example
-    unchecked -- including opencode.example.json and .env.example, which are
+    unchecked -- including example config files and .env.example, which are
     exactly where a credential is most likely to be pasted by mistake.
 
     Uses ``git ls-files`` so that local-only, gitignored personal files sitting
@@ -240,7 +237,7 @@ def test_detectors_actually_fire():
 
 
 def test_credential_detector_accepts_env_placeholders():
-    """The env-var indirection used by opencode.example.json must stay clean."""
+    """The env-var indirection used by example config files must stay clean."""
     assert _violations('"apiKey": "{env:FREELLMAPI_API_KEY}"', PUBLISHED_PATTERNS) == []
     assert _violations('"model": "freellmapi/auto"', PUBLISHED_PATTERNS) == []
 
@@ -396,7 +393,7 @@ _API_KEY_SHAPE = re.compile("freellm" + r"api-[A-Za-z0-9_\-]{16,}")
 
 
 def test_no_api_key_shape_in_any_tracked_file():
-    """Backs the Gitleaks path allow-list: tests/ and .opencode/ are scanned here."""
+    """Backs the Gitleaks path allow-list: tests/ is scanned here."""
     found = [
         name
         for name in _tracked_files()

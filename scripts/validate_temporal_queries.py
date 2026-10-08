@@ -43,7 +43,7 @@ from personal_ai.storage import EventStore, connect_database
 _CHROME_DIR_REL = "previous_project_and_raw_data/Chrome"
 _YOUTUBE_DIR_REL = "previous_project_and_raw_data/YouTube y YouTube Music/historial"
 
-# Large enough to enumerate every distinct time bucket in the real corpus.
+# Large enough to enumerate every distinct time bucket in your corpus.
 _BUCKET_CAP = 2000
 
 
@@ -52,7 +52,7 @@ def _corpus_dir(rel: str) -> Path:
 
 
 def smoke_test() -> None:
-    """Cheap structural check without the real corpus."""
+    """Cheap structural check without your own corpus."""
     connection = connect_database(":memory:")
     try:
         store = EventStore(connection)
@@ -164,7 +164,7 @@ def _time_filter_check(store: EventStore) -> None:
     full = activity_summary(store, ActivitySummaryRequest())
     full_total = sum(r.count for r in full)
 
-    # Pick a narrow month from the real corpus and confirm the subset count
+    # Pick a narrow month from your corpus and confirm the subset count
     # is strictly smaller and non-negative (and equals the monthly bucket).
     months = activity_by_bucket(store, ActivityBucketsRequest(bucket="month"))
     assert months, "expected at least one month bucket"
@@ -271,7 +271,7 @@ def main() -> None:
     parser.add_argument(
         "--smoke-only",
         action="store_true",
-        help="Run smoke test without the real corpus",
+        help="Run smoke test without your own corpus",
     )
     parser.add_argument(
         "--database",

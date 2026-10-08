@@ -52,11 +52,8 @@ The number of sample segments / points in the plotted graph.
 - Third-party model providers (Ollama local only)
 
 ### Data Leakage
-- Git history contains opencode.json with credentials
-- README claims no personal data contradicted by profile.yaml
-- Chrome history in previous_project_and_raw_data/ has API keys
-- Financial_data/ contains bank statements
-- Email_Outlook/ contains full mailbox
+- Personal data committed by mistake: mitigated by the synthetic-only policy (`PUBLIC_DATA_POLICY.md`), `tests/test_privacy_regression.py`, git-ignored local data directories, and a full-history gitleaks scan in CI
+- Credentials in configuration: example files use environment-variable references only, and the privacy test checks that no tracked file carries a credential-shaped value
 
 ### Data Deletion
 - delete_for_document exists for chunks but cascade to FTS/embeddings unverified

@@ -1100,7 +1100,7 @@ idempotency (documented known limitation below).
   `not_pending`; rerun → `review_deduplicated=1`, memory stable), and CLI
   reject end-to-end (reject → no memory, terminal; rerun never reopens).
 
-**Synthetic pilot** (`/tmp/opencode/phase26_pilot/pilot.py`, scratch DB,
+**Synthetic pilot** (`a scratch script`, scratch DB,
 deleted): 17 conversations (5 EN / 5 DE / 5 ES + salary/medical/secret
 adversarial); deterministic pass auto-accepts 11 EN/DE/ES user facts; LLM pass
 escalates salary (EN/DE/ES) + medical → 4 `require_approval` review rows, secret
@@ -1115,7 +1115,7 @@ one of `["approved","not_pending"]`, zero duplicate writes. Aggregates:
 
 Full suite: 2356 passing. Ruff clean. Format clean. `git diff --check` clean. No
 production DB was opened writable; phase-26 verification used only
-`/tmp/opencode/phase26_pilot/` and `/tmp/opencode/phase26_probe/` scratch
+scratch
 databases, both deleted.
 
 **Known limitations (documented, deferred).** P0/P1/P2 within slice: (1) the

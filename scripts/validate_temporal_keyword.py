@@ -17,7 +17,7 @@ It verifies that:
 
 The literal keyword is case-insensitive for ASCII and matched as an exact
 substring (``%`` / ``_`` are literal). None of the candidate keywords need be
-present in the real corpus: a keyword with no matching events reports zero
+present in your corpus: a keyword with no matching events reports zero
 results instead of failing.
 """
 
@@ -58,7 +58,7 @@ def _corpus_dir(rel: str) -> Path:
 
 
 def smoke_test() -> None:
-    """Cheap structural check without the real corpus."""
+    """Cheap structural check without your own corpus."""
     connection = connect_database(":memory:")
     try:
         store = EventStore(connection)
@@ -216,7 +216,7 @@ def main() -> None:
     parser.add_argument(
         "--smoke-only",
         action="store_true",
-        help="Run smoke test without the real corpus",
+        help="Run smoke test without your own corpus",
     )
     parser.add_argument(
         "--database",

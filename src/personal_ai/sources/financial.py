@@ -5,15 +5,15 @@ financial accounts into a deterministic, privacy-reduced searchable payload
 that flows through the generic ingestion pipeline exactly like any other text
 source.
 
-The real corpus this adapter was written against contains four schemas:
+The adapter understands four fixed export schemas:
 
-* ``bank`` - German Girokonto statement exports (semicolon-delimited, UTF-8
-  with BOM, one file per year, preamble lines before the column header).
-* ``card`` - card (Revolut-style) statement exports (comma-delimited).
-* ``investment_transaction`` - brokerage (Trade Republic-style) transaction
-  exports (comma-delimited, one row per executed order).
-* ``portfolio`` - aggregate portfolio snapshot exports (Degiro-style,
-  comma-delimited, undated).
+* ``bank`` - bank statement exports (semicolon-delimited, UTF-8 with BOM, one
+  file per year, preamble lines before the column header).
+* ``card`` - card statement exports (comma-delimited).
+* ``investment_transaction`` - brokerage transaction exports (comma-delimited,
+  one row per executed order).
+* ``portfolio`` - aggregate portfolio snapshot exports (comma-delimited,
+  undated).
 
 Record identity is content-derived and independent of filename, file
 modification time, BOM presence, line endings, CSV delimiter, column order,

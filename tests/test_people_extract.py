@@ -98,8 +98,8 @@ def test_email_non_person_addresses_are_skipped() -> None:
     record = make_email_record(
         sender="MAILER-DAEMON <MAILER-DAEMON@example.com>",
         to="no-reply <no-reply@example.com>, noreply@example.com, "
-        "do-not-reply@x.io, notifications@x.io, postmaster@x.io, "
-        "bounce-123@x.io",
+        "do-not-reply@example.com, notifications@example.com, postmaster@example.com, "
+        "bounce-123@example.com",
         cc="",
     )
     assert extract_person_references(record) == ()

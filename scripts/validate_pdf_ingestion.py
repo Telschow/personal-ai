@@ -1,4 +1,4 @@
-"""Validate real corpus ingestion into a temporary database.
+"""Validate corpus ingestion into a temporary database.
 
 Usage:
     uv run scripts/validate_pdf_ingestion.py

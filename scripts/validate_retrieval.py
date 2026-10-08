@@ -144,7 +144,7 @@ def main() -> None:
     parser.add_argument(
         "--smoke-only",
         action="store_true",
-        help="Run smoke test without Ollama or real corpus",
+        help="Run smoke test without Ollama or your own corpus",
     )
     args = parser.parse_args()
     if args.smoke_only:
