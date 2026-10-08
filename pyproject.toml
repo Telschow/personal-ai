@@ -19,7 +19,7 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.16.4",
     "types-PyYAML>=6.0.12",
-    "types-regex>=2026.9.10",
+    "types-regex>=2026.9.29.20261005",
 ]
 
 [tool.mypy]
