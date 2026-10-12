@@ -179,6 +179,56 @@ class TestRetrievalService:
         second = service.search("Example Corp")
         assert first == second
 
+    def test_stronger_keyword_match_ranks_first(self) -> None:
+        """BM25 ranks are negative with lower = better; the best chunk must lead.
+
+        Regression: the score was ``1 + rank`` clamped to [0, 1], so the
+        strongest matches scored 0.0 and were sorted below weak ones.
+        """
+        strong = self._ingest(
+            b"Zebra stripes and zebra herds: a zebra field note. " * 20,
+            source_key="strong.txt",
+        )
+        weak = self._ingest(
+            b"A long note about the garden, the weather and lunch plans. " * 20
+            + b"Once, briefly, a zebra.",
+            source_key="weak.txt",
+        )
+        hits = self.chunk_store.search("zebra", limit=10)
+        assert [h.document_id for h in hits] == [strong, weak]
+        assert hits[0].rank < hits[1].rank < 0
+
+        results = self._service().search("zebra")
+        chunk_ids = [r.document_id for r in results if r.result_type == "chunk"]
+        assert chunk_ids == [strong, weak]
+        assert results[0].score > results[1].score > 0
+
+    def test_chunk_order_is_preserved_for_higher_is_better_backends(self) -> None:
+        """Semantic and hybrid ranks are higher = better; order must still hold."""
+        from personal_ai.storage.chunks import ChunkSearchResult
+
+        hits = tuple(
+            ChunkSearchResult(
+                chunk_id=f"c{i}",
+                document_id=f"d{i}",
+                chunk_index=0,
+                text="zebra",
+                rank=rank,
+            )
+            for i, rank in enumerate((0.92, 0.41, 0.05))
+        )
+
+        class FixedIndex:
+            def search(self, query, *, limit, filters=None):
+                return hits[:limit]
+
+        service = RetrievalService(
+            FixedIndex(), self.extraction_store, self.document_store
+        )
+        results = service.search("zebra")
+        assert [r.document_id for r in results] == ["d0", "d1", "d2"]
+        assert len({r.score for r in results}) == 3
+
     def test_limit_respected(self) -> None:
         self._ingest(TEXT_HEAVY_TEXT.encode())
         service = self._service()

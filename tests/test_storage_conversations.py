@@ -551,6 +551,13 @@ class TestSearchTemporalBounds:
             "Example Corp late",
         ]
 
+    def test_date_only_created_before_includes_the_whole_day(self) -> None:
+        results = self.store.search("Example Corp", created_before="2026-02-15")
+        assert [r.content_text for r in results] == [
+            "Example Corp early",
+            "Example Corp late",
+        ]
+
     def test_created_before_excludes_later(self) -> None:
         results = self.store.search(
             "Example Corp", created_before="2026-02-01T00:00:00+00:00"

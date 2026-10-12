@@ -189,6 +189,22 @@ def _parse_boundary(field: str, value: str) -> dt.datetime:
         raise ValueError(msg) from exc
 
 
+def _upper_bound(column: str, before: str) -> tuple[str, str]:
+    """SQL for an inclusive upper bound on an ISO-8601 text column.
+
+    A date-only bound means "through the end of that day", so it becomes a
+    strict ``<`` against the next day: ``'2026-10-12T13:00…' <= '2026-10-12'``
+    is false lexically, but ``< '2026-10-13'`` is true. Timestamps keep ``<=``.
+    """
+    try:
+        day = dt.date.fromisoformat(before)
+    except ValueError:
+        return f"{column} <= ?", before
+    if len(before) != len("YYYY-MM-DD"):
+        return f"{column} <= ?", before
+    return f"{column} < ?", (day + dt.timedelta(days=1)).isoformat()
+
+
 def _validate_boundary(field: str, value: str | None) -> None:
     if value is not None:
         _parse_boundary(field, value)
@@ -237,8 +253,9 @@ def _document_constraints(
             clauses.append(f"documents.{column} >= ?")
             parameters.append(after)
         if before is not None:
-            clauses.append(f"documents.{column} <= ?")
-            parameters.append(before)
+            clause, bound = _upper_bound(f"documents.{column}", before)
+            clauses.append(clause)
+            parameters.append(bound)
     fragment = f" AND {' AND '.join(clauses)}" if clauses else ""
     return fragment, parameters
 

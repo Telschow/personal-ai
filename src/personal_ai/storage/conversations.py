@@ -11,7 +11,11 @@ from personal_ai.documents.conversations import (
     ConversationAttachment,
     ConversationMessage,
 )
-from personal_ai.storage.chunks import _validate_boundary, _validate_range
+from personal_ai.storage.chunks import (
+    _upper_bound,
+    _validate_boundary,
+    _validate_range,
+)
 
 _CONVERSATIONS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS conversations (
@@ -717,8 +721,9 @@ class ConversationStore:
             conditions.append("cm.timestamp >= ?")
             params.append(created_after)
         if created_before is not None:
-            conditions.append("cm.timestamp <= ?")
-            params.append(created_before)
+            clause, bound = _upper_bound("cm.timestamp", created_before)
+            conditions.append(clause)
+            params.append(bound)
 
         where = " AND ".join(conditions)
         rows = self._connection.execute(

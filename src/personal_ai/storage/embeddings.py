@@ -74,6 +74,9 @@ def _row_to_embedding(chunk_id: str, row: tuple[object, ...]) -> Embedding:
     return embedding
 
 
+_MAX_IDS_PER_QUERY = 900
+
+
 class EmbeddingStore:
     """Durable chunk embeddings keyed by their existing chunk id.
 
@@ -160,13 +163,19 @@ class EmbeddingStore:
         ids = tuple(dict.fromkeys(chunk_ids))
         if not ids:
             return {}
-        placeholders = ", ".join("?" * len(ids))
-        rows = self._connection.execute(
-            f"SELECT {', '.join(_COLUMNS)} FROM chunk_embeddings "
-            f"WHERE chunk_id IN ({placeholders})",
-            ids,
-        ).fetchall()
-        found = {str(row[0]): _row_to_embedding(str(row[0]), row) for row in rows}
+        found: dict[str, Embedding] = {}
+        # Bounded batches: one IN (...) per call hits SQLite's host-parameter
+        # limit (as low as 999 on older builds) on a large corpus.
+        for start in range(0, len(ids), _MAX_IDS_PER_QUERY):
+            batch = ids[start : start + _MAX_IDS_PER_QUERY]
+            placeholders = ", ".join("?" * len(batch))
+            rows = self._connection.execute(
+                f"SELECT {', '.join(_COLUMNS)} FROM chunk_embeddings "
+                f"WHERE chunk_id IN ({placeholders})",
+                batch,
+            ).fetchall()
+            for row in rows:
+                found[str(row[0])] = _row_to_embedding(str(row[0]), row)
         return {chunk_id: found[chunk_id] for chunk_id in ids if chunk_id in found}
 
     def delete(self, chunk_id: str) -> bool:
