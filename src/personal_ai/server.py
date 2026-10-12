@@ -39,6 +39,7 @@ Run directly::
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
 import secrets
@@ -49,6 +50,7 @@ from collections.abc import Callable, Sequence
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -105,6 +107,65 @@ class ApiError(Exception):
         self.status_code = status_code
         self.message = message
         self.error_type = error_type
+
+
+def _hostname(authority: str) -> str | None:
+    """Return the lower-cased host name of a ``Host`` value or an origin URL."""
+    target = authority if "://" in authority else f"//{authority}"
+    try:
+        hostname = urlsplit(target).hostname
+    except ValueError:
+        return None
+    return hostname.rstrip(".") if hostname else None
+
+
+def _is_loopback_name(hostname: str) -> bool:
+    if hostname == "localhost" or hostname.endswith(".localhost"):
+        return True
+    try:
+        return ipaddress.ip_address(hostname).is_loopback
+    except ValueError:
+        return False
+
+
+def _cannot_be_rebound(hostname: str) -> bool:
+    """True when a remote web page cannot point this name at the server.
+
+    DNS rebinding needs a DNS name the attacker controls, and public names
+    always contain a dot. Loopback names, IP literals and single-label names
+    such as a Docker service name (``personal-ai``) are therefore safe.
+    """
+    if _is_loopback_name(hostname) or "." not in hostname:
+        return True
+    try:
+        ipaddress.ip_address(hostname)
+    except ValueError:
+        return False
+    return True
+
+
+def browser_guard_error(
+    origin: str | None, host: str | None, *, token_required: bool
+) -> str | None:
+    """Return why a request must be refused as cross-site, or ``None``.
+
+    Browsers attach ``Origin`` to every cross-origin request, including the
+    ``text/plain`` POSTs that skip the CORS preflight, so a page on another
+    site could otherwise approve a gated action. Only loopback origins are
+    accepted: the API serves no CORS headers, so no other browser origin can
+    use it anyway. Without an API token the ``Host`` header is checked too,
+    which stops DNS rebinding from reading memory or execution state.
+    Non-browser clients (CLI, Open WebUI's backend, curl) send no ``Origin``.
+    """
+    if origin is not None:
+        origin_host = _hostname(origin) if origin != "null" else None
+        if origin_host is None or not _is_loopback_name(origin_host):
+            return "Cross-origin browser requests are not allowed."
+    if not token_required and host is not None:
+        host_name = _hostname(host)
+        if host_name is None or not _cannot_be_rebound(host_name):
+            return "Unexpected Host header. Set an API token to serve this host name."
+    return None
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -593,7 +654,7 @@ def create_app(
             return
         header = request.headers.get("authorization", "")
         expected = f"Bearer {token}"
-        if not secrets.compare_digest(header, expected):
+        if not secrets.compare_digest(header.encode(), expected.encode()):
             raise ApiError(
                 401,
                 "Incorrect or missing API token.",
@@ -669,6 +730,16 @@ def create_app(
 
     @app.middleware("http")
     async def _auth_middleware(request: Request, call_next):
+        guard = browser_guard_error(
+            request.headers.get("origin"),
+            request.headers.get("host"),
+            token_required=token is not None,
+        )
+        if guard is not None:
+            return JSONResponse(
+                status_code=403,
+                content=error_payload(guard, "permission_error", status_code=403),
+            )
         try:
             _require_auth(request)
         except ApiError as exc:
@@ -924,6 +995,14 @@ def _coerce_int(
     return parsed
 
 
+async def _json_object(request: Request) -> dict[str, object]:
+    try:
+        body = await request.json()
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        raise ApiError(400, "request body is not valid JSON") from None
+    return _require_object(body)
+
+
 def _require_object(body: object) -> dict[str, object]:
     if not isinstance(body, dict):
         raise ApiError(400, "request body must be a JSON object")
@@ -1050,7 +1129,7 @@ def _mount_gateway_endpoints(app: FastAPI) -> None:
 
     @app.post("/api/executions/{execution_id}/retry")
     async def retry_task(execution_id: str, request: Request) -> JSONResponse:
-        body = _require_object(await request.json())
+        body = await _json_object(request)
         _enforce_body_keys(body, {"task_id"})
         task_id = _require_key(body, "task_id", str)
         task = _gateway_plane(app).retry_task(execution_id, task_id)
@@ -1058,7 +1137,7 @@ def _mount_gateway_endpoints(app: FastAPI) -> None:
 
     @app.post("/api/executions/{execution_id}/approve")
     async def approve_task(execution_id: str, request: Request) -> JSONResponse:
-        body = _require_object(await request.json())
+        body = await _json_object(request)
         _enforce_body_keys(body, {"task_id", "permission"})
         task_id = _require_key(body, "task_id", str)
         permission = _require_key(body, "permission", str)
@@ -1067,7 +1146,7 @@ def _mount_gateway_endpoints(app: FastAPI) -> None:
 
     @app.post("/api/executions/{execution_id}/reject")
     async def reject_task(execution_id: str, request: Request) -> JSONResponse:
-        body = _require_object(await request.json())
+        body = await _json_object(request)
         _enforce_body_keys(body, {"task_id", "permission"})
         task_id = _require_key(body, "task_id", str)
         permission = _require_key(body, "permission", str)

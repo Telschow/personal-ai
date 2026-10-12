@@ -96,9 +96,11 @@ class TestCompose:
         assert "ollama" in COMPOSE
         assert "name: ollama_default" in COMPOSE
 
-    def test_host_port_is_exposed(self) -> None:
-        # Port 8090 is exposed for direct GUI access (Phase 4.1)
-        assert "8090:8000" in COMPOSE
+    def test_host_port_is_exposed_on_loopback_only(self) -> None:
+        # Port 8090 is exposed for direct GUI access (Phase 4.1), on loopback
+        # only: the API has no token by default.
+        assert '"127.0.0.1:8090:8000"' in COMPOSE
+        assert '- "8090:8000"' not in COMPOSE
 
     def test_healthcheck_uses_models_endpoint(self) -> None:
         assert "http://127.0.0.1:8000/v1/models" in COMPOSE

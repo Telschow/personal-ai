@@ -86,6 +86,14 @@ scope is exactly `(execution_id, task_id, permission)`:
   permission never requested) are rejected.
 - Rejection is durable: `retry_task` re-opens a failed task, but the durable
   `rejected` record means the gate reappears, retry never re-grants.
+  When the gate reappears the request row is pending again with its
+  `decided_at` and `approver` cleared; the rejection stays in the event log
+  (`approval.denied`).
+- A cancelled or completed execution accepts no approval decisions.
+- The HTTP API refuses browser requests from non-loopback origins, so a web
+  page cannot approve a request through the user's browser. Without
+  `PERSONAL_AI_API_TOKEN`, a `Host` header with a public DNS name is refused
+  too (DNS rebinding).
 - The approval scope is active only for the duration of one task execution
   (`try/finally`), so no request can leak across executions.
 

@@ -32,7 +32,10 @@ services:
     container_name: personal-ai
     restart: unless-stopped
     ports:
-      - "8090:8000"
+      # Loopback only: Open WebUI reaches the gateway over the Docker network,
+      # so the host port never needs to be on the LAN. To expose it, set
+      # PERSONAL_AI_API_TOKEN first.
+      - "127.0.0.1:8090:8000"
     environment:
       # Runtime paths, provided by the mounts below — never baked into the image.
       PERSONAL_AI_WORKSPACE: /data/workspace
