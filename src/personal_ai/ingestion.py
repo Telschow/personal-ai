@@ -65,6 +65,7 @@ class IngestionResult:
     kind: DocumentKind
     structured_extraction: StructuredExtraction | None
     chunks: tuple[DocumentChunk, ...]
+    retired: tuple[str, ...] = ()
 
 
 class DocumentIngestor:
@@ -149,8 +150,56 @@ class DocumentIngestor:
         self._vision_extractor = vision_extractor
         self._vision_store = vision_store
 
-    def ingest(self, record: SourceRecord) -> IngestionResult:
-        """Run one source record through the full ingestion path."""
+    def ingest(
+        self, record: SourceRecord, *, version_scope: str | None = None
+    ) -> IngestionResult:
+        """Run one source record through the full ingestion path.
+
+        With a ``version_scope`` (the resolved folder of an adapter whose keys
+        name an item that can change, such as a file), the stored document
+        becomes the current version of ``(source_type, scope, source_key)``
+        and the previous version is retired: its chunks, full-text rows,
+        embeddings, structured extraction, vision pages and document row are
+        deleted, so an edited file no longer answers with its old text. The
+        old version is retired only after the new one is fully stored, and
+        never while another folder still names it as current. Without a
+        scope nothing is retired (e-mail and financial records are immutable
+        items, so they never pass one).
+        """
+        result = self._ingest(record)
+        if version_scope is None:
+            return result
+        previous = self._document_store.current_version(
+            record.source_type, version_scope, record.source_key
+        )
+        retired: tuple[str, ...] = ()
+        if (
+            previous is not None
+            and previous != result.document_id
+            and not self._document_store.is_current_elsewhere(
+                previous, record.source_type, version_scope, record.source_key
+            )
+        ):
+            self._retire(previous)
+            retired = (previous,)
+        # The pointer moves last: an interrupted retirement is retried on the
+        # next ingest, and every delete above is idempotent.
+        self._document_store.set_current_version(
+            record.source_type, version_scope, record.source_key, result.document_id
+        )
+        return replace(result, retired=retired)
+
+    def _retire(self, document_id: str) -> None:
+        """Delete one superseded document and everything derived from it."""
+        for chunk in self._chunk_store.list_for_document(document_id):
+            self._embedding_store.delete(chunk.id)
+        self._chunk_store.delete_for_document(document_id)
+        self._extraction_store.delete(document_id)
+        if self._vision_store is not None:
+            self._vision_store.delete_for_document(document_id)
+        self._document_store.delete(document_id)
+
+    def _ingest(self, record: SourceRecord) -> IngestionResult:
         document = document_from_source_record(record)
         extracted = extract_text(record)
         classification = classify_document(extracted)

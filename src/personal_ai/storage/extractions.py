@@ -164,6 +164,14 @@ class ExtractionStore:
         self._connection.commit()
         return inserted
 
+    def delete(self, document_id: str) -> bool:
+        """Remove the extraction of one document; True if a row was deleted."""
+        cursor = self._connection.execute(
+            "DELETE FROM structured_extractions WHERE document_id = ?", (document_id,)
+        )
+        self._connection.commit()
+        return cursor.rowcount == 1
+
     def get(self, document_id: str) -> StructuredExtraction | None:
         """Return the extraction for this document id, or None when absent."""
         row = self._connection.execute(

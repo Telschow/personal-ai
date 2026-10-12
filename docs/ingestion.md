@@ -15,7 +15,8 @@ Ingestion is explicit and deterministic. Data sources must be specified explicit
 
 ## Safety
 
-* No recursive directory scanning
+* Only the folder you name is read, including its subfolders; symlinks are not followed and
+  files that resolve outside the folder are skipped
 * No home directory scanning
 * No Downloads scanning
 * No .git scanning
@@ -25,8 +26,18 @@ Ingestion is explicit and deterministic. Data sources must be specified explicit
 ## CLI
 
 ```bash
-uv run personal-ai ingest --source filesystem tests/fixtures/synthetic/
+uv run personal-ai --ingest file tests/fixtures/synthetic/ --database knowledge.db
 ```
+
+## Changed Files
+
+Re-ingesting a folder after a file or note changed stores the new version and retires the
+previous one: its document row, chunks, full-text rows, embeddings, structured extraction and
+vision pages are deleted, and the summary prints `retired_versions: N`. Versions are tracked per
+ingested folder (`file`, `keep` and `notebooklm` sources), so the same relative path in two
+folders is two items, and a version still current in another folder is kept. E-mail and
+financial records are immutable items and are never retired. A file deleted from the folder
+is not removed from the database yet.
 
 ## Explicit Paths
 
@@ -35,5 +46,5 @@ Always specify explicit paths. Never use wildcards that could accidentally scan 
 ## Example
 
 ```bash
-uv run personal-ai ingest --source filesystem /path/to/synthetic/data
+uv run personal-ai --ingest file /path/to/synthetic/data --database knowledge.db
 ```

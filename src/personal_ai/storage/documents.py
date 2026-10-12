@@ -23,6 +23,25 @@ CREATE TABLE IF NOT EXISTS documents (
 )
 """
 
+# Which document is the current version of one evolving source item. The
+# scope is the resolved folder an adapter ingested, so the same relative path
+# under two folders is two items. Only adapters whose keys name an item that
+# can change (files, notes) record versions; see DocumentIngestor.ingest.
+_VERSIONS_SCHEMA = """
+CREATE TABLE IF NOT EXISTS document_versions (
+    source_type TEXT NOT NULL,
+    scope TEXT NOT NULL,
+    source TEXT NOT NULL,
+    document_id TEXT NOT NULL,
+    PRIMARY KEY (source_type, scope, source)
+)
+"""
+
+_VERSIONS_DOCUMENT_INDEX = """
+CREATE INDEX IF NOT EXISTS document_versions_document
+ON document_versions (document_id)
+"""
+
 _COLUMNS = (
     "id",
     "source",
@@ -98,6 +117,8 @@ class DocumentStore:
     def __init__(self, connection: sqlite3.Connection) -> None:
         self._connection = connection
         self._connection.execute(_DOCUMENTS_SCHEMA)
+        self._connection.execute(_VERSIONS_SCHEMA)
+        self._connection.execute(_VERSIONS_DOCUMENT_INDEX)
         self._connection.commit()
 
     def add(self, document: Document) -> bool:
@@ -176,6 +197,50 @@ class DocumentStore:
             params.append(offset)
         rows = self._connection.execute(sql, params).fetchall()
         return [_row_to_document(row) for row in rows]
+
+    def current_version(self, source_type: str, scope: str, source: str) -> str | None:
+        """Document id recorded as the current version of one source item."""
+        row = self._connection.execute(
+            "SELECT document_id FROM document_versions "
+            "WHERE source_type = ? AND scope = ? AND source = ?",
+            (source_type, scope, source),
+        ).fetchone()
+        return None if row is None else str(row[0])
+
+    def set_current_version(
+        self, source_type: str, scope: str, source: str, document_id: str
+    ) -> None:
+        """Record ``document_id`` as the current version of one source item."""
+        self._connection.execute(
+            "INSERT INTO document_versions (source_type, scope, source, document_id) "
+            "VALUES (?, ?, ?, ?) ON CONFLICT(source_type, scope, source) "
+            "DO UPDATE SET document_id = excluded.document_id",
+            (source_type, scope, source, document_id),
+        )
+        self._connection.commit()
+
+    def is_current_elsewhere(
+        self, document_id: str, source_type: str, scope: str, source: str
+    ) -> bool:
+        """True if another source item still names ``document_id`` as current.
+
+        The same relative path with the same content under two folders is
+        one document; it must survive while either folder still has it.
+        """
+        row = self._connection.execute(
+            "SELECT 1 FROM document_versions WHERE document_id = ? "
+            "AND NOT (source_type = ? AND scope = ? AND source = ?) LIMIT 1",
+            (document_id, source_type, scope, source),
+        ).fetchone()
+        return row is not None
+
+    def delete(self, document_id: str) -> bool:
+        """Remove one document row; returns True if a row was deleted."""
+        cursor = self._connection.execute(
+            "DELETE FROM documents WHERE id = ?", (document_id,)
+        )
+        self._connection.commit()
+        return cursor.rowcount == 1
 
     def close(self) -> None:
         """Release the underlying database connection."""

@@ -49,7 +49,8 @@
 - Credentials in configuration: example files use environment-variable references only, and the privacy test checks that no tracked file carries a credential-shaped value
 
 ### Data Deletion
-- delete_for_document exists for chunks but cascade to FTS/embeddings unverified
+- Re-ingesting an edited file retires the old version with its chunks, full-text rows, embeddings, extraction and vision pages (`tests/test_document_versions.py`)
+- A file deleted from its folder stays searchable; there is no removal path for it yet
 - GDPR Art 17 compliance unproven
 - No "right to be forgotten" test suite
 
@@ -88,6 +89,6 @@
 | LLM prompt delimiters | Partial | Memory and people blocks keep values on one line with `<`/`>` escaped (`tests/test_prompt_safety.py`); retrieved documents reach the model as JSON tool results |
 | Cross-site requests to the HTTP API | In place | Non-loopback `Origin` refused; without a token, rebindable `Host` names refused (`tests/test_server_gateway.py`) |
 | Tool output validation | Missing | SearchResult flows raw to agent |
-| Deletion cascade verified | No | Only chunks deleted |
+| Deletion cascade verified | Partial | Superseded versions fully retired; deleted files and purged memories are not |
 | Code scanning | In place | CodeQL, Gitleaks with a custom rule, dependency review and pip-audit run in GitHub Actions |
 | Threat model | Incomplete | PUBLICATION_THREAT_MODEL.md exists; full STRIDE/LINDDUN needed |

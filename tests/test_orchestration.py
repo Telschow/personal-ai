@@ -87,9 +87,9 @@ class IngestorSpy:
         self.inner = inner
         self.processed_keys: list[str] = []
 
-    def ingest(self, record: SourceRecord):
+    def ingest(self, record: SourceRecord, *, version_scope: str | None = None):
         self.processed_keys.append(record.source_key)
-        return self.inner.ingest(record)
+        return self.inner.ingest(record, version_scope=version_scope)
 
 
 class Harness:

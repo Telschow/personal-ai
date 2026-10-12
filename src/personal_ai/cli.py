@@ -349,6 +349,8 @@ def run_ingest(source_type: str, source_path: Path, database: Path) -> None:
     for kind in sorted(summary.kind_counts):
         print(f"  {kind}: {summary.kind_counts[kind]}")
     print(f"chunks: {summary.chunk_count}")
+    if summary.retired:
+        print(f"retired_versions: {summary.retired}")
 
 
 def run_event_ingest(source_type: str, source_path: Path, database: Path) -> None:
