@@ -179,6 +179,25 @@ class MemoryRetriever:
             for rank, (score, relevance, memory) in enumerate(scored[:limit], start=1)
         )
 
+    def is_visible(
+        self,
+        memory: Memory,
+        scopes: tuple[ScopeFilter, ...] = (),
+        *,
+        now: str | None = None,
+    ) -> bool:
+        """Apply the :meth:`search` visibility rule to one memory.
+
+        Active, in one of ``scopes`` (global is always in scope) and not
+        expired. Fetch-by-id uses this so it can never show more than search.
+        """
+        now_dt = _as_utc(parse_iso(now or self._now()))
+        return (
+            memory.status is MemoryStatus.ACTIVE
+            and _in_scope(memory, scopes)
+            and not _expired(memory, now_dt)
+        )
+
 
 def _in_scope(memory: Memory, scopes: tuple[ScopeFilter, ...]) -> bool:
     if memory.scope is MemoryScope.GLOBAL:
