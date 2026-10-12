@@ -96,7 +96,7 @@ def _batch_json(*proposals: dict[str, object]) -> str:
 class _EchoClient:
     """Healthy fake: echoes the real message id from the current window."""
 
-    def __init__(self, *, model: str = "fake") -> None:
+    def __init__(self, *, model: str = "fake", base_url: str | None = None) -> None:
         self.model = model
 
     def __enter__(self) -> Self:
@@ -119,7 +119,7 @@ class _EchoClient:
 class _SalaryClient:
     """Healthy fake that proposes a keyword-sensitive candidate (escalated)."""
 
-    def __init__(self, *, model: str = "fake") -> None:
+    def __init__(self, *, model: str = "fake", base_url: str | None = None) -> None:
         self.model = model
 
     def __enter__(self) -> Self:
@@ -148,7 +148,7 @@ class _SalaryClient:
 class _FailingClient:
     """Unhealthy fake: raises on every call (all units fail)."""
 
-    def __init__(self, *, model: str = "fake") -> None:
+    def __init__(self, *, model: str = "fake", base_url: str | None = None) -> None:
         self.model = model
 
     def __enter__(self) -> Self:
@@ -164,7 +164,7 @@ class _FailingClient:
 class _DocEchoClient:
     """Healthy fake echoing the first stable document id of the window."""
 
-    def __init__(self, *, model: str = "fake") -> None:
+    def __init__(self, *, model: str = "fake", base_url: str | None = None) -> None:
         self.model = model
 
     def __enter__(self) -> Self:

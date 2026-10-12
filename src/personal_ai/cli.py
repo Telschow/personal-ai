@@ -323,9 +323,14 @@ def run_ingest(source_type: str, source_path: Path, database: Path) -> None:
             # disabled entirely.
             summary = ingest_source(adapter, build_ingestor(None))
         else:
-            with OllamaClient(model=MODEL) as client:
+            with OllamaClient(
+                model=MODEL, base_url=load_ollama_settings().base_url
+            ) as client:
                 if vision_settings.model:
-                    with OllamaClient(model=vision_settings.model) as vision_client:
+                    with OllamaClient(
+                        model=vision_settings.model,
+                        base_url=load_ollama_settings().base_url,
+                    ) as vision_client:
                         vision_extractor = OllamaVisionExtractor(
                             vision_client,
                             prompt_version=vision_settings.prompt_version,
@@ -1338,7 +1343,10 @@ def _run_memory_curate(database: Path, args: argparse.Namespace) -> int:
         service = MemoryService(memory_store)
         manager = _NullContext(None)
         if config.extraction is CurationExtractionMode.LLM:
-            manager = OllamaClient(model=args.model or MODEL)
+            manager = OllamaClient(
+                model=args.model or MODEL,
+                base_url=load_ollama_settings().base_url,
+            )
         with manager as client:
             adapter = _build_curation_registry(config, connection, client)
             report = _run_curation(curation_store, adapter, service, config)
@@ -1719,7 +1727,10 @@ def _run_memory_curate_all(database: Path, args: argparse.Namespace) -> int:
         service = MemoryService(memory_store)
         manager = _NullContext(None)
         if config.mode == "adaptive":
-            manager = OllamaClient(model=args.model or MODEL)
+            manager = OllamaClient(
+                model=args.model or MODEL,
+                base_url=load_ollama_settings().base_url,
+            )
         with manager as client:
             registry = _build_curation_registry_generic(connection, client)
 

@@ -80,7 +80,7 @@ def chatgpt_export(tmp_path: Path) -> Path:
 class ExplodingOllamaClient:
     """Raises if constructed: conversation ingestion is fully local."""
 
-    def __init__(self, model: str) -> None:
+    def __init__(self, model: str, base_url: str | None = None) -> None:
         raise AssertionError(
             "conversation ingestion must never construct a model client"
         )

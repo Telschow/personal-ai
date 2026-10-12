@@ -97,7 +97,7 @@ def _batch_json(*proposals: dict[str, object]) -> str:
 class _SalaryClient:
     """Healthy fake that proposes a keyword-sensitive candidate (escalated)."""
 
-    def __init__(self, *, model: str = "fake") -> None:
+    def __init__(self, *, model: str = "fake", base_url: str | None = None) -> None:
         self.model = model
 
     def __enter__(self) -> Self:
@@ -126,7 +126,7 @@ class _SalaryClient:
 class _WorkClient:
     """Healthy fake that proposes a plain (acceptable) candidate."""
 
-    def __init__(self, *, model: str = "fake") -> None:
+    def __init__(self, *, model: str = "fake", base_url: str | None = None) -> None:
         self.model = model
 
     def __enter__(self) -> Self:
