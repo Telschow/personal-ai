@@ -528,9 +528,9 @@ def test_get_memory_fetch_never_writes_via_recording_proxy(bundle: _Bundle) -> N
         def __getattr__(self, name: str) -> object:
             return getattr(self._inner, name)
 
-        def get(self, mid: str) -> object:
-            recorded.append("get")
-            return self._inner.get(mid)  # type: ignore[attr-defined]
+        def get_visible(self, mid: str, scopes: object = ()) -> object:
+            recorded.append("get_visible")
+            return self._inner.get_visible(mid, scopes)  # type: ignore[attr-defined]
 
         def provenance_for(self, mid: str) -> object:
             recorded.append("provenance_for")
@@ -546,7 +546,12 @@ def test_get_memory_fetch_never_writes_via_recording_proxy(bundle: _Bundle) -> N
     )
     assert result["status"] == "ok"  # type: ignore[index]
     assert result2["status"] == "ok"  # type: ignore[index]
-    assert recorded == ["get", "provenance_for", "get", "provenance_for"]
+    assert recorded == [
+        "get_visible",
+        "provenance_for",
+        "get_visible",
+        "provenance_for",
+    ]
     # No write surface was even consulted: get/provenance reads only.
 
 
@@ -734,3 +739,66 @@ def test_read_only_guarantee_across_both_tools(tmp_path: Path) -> None:
         assert bundle.memory_service.counts() == before_counts
     finally:
         bundle.close()
+
+
+def test_get_memory_never_shows_what_search_memory_hides(bundle: _Bundle) -> None:
+    """Fetch-by-id follows the search visibility rule: active, unexpired, in scope.
+
+    Regression: ``get_memory`` returned deleted, archived, expired and
+    project-scoped memories in full to any caller that knew the id (including
+    the MCP bridge), although ``search_memory`` never returns them.
+    """
+    service = bundle.memory_service
+
+    def draft(content: str, **extra: object) -> str:
+        return service.create(
+            MemoryDraft(
+                kind="preference",
+                content=content,
+                source_type="user",
+                confidence=0.8,
+                importance=0.7,
+                **extra,  # type: ignore[arg-type]
+            )
+        ).memory_id
+
+    deleted = draft("synthetic deleted statement")
+    service.delete(deleted)
+    archived = draft("synthetic archived statement")
+    service.archive(archived)
+    expired = draft(
+        "synthetic expired statement", expires_at="2000-01-01T00:00:00+00:00"
+    )
+    project = draft("synthetic project statement", scope="project", scope_id="proj-a")
+    execution = draft("synthetic run statement", scope="execution", scope_id="exec-1")
+
+    policy = _policy(_tools(bundle))
+    for memory_id in (deleted, archived, expired, project, execution):
+        result = _invoke(policy, "get_memory", {"memory_id": memory_id})
+        assert result == {"status": "not_found", "memory_id": memory_id}
+        assert "synthetic" not in json.dumps(result)
+
+    # Execution scope is visible only with the matching trusted context.
+    scoped = _invoke(
+        policy,
+        "get_memory",
+        {
+            "memory_id": execution,
+            "scope": "execution",
+            "scope_id": "exec-1",
+            "execution_id": "exec-1",
+        },
+    )
+    assert scoped["status"] == "ok"
+    with pytest.raises(ValueError):
+        _invoke(
+            policy,
+            "get_memory",
+            {"memory_id": project, "scope": "project", "scope_id": "proj-a"},
+        )
+
+    # A plain active global memory is still returned.
+    assert (
+        _invoke(policy, "get_memory", {"memory_id": bundle.seed_memory()})["status"]
+        == "ok"
+    )

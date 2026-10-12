@@ -15,6 +15,7 @@ is the connection-creating thread).
 from __future__ import annotations
 
 import asyncio
+import json
 import sqlite3
 from pathlib import Path
 
@@ -723,3 +724,119 @@ def test_gateway_returns_503_when_services_not_configured(tmp_path: Path) -> Non
         res = outcome[name]
         assert res.status_code == 503, name
         assert res.json()["error"]["type"] == "service_unavailable"
+
+
+def test_cross_site_browser_requests_cannot_approve_or_read(tmp_path: Path) -> None:
+    """A web page must not approve a gated action or read state via the browser.
+
+    Regression: with no API token, a ``text/plain`` POST (no CORS preflight)
+    from any origin approved a pending request, and a rebound Host could read
+    executions and memory.
+    """
+
+    WRITE = "filesystem.write"
+
+    async def scenario(client, plane, workspace) -> dict[str, object]:
+        plan = plane.create_execution("Write a note", execution_id="csrf-gate")
+        task_id = plane.tasks(plan.plan_id)[0].task_id
+        paused = await client.post(f"/api/executions/{plan.plan_id}/resume")
+        assert paused.json()["status"] == "needs_approval"
+
+        body = json.dumps({"task_id": task_id, "permission": WRITE})
+        forged = await client.post(
+            f"/api/executions/{plan.plan_id}/approve",
+            content=body,
+            headers={"Content-Type": "text/plain", "Origin": "https://evil.example"},
+        )
+        assert forged.status_code == 403
+        null_origin = await client.post(
+            f"/api/executions/{plan.plan_id}/approve",
+            content=body,
+            headers={"Content-Type": "text/plain", "Origin": "null"},
+        )
+        assert null_origin.status_code == 403
+        rebound = await client.get(
+            "/api/executions", headers={"Host": "rebind.evil.example:8090"}
+        )
+        assert rebound.status_code == 403
+        status = (await client.get(f"/api/executions/{plan.plan_id}/approvals")).json()
+        assert status["approvals"][0]["status"] == "pending"
+
+        # A local console on another loopback port still works.
+        local = await client.post(
+            f"/api/executions/{plan.plan_id}/approve",
+            json={"task_id": task_id, "permission": WRITE},
+            headers={"Origin": "http://localhost:5173"},
+        )
+        assert local.status_code == 200
+        return {"ok": True}
+
+    assert run_approval_gateway(tmp_path, scenario) == {"ok": True}
+    assert not (tmp_path / "workspace" / "note.txt").exists()
+
+
+def test_browser_guard_rules() -> None:
+    from personal_ai.server import browser_guard_error
+
+    def ok(origin, host, token_required=False):
+        return browser_guard_error(origin, host, token_required=token_required) is None
+
+    # Non-browser clients: no Origin; Docker service names and IPs are fine.
+    assert ok(None, "personal-ai:8000")
+    assert ok(None, "127.0.0.1:8000")
+    assert ok(None, "192.168.1.20:8090")
+    assert ok(None, "[::1]:8000")
+    assert ok(None, "localhost.")
+    # Public DNS names can be rebound unless a token protects the API.
+    assert not ok(None, "attacker.example:8000")
+    assert ok(None, "attacker.example:8000", token_required=True)
+    # Only loopback browser origins, with or without a token.
+    assert ok("http://127.0.0.1:3000", "localhost:8000")
+    assert not ok("http://192.168.1.20:3000", "localhost:8000")
+    assert not ok("https://evil.example", "localhost:8000", token_required=True)
+    assert not ok("http://localhost.evil.example", "localhost:8000")
+
+
+def test_malformed_bodies_and_headers_are_client_errors(tmp_path: Path) -> None:
+    """Bad JSON on a decision endpoint is a 400, never an unhandled 500."""
+
+    async def scenario(client, plane, workspace) -> dict[str, int]:
+        plan = plane.create_execution("Write a note", execution_id="bad-json")
+        codes = {}
+        for action in ("approve", "reject", "retry"):
+            response = await client.post(
+                f"/api/executions/{plan.plan_id}/{action}",
+                content=b"{not json",
+                headers={"Content-Type": "application/json"},
+            )
+            codes[action] = response.status_code
+        return codes
+
+    assert run_approval_gateway(tmp_path, scenario) == {
+        "approve": 400,
+        "reject": 400,
+        "retry": 400,
+    }
+
+
+def test_non_ascii_authorization_header_is_401(tmp_path: Path) -> None:
+    async def main() -> int:
+        app = create_app(
+            tmp_path,
+            None,
+            model=DEFAULT_MODEL,
+            token="synthetic-token",
+            agent_factory=lambda: _FakeBuilt(_FakeAgent()),
+        )
+        transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
+        async with (
+            app.router.lifespan_context(app),
+            httpx.AsyncClient(transport=transport, base_url="http://test") as client,
+        ):
+            response = await client.get(
+                "/v1/models",
+                headers={"Authorization": "Bearer töken".encode("latin-1")},
+            )
+            return response.status_code
+
+    assert _run(main()) == 401

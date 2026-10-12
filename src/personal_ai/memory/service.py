@@ -119,6 +119,18 @@ class MemoryService:
             raise MemoryNotFoundError(f"Unknown memory: {memory_id}")
         return memory
 
+    def get_visible(self, memory_id: str, scopes: Sequence[ScopeFilter] = ()) -> Memory:
+        """Fetch one memory only if :meth:`search` could return it.
+
+        Deleted, archived, superseded, expired and out-of-scope memories raise
+        :class:`MemoryNotFoundError`, exactly like an unknown id, so a fetch
+        never reveals what retrieval hides.
+        """
+        memory = self._store.get(memory_id)
+        if memory is None or not self._retriever.is_visible(memory, tuple(scopes)):
+            raise MemoryNotFoundError(f"Unknown memory: {memory_id}")
+        return memory
+
     def list(self, status: MemoryStatus | str | None = None) -> tuple[Memory, ...]:
         """List memories; defaults to active, newest first."""
         if status is None or status == "active":

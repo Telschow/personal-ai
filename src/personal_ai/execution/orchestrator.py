@@ -451,6 +451,11 @@ class Orchestrator:
         plan = self._store.get_plan(execution_id)
         if plan is None or task_id not in plan.task_ids:
             return None
+        if plan.status in (PlanStatus.CANCELLED, PlanStatus.COMPLETED):
+            raise PlanNotCompleteError(
+                f"Execution {execution_id} is {plan.status.value}; "
+                "its approvals can no longer be decided"
+            )
         for req in self._store.approval_requests(execution_id):
             if req.get("task_id") == task_id and req.get("permission") == permission:
                 if req.get("status") == "pending":

@@ -323,3 +323,18 @@ def test_add_many_empty_batch_is_a_noop() -> None:
     with make_store() as store:
         assert store.add_many([]) == 0
         assert store.count("nomic-embed-text") == 0
+
+
+def test_list_for_chunks_stays_under_the_sqlite_parameter_limit() -> None:
+    """Regression: one IN (...) per call raised "too many SQL variables"."""
+    connection = connect_database(":memory:")
+    connection.setlimit(sqlite3.SQLITE_LIMIT_VARIABLE_NUMBER, 999)
+    store = EmbeddingStore(connection)
+    store.add(make_embedding(vector=(1.0, 2.0, 3.0)), "chunk-0")
+    store.add(make_embedding(vector=(4.0, 5.0, 6.0)), "chunk-2500")
+    try:
+        result = store.list_for_chunks(f"chunk-{i}" for i in range(3000))
+    finally:
+        store.close()
+
+    assert list(result) == ["chunk-0", "chunk-2500"]

@@ -974,6 +974,17 @@ def test_retry_cannot_override_a_rejected_approval(tmp_path: Path) -> None:
     assert again.status is PlanStatus.NEEDS_APPROVAL
     assert not (workspace / "note.txt").exists()
 
+    # The re-requested approval is a fresh, undecided row: it must not keep
+    # the earlier rejection's decision time and approver. The rejection
+    # itself stays in the event log.
+    (request,) = cp.approvals(plan.plan_id)
+    assert request["status"] == "pending"
+    assert request["decided_at"] is None
+    assert request["approver"] is None
+    assert any(
+        e.event_type == EventType.APPROVAL_DENIED for e in cp.events(plan.plan_id)
+    )
+
 
 # ---------------------------------------------------------------------------
 # Board timestamp semantics + no-leak contract
@@ -1020,3 +1031,23 @@ def test_events_and_approvals_never_leak_tool_arguments(tmp_path: Path) -> None:
         serialized = json.dumps(req)
         assert "note.txt" not in serialized
         assert "hello" not in serialized
+
+
+def test_cancelled_execution_approvals_cannot_be_decided(tmp_path: Path) -> None:
+    """Regression: approve() on a cancelled execution succeeded and emitted
+    APPROVAL_GRANTED events for a plan that can never run."""
+    _, cp, _, workspace = _engineer_control_plane(tmp_path)
+    plan = cp.create_execution("Write a note", execution_id="exec-cancel-gate")
+    task_id = cp.tasks(plan.plan_id)[0].task_id
+    cp.run_execution(plan.plan_id)
+    cp.cancel_execution(plan.plan_id)
+
+    for decide in (cp.approve, cp.reject):
+        with pytest.raises(PlanNotCompleteError):
+            decide(plan.plan_id, task_id, WRITE)
+    (request,) = cp.approvals(plan.plan_id)
+    assert request["status"] == "pending"
+    assert not any(
+        e.event_type == EventType.APPROVAL_GRANTED for e in cp.events(plan.plan_id)
+    )
+    assert not (workspace / "note.txt").exists()

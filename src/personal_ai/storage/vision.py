@@ -80,6 +80,14 @@ class VisionStore:
         self._connection.execute(_VISION_PAGES_SCHEMA)
         self._connection.commit()
 
+    def delete_for_document(self, document_id: str) -> int:
+        """Remove every cached vision page of one document; returns the count."""
+        cursor = self._connection.execute(
+            "DELETE FROM vision_pages WHERE document_id = ?", (document_id,)
+        )
+        self._connection.commit()
+        return cursor.rowcount
+
     def get(self, document_id: str, page_number: int) -> StoredVisionPage | None:
         """Return the cached vision text for this page, or None when absent."""
         row = self._connection.execute(

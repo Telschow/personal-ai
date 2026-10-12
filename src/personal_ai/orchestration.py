@@ -31,6 +31,7 @@ class SourceIngestionSummary:
     documents: int
     kind_counts: dict[str, int] = field(default_factory=dict)
     chunk_count: int = 0
+    retired: int = 0
 
 
 def discover_source(adapter: SourceAdapter) -> DiscoverySummary:
@@ -45,14 +46,22 @@ def discover_source(adapter: SourceAdapter) -> DiscoverySummary:
 def ingest_source(
     adapter: SourceAdapter, ingestor: DocumentIngestor
 ) -> SourceIngestionSummary:
-    """Ingest every discovered record of one adapter exactly once."""
+    """Ingest every discovered record of one adapter exactly once.
+
+    Adapters whose keys name an item that can change (files, notes) expose a
+    ``version_scope``; with it, a changed item's previous document version
+    is retired (see :meth:`DocumentIngestor.ingest`).
+    """
     kind_counts: dict[str, int] = {}
     chunk_count = 0
     documents = 0
+    retired = 0
+    version_scope = getattr(adapter, "version_scope", None)
 
     for record in adapter.discover():
-        result = ingestor.ingest(record)
+        result = ingestor.ingest(record, version_scope=version_scope)
         documents += 1
+        retired += len(result.retired)
         kind = result.kind
         kind_counts[kind.value] = kind_counts.get(kind.value, 0) + 1
         chunk_count += len(result.chunks)
@@ -62,4 +71,5 @@ def ingest_source(
         documents=documents,
         kind_counts=kind_counts,
         chunk_count=chunk_count,
+        retired=retired,
     )

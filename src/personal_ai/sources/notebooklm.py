@@ -304,6 +304,11 @@ class NotebookLMSourceAdapter:
         self.directory = directory.resolve()
 
     @property
+    def version_scope(self) -> str:
+        """Keys are paths under this folder: a changed file is a new version."""
+        return str(self.directory)
+
+    @property
     def source_type(self) -> str:
         return SOURCE_TYPE
 

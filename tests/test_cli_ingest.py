@@ -53,7 +53,7 @@ class FakeOllamaClient:
     to contact an embedding provider, the test would fail loudly.
     """
 
-    def __init__(self, model: str) -> None:
+    def __init__(self, model: str, base_url: str | None = None) -> None:
         self.model = model
 
     def __enter__(self) -> Self:
@@ -621,7 +621,7 @@ def email_export(tmp_path: Path) -> Path:
 class ExplodingOllamaClient:
     """Raises if constructed: email ingestion must stay model-free."""
 
-    def __init__(self, model: str) -> None:
+    def __init__(self, model: str, base_url: str | None = None) -> None:
         raise AssertionError("email ingestion must not invoke structured extraction")
 
 
@@ -882,3 +882,32 @@ def test_email_ingest_never_constructs_vision_extractor(
     lines = capsys.readouterr().out.splitlines()
     assert lines[0] == "source_type: email"
     assert content_counts(database) == (4, 4, 0)
+
+
+def test_ingest_uses_the_configured_ollama_base_url(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    faked_model: FakeStructuredExtractor,
+) -> None:
+    """Regression: ingest built its model client for localhost:11434 only."""
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    (workspace / "note.txt").write_text("Synthetic note about a garden. " * 20)
+    received: list[str | None] = []
+
+    class _RecordingClient(FakeOllamaClient):
+        def __init__(self, model: str, base_url: str | None = None) -> None:
+            super().__init__(model, base_url)
+            received.append(base_url)
+
+    monkeypatch.setattr(cli, "OllamaClient", _RecordingClient)
+    monkeypatch.setenv("OLLAMA_BASE_URL", "http://ollama:11434")
+    run_cli(
+        monkeypatch,
+        "--ingest",
+        "file",
+        str(workspace),
+        "--database",
+        str(tmp_path / "knowledge.db"),
+    )
+    assert received and set(received) == {"http://ollama:11434"}

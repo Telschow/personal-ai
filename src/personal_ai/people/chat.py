@@ -28,6 +28,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from personal_ai.ollama_client import ChatMessage
+from personal_ai.prompt_safety import inline_untrusted
 
 if TYPE_CHECKING:
     from personal_ai.people.models import Person
@@ -91,13 +92,13 @@ class PeopleContext:
         if not self.people:
             lines.append("(no people derived)")
         for person in self.people:
-            emails = ", ".join(person.emails)
-            parts = [person.display_name]
+            emails = ", ".join(inline_untrusted(email) for email in person.emails)
+            parts = [inline_untrusted(person.display_name)]
             if emails:
                 parts.append(f"<{emails}>")
             lines.append(
                 f"- {' '.join(parts)} "
-                f"[roles: {', '.join(person.roles) or 'none'}, "
+                f"[roles: {inline_untrusted(', '.join(person.roles)) or 'none'}, "
                 f"evidence: {person.evidence_count}, "
                 f"last seen: {person.last_seen_at or 'never'}]"
             )

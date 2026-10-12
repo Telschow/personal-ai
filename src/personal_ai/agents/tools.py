@@ -531,7 +531,9 @@ def _memory_get_handler(
 ) -> Callable[[dict[str, object]], object]:
     """Read-only fetch of one durable memory by id with content-free provenance.
 
-    Delegates to ``MemoryService.get`` and ``MemoryService.provenance_for``.
+    Delegates to ``MemoryService.get_visible`` and
+    ``MemoryService.provenance_for``. Visibility matches ``search_memory``:
+    deleted, archived, expired and out-of-scope memories are ``not_found``.
     An unknown id returns a ``not_found`` status, never a fallback. The memory
     projection is the canonical ``Memory.to_dict`` surface; the provenance
     projection is aggregate-only (evidence count/kinds and first/last evidence
@@ -542,8 +544,14 @@ def _memory_get_handler(
 
     def handle(arguments: dict[str, object]) -> object:
         memory_id = _require_non_empty_str(arguments, "memory_id")
+        scopes = _memory_scopes(
+            str(_take(arguments, "scope", "global")),
+            _take(arguments, "scope_id", None),
+            _take(arguments, "execution_id", None),
+            _take(arguments, "agent_id", None),
+        )
         try:
-            memory = memory_service.get(memory_id)  # type: ignore[attr-defined]
+            memory = memory_service.get_visible(memory_id, scopes)  # type: ignore[attr-defined]
         except MemoryNotFoundError:
             return {"status": "not_found", "memory_id": memory_id}
         provenance = memory_service.provenance_for(memory_id)  # type: ignore[attr-defined]

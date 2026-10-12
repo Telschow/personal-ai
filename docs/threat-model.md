@@ -19,14 +19,7 @@
 
 ### Information Disclosure
 - **Risk**: PII leaked via logs, error messages, embedding similarity, cross-source leakage
-- **Impact**: GDPR Art 3 the-rs vý.ways harrox the path.uids) = keys in the data frames
-
-The number of sample segments / points in the plotted graph.
-
-    Returns
-    --------
-    "error": "threat"
-
+- **Impact**: Personal data exposed to other people or to other web sites (GDPR Art 32)
 - **Mitigation**: No PII in logs by default; structured logging only; sanitize prompts before LLM send; embedding filtering; .gitignore enforces data dirs
 
 ### Denial of Service
@@ -56,7 +49,8 @@ The number of sample segments / points in the plotted graph.
 - Credentials in configuration: example files use environment-variable references only, and the privacy test checks that no tracked file carries a credential-shaped value
 
 ### Data Deletion
-- delete_for_document exists for chunks but cascade to FTS/embeddings unverified
+- Re-ingesting an edited file retires the old version with its chunks, full-text rows, embeddings, extraction and vision pages (`tests/test_document_versions.py`)
+- A file deleted from its folder stays searchable; there is no removal path for it yet
 - GDPR Art 17 compliance unproven
 - No "right to be forgotten" test suite
 
@@ -91,9 +85,10 @@ The number of sample segments / points in the plotted graph.
 | Content hash at ingest | Partial | SHA-256 stored in DB metadata |
 | .gitignore enforcement | Good | Sensitive dirs excluded |
 | SQL PRAGMAs | Weak | Only `foreign_keys = ON` |
-| FTS5 input sanitization | Gap | Direct user query in MATCH |
-| LLM prompt delimiters | Missing | No visible sanitization |
+| FTS5 input sanitization | In place | Each term is quoted as a literal phrase; `tests/test_storage_chunk_search.py` |
+| LLM prompt delimiters | Partial | Memory and people blocks keep values on one line with `<`/`>` escaped (`tests/test_prompt_safety.py`); retrieved documents reach the model as JSON tool results |
+| Cross-site requests to the HTTP API | In place | Non-loopback `Origin` refused; without a token, rebindable `Host` names refused (`tests/test_server_gateway.py`) |
 | Tool output validation | Missing | SearchResult flows raw to agent |
-| Deletion cascade verified | No | Only chunks deleted |
+| Deletion cascade verified | Partial | Superseded versions fully retired; deleted files and purged memories are not |
 | Code scanning | In place | CodeQL, Gitleaks with a custom rule, dependency review and pip-audit run in GitHub Actions |
 | Threat model | Incomplete | PUBLICATION_THREAT_MODEL.md exists; full STRIDE/LINDDUN needed |

@@ -483,7 +483,8 @@ class OrchestrationStore:
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(execution_id, task_id, permission) DO UPDATE SET
                 tool=excluded.tool, risk=excluded.risk, reason=excluded.reason,
-                status=excluded.status, requested_at=excluded.requested_at
+                status=excluded.status, requested_at=excluded.requested_at,
+                decided_at=NULL, approver=NULL
             """,
             (
                 execution_id,

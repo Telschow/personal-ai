@@ -12,6 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from personal_ai.memory.retriever import MemoryHit, ScopeFilter
+from personal_ai.prompt_safety import inline_untrusted
 
 _HEADER = (
     '<memory_context untrusted="true">\n'
@@ -67,7 +68,7 @@ class MemoryContext:
                 f"{f'/{memory.scope_id}' if memory.scope_id else ''} "
                 f"confidence={memory.confidence:.2f} "
                 f"importance={memory.importance:.2f}] "
-                f"{memory.content}"
+                f"{inline_untrusted(memory.content)}"
             )
         lines.append(_FOOTER)
         lines.append("</memory_context>")

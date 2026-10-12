@@ -358,12 +358,18 @@ class RetrievalOutcome:
 
 
 def _chunk_to_search_result(
-    hit: ChunkSearchResult, title: str, source_type: str | None
+    hit: ChunkSearchResult, title: str, source_type: str | None, position: int
 ) -> SearchResult:
-    """Convert a chunk search hit to the unified result format."""
-    # BM25 rank is negative (closer to 0 = better).  Normalize to [0, 1].
-    # Clamp very negative ranks to 0.
-    score = max(0.0, min(1.0, 1.0 + hit.rank))
+    """Convert a chunk search hit to the unified result format.
+
+    ``position`` is the 0-based place of the hit in the chunk index's
+    best-first list. The score comes from that position, not from
+    ``hit.rank``: the backends disagree on what ``rank`` means (FTS5 BM25 is
+    negative and lower is better, semantic cosine and hybrid RRF are higher
+    is better), but every :class:`ChunkIndex` returns its hits best first.
+    The score is in (0, 1] and strictly decreases with position.
+    """
+    score = 1.0 / (1 + position)
     return SearchResult(
         result_type="chunk",
         document_id=hit.document_id,
@@ -486,9 +492,11 @@ class RetrievalService:
             return document.source, document.source_type
 
         results: list[SearchResult] = []
-        for chunk_hit in chunk_hits:
+        for position, chunk_hit in enumerate(chunk_hits):
             title, source_type = _document_provenance(chunk_hit.document_id)
-            results.append(_chunk_to_search_result(chunk_hit, title, source_type))
+            results.append(
+                _chunk_to_search_result(chunk_hit, title, source_type, position)
+            )
         for extraction_hit in extraction_hits:
             title, source_type = _document_provenance(extraction_hit.document_id)
             results.append(

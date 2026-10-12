@@ -489,3 +489,22 @@ def test_limit_applies_after_filtering(harness: SearchHarness) -> None:
     )
 
     assert hit_ids(hits) == ["chunk-notebooklm"]
+
+
+def test_date_only_upper_bound_includes_the_whole_day(harness: SearchHarness) -> None:
+    """Regression: ``created_before="2026-03-05"`` dropped a 12:00 document."""
+    same_day = harness.chunks.search(
+        "guitar", filters=DocumentFilter(created_before="2026-03-05")
+    )
+    assert "chunk-notebooklm" in {hit.chunk_id for hit in same_day}
+    day_before = harness.chunks.search(
+        "guitar", filters=DocumentFilter(created_before="2026-03-04")
+    )
+    assert "chunk-notebooklm" not in {hit.chunk_id for hit in day_before}
+    window = harness.chunks.search(
+        "guitar",
+        filters=DocumentFilter(
+            created_after="2026-03-05", modified_before="2026-06-01"
+        ),
+    )
+    assert [hit.chunk_id for hit in window] == ["chunk-notebooklm"]

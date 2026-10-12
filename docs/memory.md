@@ -154,6 +154,11 @@ one memory in full". It is a read-only sibling of `search_memory`:
   ids/bodies, prompts, model output, references, or `candidate_json`. An
   unknown id returns `{"status": "not_found", "memory_id": ...}`, never a
   fallback.
+- **Visibility**: the same rule as `search_memory` (`MemoryRetriever.is_visible`).
+  Deleted, archived, superseded, expired and out-of-scope memories answer
+  `not_found`, like an unknown id. Scope arguments are optional and validated
+  exactly as for search; the MCP bridge passes none, so it sees global memories
+  only.
 - **Authorization**: same `memory.read` permission as `search_memory`
   (`RiskLevel.READ`, `deterministic=True`, `mutates_state=False`); only
   researcher/corpus agents declare it. Registered via
